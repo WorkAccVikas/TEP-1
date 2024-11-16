@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Box, Button, Chip, CircularProgress, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo } from 'react';
@@ -7,13 +7,18 @@ import { useExpanded, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
-import { Add } from 'iconsax-react';
+import { Add, Eye } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
+import { ThemeMode } from 'config';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const columns = useMemo(
     () => [
       {
@@ -70,6 +75,40 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             default:
               return <Chip color="info" label="Not Defined" size="small" variant="light" />;
           }
+        }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          
+          const vendorID = row.original.vendorId;
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View Rate"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+                  }}
+                >
+                  <Eye/>
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
         }
       }
     ],
@@ -180,6 +219,18 @@ const ButtonComponent = ({ loading }) => {
             disabled={loading} // Disable button while loading
           >
             {loading ? 'Loading...' : 'Add Vendor'}
+          </Button>
+        </WrapperButton>
+        <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+          <Button
+            variant="contained"
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+            onClick={() => navigate('/management/vendor/add-vendor-rate')}
+            size="small"
+             color="success"
+            disabled={loading} // Disable button while loading
+          >
+            {loading ? 'Loading...' : 'Add Vendor Rate'}
           </Button>
         </WrapperButton>
       </Stack>

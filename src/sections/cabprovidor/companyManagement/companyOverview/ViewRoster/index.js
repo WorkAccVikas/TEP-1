@@ -29,6 +29,7 @@ const ViewRoster = ({ id }) => {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
+      setSubmitting(true);
       const response = await axiosServices.post(`/tripData/trip/requests/company`, {
         data: {
           companyId: id,
@@ -106,7 +107,7 @@ const ViewRoster = ({ id }) => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, setFieldValue }) => (
+          {({ values, errors, touched, setFieldValue, isSubmitting }) => (
             <Form>
               <DialogContent sx={{ p: 1.5 }}>
                 <Stack spacing={3}>
@@ -177,7 +178,7 @@ const ViewRoster = ({ id }) => {
 
               <DialogActions sx={{ p: 2.5 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Button type="submit" variant="contained">
+                  <Button type="submit" variant="contained" disabled={isSubmitting}>
                     Submit
                   </Button>
                 </Stack>
