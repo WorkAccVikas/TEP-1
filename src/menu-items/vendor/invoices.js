@@ -2,12 +2,12 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Bill, MenuBoard} from 'iconsax-react';
+import { Bill, MenuBoard } from 'iconsax-react';
 
 // icons
 const icons = {
   samplePage: MenuBoard,
-  invoice: Bill,
+  invoice: Bill
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -18,14 +18,21 @@ const invoices = {
   type: 'group',
   icon: icons.samplePage,
   children: [
-     // Invoices
+    // Invoices
     {
       id: 'invoice',
       title: <FormattedMessage id="invoice" />,
       type: 'item',
       url: '/apps/invoices/list',
-      icon: icons.invoice,
+      icon: icons.invoice
     },
+    {
+      id: 'create',
+      title: <FormattedMessage id="create" />,
+      type: 'item',
+      url: '/apps/invoices/create',
+      icon: icons.upload
+    }
   ]
 };
 

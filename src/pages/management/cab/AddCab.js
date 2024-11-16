@@ -1,5 +1,22 @@
 /* eslint-disable no-unused-vars */
-import { Box, Button, DialogActions, Divider, Grid, InputLabel, Stack, Switch, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputLabel,
+  Stack,
+  Switch,
+  Typography
+} from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FormikAutocomplete from 'components/autocomplete/AutoComplete';
@@ -8,8 +25,9 @@ import MainCard from 'components/MainCard';
 import FormikTextField from 'components/textfield/TextField';
 import { USERTYPE } from 'constant';
 import { Form, FormikProvider, useFormik } from 'formik';
+import { Add, DocumentUpload, Trash } from 'iconsax-react';
 import MultiFileUpload from 'pages/apps/test/components/MultiFileUpload';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 import { openSnackbar } from 'store/reducers/snackbar';
@@ -17,6 +35,8 @@ import { addCab } from 'store/slice/cabProvidor/cabSlice';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { convertToDateUsingMoment, formatDateUsingMoment } from 'utils/helper';
 import * as Yup from 'yup';
+
+const MAX_VEHICLE_IMAGES = 7; // Maximum number of allowed vehicle images
 
 export const getInitialValuesByUserTypeForCreation = (userType) => {
   switch (userType) {
@@ -516,7 +536,7 @@ const getPayloadForUpdate = (values, userType) => {
   }
 };
 
-const getPayloadForCreation = (values, userType , vehicleImages) => {
+const getPayloadForCreation = (values, userType, vehicleImages) => {
   switch (userType) {
     case USERTYPE.iscabProvider: {
       const formData = new FormData();
@@ -554,8 +574,8 @@ const getPayloadForCreation = (values, userType , vehicleImages) => {
       // formData.append('vehicleImages', values?.vehicleImages);
 
       // Append multiple vehicle images
-      vehicleImages.forEach((image) => {
-        formData.append('vehicleImage', image);
+      vehicleImages.forEach((item) => {
+        formData.append('vehicleImage', item.file);
       });
 
       // const vehicleImageArray = []
@@ -706,9 +726,51 @@ const AddCab = () => {
   const vendors = useSelector((state) => state.vendors.allVendors);
   const vehicleTypes = useSelector((state) => state.vehicleTypes.vehicleTypes);
   const [vehicleImages, setVehicleImages] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [vehicleImageError, setVehicleImageError] = useState(''); // State for error messages
 
-  const handleFileChange = (e) => {
-    setVehicleImages([...e.target.files]);
+  const fileInputRef = useRef();
+
+  const triggerFileInput = () => {
+    console.log('trigger Function click');
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = (e) => {
+    // setVehicleImages([...e.target.files]);
+    const files = Array.from(event.target.files);
+
+    const totalImages = vehicleImages.length + files.length;
+
+    if (totalImages > MAX_VEHICLE_IMAGES) {
+      setVehicleImageError(`You can only upload up to ${MAX_VEHICLE_IMAGES} images.`);
+      return;
+    }
+    setVehicleImageError(''); // Clear any previous errors
+
+    const newImages = files.map((file) => ({
+      id: Math.random(),
+      name: file.name,
+      url: URL.createObjectURL(file),
+      file
+    }));
+    setVehicleImages((prev) => [...prev, ...newImages]);
+  };
+
+  const handleDelete = (id) => {
+    setVehicleImages((prev) => prev.filter((img) => img.id !== id));
+    setVehicleImageError(''); // Clear error if applicable
+  };
+
+  const handleOpenDialog = (image) => {
+    setSelectedImage(image);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedImage(null);
   };
 
   useEffect(() => {
@@ -796,6 +858,7 @@ const AddCab = () => {
         resetForm();
         navigate('/management/cab/view', { replace: true });
       } catch (error) {
+        console.log('Error :: formikHandleSubmit =', error);
         dispatch(
           openSnackbar({
             open: true,
@@ -1525,39 +1588,141 @@ const AddCab = () => {
                   </MainCard>
                 </Grid>
 
-                {/* Vehicle images */}
-                {/* <Grid item xs={12}>
-                  <MainCard title="Vehicle Images">
-                    <Stack spacing={1}>
-                      <InputLabel htmlFor="uploadFile">Upload Images</InputLabel>
-                      <MultiFileUpload
-                        files={values.vehicleImages}
-                        setFieldValue={(key, value) => setFieldValue('vehicleImages', value)}
-                        error={touched.vehicleImages && Boolean(errors.vehicleImages)}
-                        showList={true}
-                      />
-                      {formik.touched.vehicleImages && formik.errors.vehicleImages && (
-                        <p style={{ color: 'red' }}>{formik.errors.vehicleImages}</p>
-                      )}
-                    </Stack>
-                  </MainCard>
-                </Grid> */}
-
+                {/* Vehicle Images Upload */}
                 <Grid item xs={12}>
-                  <MainCard title="Vehicle Images">
-                    <Stack spacing={1}>
-                      <InputLabel htmlFor="uploadFile">Upload Images</InputLabel>
-                      {/* <MultiFileUpload
-                        files={values.vehicleImages}
-                        setFieldValue={(key, value) => setFieldValue('vehicleImages', value)}
-                        error={touched.vehicleImages && Boolean(errors.vehicleImages)}
-                        showList={true}
-                      /> */}
-                      <input type="file" multiple onChange={handleFileChange} accept="image/*" />
-                      {/* {formik.touched.vehicleImages && formik.errors.vehicleImages && (
-                        <p style={{ color: 'red' }}>{formik.errors.vehicleImages}</p>
-                      )} */}
-                    </Stack>
+                  <MainCard title="Upload Vehicle Images">
+                    <Box p={3}>
+                      {/* Upload Section */}
+                      <Stack gap={2}>
+                        <Box
+                          border="2px dashed #ccc"
+                          borderRadius="8px"
+                          p={3}
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          flexDirection="column"
+                          // sx={{
+                          //   cursor: 'pointer',
+                          //   '&:hover': { borderColor: '#1976d2' }
+                          // }}
+                          // onClick={triggerFileInput} // Trigger input click on box click
+
+                          sx={{
+                            cursor: vehicleImages.length < MAX_VEHICLE_IMAGES ? 'pointer' : 'not-allowed',
+                            '&:hover': {
+                              borderColor: vehicleImages.length < MAX_VEHICLE_IMAGES ? '#1976d2' : '#ccc'
+                            }
+                          }}
+                          onClick={vehicleImages.length < MAX_VEHICLE_IMAGES ? triggerFileInput : undefined} // Prevent clicks if limit is reached
+                        >
+                          <DocumentUpload fontSize="large" color="primary" />
+                          <Typography variant="body1" color="textSecondary">
+                            Click here to upload images of your vehicle
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            component="label"
+                            sx={{ mt: 2 }}
+                            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+                          >
+                            Upload Images
+                            <input
+                              ref={fileInputRef} // Attach ref to the file input
+                              hidden
+                              accept="image/*"
+                              type="file"
+                              multiple
+                              onChange={handleFileUpload}
+                            />
+                          </Button>
+                          {vehicleImageError && (
+                            <Typography variant="caption" color="error" sx={{ mt: 1 }}>
+                              {vehicleImageError}
+                            </Typography>
+                          )}
+                        </Box>
+
+                        <Typography variant="caption" color="textSecondary">
+                          {`Allowed formats: jpg, png, jpeg. Max size: ${MAX_VEHICLE_IMAGES} images.`}
+                        </Typography>
+                      </Stack>
+
+                      {/* Images Section */}
+                      {vehicleImages.length > 0 && (
+                        <Box mt={4}>
+                          <Typography variant="h6" gutterBottom>
+                            Uploaded Vehicle Images (
+                            <Typography component="span" sx={{ fontWeight: 'bold' }}>
+                              {vehicleImages.length}/{MAX_VEHICLE_IMAGES}
+                            </Typography>
+                            )
+                          </Typography>
+                          <Grid container spacing={2}>
+                            {vehicleImages.map((image) => (
+                              <Grid item xs={12} sm={6} md={2} key={image.id}>
+                                <Card onClick={() => handleOpenDialog(image)} sx={{ cursor: 'pointer' }} title={image.name}>
+                                  <CardMedia component="img" height="140" image={image.url} alt={image.name} />
+                                  <CardContent
+                                    sx={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center'
+                                    }}
+                                  >
+                                    <Typography variant="body2" noWrap>
+                                      {image.name}
+                                    </Typography>
+                                    <IconButton
+                                      color="error"
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // Prevent card click when deleting
+                                        handleDelete(image.id);
+                                      }}
+                                    >
+                                      <Trash />
+                                    </IconButton>
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </Box>
+                      )}
+
+                      {/* Dialog for Image Preview */}
+                      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+                        <Stack
+                          gap={2}
+                          sx={{
+                            // width: "inherit",
+                            height: 'inherit'
+                          }}
+                        >
+                          <DialogTitle
+                            sx={{
+                              fontWeight: 'bold',
+                              bgcolor: 'primary.main', // Background color
+                              color: 'white' // Text color
+                              // px: 3, // Horizontal padding
+                              // py: 2, // Vertical padding
+                            }}
+                          >
+                            <Stack direction="row" justifyContent="space-between" alignContent="center">
+                              <Typography variant="h6">{selectedImage?.name}</Typography>
+                              <IconButton onClick={handleCloseDialog} sx={{ color: 'white' }}>
+                                <Add style={{ transform: 'rotate(45deg)' }} />
+                              </IconButton>
+                            </Stack>
+                          </DialogTitle>
+                          <DialogContent>
+                            {selectedImage && (
+                              <img src={selectedImage.url} alt={selectedImage.name} style={{ width: '100%', borderRadius: '8px' }} />
+                            )}
+                          </DialogContent>
+                        </Stack>
+                      </Dialog>
+                    </Box>
                   </MainCard>
                 </Grid>
 
