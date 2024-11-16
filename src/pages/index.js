@@ -26,9 +26,9 @@ import { GiPayMoney } from 'react-icons/gi';
 import { GiTakeMyMoney } from 'react-icons/gi';
 import CustomCircularLoader from 'components/CustomCircularLoader';
 import useDateRange from 'hooks/useDateRange';
-import DateRangeSelect from 'components/DateRange/DateRangeSelect';
+import DateRangeSelect, { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
 import moment from 'moment';
-import { formatDateUsingMoment } from 'utils/helper';
+import { formatDateForApi, formatDateUsingMoment } from 'utils/helper';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -36,7 +36,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange();
+  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange(DATE_RANGE_OPTIONS.CURRENT_MONTH);
 
   const loading = useSelector((state) => state.dashboard.loading);
   const dashboardData = useSelector((state) => state.dashboard.data);
@@ -59,7 +59,17 @@ const Dashboard = () => {
       endDate: formatDateUsingMoment(endDate, 'YYYY-MM-DD')
     };
 
-    dispatch(fetchDashboardData(payload));
+    const payload2 = {
+      startDate: formatDateForApi(startDate),
+      endDate: formatDateForApi(endDate)
+    };
+
+    console.log('payload = ', payload);
+    console.log('payload2 = ', payload2);
+
+    alert(JSON.stringify(payload2, null, 2));
+
+    dispatch(fetchDashboardData(payload2));
   }, [dispatch, startDate, endDate]);
 
   const token = localStorage.getItem('serviceToken') || '';

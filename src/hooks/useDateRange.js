@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import moment from 'moment';
+import { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
 
 /**
  * Custom hook to manage date range state and logic.
@@ -12,12 +13,34 @@ import moment from 'moment';
  * - `setRange`: Function to update the selected range.
  * - `handleRangeChange`: Function to update both start and end dates.
  */
-const useDateRange = () => {
-  // State for the selected start date, defaulting to the start of the current day.
-  const [startDate, setStartDate] = useState(moment().startOf('day').toDate());
 
-  // State for the selected end date, defaulting to the start of the current day.
-  const [endDate, setEndDate] = useState(moment().startOf('day').toDate());
+const TYPE = {
+  [DATE_RANGE_OPTIONS.TODAY]: {
+    startDate: moment().startOf('day').toDate(),
+    endDate: moment().toDate()
+  },
+  [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+    startDate: moment().startOf('month').toDate(),
+    endDate: moment().endOf('month').toDate()
+  },
+  [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
+    startDate: moment().startOf('month').toDate(),
+    endDate: moment().toDate()
+  }
+};
+
+const useDateRange = (type = DATE_RANGE_OPTIONS.TODAY) => {
+  // State for the selected start date, defaulting to the start of the current day.
+  // const [startDate, setStartDate] = useState(moment().startOf('day').toDate());
+
+  // // State for the selected end date, defaulting to the start of the current day.
+  // const [endDate, setEndDate] = useState(moment().startOf('day').toDate());
+
+  // State for the selected end date, defaulting to the current date and time.
+  // const [endDate, setEndDate] = useState(moment().toDate());
+
+  const [startDate, setStartDate] = useState(TYPE[type].startDate);
+  const [endDate, setEndDate] = useState(TYPE[type].endDate);
 
   // State for the selected date range as a string.
   const [range, setRange] = useState('');

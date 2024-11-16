@@ -14,6 +14,7 @@ export const DATE_RANGE_OPTIONS = Object.freeze({
   LAST_30_DAYS: 'last30days',
   THIS_MONTH: 'thisMonth',
   LAST_MONTH: 'lastMonth',
+  CURRENT_MONTH: 'currentMonth',
   CUSTOM: 'custom'
 });
 
@@ -53,6 +54,11 @@ const predefinedDateRanges = {
     label: 'Last Month',
     start: moment().subtract(1, 'month').startOf('month'),
     end: moment().subtract(1, 'month').endOf('month')
+  },
+  [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
+    label: 'Current Month',
+    start: moment().startOf('month'),
+    end: moment().endOf('day')
   },
   [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Custom Range' }
 };
