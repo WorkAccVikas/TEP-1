@@ -52,6 +52,7 @@ import FormDialog from 'components/alertDialog/FormDialog';
 import { convertToDateUsingMoment, formattedDate } from 'utils/helper';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
+import { Link } from 'react-router-dom';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -515,7 +516,23 @@ const TripList = () => {
       {
         Header: 'Company Name',
         accessor: 'companyID.company_name',
-        disableFilters: true
+        disableFilters: true,
+        Cell: ({ row, value }) => {
+          console.log('row', row.original);
+          console.log('row', row.original._id);
+
+          return (
+            <Typography>
+              <Link
+                to={`/apps/trips/trip-view/${row.original.tripId}?id=${row.original._id}`}
+                onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
+                style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
+              >
+                {row.original.companyID.company_name}
+              </Link>
+            </Typography>
+          );
+        }
       },
       {
         Header: 'Trip Date',
@@ -531,8 +548,58 @@ const TripList = () => {
         accessor: 'tripTime'
       },
       {
+        Header: 'Zone Name',
+        accessor: 'zoneNameID.zoneName'
+      },
+      {
+        Header: 'Zone Type',
+        accessor: 'zoneTypeID.zoneTypeName'
+      },
+      {
+        Header: 'Cab',
+        accessor: 'vehicleNumber.vehicleNumber'
+      },
+      {
+        Header: 'Cab Type',
+        accessor: 'vehicleTypeID.vehicleTypeName'
+      },
+      {
         Header: 'Driver',
-        accessor: 'driverId.userName'
+        accessor: 'driverId.userName',
+        Cell: ({ value }) => value || 'None'
+      },
+      {
+        Header: 'Guard',
+        accessor: 'guard'
+      },
+      {
+        Header: 'Guard Price',
+        accessor: 'guardPrice'
+      },
+      {
+        Header: 'Company Rate',
+        accessor: 'companyRate'
+      },
+      {
+        Header: 'Vendor Rate',
+        accessor: 'vendorRate'
+      },
+      {
+        Header: 'Driver Rate',
+        accessor: 'driverRate'
+      },
+      {
+        Header: 'Additional Rate',
+        accessor: 'addOnRate'
+      },
+      {
+        Header: 'Penalty',
+        accessor: 'penalty'
+      },
+      {
+        Header: 'Location',
+        accessor: 'location',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Remarks',
@@ -684,7 +751,10 @@ const TripList = () => {
     }
   ];
 
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Trips', to: '/apps/trips/list' }];
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Trips', to: '/apps/trips/list' }
+  ];
 
   // console.log('Data = ', data);
 
@@ -761,7 +831,7 @@ const TripList = () => {
           </Box>
         </Grid>
       </Grid> */}
-        <Breadcrumbs custom heading="Trips" links={breadcrumbLinks} />
+      <Breadcrumbs custom heading="Trips" links={breadcrumbLinks} />
 
       <MainCard content={false}>
         <ScrollX>

@@ -8,6 +8,7 @@ import MainCard from 'components/MainCard';
 import FormikTextField from 'components/textfield/TextField';
 import { USERTYPE } from 'constant';
 import { Form, FormikProvider, useFormik } from 'formik';
+import MultiFileUpload from 'pages/apps/test/components/MultiFileUpload';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
@@ -51,7 +52,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         pollutionExpiryDate_Doc: null,
         RC_Model_doc: null,
         permitOneYrExpiryDate_doc: null,
-        permitFiveYrExpiryDate_doc: null
+        permitFiveYrExpiryDate_doc: null,
+        vehicleImages: []
       };
 
     case USERTYPE.iscabProviderUser:
@@ -86,7 +88,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         pollutionExpiryDate_Doc: null,
         RC_Model_doc: null,
         permitOneYrExpiryDate_doc: null,
-        permitFiveYrExpiryDate_doc: null
+        permitFiveYrExpiryDate_doc: null,
+        vehicleImages: []
       };
 
     case USERTYPE.isVendor:
@@ -119,7 +122,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         pollutionExpiryDate_Doc: null,
         RC_Model_doc: null,
         permitOneYrExpiryDate_doc: null,
-        permitFiveYrExpiryDate_doc: null
+        permitFiveYrExpiryDate_doc: null,
+        vehicleImages: []
       };
 
     case USERTYPE.isVendorUser:
@@ -152,7 +156,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         pollutionExpiryDate_Doc: null,
         RC_Model_doc: null,
         permitOneYrExpiryDate_doc: null,
-        permitFiveYrExpiryDate_doc: null
+        permitFiveYrExpiryDate_doc: null,
+        vehicleImages: []
       };
 
     default:
@@ -202,7 +207,8 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         permitOneYrExpiryDate_doc: '',
         permitOneYrExpiryDate_docUrl: data?.permitOneYrExpiryDate_doc,
         permitFiveYrExpiryDate_doc: '',
-        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc
+        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc,
+        vehicleImages: data?.vehicleImages
       };
 
     case USERTYPE.iscabProviderUser:
@@ -245,7 +251,8 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         permitOneYrExpiryDate_doc: '',
         permitOneYrExpiryDate_docUrl: data?.permitOneYrExpiryDate_doc,
         permitFiveYrExpiryDate_doc: '',
-        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc
+        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc,
+        vehicleImages: data?.vehicleImages
       };
 
     case USERTYPE.isVendor:
@@ -288,7 +295,8 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         permitOneYrExpiryDate_doc: '',
         permitOneYrExpiryDate_docUrl: data?.permitOneYrExpiryDate_doc,
         permitFiveYrExpiryDate_doc: '',
-        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc
+        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc,
+        vehicleImages: data?.vehicleImages
       };
 
     case USERTYPE.isVendorUser:
@@ -331,11 +339,26 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         permitOneYrExpiryDate_doc: '',
         permitOneYrExpiryDate_docUrl: data?.permitOneYrExpiryDate_doc,
         permitFiveYrExpiryDate_doc: '',
-        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc
+        permitFiveYrExpiryDate_docUrl: data?.permitFiveYrExpiryDate_doc,
+        vehicleImages: data?.vehicleImages
       };
 
     default:
       return {};
+  }
+};
+
+const handleFileChange = (event) => {
+  // Check if files are selected
+  if (event.target.files.length > 0) {
+    const uploadedFiles = Array.from(event.target.files);
+
+    // Filter out duplicate files based on the name
+    setFiles((prevFiles) => {
+      const existingFileNames = prevFiles.map((file) => file.name);
+      const uniqueFiles = uploadedFiles.filter((file) => !existingFileNames.includes(file.name));
+      return [...prevFiles, ...uniqueFiles];
+    });
   }
 };
 
@@ -493,10 +516,12 @@ const getPayloadForUpdate = (values, userType) => {
   }
 };
 
-const getPayloadForCreation = (values, userType) => {
+const getPayloadForCreation = (values, userType , vehicleImages) => {
   switch (userType) {
     case USERTYPE.iscabProvider: {
       const formData = new FormData();
+      console.log('values.vehicleImages', values.vehicleImages);
+
       formData.append('vehicletype', values.vehicletype);
       formData.append('vendorId', values.vendorId || 'null');
       formData.append('vehicleName', values.vehicleName);
@@ -526,6 +551,40 @@ const getPayloadForCreation = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values?.vehicleImages);
+
+      // Append multiple vehicle images
+      vehicleImages.forEach((image) => {
+        formData.append('vehicleImage', image);
+      });
+
+      // const vehicleImageArray = []
+      // if (values?.vehicleImages && values.vehicleImages.length > 0) {
+      //   // Convert each file into a Blob and concatenate them
+
+      //   const combinedBlob = new Blob(values.vehicleImages, { type: values.vehicleImages[0].type });
+
+      //   // Create a new File from the combined Blob
+      //   const combinedFile = new File([combinedBlob], "combined-vehicle-images", {
+      //     type: values.vehicleImages[0].type,
+      //   });
+
+      //   console.log("combinedFile",combinedFile);
+
+      //   console.log();
+
+      //   // Append the single file to FormData
+      //   formData.append("vehicleImages", combinedFile);
+      // }
+
+      //       if (values?.vehicleImages && values.vehicleImages.length > 0) {
+      //         values.vehicleImages.forEach((file) => {
+      //           vehicleImageArray.push(file);
+      //         });
+      //       }
+      // console.log({vehicleImageArray});
+
+      //       formData.append('vehicleImages', vehicleImageArray)
       return formData;
     }
 
@@ -560,6 +619,7 @@ const getPayloadForCreation = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values?.vehicleImages);
       return formData;
     }
 
@@ -593,6 +653,7 @@ const getPayloadForCreation = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values?.vehicleImages);
       return formData;
     }
 
@@ -626,6 +687,7 @@ const getPayloadForCreation = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values?.vehicleImages);
       return formData;
     }
 
@@ -643,6 +705,11 @@ const AddCab = () => {
   const userType = useSelector((state) => state.auth.userType);
   const vendors = useSelector((state) => state.vendors.allVendors);
   const vehicleTypes = useSelector((state) => state.vehicleTypes.vehicleTypes);
+  const [vehicleImages, setVehicleImages] = useState([]);
+
+  const handleFileChange = (e) => {
+    setVehicleImages([...e.target.files]);
+  };
 
   useEffect(() => {
     if (userType === USERTYPE.iscabProvider || userType === USERTYPE.iscabProviderUser) {
@@ -671,17 +738,17 @@ const AddCab = () => {
     vehicletype: Yup.string().required('Vehicletype is required').min(1, 'Vehicletype is required'),
     vehicleNumber: Yup.string().required('VehicleNumber is required').min(1, 'VehicleNumber is required'),
     vehicleName: Yup.string().required('VehicleName is required').min(1, 'VehicleName is required'),
-    fitnessDate: Yup.date().required('Fitness Date is required'),
-    fitnessDate_Doc: id ? Yup.mixed().required('FitnessDate_Doc is required') : Yup.mixed(),
-    insuranceExpiryDate: Yup.date().required('Permit expiry date is required'),
-    insuranceExpiryDate_Doc: id ? Yup.mixed().required('InsuranceExpiryDate_Doc is required') : Yup.mixed(),
-    pollutionExpiryDate: Yup.date().required('PollutionExpiryDate is required'),
-    pollutionExpiryDate_Doc: id ? Yup.mixed().required('PollutionExpiryDate_Doc is required') : Yup.mixed(),
-    permitOneYrExpiryDate: Yup.date().required('PermitOneYrExpiryDate is required'),
-    permitOneYrExpiryDate_doc: id ? Yup.mixed().required('PermitOneYrExpiryDate_doc is required') : Yup.mixed(),
-    permitFiveYrExpiryDate: Yup.date().required('PermitFiveYrExpiryDate is required'),
-    permitFiveYrExpiryDate_doc: id ? Yup.mixed().required('PermitFiveYrExpiryDate_doc is required') : Yup.mixed(),
-    RC_Model_doc: id ? Yup.mixed().required('RC_Model_doc is required') : Yup.mixed(),
+    // fitnessDate: Yup.date().required('Fitness Date is required'),
+    // fitnessDate_Doc: id ? Yup.mixed().required('FitnessDate_Doc is required') : Yup.mixed(),
+    // insuranceExpiryDate: Yup.date().required('Permit expiry date is required'),
+    // insuranceExpiryDate_Doc: id ? Yup.mixed().required('InsuranceExpiryDate_Doc is required') : Yup.mixed(),
+    // pollutionExpiryDate: Yup.date().required('PollutionExpiryDate is required'),
+    // pollutionExpiryDate_Doc: id ? Yup.mixed().required('PollutionExpiryDate_Doc is required') : Yup.mixed(),
+    // permitOneYrExpiryDate: Yup.date().required('PermitOneYrExpiryDate is required'),
+    // permitOneYrExpiryDate_doc: id ? Yup.mixed().required('PermitOneYrExpiryDate_doc is required') : Yup.mixed(),
+    // permitFiveYrExpiryDate: Yup.date().required('PermitFiveYrExpiryDate is required'),
+    // permitFiveYrExpiryDate_doc: id ? Yup.mixed().required('PermitFiveYrExpiryDate_doc is required') : Yup.mixed(),
+    // RC_Model_doc: id ? Yup.mixed().required('RC_Model_doc is required') : Yup.mixed(),
     fuelType: Yup.boolean(),
     fireCylinder: Yup.boolean(),
     firstAidBox: Yup.boolean(),
@@ -701,7 +768,7 @@ const AddCab = () => {
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         if (!id) {
-          const formData = getPayloadForCreation(values, userType);
+          const formData = getPayloadForCreation(values, userType, vehicleImages);
 
           const response = await dispatch(addCab(formData)).unwrap();
         } else {
@@ -745,6 +812,8 @@ const AddCab = () => {
       }
     }
   });
+
+  console.log('formik', formik.values.vehicleImages);
 
   const { errors, touched, handleSubmit, handleBlur, isSubmitting, getFieldProps, setFieldValue, values, dirty, initialValues } = formik;
 
@@ -1453,6 +1522,42 @@ const AddCab = () => {
                         </Stack>
                       </Grid>
                     </Grid>
+                  </MainCard>
+                </Grid>
+
+                {/* Vehicle images */}
+                {/* <Grid item xs={12}>
+                  <MainCard title="Vehicle Images">
+                    <Stack spacing={1}>
+                      <InputLabel htmlFor="uploadFile">Upload Images</InputLabel>
+                      <MultiFileUpload
+                        files={values.vehicleImages}
+                        setFieldValue={(key, value) => setFieldValue('vehicleImages', value)}
+                        error={touched.vehicleImages && Boolean(errors.vehicleImages)}
+                        showList={true}
+                      />
+                      {formik.touched.vehicleImages && formik.errors.vehicleImages && (
+                        <p style={{ color: 'red' }}>{formik.errors.vehicleImages}</p>
+                      )}
+                    </Stack>
+                  </MainCard>
+                </Grid> */}
+
+                <Grid item xs={12}>
+                  <MainCard title="Vehicle Images">
+                    <Stack spacing={1}>
+                      <InputLabel htmlFor="uploadFile">Upload Images</InputLabel>
+                      {/* <MultiFileUpload
+                        files={values.vehicleImages}
+                        setFieldValue={(key, value) => setFieldValue('vehicleImages', value)}
+                        error={touched.vehicleImages && Boolean(errors.vehicleImages)}
+                        showList={true}
+                      /> */}
+                      <input type="file" multiple onChange={handleFileChange} accept="image/*" />
+                      {/* {formik.touched.vehicleImages && formik.errors.vehicleImages && (
+                        <p style={{ color: 'red' }}>{formik.errors.vehicleImages}</p>
+                      )} */}
+                    </Stack>
                   </MainCard>
                 </Grid>
 

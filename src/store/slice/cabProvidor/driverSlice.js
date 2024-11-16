@@ -44,12 +44,45 @@ export const updateDriver = createAsyncThunk('drivers/updateDriver', async ({ id
   }
 });
 
-// Define the async thunk for deleting a driver
-export const deleteDriver = createAsyncThunk('drivers/deleteDriver', async (id, { rejectWithValue }) => {
+// update driver basic details
+export const updateDriverBasicDetails = createAsyncThunk('driver/updateBasicDetails', async (formData, { rejectWithValue }) => {
   try {
-    // Replace with your actual endpoint
-    await axios.delete(`/drivers/${id}`);
-    return id; // Return the id for deletion
+    const response = await axios.put(`/driver/update/basic/details`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log(`🚀 ~ updateDriverBasicDetails ~ response:`, response);
+    return { status: response.status, message: response.data.message };
+  } catch (error) {
+    console.log('Error :: updateDriverBasicDetails =', error);
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// update driver specific details
+export const updateDriverSpecificDetails = createAsyncThunk('driver/updateSpecificDetails', async (formData, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/driver/update/specific/details`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log(`🚀 ~ updateDriverSpecificDetails ~ response:`, response);
+    return { status: response.status, message: response.data.message };
+  } catch (error) {
+    console.log('Error :: updateDriverSpecificDetails =', error);
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// Define the async thunk for deleting a driver
+export const deleteDriver = createAsyncThunk('drivers/deleteDriver', async (_, { rejectWithValue, getState }) => {
+  try {
+    const state = getState();
+    const id = state.drivers.selectedID;
+    const response = await axios.delete(`/driver?driverId=${id}`);
+    return response;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
@@ -75,6 +108,22 @@ export const fetchAllDrivers = createAsyncThunk('drivers/fetchAllDrivers', async
   }
 });
 
+// fetch driver details
+export const fetchDriverDetails = createAsyncThunk('driver/fetchDetails', async (id, { getState, rejectWithValue }) => {
+  try {
+    // const state = getState();
+    // const driverID = state.driver.selectedID;
+    console.log(`🚀 ~ driverID:`, id);
+    // const _id = driverID || id;
+    const response = await axios.get(`/driver/by?driverId=${id}`);
+    console.log(`🚀 ~ fetchDriverDetails ~ response:`, response);
+    return response?.data?.data;
+  } catch (error) {
+    console.log('Error :: fetchDriverDetails =', error);
+    return rejectWithValue(error.response.data);
+  }
+});
+
 const initialState = {
   ...commonInitialState,
   drivers: [], // Empty array initially
@@ -88,6 +137,8 @@ const initialState = {
   loading: false,
   error: null
 };
+
+console.log('tom = ', commonReducers);
 
 const driverSlice = createSlice({
   name: 'drivers',
@@ -174,5 +225,5 @@ const driverSlice = createSlice({
 });
 
 // Export the reducer and actions
-export const { reset, resetError, handleOpen, handleClose } = driverSlice.actions;
+export const { reset, resetError, handleOpen, handleClose, setSelectedID, setGetSingleDetails, setDeletedName } = driverSlice.actions;
 export const driverReducer = driverSlice.reducer;

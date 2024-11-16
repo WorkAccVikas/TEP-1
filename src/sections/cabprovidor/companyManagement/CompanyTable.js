@@ -89,11 +89,13 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       },
       {
         Header: 'Address',
-        accessor: 'address'
+        accessor: 'address',
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'City',
-        accessor: 'city'
+        accessor: 'city',
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'State',

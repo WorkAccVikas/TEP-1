@@ -16,6 +16,7 @@ import ViewRosterTest1 from 'pages/apps/test/ViewRoster';
 import AddRosterFileForm from 'pages/apps/test/components/AddRosterFileForm';
 import DriverRate from 'pages/management/driver/driverRate/DriverRate';
 import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelisting';
+import TripView from 'pages/trips/TripView';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -94,7 +95,7 @@ const VendorDashboard = Loadable(lazy(() => import('pages/dashboard/vendorDashbo
 const CompanyDashboard = Loadable(lazy(() => import('pages/dashboard/companyDashboard/CompanyDashboard')));
 const UserDashboard = Loadable(lazy(() => import('pages/dashboard/userDashboard/UserDashboard')));
 const InvoiceDashboard = Loadable(lazy(() => import('pages/dashboard/invoiceDashboard/InvoiceDashboard')));
-
+const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver.js')));
 // Dashboard
 const RosterDashboard1 = Loadable(lazy(() => import('pages/apps/test/dashboard')));
 
@@ -182,7 +183,7 @@ const CabProvidorRoutes = {
                 {
                   path: 'all-roster',
                   element: <AllRosters />
-                }
+                },
               ]
             },
 
@@ -234,6 +235,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'list',
                   element: <TripList />
+                },
+                {
+                  path: 'trip-view/:id',
+                  element: <TripView />
                 }
               ]
             }
@@ -356,11 +361,11 @@ const CabProvidorRoutes = {
                 {
                   path: 'add-driver-rate',
                   element: <AddCabRateDriver />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <EditDriver />
                 }
-                // {
-                //   path: 'add-driver',
-                //   element: <AddDriver />
-                // }
               ]
             },
             // Cab
