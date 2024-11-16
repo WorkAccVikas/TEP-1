@@ -1,30 +1,61 @@
 // eslint-disable-next-line no-unused-vars
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import ScrollX from 'components/ScrollX';
 import PaginationBox from 'components/tables/Pagination';
 import ReactTable from 'components/tables/reactTable/ReactTable';
 import PropTypes from 'prop-types';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { formattedDate } from 'utils/helper';
 import MainCard from 'components/MainCard';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import AssignVehiclePopup from './driverOverview/assignVehiclePopup/AssignVehiclePopup';
 import ReassignVehicle from './driverOverview/reassignVehiclePopup/ReassignVehicle';
 import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { dispatch } from 'store';
+import { dispatch, useSelector } from 'store';
+import { Edit, Eye, Trash } from 'iconsax-react';
+import { ThemeMode } from 'config';
+import { ACTION, FUEL_TYPE, MODULE, PERMISSIONS } from 'constant';
+import {
+  deleteDriver,
+  fetchDriverDetails,
+  fetchDrivers,
+  handleClose,
+  handleOpen,
+  setDeletedName,
+  setGetSingleDetails,
+  setSelectedID
+} from 'store/slice/cabProvidor/driverSlice';
+import AlertDelete from 'components/alertDialog/AlertDelete';
 
 const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
+  // const selectedID = useSelector((state) => state.drivers.selectedID);
+  // console.log('selectedID', selectedID);
+  const navigate = useNavigate();
   // eslint-disable-next-line no-unused-vars
   const mode = theme.palette.mode;
   const [driverId, setDriverId] = useState(null);
   const [assignedVehicle, setAssignedVehicle] = useState([]);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+
+  const { remove, deletedName, selectedID } = useSelector((state) => state.drivers);
 
   //assignedVehicle
   const handleClosePendingDialog = () => {
@@ -49,6 +80,57 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
     setReassignDialogOpen(false);
     setDriverId(null);
   };
+
+  const handleCloseDialog = useCallback(async (e, flag = false) => {
+    console.log(`🚀 ~ handleCloseDialog ~ flag:`, flag, selectedID);
+
+    if (typeof flag === 'boolean' && flag) {
+      const response = await dispatch(deleteDriver()).unwrap();
+
+      console.log('res = ', response);
+
+      if (response.status === 200) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Driver Delete Successfully',
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: true
+          })
+        );
+        dispatch(handleClose());
+        setUpdateKey(updateKey + 1);
+        // dispatch(fetchDrivers());
+      }
+    } else {
+      dispatch(handleClose());
+      return;
+    }
+  }, []);
+
+  // const handleEditDriver = (e, row) => {
+  //   e.stopPropagation();
+  //   console.log('Id = ', row.values._id);
+  //   dispatch(setSelectedID(row.values._id));
+  //   navigate(`/management/driver/edit/${row.values._id}`);
+  //   // dispatch(handleOpen(ACTION.EDIT));
+  //   // (async () => {
+  //   //   try {
+  //   //     if (row.values._id) {
+  //   //       console.log('API Calling .......');
+
+  //   //       const result = await dispatch(fetchDriverDetails(row.values._id)).unwrap();
+  //   //       console.log(`🚀 ~ Manage ~ result:`, result);
+  //   //       dispatch(setGetSingleDetails(result));
+  //   //     }
+  //   //   } catch (error) {
+  //   //     console.log(`🚀 ~ Manage ~ error:`, error);
+  //   //   }
+  //   // })();
+  // };
 
   const columns = useMemo(
     () => [
@@ -226,90 +308,89 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             </>
           );
         }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          const driverID = row.original._id;
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              {/* <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/driver-overview/${driverID}`);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip> */}
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Id = ', row.values._id);
+                    dispatch(setSelectedID(row.values._id));
+                    navigate(`/management/driver/edit/${row.values._id}`);
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Delete"
+              >
+                <IconButton
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log(`🚀 ~ row.values.id:`, row.values);
+                    dispatch(handleOpen(ACTION.DELETE));
+                    dispatch(setDeletedName(row.values['userName']));
+                    dispatch(setSelectedID(row.values._id)); //setDeletedName
+                  }}
+                >
+                  <Trash />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
       }
-      //   {
-      //     Header: 'Actions',
-      //     className: 'cell-center',
-      //     disableSortBy: true,
-      //     Cell: ({ row }) => {
-      //       const driverID = row.original._id;
-      //       return (
-      //         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="View"
-      //           >
-      //             <IconButton
-      //               color="secondary"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 navigate(`/driver-overview/${driverID}`);
-      //               }}
-      //             >
-      //               <Eye /> {/* Replace this with your collapseIcon if needed */}
-      //             </IconButton>
-      //           </Tooltip>
-
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Edit"
-      //           >
-      //             <IconButton
-      //               color="primary"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 console.log('Id = ', row.values._id);
-      //                 navigate(`/driver-management/edit/${row.values._id}`);
-      //                 dispatch(handleOpen(ACTION.EDIT));
-      //                 dispatch(setSelectedID(row.values._id));
-      //               }}
-      //             >
-      //               <Edit />
-      //             </IconButton>
-      //           </Tooltip>
-
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Delete"
-      //           >
-      //             <IconButton
-      //               color="error"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 console.log(`🚀 ~ row.values.id:`, row.values);
-      //                 // dispatch(handleOpen(ACTION.DELETE));
-      //                 // dispatch(setDeletedName(row.values["userName"]));
-      //                 // dispatch(setSelectedID(row.values._id));
-      //               }}
-      //             >
-      //               <Trash />
-      //             </IconButton>
-      //           </Tooltip>
-      //         </Stack>
-      //       );
-      //     }
-      //   }
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [theme]
@@ -339,6 +420,8 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           )}
         </Box>
       </Stack>
+      {/* Delete Dialog */}
+      {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />}
       {/* Pending Dialog */}
       <Dialog open={pendingDialogOpen} onClose={handleClosePendingDialog}>
         <AssignVehiclePopup

@@ -70,7 +70,6 @@ export default function RowEditable({ getValue: initialValue, row, column, table
     original._guard_1,
     original._dualTrip_1
   );
-  console.log( { guardPrice, companyRate })
   const onChange = (e) => {
     if (id === '_guard_1' || id === '_dual_trip') {
       setValue(e.target.checked ? 1 : 0);

@@ -1,5 +1,17 @@
 // material-ui
-import { Autocomplete, Button, DialogActions, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Button,
+  DialogActions,
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField
+} from '@mui/material';
 
 // project-imports
 import MainCard from 'components/MainCard';
@@ -54,6 +66,15 @@ function AddCompany() {
   };
 
   const DIGITS_ONLY_PATTERN = /^\d+$/;
+
+  const optionsForBillingCycle = [
+    { value: '0', label: 'Select' },
+    { value: 'Weekly', label: 'Weekly' },
+    { value: '15 Days', label: '15 Days' },
+    { value: '1 Month', label: '1 Month' },
+    { value: '2 Months', label: '2 Months' },
+    { value: 'Quaterly', label: 'Quaterly' }
+  ];
 
   // List of Indian states
   const indianStates = [
@@ -120,15 +141,15 @@ function AddCompany() {
       .trim()
       .matches(/^[0-9]{10}$/, { message: 'Please enter valid mobile number', excludeEmptyString: false })
       .required('Mobile Number is required'),
-    landline: yup
-      .string()
-      .trim()
-      .matches(/^[0-9]{10}$/, { message: 'Please enter valid landline number', excludeEmptyString: false })
-      .test('not-same-as-phone', 'Landline phone number should be different from mobile number', function (value) {
-        const { mobile: phone } = this.parent;
-        return typeof phone === 'undefined' ? true : value !== phone;
-      })
-      .required('Landline Number is required'),
+    // landline: yup
+    //   .string()
+    //   .trim()
+    //   .matches(/^[0-9]{10}$/, { message: 'Please enter valid landline number', excludeEmptyString: false })
+    //   .test('not-same-as-phone', 'Landline phone number should be different from mobile number', function (value) {
+    //     const { mobile: phone } = this.parent;
+    //     return typeof phone === 'undefined' ? true : value !== phone;
+    //   })
+    //   .required('Landline Number is required'),
     PAN: yup
       .string()
       .required('PAN is required')
@@ -152,6 +173,13 @@ function AddCompany() {
     //   .required('Address is required'),
     // city: yup.string().trim().required('City is required'),
     state: yup.string().trim().required('State is required'),
+    billingCycle: yup
+      .string()
+      .required('Billing Cycle is required')
+      .oneOf(
+        optionsForBillingCycle.map((option) => option.value),
+        'Invalid Billing Cycle selection'
+      ),
     // MCDTax: yup.string().required('MCD Tax is required'),
     // MCDAmount: yup
     //   .string()
@@ -199,11 +227,12 @@ function AddCompany() {
       address: companyData?.address || '',
       city: companyData?.city || '',
       state: companyData?.state || '',
-      MCDTax: companyData?.MCDTax || '',
-      MCDAmount: companyData?.MCDAmount || '',
-      stateTax: companyData?.stateTax || '',
-      stateTaxAmount: companyData?.stateTaxAmount || '',
-      files: companyData?.companyContract || null
+      // MCDTax: companyData?.MCDTax || '',
+      // MCDAmount: companyData?.MCDAmount || '',
+      // stateTax: companyData?.stateTax || '',
+      // stateTaxAmount: companyData?.stateTaxAmount || '',
+      files: companyData?.companyContract || null,
+      billingCycle: companyData?.billingCycle || ''
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -221,10 +250,11 @@ function AddCompany() {
         formData.append('city', values.city);
         formData.append('state', values.state);
         formData.append('address', values.address);
-        formData.append('MCDTax', values.MCDTax);
-        formData.append('MCDAmount', values.MCDAmount);
-        formData.append('stateTax', values.stateTax);
-        formData.append('stateTaxAmount', values.stateTaxAmount);
+        formData.append('billingCycle', values.billingCycle);
+        // formData.append('MCDTax', values.MCDTax);
+        // formData.append('MCDAmount', values.MCDAmount);
+        // formData.append('stateTax', values.stateTax);
+        // formData.append('stateTaxAmount', values.stateTaxAmount);
         formData.append('companyContract', values.files[0]);
 
         const resultAction = await dispatch(addCompany(formData));
@@ -472,10 +502,31 @@ function AddCompany() {
                   />
                 </Stack>
               </Grid>
+              <Grid item xs={12} lg={4}>
+                <Stack spacing={1}>
+                  <InputLabel>Billing Cycle</InputLabel>
+                  <TextField
+                    select
+                    label="Select Billing Cycle"
+                    name="billingCycle"
+                    value={formik.values.billingCycle}
+                    onChange={formik.handleChange}
+                    error={formik.touched.billingCycle && Boolean(formik.errors.billingCycle)}
+                    helperText={formik.touched.billingCycle && formik.errors.billingCycle}
+                    fullWidth
+                  >
+                    {optionsForBillingCycle.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Stack>
+              </Grid>
             </Grid>
           </MainCard>
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <MainCard title="MCD/TAX INFORMATION">
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={3}>
@@ -575,7 +626,7 @@ function AddCompany() {
               </Grid>
             </Grid>
           </MainCard>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <MainCard title="CONTRACT INFORMATION">
             {/* <SingleFileUpload

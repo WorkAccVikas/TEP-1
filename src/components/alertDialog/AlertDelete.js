@@ -38,7 +38,7 @@ export default function AlertDelete({ title, open, handleClose,subtitle }) {
                 {' '}
                 &quot;{title}&quot;{' '}
               </Typography>
-              {subtitle}
+              {subtitle}{''}, it will be permanently deleted
             </Typography>
           </Stack>
 

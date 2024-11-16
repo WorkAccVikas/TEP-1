@@ -26,6 +26,7 @@ export const commonReducers = {
   },
   handleOpen: (state, action) => {
     const type = action.payload;
+    console.log("VI = ",type);
     if (type === 'backdropClick') {
       state.selected = null;
       return;
@@ -56,5 +57,8 @@ export const commonReducers = {
   },
   setSelectedID: (state, action) => {
     state.selectedID = action.payload;
+  },
+  setGetSingleDetails: (state, action) => {
+    state.getSingleDetails = action.payload;
   }
 };
