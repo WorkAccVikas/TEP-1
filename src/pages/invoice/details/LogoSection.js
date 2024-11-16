@@ -10,7 +10,7 @@ import { ThemeMode } from 'config';
 const LogoSection = () => {
   const theme = useTheme();
 
-  return <img src={'https://www.taxi.in/uploads/images/business2311/logo-sewak-travels.jpg'} alt="icon logo" width="100" height={'100'} />;
+  return <img src={'https://www.taxi.in/uploads/images/business2311/logo-sewak-travels.jpg'} alt="icon logo" width="40" height={'100'} />;
 };
 
 export default LogoSection;

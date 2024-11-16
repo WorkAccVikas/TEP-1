@@ -10,7 +10,7 @@ import { ThemeMode } from 'config';
 const LogoIcon = () => {
   const theme = useTheme();
 
-  return <img src={theme.palette.mode === ThemeMode.DARK ? logoIconDark : logoIcon} alt="icon logo" width="100" />;
+  return <img src={theme.palette.mode === ThemeMode.DARK ? logoIconDark : logoIcon} alt="icon logo" width="40" />;
 };
 
 export default LogoIcon;
