@@ -14,54 +14,9 @@ export const DATE_RANGE_OPTIONS = Object.freeze({
   LAST_30_DAYS: 'last30days',
   THIS_MONTH: 'thisMonth',
   LAST_MONTH: 'lastMonth',
-  CURRENT_MONTH: 'currentMonth',
+  // CURRENT_MONTH: 'currentMonth',
   CUSTOM: 'custom'
 });
-
-// Predefined date range objects based on the above enum
-const predefinedDateRanges = {
-  [DATE_RANGE_OPTIONS.ALL_TIME]: {
-    label: 'All Time',
-    start: moment(0),
-    end: moment().endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.TODAY]: {
-    label: 'Today',
-    start: moment().startOf('day'),
-    end: moment().endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.YESTERDAY]: {
-    label: 'Yesterday',
-    start: moment().subtract(1, 'day').startOf('day'),
-    end: moment().subtract(1, 'day').endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.LAST_7_DAYS]: {
-    label: 'Last 7 Days',
-    start: moment().subtract(7, 'days').startOf('day'),
-    end: moment().endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.LAST_30_DAYS]: {
-    label: 'Last 30 Days',
-    start: moment().subtract(30, 'days').startOf('day'),
-    end: moment().endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-    label: 'This Month',
-    start: moment().startOf('month'),
-    end: moment().endOf('month')
-  },
-  [DATE_RANGE_OPTIONS.LAST_MONTH]: {
-    label: 'Last Month',
-    start: moment().subtract(1, 'month').startOf('month'),
-    end: moment().subtract(1, 'month').endOf('month')
-  },
-  [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
-    label: 'Current Month',
-    start: moment().startOf('month'),
-    end: moment().endOf('day')
-  },
-  [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Custom Range' }
-};
 
 const DateRangeSelect = memo(
   ({
@@ -76,6 +31,56 @@ const DateRangeSelect = memo(
   }) => {
     console.log('DateRangeSelect render');
     const [isDialogOpen, setDialogOpen] = useState(false);
+
+    // Predefined date range objects based on the above enum
+    const predefinedDateRanges = {
+      [DATE_RANGE_OPTIONS.ALL_TIME]: {
+        label: 'All Time',
+        start: moment(0),
+        end: moment().endOf('day')
+      },
+      [DATE_RANGE_OPTIONS.TODAY]: {
+        label: 'Today',
+        start: moment().startOf('day'),
+        end: moment().endOf('day')
+      },
+      [DATE_RANGE_OPTIONS.YESTERDAY]: {
+        label: 'Yesterday',
+        start: moment().subtract(1, 'day').startOf('day'),
+        end: moment().subtract(1, 'day').endOf('day')
+      },
+      [DATE_RANGE_OPTIONS.LAST_7_DAYS]: {
+        label: 'Last 7 Days',
+        start: moment().subtract(7, 'days').startOf('day'),
+        end: moment().endOf('day')
+      },
+      [DATE_RANGE_OPTIONS.LAST_30_DAYS]: {
+        label: 'Last 30 Days',
+        start: moment().subtract(30, 'days').startOf('day'),
+        end: moment().endOf('day')
+      },
+      // [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+      //   label: 'This Month',
+      //   start: moment().startOf('month'),
+      //   end: moment().endOf('month')
+      // },
+      [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+        label: 'This Month',
+        start: moment().startOf('month'),
+        end: moment()
+      },
+      [DATE_RANGE_OPTIONS.LAST_MONTH]: {
+        label: 'Last Month',
+        start: moment().subtract(1, 'month').startOf('month'),
+        end: moment().subtract(1, 'month').endOf('month')
+      },
+      // [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
+      //   label: 'Current Month',
+      //   start: moment().startOf('month'),
+      //   end: moment()
+      // },
+      [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Custom Range' }
+    };
 
     // Helper to determine which range the current start and end dates fall into
     const determineRange = (startDate, endDate) => {

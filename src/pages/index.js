@@ -36,7 +36,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange(DATE_RANGE_OPTIONS.CURRENT_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange(DATE_RANGE_OPTIONS.THIS_MONTH);
 
   const loading = useSelector((state) => state.dashboard.loading);
   const dashboardData = useSelector((state) => state.dashboard.data);
@@ -67,7 +67,7 @@ const Dashboard = () => {
     console.log('payload = ', payload);
     console.log('payload2 = ', payload2);
 
-    alert(JSON.stringify(payload2, null, 2));
+    // alert(JSON.stringify(payload2, null, 2));
 
     dispatch(fetchDashboardData(payload2));
   }, [dispatch, startDate, endDate]);

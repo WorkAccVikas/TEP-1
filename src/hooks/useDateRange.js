@@ -21,12 +21,16 @@ const TYPE = {
   },
   [DATE_RANGE_OPTIONS.THIS_MONTH]: {
     startDate: moment().startOf('month').toDate(),
-    endDate: moment().endOf('month').toDate()
-  },
-  [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
-    startDate: moment().startOf('month').toDate(),
     endDate: moment().toDate()
   }
+  // [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+  //   startDate: moment().startOf('month').toDate(),
+  //   endDate: moment().endOf('month').toDate()
+  // },
+  // [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
+  //   startDate: moment().startOf('month').toDate(),
+  //   endDate: moment().toDate()
+  // }
 };
 
 const useDateRange = (type = DATE_RANGE_OPTIONS.TODAY) => {
@@ -65,6 +69,7 @@ const useDateRange = (type = DATE_RANGE_OPTIONS.TODAY) => {
    */
   const handleRangeChange = useCallback(({ startDate, endDate }) => {
     console.log('startDate', startDate, typeof startDate); // Debug log for start date.
+    console.log('endDate', endDate, typeof endDate); // Debug log for end date.
     setStartDate(startDate);
     setEndDate(endDate);
   }, []);
