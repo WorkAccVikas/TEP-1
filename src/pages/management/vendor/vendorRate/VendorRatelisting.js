@@ -4,6 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -23,10 +24,11 @@ import VendorRateTable from './VendorRateTable';
 import { useLocation, useNavigate } from 'react-router';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import MainCard from 'components/MainCard';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
-const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVendorID, initialVendorID }) => {
+const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVendorID, initialVendorID, handleSelectedVendorName,handleSelectedCompanyName }) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
   const [vendorID, setVendorID] = useState(initialVendorID);
   const dispatch = useDispatch();
@@ -34,20 +36,29 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
 
   const allVendors = useSelector((state) => state.vendors.allVendors);
 
-  console.log("vendorID",vendorID);
-  console.log("selectedCompany",selectedCompany);
-  
+  console.log('vendorID', vendorID);
+  console.log('selectedCompany', selectedCompany);
 
   useEffect(() => {
     dispatch(fetchAllVendors());
   }, [dispatch]);
-  
+
   const handleSave = () => {
     if (!selectedCompany || !vendorID) {
       return;
     }
+    // Fetch company name (assuming selectedCompany contains company object with name)
+    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  // Adjust based on your structure
+
+    // Fetch vendor name based on vendorID
+    const selectedVendor = allVendors.find((vendor) => vendor.vendorId === vendorID);
+    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';  // Adjust based on your structure
+    
     setSelectedCompany(selectedCompany);
-    setSelectedVendorID(vendorID); // Pass the selected vendor ID back to the parent
+    setSelectedVendorID(vendorID);
+
+    handleSelectedCompanyName(selectedCompanyName);
+    handleSelectedVendorName(selectedVendorName); 
     onClose();
   };
 
@@ -133,9 +144,21 @@ const VendorRatelisting = () => {
   const [selectedVendorID, setSelectedVendorID] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(true); // Dialog state
 
-  //   console.log('selectedCompany', selectedCompany);
-  console.log('selectedVendorID', selectedVendorID);
-  console.log('selectedCompany', selectedCompany);
+  const [selectedCompanyName, setSelectedCompanyName] = useState('');
+  const [selectedVendorName, setSelectedVendorName] = useState('');
+
+  const handleSelectedCompanyName = (companyName) => {
+    console.log('Selected Company Name:', companyName);
+    setSelectedCompanyName(companyName);
+  };
+
+  const handleSelectedVendorName = (vendorName) => {
+    console.log('Selected Vendor Name:', vendorName);
+    setSelectedVendorName(vendorName);
+  };
+
+  console.log("selectedCompanyName",selectedCompanyName);
+  
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -185,6 +208,8 @@ const VendorRatelisting = () => {
         setSelectedCompany={setSelectedCompany}
         setSelectedVendorID={setSelectedVendorID}
         initialVendorID={initialVendorID}
+        handleSelectedCompanyName={handleSelectedCompanyName}
+        handleSelectedVendorName={handleSelectedVendorName}
       />
 
       {/* Render CompanyRateListing once a company is selected */}
@@ -192,16 +217,24 @@ const VendorRatelisting = () => {
         <Stack gap={1} spacing={1}>
           {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
-          <VendorRateTable
-            data={vendorList}
-            page={page}
-            setPage={setPage}
-            limit={limit}
-            setLimit={setLimit}
-            updateKey={updateKey}
-            setUpdateKey={setUpdateKey}
-            loading={loading}
-          />
+          <MainCard
+            title={
+              <Stack direction="row" alignItems="center" gap={1}>
+              Vendor Rates between <Chip label={selectedCompanyName} color="primary" /> and <Chip label={selectedVendorName} color="secondary" />
+            </Stack>
+            }
+          >
+            <VendorRateTable
+              data={vendorList}
+              page={page}
+              setPage={setPage}
+              limit={limit}
+              setLimit={setLimit}
+              updateKey={updateKey}
+              setUpdateKey={setUpdateKey}
+              loading={loading}
+            />
+          </MainCard>
         </Stack>
       ) : null}
     </>
