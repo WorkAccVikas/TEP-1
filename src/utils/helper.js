@@ -165,6 +165,11 @@ export const formatDateUsingMoment = (date, format) => {
   return moment(date).format(format);
 };
 
+// Utility function to format dates in UTC
+export const formatDateForApi = (date) => {
+  return moment(date).format('YYYY-MM-DDTHH:mm:ss');
+};
+
 export const convertToDateUsingMoment = (str, format = 'DD/MM/YYYY') => {
   const result = moment(str, format).toDate();
   return result;
