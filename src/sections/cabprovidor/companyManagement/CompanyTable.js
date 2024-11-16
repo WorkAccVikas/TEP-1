@@ -110,8 +110,17 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         }
       },
       {
+        Header: 'Total Vehicle',
+        accessor: 'totalVehicles'
+      },
+      {
+        Header: 'Total Income',
+        accessor: 'totalEarnedIncome'
+      },
+      {
         Header: 'Amount Receivable',
-        accessor: 'stateTaxAmount'
+        accessor: 'stateTaxAmount',
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'Status',
