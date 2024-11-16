@@ -22,6 +22,7 @@ export const commonReducers = {
     state.deletedName = action.payload;
   },
   setSelected: (state, action) => {
+    console.log(action.payload);
     state.selected = action.payload;
   },
   handleOpen: (state, action) => {
