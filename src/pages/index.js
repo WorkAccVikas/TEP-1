@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 // material-ui
-import { Grid, Stack } from '@mui/material';
+import { Grid, Stack, Typography } from '@mui/material';
 
 // project-imports
 import { useTheme } from '@mui/material/styles';
@@ -25,12 +25,18 @@ import { GiPayMoney } from 'react-icons/gi';
 
 import { GiTakeMyMoney } from 'react-icons/gi';
 import CustomCircularLoader from 'components/CustomCircularLoader';
+import useDateRange from 'hooks/useDateRange';
+import DateRangeSelect from 'components/DateRange/DateRangeSelect';
+import moment from 'moment';
+import { formatDateUsingMoment } from 'utils/helper';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
+
+  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange();
 
   const loading = useSelector((state) => state.dashboard.loading);
   const dashboardData = useSelector((state) => state.dashboard.data);
@@ -48,8 +54,13 @@ const Dashboard = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchDashboardData());
-  }, [dispatch]);
+    const payload = {
+      startDate: formatDateUsingMoment(startDate, 'YYYY-MM-DD'),
+      endDate: formatDateUsingMoment(endDate, 'YYYY-MM-DD')
+    };
+
+    dispatch(fetchDashboardData(payload));
+  }, [dispatch, startDate, endDate]);
 
   const token = localStorage.getItem('serviceToken') || '';
 
@@ -144,6 +155,17 @@ const Dashboard = () => {
   return (
     <>
       <Stack gap={2}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="h4"></Typography>
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+          />
+        </Stack>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <ReportCard

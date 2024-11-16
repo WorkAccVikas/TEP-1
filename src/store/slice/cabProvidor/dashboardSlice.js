@@ -14,9 +14,14 @@ const initialState = {
   error: null
 };
 
-export const fetchDashboardData = createAsyncThunk('dashboard/fetchDashboardData', async (_, { rejectWithValue }) => {
+export const fetchDashboardData = createAsyncThunk('dashboard/fetchDashboardData', async (payload, { rejectWithValue }) => {
   try {
-    const response = await axios.get('/dashboard/data');
+    const response = await axios.get('/dashboard/data', {
+      params: {
+        startDate: payload?.startDate,
+        endDate: payload?.endDate
+      }
+    });
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
