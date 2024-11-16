@@ -15,8 +15,11 @@ const SearchComponent = ({ setSelectedCompany }) => {
     const fetchDefaultOptions = async () => {
       setLoading(true);
       try {
-        const response = await axiosServices.get('/company?page=1&limit=10');
-        setOptions(response.data.data.result); // Assuming your API returns an array of companies
+        // const response = await axiosServices.get('/company?page=1&limit=10');
+        // setOptions(response.data.data.result); // Assuming your API returns an array of companies
+
+        const response = await axiosServices.get('/company/all');
+        setOptions(response.data.companies);
       } catch (error) {
         console.error('Error fetching default options:', error);
       } finally {
