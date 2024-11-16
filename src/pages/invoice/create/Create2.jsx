@@ -66,6 +66,13 @@ import axios from 'utils/axios';
 import { getApiResponse } from 'utils/axiosHelper';
 import _ from 'lodash'; // For debouncing
 import useAuth from 'hooks/useAuth';
+import CustomCircularLoader from 'components/CustomCircularLoader';
+import { USERTYPE } from 'constant';
+
+const API_URL = {
+  [USERTYPE.iscabProvider]: '/invoice/create',
+  [USERTYPE.isVendor]: '/invoice/create'
+};
 
 export const TAX_TYPE = {
   INDIVIDUAL: 'Individual',
@@ -138,19 +145,19 @@ const getInitialValues = (data, user, userSpecificData) => {
     start_date: null, // For Start Date
     end_date: null, // For End Date
     cashierInfo: {
-      cabProviderLegalName: userSpecificData?.cabProviderLegalName || '',
+      cabProviderLegalName: userSpecificData?.cabProviderLegalName || userSpecificData?.vendorCompanyName || '',
       PAN: userSpecificData?.PAN || '',
       GSTIN: userSpecificData?.GSTIN || '',
       contactPersonName: userSpecificData?.contactPersonName || '',
       workEmail: user?.userEmail || '',
-      workMobileNumber : userSpecificData?.workMobileNumber || '',
-      officeAddress : userSpecificData?.officeAddress || '',
+      workMobileNumber: userSpecificData?.workMobileNumber || '',
+      officeAddress: userSpecificData?.officeAddress || '',
       officePinCode: userSpecificData?.officePinCode || '',
       officeState: userSpecificData?.officeState || '',
       address: user?.address || '',
       city: user?.city || '',
       state: user?.state || '',
-      postal_code: user?.pinCode || '',
+      postal_code: user?.pinCode || ''
     },
     customerInfo: {
       address: '',
@@ -241,6 +248,10 @@ const Create2 = () => {
   const [groupTax, setGroupTax] = useState(0);
   const [groupDiscount, setGroupDiscount] = useState(0);
 
+  const userType = useSelector((state) => state.auth.userType);
+
+  console.log('settings = ', settings);
+
   const handleFormikSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
       console.log('Formik submit', values);
@@ -285,14 +296,23 @@ const Create2 = () => {
           terms: values?.terms,
           billedTo: values?.customerInfo,
           billedBy: values?.cashierInfo,
-          bankDetails: values?.bank_details
+          bankDetails: values?.bank_details,
+          settings: {
+            discount: {
+              apply: settings.discount.apply,
+              by: settings.discount.by
+            },
+            tax: {
+              apply: settings.tax.apply
+            }
+          }
         }
       };
 
       // alert(JSON.stringify(payload, null, 2));
       console.log('payload', payload);
 
-      const response = await axios.post('/invoice/create', payload);
+      const response = await axios.post(API_URL[userType], payload);
 
       if (response.status === 201) {
         dispatch(
@@ -308,7 +328,7 @@ const Create2 = () => {
         );
 
         resetForm();
-        navigation('/apps/invoices/dashboard', {
+        navigation('/apps/invoices/list', {
           replace: true
         });
       }
@@ -325,15 +345,6 @@ const Create2 = () => {
   });
 
   const { handleBlur, errors, handleChange, handleSubmit, values, isValid, setFieldValue, touched } = formik;
-
-  useEffect(() => {
-    console.log('user', user);
-    console.log('userSpecificData', userSpecificData);
-
-    console.log('address', user?.address);
-
-    formik.setFieldValue('cashierInfo.address', 'eee');
-  }, []);
 
   useEffect(() => {
     console.log('useEffect of invoice create');
@@ -467,19 +478,6 @@ const Create2 = () => {
     setCashierValues(values?.cashierInfo || {});
   }, []);
 
-  // Update Formik initialValues manually based on settings
-  // useEffect(() => {
-  //   if (!dialogOpen) {
-  //     setLoadingTable(true); // Set loading to true while waiting for initial values
-  //     console.log('user', user);
-  //     console.log('userSpecificData', userSpecificData);
-
-  //     setFormikInitialValues(getInitialValues(settings, user, userSpecificData));
-
-  //     setLoadingTable(false); // Set loading to false when initial values are ready
-  //   }
-  // }, [settings, user, userSpecificData, dialogOpen]);
-
   useEffect(() => {
     setLoadingTable(true); // Set loading to true while waiting for initial values
     console.log('user', user);
@@ -611,6 +609,36 @@ const Create2 = () => {
 
     debouncedSetValues(updatedItems, subTotal, totalTax, totalDiscount, grandTotal);
   }, [values.invoiceData, groupTax, groupDiscount, debouncedSetValues]);
+
+  useEffect(() => {
+    async function fetchCabProviderDetails() {
+      // TODO : Fetch cab provider details from API
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const res = {
+        cabProviderLegalName: 'User01 Travels',
+        PAN: 'ABCTY1234D',
+        GSTIN: '22AAAAA0000A1Z5',
+        contactPersonName: 'Suresh Yadav',
+        workEmail: 'user123@gmail.com',
+        workMobileNumber: 9988776655,
+        officeAddress: 'NSP Pitampura Delhi',
+        officePinCode: '110035',
+        officeState: 'Delhi',
+        address: 'Netaji Subhash Place Delhi,110034',
+        city: 'Kolkata',
+        state: 'West Bengal',
+        postal_code: 700098
+      };
+      formik.setFieldValue('customerInfo', res);
+    }
+
+    if (userType === USERTYPE.isVendor) {
+      fetchCabProviderDetails();
+    }
+  }, [userType]);
+
+  if (loading) return <CustomCircularLoader />;
 
   return (
     <>
@@ -1044,65 +1072,91 @@ const Create2 = () => {
                 {/* Bill To */}
                 <Grid item xs={12} sm={6}>
                   <MainCard sx={{ minHeight: 168 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={8}>
-                        <Stack spacing={2}>
-                          <Typography variant="h5">Billed To:</Typography>
-                          <Stack sx={{ width: '100%' }}>
-                            <Typography variant="subtitle1">{values?.customerInfo?.company_name || ''}</Typography>
-                            {values?.customerInfo?.address && (
-                              <Typography color="secondary">
-                                {values?.customerInfo?.address}
-                                {values?.customerInfo?.city && `, ${values?.customerInfo?.city}`}
-                                {values?.customerInfo?.state &&
-                                  values?.customerInfo?.postal_code &&
-                                  `, ${values?.customerInfo?.state}-${values?.customerInfo?.postal_code}`}
-                              </Typography>
-                            )}
-                            {values?.customerInfo?.GSTIN && (
-                              <Typography color="secondary">
-                                <strong>GSTIN:</strong> {values?.customerInfo?.GSTIN}
-                              </Typography>
-                            )}
-                            {values?.customerInfo?.PAN && (
-                              <Typography color="secondary">
-                                <strong>PAN:</strong> {values?.customerInfo?.PAN}
-                              </Typography>
-                            )}
+                    {userType === USERTYPE.iscabProvider && (
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={8}>
+                          <Stack spacing={2}>
+                            <Typography variant="h5">Billed To:</Typography>
+                            <Stack sx={{ width: '100%' }}>
+                              <Typography variant="subtitle1">{values?.customerInfo?.company_name || ''}</Typography>
+                              {values?.customerInfo?.address && (
+                                <Typography color="secondary">
+                                  {values?.customerInfo?.address}
+                                  {values?.customerInfo?.city && `, ${values?.customerInfo?.city}`}
+                                  {values?.customerInfo?.state &&
+                                    values?.customerInfo?.postal_code &&
+                                    `, ${values?.customerInfo?.state}-${values?.customerInfo?.postal_code}`}
+                                </Typography>
+                              )}
+                              {values?.customerInfo?.GSTIN && (
+                                <Typography color="secondary">
+                                  <strong>GSTIN:</strong> {values?.customerInfo?.GSTIN}
+                                </Typography>
+                              )}
+                              {values?.customerInfo?.PAN && (
+                                <Typography color="secondary">
+                                  <strong>PAN:</strong> {values?.customerInfo?.PAN}
+                                </Typography>
+                              )}
+                            </Stack>
                           </Stack>
-                        </Stack>
+                        </Grid>
+
+                        <Grid item xs={12} sm={4}>
+                          <Box textAlign="right" color="secondary.200">
+                            <Button
+                              size="small"
+                              startIcon={<Add />}
+                              color="secondary"
+                              variant="outlined"
+                              onClick={() =>
+                                dispatch(
+                                  customerPopup({
+                                    isCustomerOpen: true
+                                  })
+                                )
+                              }
+                            >
+                              Add
+                            </Button>
+                            <AddressModal
+                              open={isCustomerOpen}
+                              setOpen={(value) =>
+                                dispatch(
+                                  customerPopup({
+                                    isCustomerOpen: value
+                                  })
+                                )
+                              }
+                              handlerAddress={(value) => setFieldValue('customerInfo', value)}
+                            />
+                          </Box>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <Box textAlign="right" color="secondary.200">
-                          <Button
-                            size="small"
-                            startIcon={<Add />}
-                            color="secondary"
-                            variant="outlined"
-                            onClick={() =>
-                              dispatch(
-                                customerPopup({
-                                  isCustomerOpen: true
-                                })
-                              )
-                            }
-                          >
-                            Add
-                          </Button>
-                          <AddressModal
-                            open={isCustomerOpen}
-                            setOpen={(value) =>
-                              dispatch(
-                                customerPopup({
-                                  isCustomerOpen: value
-                                })
-                              )
-                            }
-                            handlerAddress={(value) => setFieldValue('customerInfo', value)}
-                          />
-                        </Box>
+                    )}
+
+                    {userType === USERTYPE.isVendor && (
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          <Stack spacing={2}>
+                            <Typography variant="h5">Billed To:</Typography>
+                            <Stack sx={{ width: '100%' }}>
+                              <Typography variant="subtitle1">{values?.customerInfo?.cabProviderLegalName || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.contactPersonName || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.workEmail || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.workMobileNumber || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.officeAddress || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.officePinCode || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.officeState || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.address || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.postal_code || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.GSTIN || 'N/A'}</Typography>
+                              <Typography variant="subtitle1">{values?.customerInfo?.PAN || 'N/A'}</Typography>
+                            </Stack>
+                          </Stack>
+                        </Grid>
                       </Grid>
-                    </Grid>
+                    )}
                   </MainCard>
                   {touched.customerInfo && errors.customerInfo && (
                     <FormHelperText error={true}>{errors?.customerInfo?.name}</FormHelperText>
@@ -1229,7 +1283,7 @@ const Create2 = () => {
                                     </TableCell>
                                     <TableCell>
                                       <IconButton onClick={() => arrayHelpers.remove(index)} color="secondary">
-                                        <Trash />
+                                        <Trash color="red" />
                                       </IconButton>
                                     </TableCell>
                                   </TableRow>
