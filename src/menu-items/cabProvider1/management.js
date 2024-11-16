@@ -142,13 +142,13 @@ const management = {
         //   url: '/management/driver/view',
         //   // icon: icons.view
         // },
-        {
-          id: 'create-driver-rate',
-          title: <FormattedMessage id="add driver rate" />,
-          type: 'item',
-          url: '/management/driver/add-driver-rate',
-          // icon: icons.add
-        },
+        // {
+        //   id: 'create-driver-rate',
+        //   title: <FormattedMessage id="add driver rate" />,
+        //   type: 'item',
+        //   url: '/management/driver/add-driver-rate',
+        //   // icon: icons.add
+        // },
         {
           id: 'view-driver-rate',
           title: <FormattedMessage id="view-driver-rate" />,

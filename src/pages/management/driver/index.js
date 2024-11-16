@@ -247,6 +247,18 @@ const ButtonComponent = ({ driverType, handleDriverTypeChange, loading }) => {
             {loading ? 'Loading...' : 'Add Driver'}
           </Button>
         </WrapperButton>
+        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+          <Button
+            variant="contained"
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+            onClick={() => navigate('/management/driver/add-driver-rate')}
+            size="small"
+             color="success"
+            disabled={loading} // Disable button while loading
+          >
+            {loading ? 'Loading...' : 'Add Driver Rate'}
+          </Button>
+        </WrapperButton>
       </Stack>
     </>
   );
