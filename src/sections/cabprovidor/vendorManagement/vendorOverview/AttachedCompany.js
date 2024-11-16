@@ -211,56 +211,60 @@ const AttachedCompany = ({ data, loading }) => {
       },
       {
         Header: 'Company Name',
-        accessor: 'company_name'
+        accessor: 'company_name',  
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'Company Email',
-        accessor: 'company_email'
+        accessor: 'company_email',  
+        Cell: ({ value }) => value || 'None' 
       },
 
       {
         Header: 'Mobile Number',
-        accessor: 'mobile'
+        accessor: 'mobile',  
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'Address',
-        accessor: 'address'
+        accessor: 'address',  
+        Cell: ({ value }) => value || 'None' 
       },
-      {
-        Header: 'View Rate',
-        className: 'cell-left',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          const theme = useTheme();
-          const mode = theme.palette.mode;
-          return (
-            <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="View"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpen();
-                    setCompanyName(row.original.company_name);
-                  }}
-                >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          );
-        }
-      }
+      // {
+      //   Header: 'View Rate',
+      //   className: 'cell-left',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     const theme = useTheme();
+      //     const mode = theme.palette.mode;
+      //     return (
+      //       <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
+      //         <Tooltip
+      //           componentsProps={{
+      //             tooltip: {
+      //               sx: {
+      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                 opacity: 0.9
+      //               }
+      //             }
+      //           }}
+      //           title="View"
+      //         >
+      //           <IconButton
+      //             color="secondary"
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               handleOpen();
+      //               setCompanyName(row.original.company_name);
+      //             }}
+      //           >
+      //             <Eye />
+      //           </IconButton>
+      //         </Tooltip>
+      //       </Stack>
+      //     );
+      //   }
+      // }
     ],
     []
   );
@@ -283,7 +287,7 @@ const AttachedCompany = ({ data, loading }) => {
             <CircularProgress />
           </Box>
         ) : data.length > 0 ? (
-          <ReactTable columns={columns} data={data} />
+          <ReactTable columns={columns} data={data} hideHeader/>
         ) : (
           <TableNoDataMessage text="No Company Found" />
         )}
