@@ -14,14 +14,12 @@ import {
   Stack,
   Button,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  Tooltip,
+  IconButton
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
-import { Add, ArrowDown2, ArrowRight2 } from 'iconsax-react';
+import { Add, ArrowDown2, ArrowRight2, Edit } from 'iconsax-react';
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import { useExpanded, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
@@ -33,8 +31,11 @@ import EmptyTableDemo from 'components/tables/EmptyTable';
 import axiosServices from 'utils/axios';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { ThemeMode } from 'config';
 
 const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
   const navigate = useNavigate();
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
@@ -90,12 +91,12 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'Address',
         accessor: 'address',
-        Cell: ({ value }) => value || 'None' 
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'City',
         accessor: 'city',
-        Cell: ({ value }) => value || 'None' 
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'State',
@@ -126,23 +127,59 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
               return <Chip color="info" label="Not Defined" size="small" variant="light" />;
           }
         }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        width: 100,
+        Cell: ({ row }) => {
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const id = row.original._id;
+                    console.log('Id = ', row.original._id);
+                    // dispatch(setSelectedID(row.values._id));
+                    navigate(`/management/company/edit/${id}`);
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
       }
       // {
       //   Header: 'Status',
       //   accessor: 'isActive',
       //   Cell: ({ row, value }) => {
-          
+
       //     const [status, setStatus] = useState(value);
       //     const [openDialog, setOpenDialog] = useState(false); // To control the visibility of the dialog
       //     const [newStatus, setNewStatus] = useState(null); // To store the status to be toggled
-      
+
       //     const handleToggleStatus = () => {
       //       // Determine new status based on current status
       //       const toggledStatus = status === 1 ? 0 : 1;
       //       setNewStatus(toggledStatus);
       //       setOpenDialog(true); // Open the confirmation dialog
       //     };
-      
+
       //     const handleConfirmStatusUpdate = async () => {
       //       try {
       //         // Make PUT request to update status
@@ -152,7 +189,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       //             status: newStatus
       //           }
       //         });
-      
+
       //         // Update local status
       //         setStatus(newStatus);
       //         setOpenDialog(false); // Close the dialog after successful update
@@ -171,11 +208,11 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       //         );
       //       }
       //     };
-      
+
       //     const handleCancel = () => {
       //       setOpenDialog(false); // Close the dialog without making any change
       //     };
-      
+
       //     return (
       //       <>
       //         <Chip
@@ -191,7 +228,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       //             }
       //           }}
       //         />
-      
+
       //         {/* Confirmation Dialog */}
       //         <Dialog open={openDialog} onClose={handleCancel}>
       //           <DialogTitle>Confirm Status Change</DialogTitle>
