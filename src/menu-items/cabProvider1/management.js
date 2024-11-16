@@ -93,38 +93,38 @@ const management = {
     {
       id: 'vendor',
       title: <FormattedMessage id="vendor" />,
-      type: 'collapse',
+      type: 'item',
       url: '/management/vendor/view',
       icon: icons.vendor,
-      children: [
-        // {
-        //   id: 'view',
-        //   title: <FormattedMessage id="view" />,
-        //   type: 'item',
-        //   url: '/management/vendor/view',
-        //   // icon: icons.view
-        // },
-        // {
-        //   id: 'create-vendor',
-        //   title: <FormattedMessage id="add vendor" />,
-        //   type: 'item',
-        //   url: '/management/vendor/add-vendor',
-        //   // icon: icons.add
-        // },
-        {
-          id: 'create-vendor-rate',
-          title: <FormattedMessage id="add vendor rate" />,
-          type: 'item',
-          url: '/management/vendor/add-vendor-rate',
-          // icon: icons.add
-        },
-        {
-          id: 'view-vendor-rate',
-          title: <FormattedMessage id="view-vendor-rate" />,
-          type: 'item',
-          url: '/management/vendor/view-vendor-rate'
-        }
-      ]
+      // children: [
+      //   {
+      //     id: 'view',
+      //     title: <FormattedMessage id="view" />,
+      //     type: 'item',
+      //     url: '/management/vendor/view',
+      //     // icon: icons.view
+      //   },
+      //   {
+      //     id: 'create-vendor',
+      //     title: <FormattedMessage id="add vendor" />,
+      //     type: 'item',
+      //     url: '/management/vendor/add-vendor',
+      //     // icon: icons.add
+      //   },
+      //   {
+      //     id: 'create-vendor-rate',
+      //     title: <FormattedMessage id="add vendor rate" />,
+      //     type: 'item',
+      //     url: '/management/vendor/add-vendor-rate',
+      //     // icon: icons.add
+      //   },
+      //   {
+      //     id: 'view-vendor-rate',
+      //     title: <FormattedMessage id="view-vendor-rate" />,
+      //     type: 'item',
+      //     url: '/management/vendor/view-vendor-rate'
+      //   }
+      // ]
     },
 
     // Driver
