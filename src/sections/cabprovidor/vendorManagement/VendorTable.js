@@ -1,5 +1,20 @@
 import PropTypes from 'prop-types';
-import { Box, Button, Chip, CircularProgress, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo } from 'react';
@@ -82,7 +97,6 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          
           const vendorID = row.original.vendorId;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
@@ -104,7 +118,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                     navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
                   }}
                 >
-                  <Eye/>
+                  <Eye />
                 </IconButton>
               </Tooltip>
             </Stack>
@@ -227,7 +241,7 @@ const ButtonComponent = ({ loading }) => {
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
             onClick={() => navigate('/management/vendor/add-vendor-rate')}
             size="small"
-             color="success"
+            color="success"
             disabled={loading} // Disable button while loading
           >
             {loading ? 'Loading...' : 'Add Vendor Rate'}

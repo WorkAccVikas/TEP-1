@@ -4,6 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -21,17 +22,17 @@ import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import DriverTable from './DriverTable';
 import AddCabRateDriver from 'pages/master/CabRate/Driver';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { fetchAllDrivers } from 'store/slice/cabProvidor/driverSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import MainCard from 'components/MainCard';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
-const token = localStorage.getItem('serviceToken');
-
-const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1 }) => {
+const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1, initialDriverID, handleSelectedCompanyName, handleSelectedDriverName }) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
-  const [driverID, setDriverID] = useState(null);
+  const [driverID, setDriverID] = useState(initialDriverID);
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const allDrivers = useSelector((state) => state.drivers.allDrivers);
@@ -39,7 +40,7 @@ const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1 }
 
   const CabProviderId = userInfo.userId;
 
-//   console.log('allDrivers', allDrivers);
+  //   console.log('allDrivers', allDrivers);
 
   useEffect(() => {
     dispatch(fetchAllDrivers(CabProviderId));
@@ -49,9 +50,24 @@ const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1 }
     if (!selectedCompany || !driverID) {
       return;
     }
+
+     // Fetch company name (assuming selectedCompany contains company object with name)
+     const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  
+
+     // Fetch vendor name based on vendorID
+    const selectedDriver = allDrivers.find((driver) => driver.driverId._id === driverID);
+    const selectedDriverName = selectedDriver ? selectedDriver.driverId.userName : ''; 
+
+     handleSelectedCompanyName(selectedCompanyName);
+     handleSelectedDriverName(selectedDriverName); 
     setSelectedCompany(selectedCompany); // Save selected company
     setDriverID1(driverID);
     onClose();
+  };
+
+  const onCancel = () => {
+    onClose();
+    navigate('/management/driver/view');
   };
 
   return (
@@ -103,7 +119,7 @@ const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1 }
         </Grid>
       </DialogContent>
       <DialogActions sx={{ padding: '8px' }}>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onCancel} color="secondary">
           Cancel
         </Button>
         <Button onClick={handleSave} color="primary">
@@ -115,6 +131,9 @@ const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1 }
 };
 const DriverRate = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialDriverID = queryParams.get('driverID');
   const [data, setData] = useState([]);
   const [skipPageReset, setSkipPageReset] = useState(false);
   const [companyRate, setCompanyRate] = useState([]);
@@ -127,6 +146,17 @@ const DriverRate = () => {
   const [selectedCompany, setSelectedCompany] = useState(null); // Selected company state
   const [dialogOpen, setDialogOpen] = useState(true); // Dialog state
   const [driverID1, setDriverID1] = useState(null);
+
+  const [selectedCompanyName, setSelectedCompanyName] = useState('');
+  const [selectedDriverName, setSelectedDriverName] = useState('');
+
+  const handleSelectedCompanyName = (companyName) => {
+    setSelectedCompanyName(companyName);
+  };
+
+  const handleSelectedDriverName = (vendorName) => {
+    setSelectedDriverName(vendorName);
+  };
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -144,7 +174,7 @@ const DriverRate = () => {
     if (!selectedCompany || !driverID1) return;
 
     fetchdata();
-  }, [selectedCompany, driverID1, token]);
+  }, [selectedCompany, driverID1]);
 
   //   console.log('driverList', driverList);
 
@@ -169,49 +199,60 @@ const DriverRate = () => {
         onClose={handleDialogClose}
         setSelectedCompany={setSelectedCompany}
         setDriverID1={setDriverID1}
+        initialDriverID={initialDriverID}
+        handleSelectedCompanyName={handleSelectedCompanyName}
+        handleSelectedDriverName={handleSelectedDriverName}
       />
 
       {/* Render CompanyRateListing once a company is selected */}
-      {!dialogOpen && selectedCompany && !showCompanyList ? (
+      {!dialogOpen && selectedCompany && driverID1 && !showCompanyList ? (
         <Stack gap={1} spacing={1}>
-          <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} />
+          {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
           {/* {companyList.length !== 0 && ( */}
-          <DriverTable
-            data={driverList}
-            page={page}
-            setPage={setPage}
-            limit={limit}
-            setLimit={setLimit}
-            updateKey={updateKey}
-            setUpdateKey={setUpdateKey}
-            loading={loading}
-          />
+
+          <MainCard
+            title={
+              <Stack direction="row" alignItems="center" gap={1}>
+                Driver Rates between <Chip label={selectedCompanyName} color="primary" /> and{' '}
+                <Chip label={selectedDriverName} color="secondary" />
+              </Stack>
+            }
+          >
+            <DriverTable
+              data={driverList}
+              page={page}
+              setPage={setPage}
+              limit={limit}
+              setLimit={setLimit}
+              updateKey={updateKey}
+              setUpdateKey={setUpdateKey}
+              loading={loading}
+            />
+          </MainCard>
           {/* )} */}
         </Stack>
-      ) : (
-        <AddCabRateDriver />
-      )}
+      ) : null}
     </>
   );
 };
 
 export default DriverRate;
 
-const ButtonComponent = ({ loading, onAddRate }) => {
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <WrapperButton>
-        <Button
-          variant="contained"
-          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-          onClick={onAddRate} // Call the onAddRate function when button is clicked
-          size="small"
-          disabled={loading} // Disable button while loading
-        >
-          {loading ? 'Loading...' : ' Add Rate'}
-        </Button>
-      </WrapperButton>
-    </Stack>
-  );
-};
+// const ButtonComponent = ({ loading, onAddRate }) => {
+//   return (
+//     <Stack direction="row" spacing={1} alignItems="center">
+//       <WrapperButton>
+//         <Button
+//           variant="contained"
+//           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+//           onClick={onAddRate} // Call the onAddRate function when button is clicked
+//           size="small"
+//           disabled={loading} // Disable button while loading
+//         >
+//           {loading ? 'Loading...' : ' Add Rate'}
+//         </Button>
+//       </WrapperButton>
+//     </Stack>
+//   );
+// };

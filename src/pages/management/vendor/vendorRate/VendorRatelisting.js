@@ -36,9 +36,6 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
 
   const allVendors = useSelector((state) => state.vendors.allVendors);
 
-  console.log('vendorID', vendorID);
-  console.log('selectedCompany', selectedCompany);
-
   useEffect(() => {
     dispatch(fetchAllVendors());
   }, [dispatch]);
@@ -48,11 +45,11 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
       return;
     }
     // Fetch company name (assuming selectedCompany contains company object with name)
-    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  // Adjust based on your structure
+    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  
 
     // Fetch vendor name based on vendorID
     const selectedVendor = allVendors.find((vendor) => vendor.vendorId === vendorID);
-    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';  // Adjust based on your structure
+    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';  
     
     setSelectedCompany(selectedCompany);
     setSelectedVendorID(vendorID);
@@ -148,17 +145,12 @@ const VendorRatelisting = () => {
   const [selectedVendorName, setSelectedVendorName] = useState('');
 
   const handleSelectedCompanyName = (companyName) => {
-    console.log('Selected Company Name:', companyName);
     setSelectedCompanyName(companyName);
   };
 
   const handleSelectedVendorName = (vendorName) => {
-    console.log('Selected Vendor Name:', vendorName);
     setSelectedVendorName(vendorName);
   };
-
-  console.log("selectedCompanyName",selectedCompanyName);
-  
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -175,15 +167,10 @@ const VendorRatelisting = () => {
       }
     };
 
-    // console.log('selectedCompany', selectedCompany);
-    // console.log('selectedVendorID', selectedVendorID);
-
     if (!selectedCompany || !selectedVendorID) return;
 
     fetchdata();
   }, [selectedCompany, selectedVendorID]);
-
-  //   console.log('vendorList', vendorList);
 
   const handleAddRate = () => {
     navigate('/management/vendor/add-vendor-rate');
