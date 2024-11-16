@@ -14,6 +14,7 @@ import { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
  * - `handleRangeChange`: Function to update both start and end dates.
  */
 
+
 const TYPE = {
   [DATE_RANGE_OPTIONS.TODAY]: {
     startDate: moment().startOf('day').toDate(),
