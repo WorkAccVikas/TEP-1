@@ -146,10 +146,10 @@ const VendorRoutes = {
                   path: 'list',
                   element: <InvoiceList />
                 },
-                // {
-                //   path: 'create',
-                //   element: <Create />
-                // },
+                {
+                  path: 'create',
+                  element: <InvoiceCreate />
+                },
                 // {
                 //   path: 'invoice',
                 //   element: <InvoiceList />
