@@ -76,7 +76,7 @@ function RosterTemplateDialog({ onClose, selectedValue, open, templates }) {
                 <ListItemText primary={template.templateName} />
               </ListItemButton>
             ))}
-          <ListItemButton
+          {/* <ListItemButton
             autoFocus
             onClick={() => {
               handleClose();
@@ -90,7 +90,7 @@ function RosterTemplateDialog({ onClose, selectedValue, open, templates }) {
               </Avatar>
             </ListItemAvatar>
             <ListItemText primary="Add New Template" />
-          </ListItemButton>
+          </ListItemButton> */}
         </List>
       </Dialog>
       <CreateRosterTemplate />
