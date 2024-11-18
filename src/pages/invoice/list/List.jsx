@@ -112,6 +112,7 @@ function ReactTable({ columns, data }) {
   );
 
   const componentRef = useRef(null);
+  const navigate = useNavigate();
 
   // ================ Tab ================
 
@@ -177,6 +178,10 @@ function ReactTable({ columns, data }) {
               </Stack>
             ))}
           </> */}
+
+          <Button variant="contained" color="primary" onClick={() => navigate('/apps/invoices/create')}>
+            Create Invoice
+          </Button>
           <CSVExport data={data} filename={'invoice-list.csv'} />
         </Stack>
       </Stack>
