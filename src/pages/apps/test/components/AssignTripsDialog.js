@@ -245,8 +245,20 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               }
             : { _id: null, userName: item.userName || 'N/A' }, // Fallback for undefined vehicleType
 
-        _driver: { _id: null, userName: null },
-        _cab: { _id: null, vehicleNumber: null },
+        // _driver: { _id: null, userName: null },
+        _driver: item.driverOptionsArray?.length === 1
+        ? {
+            _id: item.driverOptionsArray[0]?.id || null, // Add fallback for undefined
+            userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
+          }
+        : { _id: null, userName: item.userName || 'N/A' },
+
+        _cab:  item.cabOptionsArray?.length === 1
+        ? {
+            _id: item.cabOptionsArray[0]?.id || null, // Add fallback for undefined
+            vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
+          }
+        : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
         _zoneName_options: zoneInfo || [], // Ensure zoneInfo is not undefined
         _vehicleType_options: vehicleTypeInfo || [], // Ensure vehicleTypeInfo is not undefined
         _drivers_options: drivers || [], // Ensure drivers is not undefined
