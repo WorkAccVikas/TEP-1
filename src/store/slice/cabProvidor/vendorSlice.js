@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { commonInitialState, commonReducers } from '../common';
 
 // Define the async thunk for fetching vendors
 export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
@@ -61,7 +62,51 @@ export const addSpecialDetails = createAsyncThunk('vendors/addSpecialDetails', a
   }
 });
 
+// Get vendor details by id
+export const fetchVendorsById = createAsyncThunk('vendors/fetchVendorById', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`vendor/details/by?vendorId=${id}`);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Edit vendor basic details by Cabprovider
+export const editVendorBasicInfo = createAsyncThunk('vendors/editVendorBasicInfo', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.put('/vendor/update/basic/details', payload);
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Edit vendor speific details by Cabprovider
+export const editVendorSpecificInfo = createAsyncThunk('vendors/editVendorSpecificInfo', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.put('/vendor/update/specific/details', payload);
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Update status of vendor
+export const updateVendorStatus = createAsyncThunk('vendors/updateVendorStatus', async (status, { rejectWithValue, getState }) => {
+  try {
+    const state = getState();
+    const id = state.vendors.selectedID;
+    const response = await axios.put('/vendor/updateActiveStatus', { data: { vendorId: id, status } });
+    console.log(response);
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 const initialState = {
+  ...commonInitialState,
   vendors: [],
   allVendors: [],
   metaData: {
@@ -78,6 +123,7 @@ const vendorSlice = createSlice({
   name: 'vendors',
   initialState,
   reducers: {
+    ...commonReducers,
     reset: () => initialState, // Reset state to initial state on logout
     resetError: (state) => {
       state.error = null;
@@ -157,5 +203,5 @@ const vendorSlice = createSlice({
   }
 });
 
-export const { reset, resetError } = vendorSlice.actions;
+export const { reset, resetError, handleOpen, setDeletedName, setSelectedID, handleClose } = vendorSlice.actions;
 export const vendorReducer = vendorSlice.reducer;

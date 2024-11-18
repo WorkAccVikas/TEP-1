@@ -53,11 +53,13 @@ const AddUser = Loadable(lazy(() => import('pages/management/user/AddUser')));
 const Vendor = Loadable(lazy(() => import('pages/management/vendor')));
 const AddVendor = Loadable(lazy(() => import('pages/management/vendor/AddVendor')));
 const VendorOverview = Loadable(lazy(() => import('pages/overview/VendorOverview')));
+const EditVendor = Loadable(lazy(() => import('pages/management/vendor/EditVendor')));
 
 // Driver
 const Driver = Loadable(lazy(() => import('pages/management/driver')));
 const DriverOverview = Loadable(lazy(() => import('pages/overview/DriverOverview')));
 // const AddDriver = Loadable(lazy(() => import('pages/management/driver/AddDriver')));
+const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver.js')));
 
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
@@ -68,6 +70,7 @@ const AddCompany = Loadable(lazy(() => import('pages/management/company/AddCompa
 const AddBranch = Loadable(lazy(() => import('pages/management/company/AddBranch')));
 const CompanyOverview = Loadable(lazy(() => import('pages/overview/CompanyOverview')));
 const CompanyRateListing = Loadable(lazy(() => import('pages/management/company/addCompanyRate/CompanyRate1/CompanyRateListing')));
+const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCompany')));
 
 // reports
 const Reports = Loadable(lazy(() => import('pages/Reports')));
@@ -95,7 +98,6 @@ const VendorDashboard = Loadable(lazy(() => import('pages/dashboard/vendorDashbo
 const CompanyDashboard = Loadable(lazy(() => import('pages/dashboard/companyDashboard/CompanyDashboard')));
 const UserDashboard = Loadable(lazy(() => import('pages/dashboard/userDashboard/UserDashboard')));
 const InvoiceDashboard = Loadable(lazy(() => import('pages/dashboard/invoiceDashboard/InvoiceDashboard')));
-const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver.js')));
 // Dashboard
 const RosterDashboard1 = Loadable(lazy(() => import('pages/apps/test/dashboard')));
 
@@ -183,7 +185,7 @@ const CabProvidorRoutes = {
                 {
                   path: 'all-roster',
                   element: <AllRosters />
-                },
+                }
               ]
             },
 
@@ -300,6 +302,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'add-company-rate',
                   element: <CompanyRateListing />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <EditCompany />
                 }
               ]
             },
@@ -333,6 +339,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'add-vendor-rate',
                   element: <AddCabRateVendor />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <EditVendor />
                 }
               ]
             },

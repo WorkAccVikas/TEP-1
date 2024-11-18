@@ -161,7 +161,7 @@ export const convertMBToBytes = (sizeInMB) => {
   return sizeInMB * bytesPerMB;
 };
 
-export const formatDateUsingMoment = (date, format) => {
+export const formatDateUsingMoment = (date, format = 'YYYY-MM-DD') => {
   return moment(date).format(format);
 };
 
