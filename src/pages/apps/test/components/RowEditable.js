@@ -323,6 +323,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               value={value}
               onChange={onChange}
               onBlur={onBlur}
+              renderValue={(selected) => selected?.userName || 'Select Driver'}
               disabled={!original._cab.linkedDrivers}
             >
               {original._cab.linkedDrivers ? (
@@ -369,6 +370,8 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               value={value}
               onChange={onChange}
               onBlur={onBlur}
+              renderValue={(selected) => selected?.vehicleNumber || 'Select Vehicle'}
+
               // disabled={!original._driver.assignedVehicle}
             >
               {/* <MenuItem value={original._driver.assignedVehicle ? original._driver.assignedVehicle.vehicleId : null}>
