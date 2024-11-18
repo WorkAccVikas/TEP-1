@@ -12,7 +12,7 @@ import {
   fetchCompanies,
   fetchCompaniesAssignedDrivers,
   fetchCompaniesAssignedVendors,
-  fetchCompaniesDetails
+  fetchCompanyDetails
 } from 'store/slice/cabProvidor/companySlice';
 import { dispatch } from 'store';
 import Overview from 'sections/cabprovidor/companyManagement/companyOverview/Overview';
@@ -84,7 +84,7 @@ const CompanyOverview = () => {
     const fetchData = async () => {
       setLoading(true); // Set loading to true when data fetching starts
       await dispatch(fetchCompanies());
-      await dispatch(fetchCompaniesDetails(id));
+      await dispatch(fetchCompanyDetails(id));
       await dispatch(fetchCompaniesAssignedVendors(id));
       await dispatch(fetchCompaniesAssignedDrivers(id));
       setLoading(false); // Set loading to false after data is fetched

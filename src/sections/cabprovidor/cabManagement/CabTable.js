@@ -20,18 +20,21 @@ import { useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { formattedDate } from 'utils/helper';
 import MainCard from 'components/MainCard';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import axiosServices from 'utils/axios';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
+import { ThemeMode } from 'config';
+import { Edit } from 'iconsax-react';
 
 const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
   // eslint-disable-next-line no-unused-vars
   const mode = theme.palette.mode;
+  const navigate = useNavigate();
 
   const columns = useMemo(
     () => [
@@ -201,67 +204,67 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
           console.log(row);
           return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
-      }
-      //   {
-      //     Header: 'Actions',
-      //     className: 'cell-center',
-      //     disableSortBy: true,
-      //     Cell: ({ row }) => {
-      //       return (
-      //         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Edit"
-      //           >
-      //             <IconButton
-      //               color="primary"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 console.log('Id = ', row.values._id);
-      //                 navigate(`/vehicle-management/edit/${row.values._id}`);
-      //                 dispatch(handleOpen(ACTION.EDIT));
-      //                 dispatch(setSelectedID(row.values._id));
-      //               }}
-      //             >
-      //               <Edit />
-      //             </IconButton>
-      //           </Tooltip>
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Id = ', row.values._id);
+                    navigate(`/management/cab/edit/${row.values._id}`);
+                    // dispatch(handleOpen(ACTION.EDIT));
+                    // dispatch(setSelectedID(row.values._id));
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
 
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Delete"
-      //           >
-      //             <IconButton
-      //               color="error"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 console.log(`🚀 ~ row.values.id:`, row.values);
-      //                 dispatch(handleOpen(ACTION.DELETE));
-      //                 dispatch(setDeletedName(row.values['vehicleName']));
-      //                 dispatch(setSelectedID(row.values._id));
-      //               }}
-      //             >
-      //               <Trash />
-      //             </IconButton>
-      //           </Tooltip>
-      //         </Stack>
-      //       );
-      //     }
-      //   }
+              {/* <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Delete"
+                >
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log(`🚀 ~ row.values.id:`, row.values);
+                      dispatch(handleOpen(ACTION.DELETE));
+                      dispatch(setDeletedName(row.values['vehicleName']));
+                      dispatch(setSelectedID(row.values._id));
+                    }}
+                  >
+                    <Trash />
+                  </IconButton>
+                </Tooltip> */}
+            </Stack>
+          );
+        }
+      },
     ],
     []
   );

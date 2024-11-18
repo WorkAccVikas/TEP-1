@@ -246,6 +246,14 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const columns = useMemo(
     () => [
       {
+        header: 'Trip Id',
+        accessorKey: 'rosterTripId',
+        dataType: 'plain_text',
+        meta: {
+          className: 'cell-center'
+        }
+      },
+      {
         header: 'Date',
         accessorKey: '_trip_date',
         dataType: 'date',
@@ -253,6 +261,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
+    
       {
         header: 'Time',
         accessorKey: '_trip_time',
