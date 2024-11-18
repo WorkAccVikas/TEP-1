@@ -214,10 +214,10 @@ function AddBranch() {
       address: branchData.address || '',
       city: branchData.city || '',
       state: branchData.state || '',
-      MCDTax: branchData.MCDTax || '',
-      MCDAmount: branchData.MCDAmount || '',
-      stateTax: branchData.stateTax || '',
-      stateTaxAmount: branchData.stateTaxAmount || '',
+      // MCDTax: branchData.MCDTax || '',
+      // MCDAmount: branchData.MCDAmount || '',
+      // stateTax: branchData.stateTax || '',
+      // stateTaxAmount: branchData.stateTaxAmount || '',
       files: branchData.companyContract || null
     },
     validationSchema,
@@ -238,10 +238,10 @@ function AddBranch() {
         formData.append('city', values.city);
         formData.append('state', values.state);
         formData.append('address', values.address);
-        formData.append('MCDTax', values.MCDTax);
-        formData.append('MCDAmount', values.MCDAmount);
-        formData.append('stateTax', values.stateTax);
-        formData.append('stateTaxAmount', values.stateTaxAmount);
+        // formData.append('MCDTax', values.MCDTax);
+        // formData.append('MCDAmount', values.MCDAmount);
+        // formData.append('stateTax', values.stateTax);
+        // formData.append('stateTaxAmount', values.stateTaxAmount);
         formData.append('companyContract', values.files[0]);
 
         const resultAction = await dispatch(addBranch(formData));
@@ -305,10 +305,10 @@ function AddBranch() {
         address: rowOriginal.address || '',
         city: rowOriginal.city || '',
         state: rowOriginal.state || '',
-        MCDTax: rowOriginal.MCDTax || '',
-        MCDAmount: rowOriginal.MCDAmount || '',
-        stateTax: rowOriginal.stateTax || '',
-        stateTaxAmount: rowOriginal.stateTaxAmount || '',
+        // MCDTax: rowOriginal.MCDTax || '',
+        // MCDAmount: rowOriginal.MCDAmount || '',
+        // stateTax: rowOriginal.stateTax || '',
+        // stateTaxAmount: rowOriginal.stateTaxAmount || '',
         files: [{ name: 'files', url: rowOriginal.companyContract }] || null
       });
     }
@@ -551,7 +551,7 @@ function AddBranch() {
             </Grid>
           </MainCard>
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <MainCard title="MCD/TAX INFORMATION">
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={3}>
@@ -653,7 +653,7 @@ function AddBranch() {
               </Grid>
             </Grid>
           </MainCard>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <MainCard title="CONTRACT INFORMATION">
             <>

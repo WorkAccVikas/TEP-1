@@ -42,6 +42,7 @@ import {
   setSelectedID
 } from 'store/slice/cabProvidor/driverSlice';
 import AlertDelete from 'components/alertDialog/AlertDelete';
+import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 
 const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
@@ -389,6 +390,15 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               </Tooltip>
             </Stack>
           );
+        }
+      },
+      {
+        Header: 'Compliance Progress',
+        accessor: 'progress',
+        Cell: ({ row, value }) => {
+          const progessValue = Math.floor(Math.random() * 101);
+          console.log(row);
+          return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
       }
     ],

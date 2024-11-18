@@ -25,10 +25,20 @@ import { useLocation, useNavigate } from 'react-router';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
+import { color } from 'framer-motion';
+import { bgcolor } from '@mui/system';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
-const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVendorID, initialVendorID, handleSelectedVendorName,handleSelectedCompanyName }) => {
+const AddVendorRateDialog = ({
+  open,
+  onClose,
+  setSelectedCompany,
+  setSelectedVendorID,
+  initialVendorID,
+  handleSelectedVendorName,
+  handleSelectedCompanyName
+}) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
   const [vendorID, setVendorID] = useState(initialVendorID);
   const dispatch = useDispatch();
@@ -45,17 +55,17 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
       return;
     }
     // Fetch company name (assuming selectedCompany contains company object with name)
-    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  
+    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';
 
     // Fetch vendor name based on vendorID
     const selectedVendor = allVendors.find((vendor) => vendor.vendorId === vendorID);
-    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';  
-    
+    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';
+
     setSelectedCompany(selectedCompany);
     setSelectedVendorID(vendorID);
 
     handleSelectedCompanyName(selectedCompanyName);
-    handleSelectedVendorName(selectedVendorName); 
+    handleSelectedVendorName(selectedVendorName);
     onClose();
   };
 
@@ -207,8 +217,16 @@ const VendorRatelisting = () => {
           <MainCard
             title={
               <Stack direction="row" alignItems="center" gap={1}>
-              Vendor Rates between <Chip label={selectedCompanyName} color="primary" /> and <Chip label={selectedVendorName} color="secondary" />
-            </Stack>
+                Vendor Rates between{' '}
+                <SearchComponent
+                  setSelectedCompany={(company) => {
+                    setSelectedCompany(company);
+                    setSelectedCompanyName(company?.company_name || '');
+                  }}
+                  sx={{ width: '200px'}}
+                />{' '}
+                and <Chip label={selectedVendorName} color="secondary" />
+              </Stack>
             }
           >
             <VendorRateTable

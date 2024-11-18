@@ -49,14 +49,14 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [drivers, setDrivers] = useState([]);
   const [companyRate, setCompanyrate] = useState([]);
   const [driverRate, setDriverRate] = useState([]);
-  console.log({ zoneInfo });
-  console.log({ fileData });
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0]; // This will return the date in yyyy-mm-dd format
   };
 
   const generateTrips = async () => {
+    console.log({payload1})
     const assignedTripsArray = payload1.map((item) => {
       return {
         _roster_id: item._roster_id,
@@ -198,7 +198,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       const companyId = fileData?.companyId?._id;
       if (!companyId) return;
       const response = await axiosServices.get(`/company/unwind/rates?companyId=${companyId}`);
-      console.log('fetchCompanyRate', response.data.data);
       setCompanyrate(response.data.data);
     };
 
@@ -206,14 +205,13 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       const companyId = fileData?.companyId?._id;
       if (!companyId) return;
       const response = await axiosServices.get(`/driver/all/driver/rate?companyID=${companyId}`);
-      console.log('fetchDriverRate', response.data.data);
       setDriverRate(response.data.data);
     };
 
     fetchCompanyRate();
     fetchDriverRate();
   }, [fileData]);
-  console.log({ tripData });
+
   useEffect(() => {
     if (tripData?.length > 0) {
       const mappedData = tripData.map((item) => ({
@@ -279,7 +277,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     }
   }, [tripData, drivers, vehicleTypeInfo, zoneInfo, companyRate, driverRate]);
 
-  console.log({ data });
   const columns = useMemo(
     () => [
       {
@@ -342,6 +339,11 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
+      // {
+      //   header: 'Fetch Rate',
+      //   accessorKey: 'select',
+      //   dataType: 'fetchButton'
+      // },
       {
         header: 'Guard Price',
         accessorKey: '_guard_price_1',
@@ -350,6 +352,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
+
       {
         header: 'Company Rate',
         accessorKey: '_companyRate',
@@ -390,11 +393,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
-      {
-        header: 'Status',
-        accessorKey: 'select',
-        dataType: 'select'
-      },
+
       {
         header: 'Actions',
         id: 'edit',
@@ -406,6 +405,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     ],
     []
   );
+
+  console.log({ columns });
 
   return (
     <>

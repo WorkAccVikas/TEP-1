@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 
-const SearchComponent = ({ setSelectedCompany }) => {
+const SearchComponent = ({ setSelectedCompany, sx }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -71,6 +71,7 @@ const SearchComponent = ({ setSelectedCompany }) => {
         onInputChange={(event, newInputValue) => {
           setQuery(newInputValue);
         }}
+        sx={sx}
         onChange={(event, newValue) => {
           // Call setSelectedCompany with the selected company
           if (newValue) {
