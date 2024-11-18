@@ -47,8 +47,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [zoneInfo, setZoneInfo] = useState([]);
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState([]);
   const [drivers, setDrivers] = useState([]);
-  const [companyRate, setCompanyrate] = useState([]);
-  const [driverRate, setDriverRate] = useState([]);
+  const [cabOptions, setCabOptions] = useState([]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -56,7 +55,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   };
 
   const generateTrips = async () => {
-    console.log({payload1})
+    console.log({ payload1 });
     const assignedTripsArray = payload1.map((item) => {
       return {
         _roster_id: item._roster_id,
@@ -74,8 +73,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         vehicleNumber: item._cab._id,
         driverId: item._driver._id,
         companyRate: item._companyRate,
-        // vendorRate: 0,
-        // driverRate: item._driverRate_or_vendorRate,
         _driverRate_or_vendorRate: item._driverRate_or_vendorRate,
         addOnRate: item._additional_rate,
         penalty: item._penalty_1,
@@ -120,23 +117,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         status: 3
       };
     });
-
-    // const updatedTargetArray = data.map((targetItem) => {
-    //   // Find the matching payload item by comparing tripId and _id
-    //   const matchingPayload = payload1.find((payloadItem) => payloadItem.tripId === targetItem._id);
-
-    //   // If a match is found, replace all the fields except _id
-    //   if (matchingPayload) {
-    //     return {
-    //       ...matchingPayload, // Copy all properties from the matching payload item
-    //       _id: targetItem._id, // Keep the original _id from targetItem
-    //       status: 3
-    //     };
-    //   }
-
-    //   // If no match is found, return the original targetItem
-    //   return targetItem;
-    // });
 
     const fileId = tripData[0].rosterFileId;
 
@@ -188,29 +168,16 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       setDrivers(response.data.data.result);
     };
 
+    const fetchCabs = async () => {
+      const response = await axiosServices.get('/vehicle/all/linked/drivers');
+      setCabOptions(response.data.data);
+    };
+
     fetchAllZoneInfo();
     fetchAllVehicleTypeInfo();
     fetchDrivers();
+    fetchCabs();
   }, []);
-
-  useEffect(() => {
-    const fetchCompanyRate = async () => {
-      const companyId = fileData?.companyId?._id;
-      if (!companyId) return;
-      const response = await axiosServices.get(`/company/unwind/rates?companyId=${companyId}`);
-      setCompanyrate(response.data.data);
-    };
-
-    const fetchDriverRate = async () => {
-      const companyId = fileData?.companyId?._id;
-      if (!companyId) return;
-      const response = await axiosServices.get(`/driver/all/driver/rate?companyID=${companyId}`);
-      setDriverRate(response.data.data);
-    };
-
-    fetchCompanyRate();
-    fetchDriverRate();
-  }, [fileData]);
 
   useEffect(() => {
     if (tripData?.length > 0) {
@@ -269,13 +236,12 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         _zoneName_options: zoneInfo || [], // Ensure zoneInfo is not undefined
         _vehicleType_options: vehicleTypeInfo || [], // Ensure vehicleTypeInfo is not undefined
         _drivers_options: drivers || [], // Ensure drivers is not undefined
-        _company_Rate: companyRate || null, // Fallback if companyRate is undefined
-        _driver_rate: driverRate || null // Fallback if driverRate is undefined
+        _cab_options: cabOptions || [] // Ensure drivers is not undefined
       }));
 
       setData(mappedData);
     }
-  }, [tripData, drivers, vehicleTypeInfo, zoneInfo, companyRate, driverRate]);
+  }, [tripData, drivers, vehicleTypeInfo, zoneInfo]);
 
   const columns = useMemo(
     () => [
@@ -314,15 +280,16 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         dataType: 'vehicleType'
       },
       {
-        header: 'Driver',
-        accessorKey: '_driver',
-        dataType: 'driver'
-      },
-      {
         header: 'Cab',
         accessorKey: '_cab',
         dataType: 'cab'
       },
+      {
+        header: 'Driver',
+        accessorKey: '_driver',
+        dataType: 'driver'
+      },
+
       {
         header: 'Dual Trip',
         accessorKey: '_dual_trip',
@@ -405,8 +372,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     ],
     []
   );
-
-  console.log({ columns });
 
   return (
     <>
