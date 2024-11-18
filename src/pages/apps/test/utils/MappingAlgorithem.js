@@ -1,6 +1,5 @@
 export function getMergeResult(data, zone_zoneType, vehicleType) {
   let ans = [];
-  console.log({ data });
   // Create a map from zone_zoneType for quick lookup
   let zoneMap = new Map();
   zone_zoneType.forEach((zone) => {

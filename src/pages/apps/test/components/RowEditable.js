@@ -46,8 +46,9 @@ export default function RowEditable({ getValue: initialValue, row, column, table
   const tableMeta = table.options.meta;
   const { original, index } = row;
   const { id, columnDef } = column;
-  const { _zoneName_options, _vehicleType_options, _drivers_options, _company_Rate } = original;
-
+  const { _zoneName_options, _vehicleType_options, _drivers_options, _cab_options } = original;
+  console.log({ _cab_options });
+  console.log('original._cab', original._cab);
   const onChange = async (e) => {
     // Destructure with fallback values
     const newValue = id === '_guard_1' || id === '_dual_trip' ? (e.target.checked ? 1 : 0) : e.target?.value;
@@ -308,6 +309,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               renderValue={(selected) => selected?.vehicleTypeName || 'Select a vehicleype'}
             >
               {_vehicleType_options.map((type) => {
+                // original._driver.assignedVehicle ? original._driver.assignedVehicle.vehicleId.vehicleNumber : 'N/A'
                 return (
                   <MenuItem key={type._id} value={type}>
                     <Typography>{type.vehicleTypeName}</Typography>
@@ -342,14 +344,22 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               value={value}
               onChange={onChange}
               onBlur={onBlur}
+              disabled={!original._cab.linkedDrivers}
             >
-              {_drivers_options.map((driver) => {
-                return (
-                  <MenuItem key={driver._id} value={driver}>
-                    <Typography>{driver.userName}</Typography>
-                  </MenuItem>
-                );
-              })}
+              {original._cab.linkedDrivers ? (
+                original._cab.linkedDrivers.map((driver) => {
+                  console.log(driver);
+                  return (
+                    <MenuItem key={driver.driverId._id} value={driver.driverId}>
+                      <Typography>{driver.driverId.userName}</Typography>
+                    </MenuItem>
+                  );
+                })
+              ) : (
+                <MenuItem disabled>
+                  <Typography>No Drivers Available</Typography>
+                </MenuItem>
+              )}
             </Select>
           ) : (
             <Typography>
@@ -380,13 +390,21 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               value={value}
               onChange={onChange}
               onBlur={onBlur}
-              disabled={!original._driver.assignedVehicle}
+              // disabled={!original._driver.assignedVehicle}
             >
-              <MenuItem value={original._driver.assignedVehicle ? original._driver.assignedVehicle.vehicleId : null}>
+              {/* <MenuItem value={original._driver.assignedVehicle ? original._driver.assignedVehicle.vehicleId : null}>
                 <Typography>
                   {original._driver.assignedVehicle ? original._driver.assignedVehicle?.vehicleId?.vehicleNumber : 'N/A'}
                 </Typography>
-              </MenuItem>
+              </MenuItem> */}
+
+              {_cab_options.map((cab) => {
+                return (
+                  <MenuItem key={cab._id} value={cab}>
+                    <Typography>{cab.vehicleNumber}</Typography>
+                  </MenuItem>
+                );
+              })}
             </Select>
           ) : (
             <Typography>
