@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useRef } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import moment from 'moment';
 import { Calendar } from 'iconsax-react';
 import DateRangePickerDialog from 'components/DateRange/DateRangePickerDialog';
+import CustomDateRangePickerDialog from 'components/DateRange/CustomDateRangePickerDialog';
 
 // Enum to define different date range options
 export const DATE_RANGE_OPTIONS = Object.freeze({
@@ -14,9 +15,10 @@ export const DATE_RANGE_OPTIONS = Object.freeze({
   LAST_30_DAYS: 'last30days',
   THIS_MONTH: 'thisMonth',
   LAST_MONTH: 'lastMonth',
-  // CURRENT_MONTH: 'currentMonth',
   CUSTOM: 'custom'
 });
+
+const FORMAT_DATE = 'MMM DD, YY';
 
 const DateRangeSelect = memo(
   ({
@@ -27,9 +29,13 @@ const DateRangeSelect = memo(
     showSelectedRangeLabel = false, // Configurable prop to show/hide selected range label
     selectedRange,
     setSelectedRange,
+    prevRange,
     availableRanges
   }) => {
     console.log('DateRangeSelect render');
+
+    // console.log('range', selectedRange);
+    // console.log('prevRange', prevRange);
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     // Predefined date range objects based on the above enum
@@ -37,12 +43,14 @@ const DateRangeSelect = memo(
       [DATE_RANGE_OPTIONS.ALL_TIME]: {
         label: 'All Time',
         start: moment(0),
-        end: moment().endOf('day')
+        // end: moment().endOf('day')
+        end: moment()
       },
       [DATE_RANGE_OPTIONS.TODAY]: {
         label: 'Today',
         start: moment().startOf('day'),
-        end: moment().endOf('day')
+        // end: moment().endOf('day')
+        end: moment()
       },
       [DATE_RANGE_OPTIONS.YESTERDAY]: {
         label: 'Yesterday',
@@ -52,18 +60,15 @@ const DateRangeSelect = memo(
       [DATE_RANGE_OPTIONS.LAST_7_DAYS]: {
         label: 'Last 7 Days',
         start: moment().subtract(7, 'days').startOf('day'),
-        end: moment().endOf('day')
+        // end: moment().endOf('day')
+        end: moment()
       },
       [DATE_RANGE_OPTIONS.LAST_30_DAYS]: {
         label: 'Last 30 Days',
         start: moment().subtract(30, 'days').startOf('day'),
-        end: moment().endOf('day')
+        // end: moment().endOf('day')
+        end: moment()
       },
-      // [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-      //   label: 'This Month',
-      //   start: moment().startOf('month'),
-      //   end: moment().endOf('month')
-      // },
       [DATE_RANGE_OPTIONS.THIS_MONTH]: {
         label: 'This Month',
         start: moment().startOf('month'),
@@ -74,11 +79,6 @@ const DateRangeSelect = memo(
         start: moment().subtract(1, 'month').startOf('month'),
         end: moment().subtract(1, 'month').endOf('month')
       },
-      // [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
-      //   label: 'Current Month',
-      //   start: moment().startOf('month'),
-      //   end: moment()
-      // },
       [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Custom Range' }
     };
 
@@ -93,9 +93,11 @@ const DateRangeSelect = memo(
     };
 
     useEffect(() => {
+      console.table({ startDate, endDate, selectedRange });
       // Automatically set the range based on the initial dates
       if (startDate && endDate && !selectedRange) {
         const initialRange = determineRange(startDate, endDate);
+        console.log(`🚀 ~ useEffect ~ initialRange:`, initialRange);
         setSelectedRange(initialRange);
       }
     }, [startDate, endDate, selectedRange, setSelectedRange]);
@@ -122,14 +124,19 @@ const DateRangeSelect = memo(
       }
     };
 
-    const handleDialogClose = () => {
+    const handleDialogClose = (e, flag = false) => {
       setDialogOpen(false);
+      if (flag === 'backdropClick') {
+        setSelectedRange(prevRange);
+        return;
+      }
+      setSelectedRange(!flag ? prevRange : DATE_RANGE_OPTIONS.CUSTOM);
     };
 
     const selectedRangeLabel =
       selectedRange && startDate && endDate
-        ? `${predefinedDateRanges[selectedRange]?.label} (${moment(startDate).format('MMMM DD, YYYY')} - ${moment(endDate).format(
-            'MMMM DD, YYYY'
+        ? `${predefinedDateRanges[selectedRange]?.label} (${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(
+            FORMAT_DATE
           )})`
         : predefinedDateRanges[selectedRange]?.label || 'Select Date Range';
 
@@ -184,7 +191,7 @@ const DateRangeSelect = memo(
           </Select>
         </FormControl>
 
-        <DateRangePickerDialog
+        {/* <DateRangePickerDialog
           isOpen={isDialogOpen}
           onClose={handleDialogClose}
           onDateRangeChange={(newRange) => {
@@ -193,7 +200,23 @@ const DateRangeSelect = memo(
           }}
           initialStartDate={startDate}
           initialEndDate={endDate}
-        />
+        /> */}
+
+        {isDialogOpen && (
+          <CustomDateRangePickerDialog
+            isOpen={isDialogOpen}
+            onClose={handleDialogClose}
+            onDateRangeChange={(newRange, flag) => {
+              // console.log('f = ', flag);
+              onRangeChange(newRange);
+              handleDialogClose(null, flag);
+            }}
+            prevRange={prevRange}
+            selectedRange={selectedRange}
+            initialStartDate={startDate}
+            initialEndDate={endDate}
+          />
+        )}
       </>
     );
   }
@@ -207,6 +230,7 @@ DateRangeSelect.propTypes = {
   showLabel: PropTypes.bool, // Determines whether to show the label
   showSelectedRangeLabel: PropTypes.bool, // Prop for controlling selectedRangeLabel visibility
   selectedRange: PropTypes.string, // The currently selected date range key
+  prevRange: PropTypes.string, // The previously selected date range key
   setSelectedRange: PropTypes.func.isRequired, // Function to update the selected range state
   availableRanges: PropTypes.arrayOf(PropTypes.string) // Array of available date range keys to be displayed
 };

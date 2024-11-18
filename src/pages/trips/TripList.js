@@ -49,10 +49,12 @@ import TripChart from 'components/cards/trips/TripChart';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
 import FormDialog from 'components/alertDialog/FormDialog';
-import { convertToDateUsingMoment, formattedDate } from 'utils/helper';
+import { convertToDateUsingMoment, formatDateForApi, formattedDate } from 'utils/helper';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
 import { Link } from 'react-router-dom';
+import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
+import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -281,6 +283,8 @@ const TripList = () => {
   const [data, setData] = useState(null);
   const [refetch, setRefetch] = useState(false);
 
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+
   useEffect(() => {
     dispatch(getInvoiceList()).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -417,7 +421,12 @@ const TripList = () => {
     const fetchData = async () => {
       try {
         // TODO : GET ALL TRIPS
-        const response = await axiosServices.get('/assignTrip/all/trips/cabProvider');
+        const response = await axiosServices.get('/assignTrip/all/trips/cabProvider', {
+          params: {
+            startDate: formatDateForApi(startDate),
+            endDate: formatDateForApi(endDate)
+          }
+        });
         setData(response.data.data);
       } catch (error) {
         console.log('Error at fetching trips = ', error);
@@ -436,7 +445,7 @@ const TripList = () => {
     };
 
     fetchData();
-  }, [refetch]);
+  }, [refetch, startDate, endDate]);
 
   useEffect(() => {
     console.log('UseEffect1 running ......... ');
@@ -833,12 +842,28 @@ const TripList = () => {
       </Grid> */}
       <Breadcrumbs custom heading="Trips" links={breadcrumbLinks} />
 
-      <MainCard content={false}>
-        <ScrollX>
-          {/* <ReactTable columns={columns} data={dummyData} /> */}
-          {data?.length > 0 && <ReactTable columns={columns} data={data} />}
-        </ScrollX>
-      </MainCard>
+      <Stack gap={2}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="h4"></Typography>
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            prevRange={prevRange}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+          />
+        </Stack>
+
+        <MainCard content={false}>
+          <ScrollX>
+            {/* <ReactTable columns={columns} data={dummyData} /> */}
+            {data?.length > 0 && <ReactTable columns={columns} data={data} />}
+          </ScrollX>
+        </MainCard>
+      </Stack>
+
       <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} handleClose={handleClose} />
 
       {alertOpen && popup === POPUP_TYPE.ALERT_DIALOG && (

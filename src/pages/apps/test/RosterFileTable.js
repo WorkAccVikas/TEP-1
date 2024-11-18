@@ -25,6 +25,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
   const columns = useMemo(
     () => {
       const handleMapClick = (rowData) => {
+        console.log({ rowData });
         handleClickOpen(rowData);
       };
 
@@ -121,7 +122,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
     },
     [navigate] // Use 'navigate' as a dependency
   );
-
+  console.log({ templates });
   useEffect(() => {
     const fetchRosterTemplate = async () => {
       const response = await axiosServices.get('/tripData/list/roster/settings');
@@ -137,6 +138,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
 
   const handleClickOpen = (rowData) => {
     setFileData(rowData);
+    console.log({ rowData });
     setOpen(true);
   };
 
@@ -163,7 +165,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
   return (
     <>
       {data.length === 0 ? (
-        <EmptyTableWithoutButton /> 
+        <EmptyTableWithoutButton />
       ) : (
         <>
           <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>

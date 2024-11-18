@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import moment from 'moment';
-import { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
 
 /**
  * Custom hook to manage date range state and logic.
@@ -10,55 +9,73 @@ import { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
  * - `startDate`: The selected start date.
  * - `endDate`: The selected end date.
  * - `range`: The selected date range as a string.
+ * - `prevRange`: The previous date range as a string.
  * - `setRange`: Function to update the selected range.
  * - `handleRangeChange`: Function to update both start and end dates.
  */
 
+export const TYPE_OPTIONS = Object.freeze({
+  ALL_TIME: 'allTime',
+  TODAY: 'today',
+  YESTERDAY: 'yesterday',
+  LAST_7_DAYS: 'last7days',
+  LAST_30_DAYS: 'last30days',
+  THIS_MONTH: 'thisMonth',
+  LAST_MONTH: 'lastMonth'
+});
 
 const TYPE = {
-  [DATE_RANGE_OPTIONS.TODAY]: {
+  [TYPE_OPTIONS.ALL_TIME]: {
+    startDate: moment(0),
+    endDate: moment()
+  },
+  [TYPE_OPTIONS.TODAY]: {
     startDate: moment().startOf('day').toDate(),
     endDate: moment().toDate()
   },
-  [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+  [TYPE_OPTIONS.YESTERDAY]: {
+    startDate: moment().subtract(1, 'day').startOf('day'),
+    endDate: moment().subtract(1, 'day').endOf('day')
+  },
+  [TYPE_OPTIONS.LAST_7_DAYS]: {
+    startDate: moment().subtract(7, 'days').startOf('day'),
+    // endDate: moment().endOf('day')
+    endDate: moment().toDate()
+  },
+  [TYPE_OPTIONS.LAST_30_DAYS]: {
+    startDate: moment().subtract(30, 'days').startOf('day'),
+    // endDate: moment().endOf('day')
+    endDate: moment().toDate()
+  },
+  [TYPE_OPTIONS.THIS_MONTH]: {
     startDate: moment().startOf('month').toDate(),
     endDate: moment().toDate()
+  },
+  [TYPE_OPTIONS.LAST_MONTH]: {
+    startDate: moment().subtract(1, 'month').startOf('month'),
+    endDate: moment().subtract(1, 'month').endOf('month')
   }
-  // [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-  //   startDate: moment().startOf('month').toDate(),
-  //   endDate: moment().endOf('month').toDate()
-  // },
-  // [DATE_RANGE_OPTIONS.CURRENT_MONTH]: {
-  //   startDate: moment().startOf('month').toDate(),
-  //   endDate: moment().toDate()
-  // }
 };
 
-const useDateRange = (type = DATE_RANGE_OPTIONS.TODAY) => {
-  // State for the selected start date, defaulting to the start of the current day.
-  // const [startDate, setStartDate] = useState(moment().startOf('day').toDate());
-
-  // // State for the selected end date, defaulting to the start of the current day.
-  // const [endDate, setEndDate] = useState(moment().startOf('day').toDate());
-
-  // State for the selected end date, defaulting to the current date and time.
-  // const [endDate, setEndDate] = useState(moment().toDate());
-
+const useDateRange = (type = TYPE_OPTIONS.TODAY) => {
   const [startDate, setStartDate] = useState(TYPE[type].startDate);
   const [endDate, setEndDate] = useState(TYPE[type].endDate);
-
-  // State for the selected date range as a string.
   const [range, setRange] = useState('');
+  const [prevRange, setPrevRange] = useState('');
 
   /**
-   * Updates the selected range value.
+   * Updates the selected range value while keeping track of the previous range.
    * Uses `useCallback` to memoize the function and prevent unnecessary re-renders.
    *
-   * @param {string} val - The new range value.
+   * @param {string} newRange - The new range value.
    */
-  const handleSetRange = useCallback((val) => {
-    setRange(val);
-  }, []);
+  const handleSetRange = useCallback(
+    (newRange) => {
+      setPrevRange(range); // Update the previous range state.
+      setRange(newRange); // Update the current range state.
+    },
+    [range]
+  );
 
   /**
    * Updates both the start and end dates.
@@ -80,6 +97,7 @@ const useDateRange = (type = DATE_RANGE_OPTIONS.TODAY) => {
     startDate,
     endDate,
     range,
+    prevRange,
     setRange: handleSetRange,
     handleRangeChange
   };
