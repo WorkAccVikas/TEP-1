@@ -28,25 +28,41 @@ const MultiFileUpload = ({ error, showList = false, files, type, setFieldValue, 
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
     multiple: true,
     onDrop: (acceptedFiles) => {
-      if (files) {
-        setFieldValue('files', [
-          ...files,
-          ...acceptedFiles.map((file) =>
-            Object.assign(file, {
-              preview: URL.createObjectURL(file)
-            })
-          )
-        ]);
-      } else {
+      console.log(acceptedFiles);
+      if (acceptedFiles && acceptedFiles.length > 0) {
         setFieldValue(
           'files',
-          acceptedFiles.map((file) =>
-            Object.assign(file, {
+          acceptedFiles.map((file) => {
+            console.log(file);
+            return {
+              path: file.path || '',
+              name: file.name || '',
+              size: file.size || 0,
+              type: file.type || '',
               preview: URL.createObjectURL(file)
-            })
-          )
+            };
+          })
         );
       }
+      // if (files) {
+      //   setFieldValue('files', [
+      //     ...files,
+      //     ...acceptedFiles.map((file) =>
+      //       Object.assign(file, {
+      //         preview: URL.createObjectURL(file)
+      //       })
+      //     )
+      //   ]);
+      // } else {
+      //   setFieldValue(
+      //     'files',
+      //     acceptedFiles.map((file) =>
+      //       Object.assign(file, {
+      //         preview: URL.createObjectURL(file)
+      //       })
+      //     )
+      //   );
+      // }
     }
   });
 

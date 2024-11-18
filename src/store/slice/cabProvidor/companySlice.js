@@ -104,11 +104,12 @@ export const addBranch = createAsyncThunk('companies/addBranch', async (company,
 });
 
 // Define the async thunk for updating a company
-export const updateCompany = createAsyncThunk('companies/updateCompany', async ({ id, updatedData }, { rejectWithValue }) => {
+export const updateCompany = createAsyncThunk('companies/updateCompany', async (payload, { rejectWithValue }) => {
   try {
     // Make sure to replace the URL with your actual endpoint
-    const response = await axios.put(`/api/companies/${id}`, updatedData);
-    return response.data;
+    const response = await axios.put(`/company/edit`, payload);
+    console.log(response);
+    return { success: response.data.success, message: response.data.message };
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
