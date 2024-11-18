@@ -61,6 +61,10 @@ function EditBranch() {
     address: 50
   };
 
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
   // List of Indian states
   const indianStates = [
     'Andhra Pradesh',
@@ -639,7 +643,7 @@ function EditBranch() {
           <Stack direction="row" justifyContent="flex-end">
             <DialogActions>
               {!loading && (
-                <Button variant="outlined" color="error" onClick={() => {}}>
+                <Button variant="outlined" color="error" onClick={handleCancel}>
                   Cancel
                 </Button>
               )}
