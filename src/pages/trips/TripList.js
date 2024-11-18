@@ -219,46 +219,47 @@ function ReactTable({ columns, data }) {
         </Stack>
       </Stack>
       <Box ref={componentRef}>
-        <Table {...getTableProps()}>
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                    <HeaderSort column={column} sort />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row);
-              return (
-                <Fragment key={i}>
-                  <TableRow
-                    {...row.getRowProps()}
-                    onClick={() => {
-                      row.toggleRowSelected();
-                    }}
-                    sx={{ cursor: 'pointer', bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit' }}
-                  >
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell} {...cell.getCellProps([{ className: cell.column.className }])}>
-                        {cell.render('Cell')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </Fragment>
-              );
-            })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <ScrollX>
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, i) => {
+                prepareRow(row);
+                return (
+                  <Fragment key={i}>
+                    <TableRow
+                      {...row.getRowProps()}
+                      onClick={() => {
+                        row.toggleRowSelected();
+                      }}
+                      sx={{ cursor: 'pointer', bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit' }}
+                    >
+                      {row.cells.map((cell) => (
+                        <TableCell key={cell} {...cell.getCellProps([{ className: cell.column.className }])}>
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollX>
+
+        <Box sx={{ p: 2, py: 3 }}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </Box>
       </Box>
     </>
   );
@@ -857,10 +858,10 @@ const TripList = () => {
         </Stack>
 
         <MainCard content={false}>
-          <ScrollX>
-            {/* <ReactTable columns={columns} data={dummyData} /> */}
-            {data?.length > 0 && <ReactTable columns={columns} data={data} />}
-          </ScrollX>
+          {/* <ScrollX> */}
+          {/* <ReactTable columns={columns} data={dummyData} /> */}
+          {data?.length > 0 && <ReactTable columns={columns} data={data} />}
+          {/* </ScrollX> */}
         </MainCard>
       </Stack>
 
