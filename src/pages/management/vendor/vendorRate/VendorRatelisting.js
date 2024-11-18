@@ -153,6 +153,7 @@ const VendorRatelisting = () => {
 
   const [selectedCompanyName, setSelectedCompanyName] = useState('');
   const [selectedVendorName, setSelectedVendorName] = useState('');
+  const [isSelectingCompany, setIsSelectingCompany] = useState(false);
 
   const handleSelectedCompanyName = (companyName) => {
     setSelectedCompanyName(companyName);
@@ -191,6 +192,13 @@ const VendorRatelisting = () => {
     // navigate('/management/vendor/view');
   };
 
+  const handleCompanySelect = (company) => {
+    console.log('Selected company:', company);
+    setSelectedCompany(company);
+    setSelectedCompanyName(company?.company_name || '');
+    setIsSelectingCompany(false); // Close the search component after selection
+  };
+
   useEffect(() => {
     setSkipPageReset(false);
   }, [data]);
@@ -218,13 +226,26 @@ const VendorRatelisting = () => {
             title={
               <Stack direction="row" alignItems="center" gap={1}>
                 Vendor Rates between{' '}
-                <SearchComponent
+                {/* <SearchComponent
                   setSelectedCompany={(company) => {
+                    console.log("company",company);
+                    
                     setSelectedCompany(company);
                     setSelectedCompanyName(company?.company_name || '');
                   }}
                   sx={{ width: '200px'}}
-                />{' '}
+                />{' '} */}
+                <>
+                  {isSelectingCompany ? (
+                    <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
+                  ) : (
+                    <Chip
+                      label={selectedCompanyName || 'Select a company'}
+                      color="primary"
+                      onClick={() => setIsSelectingCompany(true)} // Open the search component on click
+                    />
+                  )}
+                </>
                 and <Chip label={selectedVendorName} color="secondary" />
               </Stack>
             }

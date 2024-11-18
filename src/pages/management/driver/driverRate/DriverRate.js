@@ -149,6 +149,7 @@ const DriverRate = () => {
 
   const [selectedCompanyName, setSelectedCompanyName] = useState('');
   const [selectedDriverName, setSelectedDriverName] = useState('');
+  const [isSelectingCompany, setIsSelectingCompany] = useState(false);
 
   const handleSelectedCompanyName = (companyName) => {
     setSelectedCompanyName(companyName);
@@ -186,6 +187,13 @@ const DriverRate = () => {
     setDialogOpen(false);
   };
 
+  const handleCompanySelect = (company) => {
+    console.log('Selected company:', company);
+    setSelectedCompany(company);
+    setSelectedCompanyName(company?.company_name || '');
+    setIsSelectingCompany(false); // Close the search component after selection
+  };
+
   useEffect(() => {
     setSkipPageReset(false);
   }, [data]);
@@ -215,13 +223,17 @@ const DriverRate = () => {
             title={
               <Stack direction="row" alignItems="center" gap={1}>
                 Driver Rates between {' '}
-                <SearchComponent
-                  setSelectedCompany={(company) => {
-                    setSelectedCompany(company);
-                    setSelectedCompanyName(company?.company_name || '');
-                  }}
-                  sx={{ width: '200px'}}
-                />{' '} and{' '}
+                <>
+                  {isSelectingCompany ? (
+                    <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
+                  ) : (
+                    <Chip
+                      label={selectedCompanyName || 'Select a company'}
+                      color="primary"
+                      onClick={() => setIsSelectingCompany(true)} // Open the search component on click
+                    />
+                  )}
+                </> and{' '}
                 <Chip label={selectedDriverName} color="secondary" />
               </Stack>
             }
