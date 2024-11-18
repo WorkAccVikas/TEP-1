@@ -236,6 +236,28 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                     }
                   }
                 }}
+                title="View Rate"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
                 title="Edit"
               >
                 <IconButton
@@ -249,27 +271,6 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   }}
                 >
                   <Edit />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="View Rate"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
-                  }}
-                >
-                  <Eye />
                 </IconButton>
               </Tooltip>
 
