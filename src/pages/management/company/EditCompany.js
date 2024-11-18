@@ -24,7 +24,7 @@ import * as yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addCompany, fetchCompaniesDetails, updateCompany } from 'store/slice/cabProvidor/companySlice';
+import { addCompany, fetchCompanyDetails, updateCompany } from 'store/slice/cabProvidor/companySlice';
 import MultiFileUpload from 'components/third-party/dropzone/MultiFile';
 import { useEffect, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
@@ -234,7 +234,7 @@ function EditCompany() {
       files: [{ preview: companyData?.companyContract }]
       //   files: companyData?.companyContract || null
     },
-    validationSchema,
+    // validationSchema,
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       setLoading(true);
@@ -307,9 +307,9 @@ function EditCompany() {
         if (id) {
           console.log('API Calling .......');
 
-          const result = await dispatch(fetchCompaniesDetails(id)).unwrap();
+          const result = await dispatch(fetchCompanyDetails(id)).unwrap();
           console.log(`🚀 ~ Manage ~ result:`, result);
-          //   dispatch(fetchCompaniesDetails(result));
+          //   dispatch(fetchCompanyDetails(result));
           setComanyData(result);
         }
       } catch (error) {
@@ -531,11 +531,11 @@ function EditCompany() {
               </Grid>
             </MainCard>
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <MainCard title="MCD/TAX INFORMATION">
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} lg={3}>
-                  {/* <Stack spacing={1}>
+                  <Stack spacing={1}>
                   <InputLabel>MCD Tax</InputLabel>
                   <FormControl>
                     <InputLabel>MCD Tax</InputLabel>
@@ -557,7 +557,7 @@ function EditCompany() {
                       ))}
                     </Select>
                   </FormControl>
-                </Stack> */}
+                </Stack>
                 </Grid>
                 <Grid item xs={12} lg={3}>
                   <Stack spacing={1}>
@@ -583,7 +583,7 @@ function EditCompany() {
                 </Grid>
 
                 <Grid item xs={12} lg={3}>
-                  {/* <Stack spacing={1}>
+                  <Stack spacing={1}>
                   <InputLabel>State Tax</InputLabel>
                   <FormControl>
                     <InputLabel>State Tax</InputLabel>
@@ -605,7 +605,7 @@ function EditCompany() {
                       ))}
                     </Select>
                   </FormControl>
-                </Stack> */}
+                </Stack>
                 </Grid>
                 <Grid item xs={12} lg={3}>
                   <Stack spacing={1}>
@@ -631,7 +631,7 @@ function EditCompany() {
                 </Grid>
               </Grid>
             </MainCard>
-          </Grid>
+          </Grid> */}
           <Grid item xs={12}>
             <MainCard title="CONTRACT INFORMATION">
               {/* <SingleFileUpload

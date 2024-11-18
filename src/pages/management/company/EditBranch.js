@@ -24,16 +24,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { useDispatch } from 'react-redux';
 import MultiFileUpload from 'components/third-party/dropzone/MultiFile';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { addBranch, fetchCompanies } from 'store/slice/cabProvidor/companySlice';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { addBranch, fetchCompanies, fetchCompanyBranchDetails, updateCompanyBranch } from 'store/slice/cabProvidor/companySlice';
 import ConfigurableAutocomplete from 'components/autocomplete/ConfigurableAutocomplete';
 import { LoadingButton } from '@mui/lab';
 import { Save2 } from 'iconsax-react';
+import { result } from 'lodash';
 
 // ==============================|| LAYOUTS -  COLUMNS ||============================== //
 
-function AddBranch() {
-  const [branchData] = useState({});
+function EditBranch() {
+  const [branchData, setBranchData] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [list] = useState(false);
@@ -41,17 +42,7 @@ function AddBranch() {
   const location = useLocation();
   const [, setSelectedOption] = useState(null);
   const [loading, setLoading] = useState(false);
-  const rowOriginal = location.state;
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  // const { companies = [] } = useSelector((state) => state.companies || {});
-
-  useEffect(() => {
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+  const { id } = useParams();
 
   const YupValidationConfig = {
     company_name: {
@@ -70,7 +61,9 @@ function AddBranch() {
     address: 50
   };
 
-  const DIGITS_ONLY_PATTERN = /^\d+$/;
+  const handleCancel = () => {
+    navigate(-1);
+  };
 
   // List of Indian states
   const indianStates = [
@@ -111,12 +104,6 @@ function AddBranch() {
     'Ladakh',
     'Jammu and Kashmir'
   ];
-
-  const TAX = {
-    No: 0,
-    'Per Trip': 1,
-    Monthly: 2
-  };
 
   const validationSchema = yup.object({
     parentCompanyID: yup.string().required('Company Name is required'),
@@ -174,7 +161,8 @@ function AddBranch() {
       // MCDAmount: branchData.MCDAmount || '',
       // stateTax: branchData.stateTax || '',
       // stateTaxAmount: branchData.stateTaxAmount || '',
-      files: branchData.companyContract || null
+      files: [{ preview: branchData?.companyContract }]
+      // files: branchData.companyContract || null
     },
     validationSchema,
     enableReinitialize: true,
@@ -182,7 +170,8 @@ function AddBranch() {
       setLoading(true);
       try {
         const formData = new FormData();
-        formData.append('parentCompanyID', values.parentCompanyID);
+        formData.append('_id', id);
+        // formData.append('parentCompanyID', values.parentCompanyID);
         formData.append('companyBranchName', values.companyBranchName);
         formData.append('contact_person', values.contact_person);
         formData.append('company_email', values.company_email);
@@ -200,15 +189,16 @@ function AddBranch() {
         // formData.append('stateTaxAmount', values.stateTaxAmount);
         formData.append('companyContract', values.files[0]);
 
-        const resultAction = await dispatch(addBranch(formData));
+        const resultAction = await dispatch(updateCompanyBranch(formData));
+        console.log(resultAction);
 
-        if (addBranch.fulfilled.match(resultAction)) {
+        if (resultAction.payload.success) {
           // Company successfully added
           resetForm();
           dispatch(
             openSnackbar({
               open: true,
-              message: 'Company branch added successfully',
+              message: resultAction.payload.message,
               variant: 'alert',
               alert: {
                 color: 'success'
@@ -245,37 +235,53 @@ function AddBranch() {
     [formik]
   );
 
+  // useEffect(() => {
+  //   if (rowOriginal) {
+  //     formik.setValues({
+  //       parentCompanyID: rowOriginal.parentCompanyID || '',
+  //       companyBranchName: rowOriginal.companyBranchName || '',
+  //       contact_person: rowOriginal.contact_person || '',
+  //       company_email: rowOriginal.company_email || '',
+  //       mobile: rowOriginal.mobile || '',
+  //       landline: rowOriginal.landline || '',
+  //       PAN: rowOriginal.PAN || '',
+  //       GSTIN: rowOriginal.GSTIN || '',
+  //       postal_code: rowOriginal.postal_code || '',
+  //       address: rowOriginal.address || '',
+  //       city: rowOriginal.city || '',
+  //       state: rowOriginal.state || '',
+  //       // MCDTax: rowOriginal.MCDTax || '',
+  //       // MCDAmount: rowOriginal.MCDAmount || '',
+  //       // stateTax: rowOriginal.stateTax || '',
+  //       // stateTaxAmount: rowOriginal.stateTaxAmount || '',
+  //       files: [{ name: 'files', url: rowOriginal.companyContract }] || null
+  //     });
+  //   }
+  // }, [rowOriginal]);
+
   useEffect(() => {
-    if (rowOriginal) {
-      formik.setValues({
-        parentCompanyID: rowOriginal.parentCompanyID || '',
-        companyBranchName: rowOriginal.companyBranchName || '',
-        contact_person: rowOriginal.contact_person || '',
-        company_email: rowOriginal.company_email || '',
-        mobile: rowOriginal.mobile || '',
-        landline: rowOriginal.landline || '',
-        PAN: rowOriginal.PAN || '',
-        GSTIN: rowOriginal.GSTIN || '',
-        postal_code: rowOriginal.postal_code || '',
-        address: rowOriginal.address || '',
-        city: rowOriginal.city || '',
-        state: rowOriginal.state || '',
-        // MCDTax: rowOriginal.MCDTax || '',
-        // MCDAmount: rowOriginal.MCDAmount || '',
-        // stateTax: rowOriginal.stateTax || '',
-        // stateTaxAmount: rowOriginal.stateTaxAmount || '',
-        files: [{ name: 'files', url: rowOriginal.companyContract }] || null
-      });
-    }
-  }, [rowOriginal]);
+    (async () => {
+      try {
+        if (id) {
+          const result = await dispatch(fetchCompanyBranchDetails(id)).unwrap();
+          console.log(`🚀 ~ Manage ~ result:`, result);
+          setBranchData(result);
+          formik.setValues(result);
+        }
+      } catch (error) {
+        console.log(`🚀 ~ Manage ~ error:`, error);
+        // navigate('/driver-management', { replace: true });
+      }
+    })();
+  }, [id, dispatch]);
 
   return (
     <form onSubmit={formik.handleSubmit} id="validation-forms">
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <MainCard title={'ADD BRANCH INFORMATION'}>
+          <MainCard title={'UPDATE BRANCH INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} lg={4}>
+              {/* <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
                   <InputLabel id="demo-simple-select-helper-label">Company Name</InputLabel>
                   <FormControl>
@@ -292,17 +298,17 @@ function AddBranch() {
                     />
                   </FormControl>
 
-                  {/* {selectedOption && (
+                  {selectedOption && (
                     <div>
                       <h3>Selected Option:</h3>
                       <p>{selectedOption.company_name}</p>
                     </div>
-                  )} */}
+                  )}
                 </Stack>
                 {formik.touched.parentCompanyID && formik.errors.parentCompanyID && (
                   <FormHelperText error>{formik.errors.parentCompanyID}</FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
                   <InputLabel>Branch Name</InputLabel>
@@ -311,7 +317,7 @@ function AddBranch() {
                     placeholder="Enter Branch Name"
                     id="companyBranchName"
                     name="companyBranchName"
-                    value={branchData.companyBranchName || formik.values.companyBranchName}
+                    value={formik.values.companyBranchName}
                     onChange={formik.handleChange}
                     error={formik.touched.companyBranchName && Boolean(formik.errors.companyBranchName)}
                     helperText={formik.touched.companyBranchName && formik.errors.companyBranchName}
@@ -327,7 +333,7 @@ function AddBranch() {
                     placeholder="Enter Person Name"
                     id="contact_person"
                     name="contact_person"
-                    value={branchData.contact_person || formik.values.contact_person}
+                    value={formik.values.contact_person}
                     onChange={formik.handleChange}
                     error={formik.touched.contact_person && Boolean(formik.errors.contact_person)}
                     helperText={formik.touched.contact_person && formik.errors.contact_person}
@@ -342,7 +348,7 @@ function AddBranch() {
                     placeholder="Enter Company Email"
                     id="company_email"
                     name="company_email"
-                    value={branchData.company_email || formik.values.company_email}
+                    value={formik.values.company_email}
                     onChange={formik.handleChange}
                     error={formik.touched.company_email && Boolean(formik.errors.company_email)}
                     helperText={formik.touched.company_email && formik.errors.company_email}
@@ -357,7 +363,7 @@ function AddBranch() {
                     placeholder="Enter Mobile Number"
                     id="mobile"
                     name="mobile"
-                    value={branchData.mobile || formik.values.mobile}
+                    value={formik.values.mobile}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -377,7 +383,7 @@ function AddBranch() {
                     placeholder="Enter Landline Number"
                     id="landline"
                     name="landline"
-                    value={branchData.landline || formik.values.landline}
+                    value={formik.values.landline}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -397,7 +403,7 @@ function AddBranch() {
                     placeholder="Enter PAN"
                     id="PAN"
                     name="PAN"
-                    value={branchData.PAN || formik.values.PAN}
+                    value={formik.values.PAN}
                     onChange={formik.handleChange}
                     error={formik.touched.PAN && Boolean(formik.errors.PAN)}
                     helperText={formik.touched.PAN && formik.errors.PAN}
@@ -412,7 +418,7 @@ function AddBranch() {
                     placeholder="Enter GSTIN"
                     id="GSTIN"
                     name="GSTIN"
-                    value={branchData.GSTIN || formik.values.GSTIN}
+                    value={formik.values.GSTIN}
                     onChange={formik.handleChange}
                     error={formik.touched.GSTIN && Boolean(formik.errors.GSTIN)}
                     helperText={formik.touched.GSTIN && formik.errors.GSTIN}
@@ -427,7 +433,7 @@ function AddBranch() {
                     placeholder="Enter Pincode"
                     id="postal_code"
                     name="postal_code"
-                    value={branchData.postal_code || formik.values.postal_code}
+                    value={formik.values.postal_code}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -447,7 +453,7 @@ function AddBranch() {
                     placeholder="Enter Address"
                     id="address"
                     name="address"
-                    value={branchData.address || formik.values.address}
+                    value={formik.values.address}
                     onChange={formik.handleChange}
                     error={formik.touched.address && Boolean(formik.errors.address)}
                     helperText={formik.touched.address && formik.errors.address}
@@ -462,7 +468,7 @@ function AddBranch() {
                     placeholder="Enter City"
                     id="city"
                     name="city"
-                    value={branchData.city || formik.values.city}
+                    value={formik.values.city}
                     onChange={formik.handleChange}
                     error={formik.touched.city && Boolean(formik.errors.city)}
                     helperText={formik.touched.city && formik.errors.city}
@@ -660,4 +666,4 @@ function AddBranch() {
   );
 }
 
-export default AddBranch;
+export default EditBranch;
