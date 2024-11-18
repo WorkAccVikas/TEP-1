@@ -214,7 +214,14 @@ const DriverRate = () => {
           <MainCard
             title={
               <Stack direction="row" alignItems="center" gap={1}>
-                Driver Rates between <Chip label={selectedCompanyName} color="primary" /> and{' '}
+                Driver Rates between {' '}
+                <SearchComponent
+                  setSelectedCompany={(company) => {
+                    setSelectedCompany(company);
+                    setSelectedCompanyName(company?.company_name || '');
+                  }}
+                  sx={{ width: '200px'}}
+                />{' '} and{' '}
                 <Chip label={selectedDriverName} color="secondary" />
               </Stack>
             }
