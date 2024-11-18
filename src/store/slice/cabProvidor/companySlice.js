@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axios from 'utils/axios';
+import { commonInitialState, commonReducers } from '../common';
+
 // Define the async thunk for fetching companies
 export const fetchCompanies = createAsyncThunk('companies/fetchCompanies', async ({ page, limit }, { rejectWithValue }) => {
   try {
@@ -13,14 +15,24 @@ export const fetchCompanies = createAsyncThunk('companies/fetchCompanies', async
   }
 });
 
-// Define the async thunk for fetching companies by company id
-export const fetchCompaniesDetails = createAsyncThunk('companies/fetchCompaniesDetails', async (id, { rejectWithValue }) => {
+// Fetch company details by id
+export const fetchCompanyDetails = createAsyncThunk('companies/fetchCompanyDetails', async (id, { rejectWithValue }) => {
   try {
     // Send a GET request to fetch details of a specific company by companyId
     const response = await axios.get(`/company/by?companyId=${id}`);
     return response.data.data; // Ensure this matches the shape of the data you expect
   } catch (error) {
     // Return a rejected value with error details
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Fetch company branch details by id
+export const fetchCompanyBranchDetails = createAsyncThunk('companies/fetchCompanyBranchDetails', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/companyBranch/by?branchId=${id}`);
+    return response.data.data;
+  } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
 });
@@ -115,6 +127,17 @@ export const updateCompany = createAsyncThunk('companies/updateCompany', async (
   }
 });
 
+// Update company branch
+export const updateCompanyBranch = createAsyncThunk('companies/updateCompanyBranch', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/companyBranch/edit`, payload);
+    console.log(response);
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 // Define the async thunk for deleting a company
 export const deleteCompany = createAsyncThunk('companies/deleteCompany', async (id, { rejectWithValue }) => {
   try {
@@ -156,7 +179,33 @@ export const fetchCompaniesAssignedDrivers = createAsyncThunk(
   }
 );
 
+// Update status of company
+export const updateCompanyStatus = createAsyncThunk('vendors/updateCompanyStatus', async (status, { rejectWithValue, getState }) => {
+  try {
+    const state = getState();
+    const id = state.companies.selectedID;
+    const response = await axios.put('/company/updateActiveStatus', { data: { companyId: id, status } });
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Update status of company branch
+export const updateCompanyBranchStatus = createAsyncThunk('vendors/updateCompanyBranchStatus', async (status, { rejectWithValue, getState }) => {
+  try {
+    const state = getState();
+    const id = state.companies.selectedID;
+    const response = await axios.put('/companyBranch/updateActiveStatus', { data: { companyBranchId: id, status } });
+    console.log(response);
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 const initialState = {
+  ...commonInitialState,
   companies: [], // Empty array initially
   companyDetails: null,
   companiesVendor: [],
@@ -174,6 +223,7 @@ const companySlice = createSlice({
   name: 'companies',
   initialState,
   reducers: {
+    ...commonReducers,
     reset: () => initialState, // Reset state to initial state on logout
     resetError: (state) => {
       state.error = null;
@@ -198,15 +248,15 @@ const companySlice = createSlice({
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
-      .addCase(fetchCompaniesDetails.pending, (state) => {
+      .addCase(fetchCompanyDetails.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCompaniesDetails.fulfilled, (state, action) => {
+      .addCase(fetchCompanyDetails.fulfilled, (state, action) => {
         state.companyDetails = action.payload || null; // Handle empty result
         state.loading = false;
       })
-      .addCase(fetchCompaniesDetails.rejected, (state, action) => {
+      .addCase(fetchCompanyDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
@@ -289,5 +339,5 @@ const companySlice = createSlice({
 });
 
 // Export the reducer and actions
-export const { reset, resetError } = companySlice.actions;
+export const { reset, resetError, setSelectedID } = companySlice.actions;
 export const companyReducer = companySlice.reducer;

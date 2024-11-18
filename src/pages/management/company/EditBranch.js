@@ -24,16 +24,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { useDispatch } from 'react-redux';
 import MultiFileUpload from 'components/third-party/dropzone/MultiFile';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { addBranch, fetchCompanies } from 'store/slice/cabProvidor/companySlice';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { addBranch, fetchCompanies, fetchCompanyBranchDetails, updateCompanyBranch } from 'store/slice/cabProvidor/companySlice';
 import ConfigurableAutocomplete from 'components/autocomplete/ConfigurableAutocomplete';
 import { LoadingButton } from '@mui/lab';
 import { Save2 } from 'iconsax-react';
+import { result } from 'lodash';
 
 // ==============================|| LAYOUTS -  COLUMNS ||============================== //
 
-function AddBranch() {
-  const [branchData] = useState({});
+function EditBranch() {
+  const [branchData, setBranchData] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [list] = useState(false);
@@ -41,17 +42,7 @@ function AddBranch() {
   const location = useLocation();
   const [, setSelectedOption] = useState(null);
   const [loading, setLoading] = useState(false);
-  const rowOriginal = location.state;
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  // const { companies = [] } = useSelector((state) => state.companies || {});
-
-  useEffect(() => {
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+  const { id } = useParams();
 
   const YupValidationConfig = {
     company_name: {
@@ -69,8 +60,6 @@ function AddBranch() {
     comments: 50,
     address: 50
   };
-
-  const DIGITS_ONLY_PATTERN = /^\d+$/;
 
   // List of Indian states
   const indianStates = [
@@ -111,12 +100,6 @@ function AddBranch() {
     'Ladakh',
     'Jammu and Kashmir'
   ];
-
-  const TAX = {
-    No: 0,
-    'Per Trip': 1,
-    Monthly: 2
-  };
 
   const validationSchema = yup.object({
     parentCompanyID: yup.string().required('Company Name is required'),
@@ -174,7 +157,8 @@ function AddBranch() {
       // MCDAmount: branchData.MCDAmount || '',
       // stateTax: branchData.stateTax || '',
       // stateTaxAmount: branchData.stateTaxAmount || '',
-      files: branchData.companyContract || null
+      files: [{ preview: branchData?.companyContract }]
+      // files: branchData.companyContract || null
     },
     validationSchema,
     enableReinitialize: true,
@@ -182,7 +166,8 @@ function AddBranch() {
       setLoading(true);
       try {
         const formData = new FormData();
-        formData.append('parentCompanyID', values.parentCompanyID);
+        formData.append('_id', id);
+        // formData.append('parentCompanyID', values.parentCompanyID);
         formData.append('companyBranchName', values.companyBranchName);
         formData.append('contact_person', values.contact_person);
         formData.append('company_email', values.company_email);
@@ -200,15 +185,16 @@ function AddBranch() {
         // formData.append('stateTaxAmount', values.stateTaxAmount);
         formData.append('companyContract', values.files[0]);
 
-        const resultAction = await dispatch(addBranch(formData));
+        const resultAction = await dispatch(updateCompanyBranch(formData));
+        console.log(resultAction);
 
-        if (addBranch.fulfilled.match(resultAction)) {
+        if (resultAction.payload.success) {
           // Company successfully added
           resetForm();
           dispatch(
             openSnackbar({
               open: true,
-              message: 'Company branch added successfully',
+              message: resultAction.payload.message,
               variant: 'alert',
               alert: {
                 color: 'success'
@@ -245,35 +231,51 @@ function AddBranch() {
     [formik]
   );
 
+  // useEffect(() => {
+  //   if (rowOriginal) {
+  //     formik.setValues({
+  //       parentCompanyID: rowOriginal.parentCompanyID || '',
+  //       companyBranchName: rowOriginal.companyBranchName || '',
+  //       contact_person: rowOriginal.contact_person || '',
+  //       company_email: rowOriginal.company_email || '',
+  //       mobile: rowOriginal.mobile || '',
+  //       landline: rowOriginal.landline || '',
+  //       PAN: rowOriginal.PAN || '',
+  //       GSTIN: rowOriginal.GSTIN || '',
+  //       postal_code: rowOriginal.postal_code || '',
+  //       address: rowOriginal.address || '',
+  //       city: rowOriginal.city || '',
+  //       state: rowOriginal.state || '',
+  //       // MCDTax: rowOriginal.MCDTax || '',
+  //       // MCDAmount: rowOriginal.MCDAmount || '',
+  //       // stateTax: rowOriginal.stateTax || '',
+  //       // stateTaxAmount: rowOriginal.stateTaxAmount || '',
+  //       files: [{ name: 'files', url: rowOriginal.companyContract }] || null
+  //     });
+  //   }
+  // }, [rowOriginal]);
+
   useEffect(() => {
-    if (rowOriginal) {
-      formik.setValues({
-        parentCompanyID: rowOriginal.parentCompanyID || '',
-        companyBranchName: rowOriginal.companyBranchName || '',
-        contact_person: rowOriginal.contact_person || '',
-        company_email: rowOriginal.company_email || '',
-        mobile: rowOriginal.mobile || '',
-        landline: rowOriginal.landline || '',
-        PAN: rowOriginal.PAN || '',
-        GSTIN: rowOriginal.GSTIN || '',
-        postal_code: rowOriginal.postal_code || '',
-        address: rowOriginal.address || '',
-        city: rowOriginal.city || '',
-        state: rowOriginal.state || '',
-        // MCDTax: rowOriginal.MCDTax || '',
-        // MCDAmount: rowOriginal.MCDAmount || '',
-        // stateTax: rowOriginal.stateTax || '',
-        // stateTaxAmount: rowOriginal.stateTaxAmount || '',
-        files: [{ name: 'files', url: rowOriginal.companyContract }] || null
-      });
-    }
-  }, [rowOriginal]);
+    (async () => {
+      try {
+        if (id) {
+          const result = await dispatch(fetchCompanyBranchDetails(id)).unwrap();
+          console.log(`🚀 ~ Manage ~ result:`, result);
+          setBranchData(result);
+          formik.setValues(result);
+        }
+      } catch (error) {
+        console.log(`🚀 ~ Manage ~ error:`, error);
+        // navigate('/driver-management', { replace: true });
+      }
+    })();
+  }, [id, dispatch]);
 
   return (
     <form onSubmit={formik.handleSubmit} id="validation-forms">
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <MainCard title={'ADD BRANCH INFORMATION'}>
+          <MainCard title={'UPDATE BRANCH INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
@@ -637,7 +639,7 @@ function AddBranch() {
           <Stack direction="row" justifyContent="flex-end">
             <DialogActions>
               {!loading && (
-                <Button variant="outlined" color="error" onClick={handleCancel}>
+                <Button variant="outlined" color="error" onClick={() => {}}>
                   Cancel
                 </Button>
               )}
@@ -660,4 +662,4 @@ function AddBranch() {
   );
 }
 
-export default AddBranch;
+export default EditBranch;

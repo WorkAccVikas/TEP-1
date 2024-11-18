@@ -68,6 +68,7 @@ const AddCab = Loadable(lazy(() => import('pages/management/cab/AddCab')));
 const Company = Loadable(lazy(() => import('pages/management/company')));
 const AddCompany = Loadable(lazy(() => import('pages/management/company/AddCompany')));
 const AddBranch = Loadable(lazy(() => import('pages/management/company/AddBranch')));
+const EditBranch = Loadable(lazy(() => import('pages/management/company/EditBranch')));
 const CompanyOverview = Loadable(lazy(() => import('pages/overview/CompanyOverview')));
 const CompanyRateListing = Loadable(lazy(() => import('pages/management/company/addCompanyRate/CompanyRate1/CompanyRateListing')));
 const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCompany')));
@@ -306,6 +307,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'edit/:id',
                   element: <EditCompany />
+                },
+                {
+                  path: 'edit-company-branch/:id',
+                  element: <EditBranch />
                 }
               ]
             },
