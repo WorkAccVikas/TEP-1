@@ -104,8 +104,11 @@ const RosterDashboard1 = Loadable(lazy(() => import('pages/apps/test/dashboard')
 
 // Settings
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
+const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
+const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
+const ExcelTemplatePage  = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
 // ==============================|| MAIN ROUTES ||============================== //
 
 const CabProvidorRoutes = {
@@ -171,10 +174,10 @@ const CabProvidorRoutes = {
                   path: 'assign-trips',
                   element: <AssignTrips />
                 },
-                // {
-                //   path: 'test',
-                //   element: <RosterDashboard1 />
-                // },
+                {
+                  path: 'test-download',
+                  element: <ExcelTemplatePage  />
+                },
                 {
                   path: 'test-map',
                   element: <MapRosterFileTest />
@@ -446,14 +449,24 @@ const CabProvidorRoutes = {
         {
           path: 'settings',
           children: [
-            // {
-            //   path: 'account',
-            //   element: <UnderConstruction title="Account Settings" />
-            // },
-            // {
-            //   path: 'roster',
-            //   element: <UnderConstruction title="Roster Settings" />
-            // },
+            {
+              path: 'account',
+              element: <AccountSettings />
+            },
+
+            // Roster Settings
+            {
+              path: 'roster',
+              children: [
+                // Create Roster Template
+                {
+                  path: 'create-template',
+                  element: <RosterSetting />
+                }
+              ]
+            },
+
+            // Invoice Settings
             {
               path: 'invoice',
               element: <InvoiceSettings />

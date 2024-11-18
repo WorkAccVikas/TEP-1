@@ -230,6 +230,20 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 vehicleTypeName: item.vehicleTypeArray[0]?.vehicleTypeName || 'N/A' // Fallback for undefined vehicleTypeName
               }
             : { _id: null, vehicleTypeName: item.vehicleType || 'N/A' }, // Fallback for undefined vehicleType
+        __cabOptions:
+          item.cabOptionsArray?.length === 1
+            ? {
+                _id: item.cabOptionsArray[0]?._id || null, // Add fallback for undefined
+                vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' }, // Fallback for undefined vehicleType
+        __driverOptions:
+          item.driverOptionsArray?.length === 1
+            ? {
+                _id: item.driverOptionsArray[0]?._id || null, // Add fallback for undefined
+                userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, userName: item.userName || 'N/A' }, // Fallback for undefined vehicleType
 
         _driver: { _id: null, userName: null },
         _cab: { _id: null, vehicleNumber: null },
@@ -261,7 +275,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
-    
+
       {
         header: 'Time',
         accessorKey: '_trip_time',
