@@ -25,8 +25,6 @@ import CreateRosterTemplate from '../CreateRosterTemplateDrawer.js';
 // ==============================|| DIALOG - SIMPLE ||============================== //
 
 function RosterTemplateDialog({ onClose, selectedValue, open, templates }) {
-  console.log('templates', templates);
-
   const theme = useTheme();
 
   const handleClose = () => {
