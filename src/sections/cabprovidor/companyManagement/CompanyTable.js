@@ -15,7 +15,11 @@ import {
   Button,
   CircularProgress,
   Tooltip,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
@@ -32,6 +36,7 @@ import axiosServices from 'utils/axios';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { ThemeMode } from 'config';
+import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompanyStatus } from 'store/slice/cabProvidor/companySlice';
 
 const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
@@ -44,6 +49,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
     navigate('/management/company/add-company-branch');
   };
 
+  console.log(page, limit);
   const columns = useMemo(
     () => [
       {
@@ -121,21 +127,114 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'Amount Receivable',
         accessor: 'stateTaxAmount',
-        Cell: ({ value }) => value || 'None' 
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Status',
         accessor: 'status',
-        Cell: ({ value }) => {
-          switch (value) {
-            case 0:
-              return <Chip color="error" label="Inactive" size="small" variant="light" />;
-            case 1:
-              return <Chip color="success" label="Active" size="small" variant="light" />;
-            default:
-              return <Chip color="info" label="Not Defined" size="small" variant="light" />;
-          }
+        Cell: ({ row, value }) => {
+          console.log(row);
+          const [status, setStatus] = useState(row.original.isActive);
+          const [openDialog, setOpenDialog] = useState(false);
+          const [newStatus, setNewStatus] = useState(null);
+
+          const handleToggleStatus = () => {
+            const toggledStatus = status === 1 ? 0 : 1;
+            setNewStatus(toggledStatus);
+            setOpenDialog(true);
+            const id = row.original._id;
+            console.log(`🚀 ~ row.values.id:`, row);
+            dispatch(setSelectedID(id));
+          };
+
+          const handleConfirmStatusUpdate = async () => {
+            try {
+              let response;
+              const isSubRow = !Array.isArray(row.original.Branches);
+              if (isSubRow) {
+                response = await dispatch(updateCompanyBranchStatus(newStatus));
+              } else {
+                response = await dispatch(updateCompanyStatus(newStatus));
+              }
+              console.log(response);
+              if (response.payload.success) {
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: response.payload.message,
+                    variant: 'alert',
+                    alert: {
+                      color: 'success'
+                    },
+                    close: true
+                  })
+                );
+              }
+              dispatch(fetchCompanies({page, limit}));
+              setStatus(newStatus);
+              setOpenDialog(false);
+            } catch (error) {
+              console.error('Error updating status:', error);
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: error.response.data?.error || 'Something went wrong',
+                  variant: 'alert',
+                  alert: {
+                    color: 'error'
+                  },
+                  close: true
+                })
+              );
+            }
+          };
+
+          const handleCancel = () => {
+            setOpenDialog(false);
+          };
+
+          return (
+            <>
+              <Chip
+                label={status === 1 ? 'Active' : 'Inactive'}
+                color={status === 1 ? 'success' : 'error'}
+                variant="light"
+                size="small"
+                onClick={handleToggleStatus}
+                sx={{
+                  ':hover': {
+                    backgroundColor: status === 1 ? 'rgba(36, 140, 106, 0.5)' : 'rgba(255, 0, 0, 0.3)',
+                    cursor: 'pointer'
+                  }
+                }}
+              />
+
+              {/* Confirmation Dialog */}
+              <Dialog open={openDialog} onClose={handleCancel}>
+                <DialogTitle>Confirm Status Change</DialogTitle>
+                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this cab?</DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCancel} color="error">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleConfirmStatusUpdate} variant="contained">
+                    Confirm
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </>
+          );
         }
+        // Cell: ({ value }) => {
+        //   switch (value) {
+        //     case 0:
+        //       return <Chip color="error" label="Inactive" size="small" variant="light" />;
+        //     case 1:
+        //       return <Chip color="success" label="Active" size="small" variant="light" />;
+        //     default:
+        //       return <Chip color="info" label="Not Defined" size="small" variant="light" />;
+        //   }
+        // }
       },
       {
         Header: 'Actions',
@@ -161,9 +260,13 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
                   onClick={(e) => {
                     e.stopPropagation();
                     const id = row.original._id;
-                    console.log('Id = ', row.original._id);
-                    // dispatch(setSelectedID(row.values._id));
-                    navigate(`/management/company/edit/${id}`);
+                    const isSubRow = !Array.isArray(row.original.Branches);
+                    console.log('row = ', row);
+                    if (isSubRow) {
+                      navigate(`/management/company/edit-company-branch/${id}`);
+                    } else {
+                      navigate(`/management/company/edit/${id}`);
+                    }
                   }}
                 >
                   <Edit />
