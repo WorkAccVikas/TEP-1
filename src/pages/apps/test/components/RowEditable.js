@@ -16,27 +16,7 @@ import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { Checkbox, FormHelperText, IconButton, Tooltip, Typography } from '@mui/material';
 import { formatIndianDate } from 'utils/dateFormat_dbTOviewDate';
 import axiosServices from 'utils/axios';
-import {
-  ArchiveTick,
-  ArrowDown2,
-  CardSend,
-  CloudAdd,
-  CloudConnection,
-  Code,
-  Code1,
-  DirectDown,
-  DocumentCloud,
-  Dropbox,
-  Edit2,
-  FolderCloud,
-  Illustrator,
-  Import,
-  ImportSquare,
-  InfoCircle,
-  ReceiveSquare,
-  ReceiveSquare2,
-  Send
-} from 'iconsax-react';
+import { InfoCircle } from 'iconsax-react';
 
 // project-imports
 // ==============================|| EDITABLE ROW ||============================== //
@@ -46,8 +26,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
   const tableMeta = table.options.meta;
   const { original, index } = row;
   const { id, columnDef } = column;
-  const { _zoneName_options, _vehicleType_options, _drivers_options, _cab_options } = original;
-  console.log({ _cab_options });
+  const { _zoneName_options, _vehicleType_options, _cab_options } = original;
   console.log('original._cab', original._cab);
   const onChange = async (e) => {
     // Destructure with fallback values
