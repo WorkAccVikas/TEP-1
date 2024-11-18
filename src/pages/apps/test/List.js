@@ -225,7 +225,7 @@ const ViewRosterTest = () => {
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState(null);
   const [mappedRowData, setMappedRowData] = useState([]);
   const requiredHeaders = Object.values(selectedValue?.mappedData);
-
+  console.log({ selectedValue });
   useEffect(() => {
     if (fileData?.rosterUrl) {
       fetchExcelData(fileData.rosterUrl);
@@ -288,7 +288,6 @@ const ViewRosterTest = () => {
             shouldContinue = false; // Stop further processing on empty row
             return null; // Skip this row
           }
-
           const rowObject = {};
           const mappedData = selectedValue?.mappedData;
           const dateFormat = selectedValue?.dateFormat || 'DD-MM-YYYY';
@@ -296,7 +295,6 @@ const ViewRosterTest = () => {
           const pickupType = selectedValue?.pickupType || 'pickup';
           const dropType = selectedValue?.dropType || 'drop';
           let tripDateValue;
-
           Object.keys(mappedData).forEach((key) => {
             const excelHeader = mappedData[key];
             const headerIndex = headers.indexOf(excelHeader);
@@ -322,10 +320,10 @@ const ViewRosterTest = () => {
               }
 
               if (key === 'tripType' && value) {
-                console.log({ value });
                 value = value.toLowerCase() === pickupType.toLowerCase() ? 1 : value.toLowerCase() === dropType.toLowerCase() ? 2 : 'N/A';
               }
 
+              console.log({ key });
               rowObject[key] = value;
             }
           });
@@ -350,6 +348,7 @@ const ViewRosterTest = () => {
             rowObject['guard'] = 1;
           }
 
+          console.log({ rowObject });
           return rowObject;
         })
         .filter((row) => row !== null); // Filter out null rows
@@ -376,6 +375,7 @@ const ViewRosterTest = () => {
     processBatch(); // Start processing
   };
 
+  console.log({ excelData });
   const fetchAllZoneInfo = async () => {
     const response = await axiosServices.get('/zoneType/grouped/by/zone');
     setZoneInfo(response.data.data);
@@ -416,9 +416,13 @@ const ViewRosterTest = () => {
         className: 'cell-center'
       },
       {
+        Header: 'Trip Id',
+        accessor: 'rosterTripId',
+        disableFilters: true
+      },
+      {
         Header: 'Trip Date',
         accessor: 'tripDate',
-        className: 'cell-center',
         disableFilters: true
       },
       {
@@ -426,7 +430,6 @@ const ViewRosterTest = () => {
         accessor: 'tripTime',
         disableFilters: true,
         Cell: ({ value }) => {
-          console.log({ value });
           return value; // Adjust as per your type definitions
         }
       },
@@ -571,6 +574,7 @@ const ViewRosterTest = () => {
     const startDate = earliestDate._i;
     const endDate = latestDate._i;
 
+    console.log({ mappedRowData });
     const payload = {
       data: {
         rosterFileId: rosterFileId,
