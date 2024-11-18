@@ -71,11 +71,13 @@ const CompanyWiseRoster = ({ rosterData, id }) => {
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneName'
+        accessor: 'zoneName',
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneType'
+        accessor: 'zoneType',
+        Cell: ({ value }) => value || 'None' 
       },
       {
         Header: 'Location',

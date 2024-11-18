@@ -4,45 +4,45 @@ import {
   Button,
   Chip,
   CircularProgress,
+  IconButton,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
+  useTheme,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  IconButton,
-  Tooltip
+  DialogTitle
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
-import { Fragment, useCallback, useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useExpanded, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
-import { Add, Edit, Trash } from 'iconsax-react';
+import { Add, Eye, Edit } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { ACTION, MODULE, PERMISSIONS } from 'constant';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { ThemeMode } from 'config';
-import { useTheme } from '@mui/material/styles';
 import { dispatch, useSelector } from 'store';
 import { handleClose, handleOpen, setDeletedName, setSelectedID, updateVendorStatus } from 'store/slice/cabProvidor/vendorSlice';
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import { openSnackbar } from 'store/reducers/snackbar';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+  const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
+
+  const navigate = useNavigate();
   const theme = useTheme();
   const mode = theme.palette.mode;
-  const navigate = useNavigate();
-
-  const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
 
   const columns = useMemo(
     () => [
@@ -251,6 +251,27 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   <Edit />
                 </IconButton>
               </Tooltip>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View Rate"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
 
               {/* <Tooltip
                 componentsProps={{
@@ -281,40 +302,73 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           );
         }
       }
+      // {
+      //   Header: 'Actions',
+      //   className: 'cell-center',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     const vendorID = row.original.vendorId;
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+      //         <Tooltip
+      //           componentsProps={{
+      //             tooltip: {
+      //               sx: {
+      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                 opacity: 0.9
+      //               }
+      //             }
+      //           }}
+      //           title="View Rate"
+      //         >
+      //           <IconButton
+      //             color="secondary"
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+      //             }}
+      //           >
+      //             <Eye />
+      //           </IconButton>
+      //         </Tooltip>
+      //       </Stack>
+      //     );
+      //   }
+      // }
     ],
     []
   );
 
-  const handleCloseDialog = useCallback(async (e, flag = false) => {
-    console.log(`🚀 ~ handleCloseDialog ~ flag:`, selectedID);
+  // const handleCloseDialog = useCallback(async (e, flag = false) => {
+  //   console.log(`🚀 ~ handleCloseDialog ~ flag:`, selectedID);
 
-    if (typeof flag === 'boolean' && flag) {
-      // const payload = { data: { vendorId: selectedID, status: 0 } };
-      const response = await dispatch(updateVendorStatus(0)).unwrap();
+  //   if (typeof flag === 'boolean' && flag) {
+  //     // const payload = { data: { vendorId: selectedID, status: 0 } };
+  //     const response = await dispatch(updateVendorStatus(0)).unwrap();
 
-      console.log('res = ', response);
+  //     console.log('res = ', response);
 
-      if (response.success) {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: response.message,
-            variant: 'alert',
-            alert: {
-              color: 'success'
-            },
-            close: true
-          })
-        );
-        dispatch(handleClose());
-        setUpdateKey(updateKey + 1);
-        // dispatch(fetchDrivers());
-      }
-    } else {
-      dispatch(handleClose());
-      return;
-    }
-  }, []);
+  //     if (response.success) {
+  //       dispatch(
+  //         openSnackbar({
+  //           open: true,
+  //           message: response.message,
+  //           variant: 'alert',
+  //           alert: {
+  //             color: 'success'
+  //           },
+  //           close: true
+  //         })
+  //       );
+  //       dispatch(handleClose());
+  //       setUpdateKey(updateKey + 1);
+  //       // dispatch(fetchDrivers());
+  //     }
+  //   } else {
+  //     dispatch(handleClose());
+  //     return;
+  //   }
+  // }, []);
 
   return (
     <>
@@ -337,7 +391,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           )}
         </Box>
       </Stack>
-      {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />}
+      {/* {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />} */}
     </>
   );
 };
@@ -421,6 +475,18 @@ const ButtonComponent = ({ loading }) => {
             disabled={loading} // Disable button while loading
           >
             {loading ? 'Loading...' : 'Add Vendor'}
+          </Button>
+        </WrapperButton>
+        <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+          <Button
+            variant="contained"
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+            onClick={() => navigate('/management/vendor/add-vendor-rate')}
+            size="small"
+            color="success"
+            disabled={loading} // Disable button while loading
+          >
+            {loading ? 'Loading...' : 'Add Vendor Rate'}
           </Button>
         </WrapperButton>
       </Stack>

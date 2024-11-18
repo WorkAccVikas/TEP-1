@@ -4,6 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -20,20 +21,23 @@ import { Add } from 'iconsax-react';
 import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import VendorRateTable from './VendorRateTable';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import MainCard from 'components/MainCard';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
-const token = localStorage.getItem('serviceToken');
-
-const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVendorID }) => {
+const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVendorID, initialVendorID, handleSelectedVendorName,handleSelectedCompanyName }) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
-  const [vendorID, setVendorID] = useState('');
+  const [vendorID, setVendorID] = useState(initialVendorID);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const allVendors = useSelector((state) => state.vendors.allVendors);
+
+  console.log('vendorID', vendorID);
+  console.log('selectedCompany', selectedCompany);
 
   useEffect(() => {
     dispatch(fetchAllVendors());
@@ -43,9 +47,24 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
     if (!selectedCompany || !vendorID) {
       return;
     }
+    // Fetch company name (assuming selectedCompany contains company object with name)
+    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  // Adjust based on your structure
+
+    // Fetch vendor name based on vendorID
+    const selectedVendor = allVendors.find((vendor) => vendor.vendorId === vendorID);
+    const selectedVendorName = selectedVendor ? selectedVendor.vendorCompanyName : '';  // Adjust based on your structure
+    
     setSelectedCompany(selectedCompany);
-    setSelectedVendorID(vendorID); // Pass the selected vendor ID back to the parent
+    setSelectedVendorID(vendorID);
+
+    handleSelectedCompanyName(selectedCompanyName);
+    handleSelectedVendorName(selectedVendorName); 
     onClose();
+  };
+
+  const onCancel = () => {
+    onClose();
+    navigate('/management/vendor/view');
   };
 
   return (
@@ -69,7 +88,10 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
             <InputLabel sx={{ marginBottom: '4px' }}>Vendor</InputLabel>
             <Autocomplete
               value={allVendors.find((vendor) => vendor.vendorId === vendorID) || null}
-              onChange={(event, newValue) => setVendorID(newValue ? newValue.vendorId : '')}
+              onChange={(event, newValue) => {
+                // Ensure to set vendorId properly on selection
+                setVendorID(newValue ? newValue.vendorId : '');
+              }}
               options={allVendors}
               getOptionLabel={(option) => option.vendorCompanyName}
               renderOption={(props, option) => (
@@ -93,7 +115,7 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
         </Grid>
       </DialogContent>
       <DialogActions sx={{ padding: '8px' }}>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onCancel} color="secondary">
           Cancel
         </Button>
         <Button onClick={handleSave} color="primary" disabled={!selectedCompany || !vendorID}>
@@ -106,6 +128,9 @@ const AddVendorRateDialog = ({ open, onClose, setSelectedCompany, setSelectedVen
 
 const VendorRatelisting = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialVendorID = queryParams.get('vendorID');
   const [data, setData] = useState([]);
   const [skipPageReset, setSkipPageReset] = useState(false);
   const [companyRate, setCompanyRate] = useState([]);
@@ -119,8 +144,21 @@ const VendorRatelisting = () => {
   const [selectedVendorID, setSelectedVendorID] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(true); // Dialog state
 
-//   console.log('selectedCompany', selectedCompany);
-  console.log('selectedVendorID', selectedVendorID);
+  const [selectedCompanyName, setSelectedCompanyName] = useState('');
+  const [selectedVendorName, setSelectedVendorName] = useState('');
+
+  const handleSelectedCompanyName = (companyName) => {
+    console.log('Selected Company Name:', companyName);
+    setSelectedCompanyName(companyName);
+  };
+
+  const handleSelectedVendorName = (vendorName) => {
+    console.log('Selected Vendor Name:', vendorName);
+    setSelectedVendorName(vendorName);
+  };
+
+  console.log("selectedCompanyName",selectedCompanyName);
+  
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -143,9 +181,9 @@ const VendorRatelisting = () => {
     if (!selectedCompany || !selectedVendorID) return;
 
     fetchdata();
-  }, [selectedCompany, selectedVendorID, token]);
+  }, [selectedCompany, selectedVendorID]);
 
-//   console.log('vendorList', vendorList);
+  //   console.log('vendorList', vendorList);
 
   const handleAddRate = () => {
     navigate('/management/vendor/add-vendor-rate');
@@ -153,6 +191,7 @@ const VendorRatelisting = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    // navigate('/management/vendor/view');
   };
 
   useEffect(() => {
@@ -168,23 +207,34 @@ const VendorRatelisting = () => {
         onClose={handleDialogClose}
         setSelectedCompany={setSelectedCompany}
         setSelectedVendorID={setSelectedVendorID}
+        initialVendorID={initialVendorID}
+        handleSelectedCompanyName={handleSelectedCompanyName}
+        handleSelectedVendorName={handleSelectedVendorName}
       />
 
       {/* Render CompanyRateListing once a company is selected */}
       {!dialogOpen && selectedCompany && selectedVendorID && !showCompanyList ? (
         <Stack gap={1} spacing={1}>
-          <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} />
+          {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
-          <VendorRateTable
-            data={vendorList}
-            page={page}
-            setPage={setPage}
-            limit={limit}
-            setLimit={setLimit}
-            updateKey={updateKey}
-            setUpdateKey={setUpdateKey}
-            loading={loading}
-          />
+          <MainCard
+            title={
+              <Stack direction="row" alignItems="center" gap={1}>
+              Vendor Rates between <Chip label={selectedCompanyName} color="primary" /> and <Chip label={selectedVendorName} color="secondary" />
+            </Stack>
+            }
+          >
+            <VendorRateTable
+              data={vendorList}
+              page={page}
+              setPage={setPage}
+              limit={limit}
+              setLimit={setLimit}
+              updateKey={updateKey}
+              setUpdateKey={setUpdateKey}
+              loading={loading}
+            />
+          </MainCard>
         </Stack>
       ) : null}
     </>
@@ -193,20 +243,20 @@ const VendorRatelisting = () => {
 
 export default VendorRatelisting;
 
-const ButtonComponent = ({ loading, onAddRate }) => {
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <WrapperButton>
-        <Button
-          variant="contained"
-          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-          onClick={onAddRate} // Call the onAddRate function when button is clicked
-          size="small"
-          disabled={loading} // Disable button while loading
-        >
-          {loading ? 'Loading...' : ' Add Rate'}
-        </Button>
-      </WrapperButton>
-    </Stack>
-  );
-};
+// const ButtonComponent = ({ loading, onAddRate }) => {
+//   return (
+//     <Stack direction="row" spacing={1} alignItems="center">
+//       <WrapperButton>
+//         <Button
+//           variant="contained"
+//           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+//           onClick={onAddRate} // Call the onAddRate function when button is clicked
+//           size="small"
+//           disabled={loading} // Disable button while loading
+//         >
+//           {loading ? 'Loading...' : ' Add Rate'}
+//         </Button>
+//       </WrapperButton>
+//     </Stack>
+//   );
+// };
