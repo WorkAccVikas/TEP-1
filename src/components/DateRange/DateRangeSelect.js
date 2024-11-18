@@ -4,7 +4,7 @@ import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import moment from 'moment';
 import { Calendar } from 'iconsax-react';
 import DateRangePickerDialog from 'components/DateRange/DateRangePickerDialog';
-import CustomDateRangePickerDialog from './CustomDateRangePickerDialog';
+import CustomDateRangePickerDialog from 'components/DateRange/CustomDateRangePickerDialog';
 
 // Enum to define different date range options
 export const DATE_RANGE_OPTIONS = Object.freeze({
