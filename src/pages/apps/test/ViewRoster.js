@@ -54,7 +54,6 @@ import AssignTripsDialog from './components/AssignTripsDialog';
 
 function ReactTable({ columns, data, selectedData, handleSetSelectedData, handleAssignDialogOpen }) {
   const theme = useTheme();
-  console.log({ data });
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
   const filterTypes = useMemo(() => renderFilterTypes, []);
@@ -264,7 +263,6 @@ const ViewRosterTest1 = () => {
   const { rosterData: stateData, fileData } = location.state || {};
   const [selectedData, setSelectedData] = useState([]);
   const [initateRender, setInitateRender] = useState(0);
-  console.log({ rosterData });
   const handleAssignTrips = () => {
     console.log(selectedData);
   };
@@ -325,7 +323,9 @@ const ViewRosterTest1 = () => {
         title: 'Row Selection',
         Header: ({ getToggleAllPageRowsSelectedProps }) => <IndeterminateCheckbox indeterminate {...getToggleAllPageRowsSelectedProps()} />,
         accessor: 'selection',
-        Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />,
+        Cell: ({ row }) => {
+          return <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />;
+        },
         disableSortBy: true,
         disableFilters: true
       },
@@ -347,8 +347,7 @@ const ViewRosterTest1 = () => {
         accessor: 'tripType',
         disableFilters: true,
         Cell: ({ value }) => {
-          console.log({value})
-          return value == "1" ? 'Pickup' : value == "2" ? 'Drop' : 'N/A'; // Adjust as per your type definitions
+          return value == '1' ? 'Pickup' : value == '2' ? 'Drop' : 'N/A'; // Adjust as per your type definitions
         }
       },
       {

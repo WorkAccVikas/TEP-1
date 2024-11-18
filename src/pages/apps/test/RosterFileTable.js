@@ -1,4 +1,4 @@
-import { Chip, Dialog, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Button, Chip, Dialog, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { PopupTransition } from 'components/@extended/Transitions';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
@@ -6,12 +6,14 @@ import EmptyTableWithoutButton from 'components/tables/EmptyTableWithoutButton';
 import PaginationBox from 'components/tables/Pagination';
 import PropTypes from 'prop-types';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useExpanded, useTable } from 'react-table';
 import AddRosterFileForm from './forms/AddRosterFileForm';
 import ViewRosterForm from './forms/ViewRosterForm';
 import RosterTemplateDialog from './dialog/RosterTemplateDialog';
 import axiosServices from 'utils/axios';
+import { Add } from 'iconsax-react';
+import { useDrawer } from 'contexts/DrawerContext';
 
 const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
   const [fileData, setFileData] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
   const [isReadyToNavigate, setIsReadyToNavigate] = useState(false);
-
+  const { openDrawer } = useDrawer();
   const columns = useMemo(
     () => {
       const handleMapClick = (rowData) => {
@@ -106,14 +108,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
                     />
                   );
                 case 2:
-                  return (
-                    <Chip
-                      color="error"
-                      label="Invalid File"
-                      size="small"
-                      variant="light"
-                    />
-                  );
+                  return <Chip color="error" label="Invalid File" size="small" variant="light" />;
                 default:
                   return null; // Return null if isVisited doesn't match any case
               }
@@ -168,10 +163,35 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
   return (
     <>
       {data.length === 0 ? (
-        <EmptyTableWithoutButton />
+        <EmptyTableWithoutButton /> 
       ) : (
         <>
-          <MainCard content={true}>
+          <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Button
+                variant="contained"
+                startIcon={<Add />} // Show loading spinner if loading
+                onClick={() => navigate('/apps/roster/create')}
+                size="small"
+                // color="info"
+                color="inherit"
+              >
+                {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                {'Upload File'}
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Add />} // Show loading spinner if loading
+                onClick={() => openDrawer()}
+                size="small"
+                color="success"
+              >
+                {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                {'Create Template'}
+              </Button>
+            </Stack>
+          </Stack>
+          <MainCard content={false}>
             <ScrollX>
               <ReactTable columns={columns} data={data} />
             </ScrollX>

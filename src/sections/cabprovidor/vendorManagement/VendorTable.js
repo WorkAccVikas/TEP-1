@@ -15,9 +15,9 @@ import {
   Typography,
   useTheme,
   Dialog,
-  DialogActions,
+  DialogTitle,
   DialogContent,
-  DialogTitle
+  DialogActions
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
@@ -202,7 +202,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          console.log(row);
+          const vendorID = row.original.vendorId;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
               {/* <Tooltip

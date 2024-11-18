@@ -318,7 +318,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           const driverID = row.original._id;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              {/* <Tooltip
+              <Tooltip
                 componentsProps={{
                   tooltip: {
                     sx: {
@@ -327,18 +327,18 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                     }
                   }
                 }}
-                title="View"
+                title="View Rate"
               >
                 <IconButton
                   color="secondary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/driver-overview/${driverID}`);
+                    navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
                   }}
                 >
                   <Eye />
                 </IconButton>
-              </Tooltip> */}
+              </Tooltip>
 
               <Tooltip
                 componentsProps={{

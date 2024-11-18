@@ -16,43 +16,30 @@ import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { Checkbox, FormHelperText, IconButton, Tooltip, Typography } from '@mui/material';
 import { formatIndianDate } from 'utils/dateFormat_dbTOviewDate';
 import axiosServices from 'utils/axios';
-import { InfoCircle } from 'iconsax-react';
+import {
+  ArchiveTick,
+  ArrowDown2,
+  CardSend,
+  CloudAdd,
+  CloudConnection,
+  Code,
+  Code1,
+  DirectDown,
+  DocumentCloud,
+  Dropbox,
+  Edit2,
+  FolderCloud,
+  Illustrator,
+  Import,
+  ImportSquare,
+  InfoCircle,
+  ReceiveSquare,
+  ReceiveSquare2,
+  Send
+} from 'iconsax-react';
 
 // project-imports
 // ==============================|| EDITABLE ROW ||============================== //
-
-function getCompanyRate(data, zoneNameId, vehicleTypeId, zoneTypeId = null, guard, dualTrip) {
-  // Check for missing required arguments
-  if (!data || !zoneNameId || !vehicleTypeId || guard === undefined || dualTrip === undefined) {
-    console.warn('Missing required arguments for getCompanyRate');
-    return { guardPrice: 0, companyRate: 0 }; // or return null;
-  }
-
-  let guardPrice;
-  let companyRate;
-
-  // Filter to find the matching object
-  const obj = data.filter(
-    (item) =>
-      item.zoneNameID._id === zoneNameId &&
-      item.VehicleTypeName._id === vehicleTypeId &&
-      (zoneTypeId === null || (item.zoneTypeID && item.zoneTypeID._id === zoneTypeId))
-  );
-
-  if (obj.length === 0) {
-    // No matching object found
-    console.warn('No matching data found for the specified criteria');
-    return { guardPrice: 0, companyRate: 0 };
-  }
-
-  // Determine guardPrice based on the guard parameter
-  guardPrice = guard === 1 ? obj[0].guardPrice || 0 : 0;
-
-  // Determine companyRate based on the dualTrip parameter
-  companyRate = dualTrip === 0 ? obj[0].cabAmount.amount || 0 : obj[0].dualTripAmount.amount || 0;
-
-  return { guardPrice, companyRate };
-}
 
 export default function RowEditable({ getValue: initialValue, row, column, table }) {
   const [value, setValue] = useState(initialValue);
@@ -60,23 +47,119 @@ export default function RowEditable({ getValue: initialValue, row, column, table
   const { original, index } = row;
   const { id, columnDef } = column;
   const { _zoneName_options, _vehicleType_options, _drivers_options, _company_Rate } = original;
-  console.log({ original });
 
-  const { guardPrice, companyRate } = getCompanyRate(
-    _company_Rate,
-    original._zoneName._id,
-    original._vehicleType._id,
-    original._zoneType._id,
-    original._guard_1,
-    original._dualTrip_1
-  );
-  const onChange = (e) => {
-    if (id === '_guard_1' || id === '_dual_trip') {
-      setValue(e.target.checked ? 1 : 0);
-    } else {
-      setValue(e.target?.value);
-    }
+  const onChange = async (e) => {
+    // Destructure with fallback values
+    const newValue = id === '_guard_1' || id === '_dual_trip' ? (e.target.checked ? 1 : 0) : e.target?.value;
+
+    // Update the value in state
+    setValue(newValue);
+
+    // Extract the necessary values
+    const {
+      companyID: { _id: companyID } = {},
+      _zoneName: { _id: zoneNameId } = {},
+      _zoneType: { _id: zoneTypeId } = {},
+      _vehicleType: { _id: vehicleTypeId } = {},
+      _driver: { _id: driverId } = {},
+      _dual_trip = 0, // Default to 0
+      _guard_1 = 0 // Default to 0
+    } = original;
+
+    console.log({ companyID, zoneNameId, zoneTypeId, vehicleTypeId, driverId, _dual_trip, _guard_1 });
+    console.log({ id });
     console.log({ original });
+
+    // Check if the change is in the fields that require an API call
+    const isRelevantId = ['_zoneName', '_zoneType', '_vehicleType', '_driver'].includes(id);
+
+    // Store fetched values in state to be used for reassigning prices later
+    let apiResponseData = null; // This will hold the response data for later use
+
+    if (isRelevantId && companyID && zoneNameId && vehicleTypeId && driverId && zoneTypeId) {
+      try {
+        // Prepare the payload without _dual_trip and _guard_1
+        const payload = {
+          companyID,
+          vehicleTypeID: vehicleTypeId,
+          zoneNameID: zoneNameId,
+          zoneTypeID: zoneTypeId,
+          driverId
+        };
+
+        const response = await axiosServices.post(
+          '/tripData/amount/by/driver/id',
+          //    {
+          //   data: payload
+          // }
+          {
+            data: {
+              companyID: '66e010556265e5aad31f9b40',
+              vehicleTypeID: '66c57911777b0e58991125f3',
+              zoneNameID: '6683e597643aeaa0469223a3',
+              zoneTypeID: '6683e5c6643aeaa0469223b3',
+              driverId: '66ed052952b00bf1e93a4abb'
+            }
+          }
+        );
+
+        console.log('API Response:', response);
+
+        if (response.data.success) {
+          // Store the data in apiResponseData for later use
+          apiResponseData = response.data.data;
+
+          const {
+            driverGuardPrice,
+            driverAmount,
+            driverDualAmount,
+            vendorGuardPrice,
+            vendorAmount,
+            vendorDualAmount,
+            companyGuardPrice,
+            companyAmount,
+            companyDualAmount
+          } = apiResponseData;
+
+          // Perform the assignment logic based on _dual_trip and _guard_1 values
+          const _companyRate = _dual_trip === 0 ? companyAmount ?? 0 : companyDualAmount ?? 0;
+          const _guard_price_1 = _guard_1 === 0 ? 0 : companyGuardPrice ?? 0;
+          const _driverRate_or_vendorRate =
+            _dual_trip === 0 ? driverAmount ?? vendorAmount ?? 0 : driverDualAmount ?? vendorDualAmount ?? 0;
+
+          console.log({ _companyRate, _guard_price_1, _driverRate_or_vendorRate });
+
+          // Update the original object with the calculated values
+          original._companyRate = _companyRate;
+          original._guard_price_1 = _guard_price_1;
+          original._driverRate_or_vendorRate = _driverRate_or_vendorRate;
+        }
+      } catch (error) {
+        console.error('API Error:', error.message || error);
+      }
+    }
+
+    // Handle price reassignment for _dual_trip and _guard_1 changes
+    if (id === '_dual_trip' || id === '_guard_1') {
+      if (apiResponseData) {
+        // Use the previously fetched response data to reassign prices
+        const { companyGuardPrice, companyAmount, companyDualAmount, driverAmount, driverDualAmount, vendorAmount, vendorDualAmount } =
+          apiResponseData;
+
+        const _companyRate = _dual_trip === 0 ? companyAmount ?? 0 : companyDualAmount ?? 0;
+        const _guard_price_1 = _guard_1 === 0 ? 0 : companyGuardPrice ?? 0;
+        const _driverRate_or_vendorRate = _dual_trip === 0 ? driverAmount ?? vendorAmount ?? 0 : driverDualAmount ?? vendorDualAmount ?? 0;
+
+        console.log({ _companyRate, _guard_price_1, _driverRate_or_vendorRate });
+
+        // Update the original object with reassigned values
+        original._companyRate = _companyRate;
+        original._guard_price_1 = _guard_price_1;
+        original._driverRate_or_vendorRate = _driverRate_or_vendorRate;
+      } else {
+        console.log('Error: API response data not available for price reassignment');
+      }
+    }
   };
 
   const onBlur = () => {
@@ -88,34 +171,6 @@ export default function RowEditable({ getValue: initialValue, row, column, table
   }, [initialValue]);
 
   let element;
-  let userInfoSchema;
-  switch (id) {
-    case 'email':
-      userInfoSchema = yup.object().shape({
-        userInfo: yup.string().email('Enter valid email ').required('Email is a required field')
-      });
-      break;
-    case 'age':
-      userInfoSchema = yup.object().shape({
-        userInfo: yup
-          .number()
-          .typeError('Age must be number')
-          .required('Age is required')
-          .min(18, 'You must be at least 18 years')
-          .max(65, 'You must be at most 65 years')
-      });
-      break;
-    case 'visits':
-      userInfoSchema = yup.object().shape({
-        userInfo: yup.number().typeError('Visits must be number').required('Required')
-      });
-      break;
-    default:
-      userInfoSchema = yup.object().shape({
-        userInfo: yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Name is Required')
-      });
-      break;
-  }
 
   const isEditable = tableMeta?.selectedRow[row.id];
 
@@ -365,7 +420,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               id="editable-company-rate"
               type="number" // Set the type to number to accept numeric input
               value={value} // Display current rate if available, or empty string
-              onChange={(e) => setValue(e.target.value)}
+              onChange={onChange}
               onBlur={onBlur}
             />
           ) : (
@@ -374,6 +429,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
         </>
       );
       break;
+
     case 'driverVendorRate':
       element = (
         <>
