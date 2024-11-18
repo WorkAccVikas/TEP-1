@@ -31,7 +31,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { addCab } from 'store/slice/cabProvidor/cabSlice';
+import { addCab, editCab, fetchCabDetails } from 'store/slice/cabProvidor/cabSlice';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { convertToDateUsingMoment, formatDateUsingMoment } from 'utils/helper';
 import * as Yup from 'yup';
@@ -186,6 +186,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
 };
 
 export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
+  console.log("data",data);
+  
   switch (userType) {
     case USERTYPE.iscabProvider:
       return {
@@ -391,6 +393,7 @@ const initialValuesFun = (data, userType) => {
 };
 
 const getPayloadForUpdate = (values, userType) => {
+  console.log(`🚀 ~ getPayloadForUpdate ~ values:`, values);
   switch (userType) {
     case USERTYPE.iscabProvider: {
       const formData = new FormData();
@@ -424,6 +427,7 @@ const getPayloadForUpdate = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values.vehicleImages);
       return formData;
     }
 
@@ -459,6 +463,7 @@ const getPayloadForUpdate = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values.vehicleImages);
       return formData;
     }
 
@@ -494,6 +499,7 @@ const getPayloadForUpdate = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values.vehicleImages);
       return formData;
     }
 
@@ -529,6 +535,7 @@ const getPayloadForUpdate = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      formData.append('vehicleImages', values.vehicleImages);
       return formData;
     }
     default:
@@ -540,7 +547,7 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
   switch (userType) {
     case USERTYPE.iscabProvider: {
       const formData = new FormData();
-      console.log('values.vehicleImages', values.vehicleImages);
+      // console.log('values.vehicleImages', values.vehicleImages);
 
       formData.append('vehicletype', values.vehicletype);
       formData.append('vendorId', values.vendorId || 'null');
@@ -716,11 +723,17 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
   }
 };
 
+const sliceName = "cabs";
+
 const AddCab = () => {
   const [showGpsEmi, setShowGpsEmi] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const { isCreating, getSingleDetails } = useSelector(
+    (state) => state[sliceName]
+  );
 
   const userType = useSelector((state) => state.auth.userType);
   const vendors = useSelector((state) => state.vendors.allVendors);
@@ -732,8 +745,11 @@ const AddCab = () => {
 
   const fileInputRef = useRef();
 
+  console.log("id",id);
+  console.log("getSingleDetails",getSingleDetails);
+
   const triggerFileInput = () => {
-    console.log('trigger Function click');
+    // console.log('trigger Function click');
     fileInputRef.current.click();
   };
 
@@ -778,23 +794,28 @@ const AddCab = () => {
       dispatch(fetchAllVendors());
     }
 
-    //  (async () => {
-    //    try {
-    //      if (id) {
-    //        console.log('API Calling .......');
+     (async () => {
+       try {
+         if (id) {
+           console.log('API Calling .......');
 
-    //        const result = await dispatch(fetchVehicleDetails(id)).unwrap();
-    //        console.log(`🚀 ~ Manage ~ result:`, result);
-    //      }
-    //    } catch (error) {
-    //      console.log(`🚀 ~ Manage ~ error:`, error);
-    //      navigate('/vehicle-management', { replace: true });
-    //    }
-    //  })();
+           const result = await dispatch(fetchCabDetails(id)).unwrap();
+           console.log(`🚀 ~ Manage ~ result:`, result);
+         }
+       } catch (error) {
+         console.log(`🚀 ~ Manage ~ error:`, error);
+         navigate('/management/cab/view', { replace: true });
+       }
+     })();
   }, [dispatch, userType]);
 
   // const data = id? null : getSingleDetails;
-  const data = id ? null : undefined;
+  const data = isCreating ? null : getSingleDetails;
+
+  console.log("getSingleDetails",getSingleDetails);
+  console.log("isCreating",isCreating);
+  console.log("data",data);
+  
 
   const validationSchema = Yup.object({
     vehicletype: Yup.string().required('Vehicletype is required').min(1, 'Vehicletype is required'),
@@ -834,9 +855,9 @@ const AddCab = () => {
 
           const response = await dispatch(addCab(formData)).unwrap();
         } else {
-          // console.log('API Calling (UPDATE) .......');
-          // const formData = getPayloadForUpdate(values, userType);
-          // await dispatch(updateVehicle(formData));
+          console.log('API Calling (UPDATE) .......');
+          const formData = getPayloadForUpdate(values, userType);
+          await dispatch(editCab(formData));
         }
 
         // const message = isCreating ? messages[sliceName].CREATE : messages[sliceName].UPDATE;
@@ -876,7 +897,7 @@ const AddCab = () => {
     }
   });
 
-  console.log('formik', formik.values.vehicleImages);
+  // console.log('formik', formik.values.vehicleImages);
 
   const { errors, touched, handleSubmit, handleBlur, isSubmitting, getFieldProps, setFieldValue, values, dirty, initialValues } = formik;
 
@@ -1090,7 +1111,7 @@ const AddCab = () => {
                               label="Select Pollution Expiry Date"
                               sx={{
                                 width: '100%',
-                                border: !!formik.errors.pollutionExpiryDate && formik.touched.pollutionExpiryDate ? 'red' : 'auto'
+                                // border: !!formik.errors.pollutionExpiryDate && formik.touched.pollutionExpiryDate ? 'red' : 'auto'
                               }}
                               value={values.pollutionExpiryDate}
                               format="dd/MM/yyyy"
@@ -1592,7 +1613,6 @@ const AddCab = () => {
                 <Grid item xs={12}>
                   <MainCard title="Upload Vehicle Images">
                     <Box p={3}>
-                      {/* Upload Section */}
                       <Stack gap={2}>
                         <Box
                           border="2px dashed #ccc"
@@ -1602,11 +1622,7 @@ const AddCab = () => {
                           alignItems="center"
                           justifyContent="center"
                           flexDirection="column"
-                          // sx={{
-                          //   cursor: 'pointer',
-                          //   '&:hover': { borderColor: '#1976d2' }
-                          // }}
-                          // onClick={triggerFileInput} // Trigger input click on box click
+                        
 
                           sx={{
                             cursor: vehicleImages.length < MAX_VEHICLE_IMAGES ? 'pointer' : 'not-allowed',
@@ -1614,7 +1630,7 @@ const AddCab = () => {
                               borderColor: vehicleImages.length < MAX_VEHICLE_IMAGES ? '#1976d2' : '#ccc'
                             }
                           }}
-                          onClick={vehicleImages.length < MAX_VEHICLE_IMAGES ? triggerFileInput : undefined} // Prevent clicks if limit is reached
+                          onClick={vehicleImages.length < MAX_VEHICLE_IMAGES ? triggerFileInput : undefined} 
                         >
                           <DocumentUpload fontSize="large" color="primary" />
                           <Typography variant="body1" color="textSecondary">
@@ -1624,11 +1640,11 @@ const AddCab = () => {
                             variant="contained"
                             component="label"
                             sx={{ mt: 2 }}
-                            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+                            onClick={(e) => e.stopPropagation()}
                           >
                             Upload Images
                             <input
-                              ref={fileInputRef} // Attach ref to the file input
+                              ref={fileInputRef} 
                               hidden
                               accept="image/*"
                               type="file"
@@ -1648,7 +1664,7 @@ const AddCab = () => {
                         </Typography>
                       </Stack>
 
-                      {/* Images Section */}
+                     
                       {vehicleImages.length > 0 && (
                         <Box mt={4}>
                           <Typography variant="h6" gutterBottom>
@@ -1676,7 +1692,7 @@ const AddCab = () => {
                                     <IconButton
                                       color="error"
                                       onClick={(e) => {
-                                        e.stopPropagation(); // Prevent card click when deleting
+                                        e.stopPropagation(); 
                                         handleDelete(image.id);
                                       }}
                                     >
@@ -1690,22 +1706,20 @@ const AddCab = () => {
                         </Box>
                       )}
 
-                      {/* Dialog for Image Preview */}
+                    
                       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                         <Stack
                           gap={2}
                           sx={{
-                            // width: "inherit",
+                           
                             height: 'inherit'
                           }}
                         >
                           <DialogTitle
                             sx={{
                               fontWeight: 'bold',
-                              bgcolor: 'primary.main', // Background color
-                              color: 'white' // Text color
-                              // px: 3, // Horizontal padding
-                              // py: 2, // Vertical padding
+                              bgcolor: 'primary.main', 
+                              color: 'white' 
                             }}
                           >
                             <Stack direction="row" justifyContent="space-between" alignContent="center">
@@ -1729,7 +1743,7 @@ const AddCab = () => {
                 {/* Actions */}
                 <Grid item xs={12}>
                   <DialogActions>
-                    <Button color="error" onClick={() => navigate('/vehicle-management')}>
+                    <Button color="error" onClick={() => navigate('/management/cab/view')}>
                       Cancel
                     </Button>
                     <Button variant="contained" type="submit" disabled={isSubmitting || !dirty}>

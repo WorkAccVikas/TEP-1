@@ -24,25 +24,25 @@ const invoices = {
     {
       id: 'invoice',
       title: <FormattedMessage id="invoice" />,
-      type: 'collapse',
+      type: 'item',
       url: '/apps/invoices/list',
       icon: icons.invoice,
-      children: [
-        // {
-        //   id: 'list',
-        //   title: <FormattedMessage id="list" />,
-        //   type: 'item',
-        //   url: '/apps/invoices/list',
-        //   // icon: icons.view
-        // },
-        {
-          id: 'create',
-          title: <FormattedMessage id="create" />,
-          type: 'item',
-          url: '/apps/invoices/create',
-          // icon: icons.upload
-        }
-      ]
+      // children: [
+      //   {
+      //     id: 'list',
+      //     title: <FormattedMessage id="list" />,
+      //     type: 'item',
+      //     url: '/apps/invoices/list',
+      //     // icon: icons.view
+      //   },
+      //   {
+      //     id: 'create',
+      //     title: <FormattedMessage id="create" />,
+      //     type: 'item',
+      //     url: '/apps/invoices/create',
+      //     // icon: icons.upload
+      //   }
+      // ]
     },
      // Advance
     //  {
