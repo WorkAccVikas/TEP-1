@@ -399,7 +399,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'add-cab',
                   element: <AddCab />
-                  //   element: <ProtectedRoute element={AddCab} moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE} />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <AddCab />
                 }
               ]
             }

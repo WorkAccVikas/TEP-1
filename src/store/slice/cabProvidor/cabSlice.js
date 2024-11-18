@@ -3,6 +3,7 @@ import axios from 'utils/axios'; // Adjust the import path according to your pro
 
 const initialState = {
   cabs: [], // Empty array initially
+  getSingleDetails: null,
   metaData: {
     totalCount: 0,
     page: 1,
@@ -10,7 +11,8 @@ const initialState = {
     lastPageNo: 1
   },
   loading: false,
-  error: null
+  error: null,
+  errorDetails: null,
 };
 
 export const fetchCabs = createAsyncThunk('cabs/fetchCabs', async ({ page = 1, limit = 10, vendorID = null }, { rejectWithValue }) => {
@@ -37,6 +39,28 @@ export const addCab = createAsyncThunk('cabs/add', async (formData, { rejectWith
       }
     });
     return { status: response.status };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+export const editCab = createAsyncThunk('cabs/edit', async (formData, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/vehicle/edit`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return { status: response.status };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+export const fetchCabDetails = createAsyncThunk('cabs/fetchCabDetails', async (id, { getState, rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/vehicle/by?vehicleId=${id}`);
+    return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
@@ -70,10 +94,31 @@ const cabSlice = createSlice({
       .addCase(fetchCabs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(editCab.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(editCab.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(editCab.rejected, (state, action) => {
+        state.loading = false;
+        state.errorUpdate = action.payload;
+      })
+      .addCase(fetchCabDetails.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCabDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.getSingleDetails = action.payload;
+      })
+      .addCase(fetchCabDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.errorDetails = action.payload;
+      })
   }
 });
 
 // Export the reducer and actions
-export const { reset, resetError } = cabSlice.actions;
+export const { reset, resetError, setIsCreating } = cabSlice.actions;
 export const cabReducer = cabSlice.reducer;

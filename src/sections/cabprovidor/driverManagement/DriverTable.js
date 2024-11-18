@@ -152,14 +152,19 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         accessor: 'userName',
         Cell: ({ row, value }) => {
           const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+          const isCabProviderDriver = row.original.isCabProviderDriver;
+
           return (
             <Typography>
               <Link
                 to={`/management/driver/overview/${row.original._id}`}
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
-                style={{ textDecoration: 'none' }}
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 {formattedValue}
+                {isCabProviderDriver && (
+                  <span style={{ color: 'green', fontSize: '0.9rem' }}>✔</span> // Tick sign
+                )}
               </Link>
             </Typography>
           );
@@ -311,34 +316,46 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         }
       },
       {
+        Header: 'Compliance Progress',
+        accessor: 'progress',
+        Cell: ({ row, value }) => {
+          const progessValue = Math.floor(Math.random() * 101);
+          console.log(row);
+          return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+        }
+      },
+      {
         Header: 'Actions',
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
           const driverID = row.original._id;
+          const isCabProviderDriver = row.original.isCabProviderDriver;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              {isCabProviderDriver === 1 && (
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="View Rate"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
                   }}
+                  title="View Rate"
                 >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
+                    }}
+                  >
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
+              )}
 
               <Tooltip
                 componentsProps={{
@@ -390,15 +407,6 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               </Tooltip>
             </Stack>
           );
-        }
-      },
-      {
-        Header: 'Compliance Progress',
-        accessor: 'progress',
-        Cell: ({ row, value }) => {
-          const progessValue = Math.floor(Math.random() * 101);
-          console.log(row);
-          return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
       }
     ],
