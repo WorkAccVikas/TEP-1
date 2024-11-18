@@ -25,8 +25,8 @@ import { GiPayMoney } from 'react-icons/gi';
 
 import { GiTakeMyMoney } from 'react-icons/gi';
 import CustomCircularLoader from 'components/CustomCircularLoader';
-import useDateRange from 'hooks/useDateRange';
-import DateRangeSelect, { DATE_RANGE_OPTIONS } from 'components/DateRange/DateRangeSelect';
+import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
+import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import moment from 'moment';
 import { formatDateForApi, formatDateUsingMoment } from 'utils/helper';
 
@@ -36,7 +36,11 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const { startDate, endDate, range, setRange, handleRangeChange } = useDateRange(DATE_RANGE_OPTIONS.THIS_MONTH);
+  // const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange();
+
+  // console.log('range', range);
+  // console.log('prevRange', prevRange);
 
   const loading = useSelector((state) => state.dashboard.loading);
   const dashboardData = useSelector((state) => state.dashboard.data);
@@ -54,11 +58,19 @@ const Dashboard = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    /** DESC :
+     *    Payload object passed to the API, ensuring `startDate` and `endDate`
+     *    are formatted as strings in the "YYYY-MM-DD" format using `formatDateUsingMoment`.
+     */
     const payload = {
-      startDate: formatDateUsingMoment(startDate, 'YYYY-MM-DD'),
-      endDate: formatDateUsingMoment(endDate, 'YYYY-MM-DD')
+      startDate: formatDateUsingMoment(startDate),
+      endDate: formatDateUsingMoment(endDate)
     };
 
+    /** DESC :
+     *    Payload object to be sent to the API, with `startDate` and `endDate`
+     *    formatted as ISO 8601 strings (e.g., 'YYYY-MM-DDTHH:mm:ss') using `formatDateForApi`.
+     */
     const payload2 = {
       startDate: formatDateForApi(startDate),
       endDate: formatDateForApi(endDate)
@@ -69,7 +81,7 @@ const Dashboard = () => {
 
     // alert(JSON.stringify(payload2, null, 2));
 
-    dispatch(fetchDashboardData(payload2));
+    dispatch(fetchDashboardData(payload));
   }, [dispatch, startDate, endDate]);
 
   const token = localStorage.getItem('serviceToken') || '';
@@ -115,8 +127,6 @@ const Dashboard = () => {
     ],
     []
   );
-
-  
 
   // return (
   //   <>
@@ -173,6 +183,7 @@ const Dashboard = () => {
             startDate={startDate}
             endDate={endDate}
             selectedRange={range}
+            prevRange={prevRange}
             setSelectedRange={setRange}
             onRangeChange={handleRangeChange}
             showSelectedRangeLabel
