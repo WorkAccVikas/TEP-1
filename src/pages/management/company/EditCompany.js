@@ -234,7 +234,7 @@ function EditCompany() {
       files: [{ preview: companyData?.companyContract }]
       //   files: companyData?.companyContract || null
     },
-    validationSchema,
+    // validationSchema,
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       setLoading(true);

@@ -277,7 +277,7 @@ function EditBranch() {
         <Grid item xs={12}>
           <MainCard title={'UPDATE BRANCH INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} lg={4}>
+              {/* <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
                   <InputLabel id="demo-simple-select-helper-label">Company Name</InputLabel>
                   <FormControl>
@@ -294,17 +294,17 @@ function EditBranch() {
                     />
                   </FormControl>
 
-                  {/* {selectedOption && (
+                  {selectedOption && (
                     <div>
                       <h3>Selected Option:</h3>
                       <p>{selectedOption.company_name}</p>
                     </div>
-                  )} */}
+                  )}
                 </Stack>
                 {formik.touched.parentCompanyID && formik.errors.parentCompanyID && (
                   <FormHelperText error>{formik.errors.parentCompanyID}</FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
                   <InputLabel>Branch Name</InputLabel>
@@ -313,7 +313,7 @@ function EditBranch() {
                     placeholder="Enter Branch Name"
                     id="companyBranchName"
                     name="companyBranchName"
-                    value={branchData.companyBranchName || formik.values.companyBranchName}
+                    value={formik.values.companyBranchName}
                     onChange={formik.handleChange}
                     error={formik.touched.companyBranchName && Boolean(formik.errors.companyBranchName)}
                     helperText={formik.touched.companyBranchName && formik.errors.companyBranchName}
@@ -329,7 +329,7 @@ function EditBranch() {
                     placeholder="Enter Person Name"
                     id="contact_person"
                     name="contact_person"
-                    value={branchData.contact_person || formik.values.contact_person}
+                    value={formik.values.contact_person}
                     onChange={formik.handleChange}
                     error={formik.touched.contact_person && Boolean(formik.errors.contact_person)}
                     helperText={formik.touched.contact_person && formik.errors.contact_person}
@@ -344,7 +344,7 @@ function EditBranch() {
                     placeholder="Enter Company Email"
                     id="company_email"
                     name="company_email"
-                    value={branchData.company_email || formik.values.company_email}
+                    value={formik.values.company_email}
                     onChange={formik.handleChange}
                     error={formik.touched.company_email && Boolean(formik.errors.company_email)}
                     helperText={formik.touched.company_email && formik.errors.company_email}
@@ -359,7 +359,7 @@ function EditBranch() {
                     placeholder="Enter Mobile Number"
                     id="mobile"
                     name="mobile"
-                    value={branchData.mobile || formik.values.mobile}
+                    value={formik.values.mobile}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -379,7 +379,7 @@ function EditBranch() {
                     placeholder="Enter Landline Number"
                     id="landline"
                     name="landline"
-                    value={branchData.landline || formik.values.landline}
+                    value={formik.values.landline}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -399,7 +399,7 @@ function EditBranch() {
                     placeholder="Enter PAN"
                     id="PAN"
                     name="PAN"
-                    value={branchData.PAN || formik.values.PAN}
+                    value={formik.values.PAN}
                     onChange={formik.handleChange}
                     error={formik.touched.PAN && Boolean(formik.errors.PAN)}
                     helperText={formik.touched.PAN && formik.errors.PAN}
@@ -414,7 +414,7 @@ function EditBranch() {
                     placeholder="Enter GSTIN"
                     id="GSTIN"
                     name="GSTIN"
-                    value={branchData.GSTIN || formik.values.GSTIN}
+                    value={formik.values.GSTIN}
                     onChange={formik.handleChange}
                     error={formik.touched.GSTIN && Boolean(formik.errors.GSTIN)}
                     helperText={formik.touched.GSTIN && formik.errors.GSTIN}
@@ -429,7 +429,7 @@ function EditBranch() {
                     placeholder="Enter Pincode"
                     id="postal_code"
                     name="postal_code"
-                    value={branchData.postal_code || formik.values.postal_code}
+                    value={formik.values.postal_code}
                     onChange={(event) => {
                       const value = event.target.value;
                       if (/^\d*$/.test(value)) {
@@ -449,7 +449,7 @@ function EditBranch() {
                     placeholder="Enter Address"
                     id="address"
                     name="address"
-                    value={branchData.address || formik.values.address}
+                    value={formik.values.address}
                     onChange={formik.handleChange}
                     error={formik.touched.address && Boolean(formik.errors.address)}
                     helperText={formik.touched.address && formik.errors.address}
@@ -464,7 +464,7 @@ function EditBranch() {
                     placeholder="Enter City"
                     id="city"
                     name="city"
-                    value={branchData.city || formik.values.city}
+                    value={formik.values.city}
                     onChange={formik.handleChange}
                     error={formik.touched.city && Boolean(formik.errors.city)}
                     helperText={formik.touched.city && formik.errors.city}
