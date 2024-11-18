@@ -26,6 +26,7 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import axiosServices from 'utils/axios';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 
 const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
@@ -190,6 +191,15 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
               </Dialog>
             </>
           );
+        }
+      },
+      {
+        Header: 'Compliance Progress',
+        accessor: 'progress',
+        Cell: ({ row, value }) => {
+          const progessValue = Math.floor(Math.random() * 101);
+          console.log(row);
+          return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
       }
       //   {

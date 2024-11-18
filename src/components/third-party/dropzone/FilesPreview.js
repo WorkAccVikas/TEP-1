@@ -45,7 +45,7 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
               alignItems: 'center'
             }}
           >
-            {fileType.includes('image') ? (
+            {fileType?.includes('image') ? (
               <img alt="preview" src={preview} style={{ width: 64, height: 64, borderRadius: 8, marginRight: theme.spacing(2) }} />
             ) : (
               <Document variant="Bold" style={{ width: 30, height: 30, fontSize: '1.5rem', marginRight: theme.spacing(2) }} />

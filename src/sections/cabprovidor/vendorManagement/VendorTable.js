@@ -13,23 +13,33 @@ import {
   TableRow,
   Tooltip,
   Typography,
-  useTheme
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useExpanded, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
-import { Add, Eye } from 'iconsax-react';
+import { Add, Eye, Edit } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
-import { MODULE, PERMISSIONS } from 'constant';
+import { ACTION, MODULE, PERMISSIONS } from 'constant';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { ThemeMode } from 'config';
+import { dispatch, useSelector } from 'store';
+import { handleClose, handleOpen, setDeletedName, setSelectedID, updateVendorStatus } from 'store/slice/cabProvidor/vendorSlice';
+import AlertDelete from 'components/alertDialog/AlertDelete';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+  const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
+
   const navigate = useNavigate();
   const theme = useTheme();
   const mode = theme.palette.mode;
@@ -81,15 +91,110 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
       {
         Header: 'Status',
         accessor: 'vendorDetails',
-        Cell: ({ value }) => {
-          switch (value.userStatus) {
-            case 0:
-              return <Chip color="error" label="Inactive" size="small" variant="light" />;
-            case 1:
-              return <Chip color="success" label="Active" size="small" variant="light" />;
-            default:
-              return <Chip color="info" label="Not Defined" size="small" variant="light" />;
-          }
+        Cell: ({ row, value }) => {
+          console.log(row);
+          const [status, setStatus] = useState(row.original.isActive);
+          const [openDialog, setOpenDialog] = useState(false);
+          const [newStatus, setNewStatus] = useState(null);
+
+          const handleToggleStatus = () => {
+            const toggledStatus = status === 1 ? 0 : 1;
+            setNewStatus(toggledStatus);
+            setOpenDialog(true);
+            const id = row.original.vendorId;
+            console.log(`🚀 ~ row.values.id:`, row);
+            dispatch(setSelectedID(id));
+          };
+
+          const handleConfirmStatusUpdate = async () => {
+            try {
+              // // Make PUT request to update status
+              // await axiosServices.put('/vehicle/updateActiveStatus', {
+              //   data: {
+              //     vehicleId: row.original._id,
+              //     status: newStatus
+              //   }
+              // });
+
+              const response = await dispatch(updateVendorStatus(newStatus));
+              console.log(response);
+              if (response.payload.success) {
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: response.payload.message,
+                    variant: 'alert',
+                    alert: {
+                      color: 'success'
+                    },
+                    close: true
+                  })
+                );
+                // dispatch(fetchDrivers());
+              }
+
+              setStatus(newStatus);
+              setOpenDialog(false);
+            } catch (error) {
+              console.error('Error updating status:', error);
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: error.response.data?.error || 'Something went wrong',
+                  variant: 'alert',
+                  alert: {
+                    color: 'error'
+                  },
+                  close: true
+                })
+              );
+            }
+          };
+
+          const handleCancel = () => {
+            setOpenDialog(false);
+          };
+
+          return (
+            <>
+              <Chip
+                label={status === 1 ? 'Active' : 'Inactive'}
+                color={status === 1 ? 'success' : 'error'}
+                variant="light"
+                size="small"
+                onClick={handleToggleStatus}
+                sx={{
+                  ':hover': {
+                    backgroundColor: status === 1 ? 'rgba(36, 140, 106, 0.5)' : 'rgba(255, 0, 0, 0.3)',
+                    cursor: 'pointer'
+                  }
+                }}
+              />
+
+              {/* Confirmation Dialog */}
+              <Dialog open={openDialog} onClose={handleCancel}>
+                <DialogTitle>Confirm Status Change</DialogTitle>
+                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this cab?</DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCancel} color="error">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleConfirmStatusUpdate} variant="contained">
+                    Confirm
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </>
+          );
+
+          // switch (value.userStatus) {
+          //   case 0:
+          //     return <Chip color="error" label="Inactive" size="small" variant="light" />;
+          //   case 1:
+          //     return <Chip color="success" label="Active" size="small" variant="light" />;
+          //   default:
+          //     return <Chip color="info" label="Not Defined" size="small" variant="light" />;
+          // }
         }
       },
       {
@@ -100,6 +205,28 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           const vendorID = row.original.vendorId;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              {/* <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/driver-overview/${driverID}`);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip> */}
+
               <Tooltip
                 componentsProps={{
                   tooltip: {
@@ -121,13 +248,128 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   <Eye />
                 </IconButton>
               </Tooltip>
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const id = row.original.vendorId;
+                    console.log('Id = ', id);
+                    navigate(`/management/vendor/edit/${id}`);
+                    // dispatch(setSelectedID(row.values._id));
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              {/* <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Delete"
+              >
+                <IconButton
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const id = row.original.vendorId;
+                    console.log(`🚀 ~ row.values.id:`, row);
+                    dispatch(handleOpen(ACTION.DELETE));
+                    dispatch(setDeletedName(row.original['vendorCompanyName']));
+                    dispatch(setSelectedID(id));
+                  }}
+                >
+                  <Trash />
+                </IconButton>
+              </Tooltip> */}
             </Stack>
           );
         }
       }
+      // {
+      //   Header: 'Actions',
+      //   className: 'cell-center',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     const vendorID = row.original.vendorId;
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+      //         <Tooltip
+      //           componentsProps={{
+      //             tooltip: {
+      //               sx: {
+      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                 opacity: 0.9
+      //               }
+      //             }
+      //           }}
+      //           title="View Rate"
+      //         >
+      //           <IconButton
+      //             color="secondary"
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+      //             }}
+      //           >
+      //             <Eye />
+      //           </IconButton>
+      //         </Tooltip>
+      //       </Stack>
+      //     );
+      //   }
+      // }
     ],
     []
   );
+
+  // const handleCloseDialog = useCallback(async (e, flag = false) => {
+  //   console.log(`🚀 ~ handleCloseDialog ~ flag:`, selectedID);
+
+  //   if (typeof flag === 'boolean' && flag) {
+  //     // const payload = { data: { vendorId: selectedID, status: 0 } };
+  //     const response = await dispatch(updateVendorStatus(0)).unwrap();
+
+  //     console.log('res = ', response);
+
+  //     if (response.success) {
+  //       dispatch(
+  //         openSnackbar({
+  //           open: true,
+  //           message: response.message,
+  //           variant: 'alert',
+  //           alert: {
+  //             color: 'success'
+  //           },
+  //           close: true
+  //         })
+  //       );
+  //       dispatch(handleClose());
+  //       setUpdateKey(updateKey + 1);
+  //       // dispatch(fetchDrivers());
+  //     }
+  //   } else {
+  //     dispatch(handleClose());
+  //     return;
+  //   }
+  // }, []);
 
   return (
     <>
@@ -150,6 +392,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           )}
         </Box>
       </Stack>
+      {/* {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />} */}
     </>
   );
 };
