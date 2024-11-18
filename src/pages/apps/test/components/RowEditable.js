@@ -133,6 +133,8 @@ export default function RowEditable({ getValue: initialValue, row, column, table
           original._companyRate = _companyRate;
           original._guard_price_1 = _guard_price_1;
           original._driverRate_or_vendorRate = _driverRate_or_vendorRate;
+          original.vendorRate = _dual_trip === 0 ? vendorAmount ?? 0 : vendorDualAmount ?? 0;
+          original.driverRate = _dual_trip === 0 ? driverAmount ?? 0 : driverDualAmount ?? 0;
         }
       } catch (error) {
         console.error('API Error:', error.message || error);

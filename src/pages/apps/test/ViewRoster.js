@@ -275,7 +275,7 @@ const ViewRosterTest1 = () => {
       setRosterData(stateData);
     }
   }, []);
-
+  console.log({ rosterData });
   useEffect(() => {
     const fetchRosterData = async (id) => {
       const response = await axiosServices.post('/tripData/trip/requests/company', {
@@ -327,6 +327,11 @@ const ViewRosterTest1 = () => {
           return <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />;
         },
         disableSortBy: true,
+        disableFilters: true
+      },
+      {
+        Header: 'Trip Id',
+        accessor: 'rosterTripId',
         disableFilters: true
       },
       {
