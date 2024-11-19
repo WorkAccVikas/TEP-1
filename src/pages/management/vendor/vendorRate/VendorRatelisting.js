@@ -27,6 +27,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
 import { color } from 'framer-motion';
 import { bgcolor } from '@mui/system';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import { APP_DEFAULT_PATH } from 'config';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
@@ -204,6 +206,12 @@ const VendorRatelisting = () => {
   }, [data]);
   useEffect(() => {}, [companyRate]);
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Vendor', to: '/management/vendor/view' },
+    { title: 'Vendor Rates' }
+  ];
+
   return (
     <>
       {/* Company selection dialog */}
@@ -219,6 +227,8 @@ const VendorRatelisting = () => {
 
       {/* Render CompanyRateListing once a company is selected */}
       {!dialogOpen && selectedCompany && selectedVendorID && !showCompanyList ? (
+        <>
+        <Breadcrumbs custom links={breadcrumbLinks} />
         <Stack gap={1} spacing={1}>
           {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
@@ -262,6 +272,7 @@ const VendorRatelisting = () => {
             />
           </MainCard>
         </Stack>
+        </>
       ) : null}
     </>
   );
