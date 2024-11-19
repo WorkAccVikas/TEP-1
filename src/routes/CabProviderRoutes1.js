@@ -17,6 +17,7 @@ import AddRosterFileForm from 'pages/apps/test/components/AddRosterFileForm';
 import DriverRate from 'pages/management/driver/driverRate/DriverRate';
 import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelisting';
 import TripView from 'pages/trips/TripView';
+import ExpandingFile from 'sections/cabprovidor/testAdvance/ExpandingFile';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -230,7 +231,12 @@ const CabProvidorRoutes = {
                   path: 'advance-type',
                   element: <AdvanceType />
                   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
-                }
+                },
+                {
+                  path: 'test',
+                  element: <ExpandingFile />
+                  //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
+                },
               ]
             },
 
