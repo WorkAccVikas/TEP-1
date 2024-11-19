@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -58,6 +58,7 @@ import { Link } from 'react-router-dom';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import LoadingButton from 'themes/overrides/LoadingButton';
+import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -106,10 +107,12 @@ const changeStatusFromAPI = async (tripId, updatedStatus, remarks) => {
   }
 };
 
-const DeleteButton = ({ selected = [], visible, deleteURL }) => {
+const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
   console.log('selected', selected);
   console.log('DataURL', deleteURL);
+  const [remove, setRemove] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const handleDelete = async () => {
     try {
       setLoading(true);
@@ -133,7 +136,8 @@ const DeleteButton = ({ selected = [], visible, deleteURL }) => {
           close: true
         })
       );
-      dispatch(getInvoiceList());
+
+      handleRefetch();
     } catch (error) {
       console.log('Error in delete', error);
       dispatch(
@@ -152,6 +156,10 @@ const DeleteButton = ({ selected = [], visible, deleteURL }) => {
     }
   };
 
+  const handleCloseForRemove = useCallback(() => {
+    setRemove(false);
+  }, []);
+
   return (
     <>
       {visible && selected.length > 0 && (
@@ -167,11 +175,21 @@ const DeleteButton = ({ selected = [], visible, deleteURL }) => {
               top: -1,
               borderRadius: '0 4px 0 4px'
             }}
-            onClick={handleDelete}
+            // onClick={handleDelete}
+            onClick={() => setRemove(true)}
             disabled={loading}
           >
             Delete ({selected.length})
           </Button>
+
+          {remove && (
+            <CustomAlertDelete
+              title={'This action is irreversible. Please check before deleting.'}
+              open={remove}
+              handleClose={handleCloseForRemove}
+              handleDelete={handleDelete}
+            />
+          )}
         </>
       )}
     </>
@@ -180,7 +198,7 @@ const DeleteButton = ({ selected = [], visible, deleteURL }) => {
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns, data, deleteButton = false, deleteURL }) {
+function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -226,8 +244,11 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL }) {
   console.log('selectedRowIds = ', selectedRowIds);
 
   const selectedRowIdsArray = Object.keys(selectedRowIds); // Get keys of selected rows
-  const selectedRows = selectedRowIdsArray.map((id) => rows[id]?.original?._id).filter(Boolean); // Map to _id of rows
+  const selectedRows = selectedRowIdsArray.map((id) => rows[id]?.original?._id).filter(Boolean);
+  // .filter((item) => item.assignedStatus === TRIP_STATUS.COMPLETED); // Map to _id of rows
   console.log('selectedRows = ', selectedRows);
+
+  console.log('rows', rows);
 
   const componentRef = useRef(null);
 
@@ -296,7 +317,7 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL }) {
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
 
-      <DeleteButton selected={selectedRows} visible={deleteButton} deleteURL={deleteURL} />
+      <DeleteButton selected={selectedRows} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
 
       {/* <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
         <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
@@ -361,7 +382,7 @@ ReactTable.propTypes = {
 // ==============================|| TRIP - LIST ||============================== //
 
 const TripList = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [alertCancelOpen, setAlertCancelOpen] = useState(false);
@@ -375,7 +396,7 @@ const TripList = () => {
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
 
   useEffect(() => {
-    dispatch(getInvoiceList()).then(() => setLoading(false));
+    // dispatch(getInvoiceList()).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -506,10 +527,13 @@ const TripList = () => {
     setCancelText(event.target.value);
   };
 
+  const handleRefetch = useCallback(() => {
+    setRefetch((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // TODO : GET ALL TRIPS
         const response = await axiosServices.get('/assignTrip/all/trips/cabProvider', {
           params: {
             startDate: formatDateForApi(startDate),
@@ -948,7 +972,9 @@ const TripList = () => {
         <MainCard content={false}>
           {/* <ScrollX> */}
           {/* <ReactTable columns={columns} data={dummyData} /> */}
-          {data?.length > 0 && <ReactTable columns={columns} data={data} deleteButton deleteURL="/assignTrip/delete/trips" />}
+          {data?.length > 0 && (
+            <ReactTable columns={columns} data={data} deleteButton deleteURL="/assignTrip/delete/trips" handleRefetch={handleRefetch} />
+          )}
           {/* </ScrollX> */}
         </MainCard>
       </Stack>
