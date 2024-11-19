@@ -27,7 +27,8 @@ export default function RowEditable({ getValue: initialValue, row, column, table
   const { original, index } = row;
   const { id, columnDef } = column;
   const { _zoneName_options, _vehicleType_options, _cab_options } = original;
-  console.log('original._cab', original._cab);
+  console.log('original._cab', original);
+
   const onChange = async (e) => {
     // Destructure with fallback values
     const newValue = id === '_guard_1' || id === '_dual_trip' ? (e.target.checked ? 1 : 0) : e.target?.value;
@@ -324,7 +325,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               onChange={onChange}
               onBlur={onBlur}
               renderValue={(selected) => selected?.userName || 'Select Driver'}
-              disabled={!original._cab.linkedDrivers}
+              disabled={!original._cab._id}
             >
               {original._cab.linkedDrivers ? (
                 original._cab.linkedDrivers.map((driver) => {
@@ -393,7 +394,7 @@ export default function RowEditable({ getValue: initialValue, row, column, table
               {value?.vehicleNumber}{' '}
               {!value._id && (
                 <Tooltip title={'select Driver'}>
-                  <IconButton size="small" color="info">
+                  <IconButton size="small" color="error">
                     <InfoCircle />
                   </IconButton>
                 </Tooltip>
