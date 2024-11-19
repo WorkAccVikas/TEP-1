@@ -12,7 +12,7 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
       drivers: cab.linkedDrivers
         .filter((driver) => driver.driverId !== null) // Exclude drivers with null driverId
         .map((driver) => ({
-          id: driver.driverId._id,
+          _id: driver.driverId._id,
           userName: driver.driverId.userName,
         })),
     });
@@ -56,7 +56,7 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
     // Match cab data and populate cabOptionsArray and DriverOptionsArray
     let cabData = cabMap.get(obj.vehicleNumber?.replaceAll(/\s+/g, '').toUpperCase());
     if (cabData) {
-      cabOptionsArray.push({ id: cabData.id, vehicleNumber: obj.vehicleNumber });
+      cabOptionsArray.push({ _id: cabData.id, vehicleNumber: obj.vehicleNumber });
       driverOptionsArray = [...cabData.drivers];
     }
 
