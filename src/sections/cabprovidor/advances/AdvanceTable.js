@@ -28,7 +28,7 @@ const AdvanceTable = ({ data, page, setPage, limit, setLimit, lastPageNo, key, s
   };
 
   const handleAdvanceType = () => {
-    navigate('/invoices/advance-type');
+    navigate('/apps/invoices/advance-type');
   };
 
   const columns = useMemo(
@@ -42,20 +42,22 @@ const AdvanceTable = ({ data, page, setPage, limit, setLimit, lastPageNo, key, s
       {
         Header: 'Requested By',
         className: 'cell-center',
-        accessor: 'requestedById.userName'
+        accessor: 'requestedById.userName',
+        Cell: ({ value }) => value || 'None'
         // disableSortBy: true,
       },
       {
         Header: 'Advance Type',
         className: 'cell-center',
-        accessor: 'advanceTypeId.advanceTypeName'
+        accessor: 'advanceTypeId.advanceTypeName',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Requested',
         className: 'cell-center',
         accessor: 'amount',
         Cell: ({ row }) => {
-          return <span>$ {row.original.amount}</span>;
+          return <span>₹ {row.original.amount}</span>;
         }
       },
       {
@@ -68,7 +70,7 @@ const AdvanceTable = ({ data, page, setPage, limit, setLimit, lastPageNo, key, s
           ) : row.original.isApproved === 2 ? (
             <Chip color="error" label="Rejected" size="small" variant="light" />
           ) : (
-            <Chip color="success" label={`$ ${row.original.approved_amount}`} size="small" variant="light" />
+            <Chip color="success" label={`₹ ${row.original.approved_amount}`} size="small" variant="light" />
           );
         }
       },
