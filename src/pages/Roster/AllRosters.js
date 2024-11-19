@@ -208,11 +208,6 @@ function ReactTable({ columns, data, setPage, limit, setLimit, lastPageNo }) {
                 </Fragment>
               );
             })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
-                <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
-              </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </Box>
@@ -257,6 +252,7 @@ const AllRosters = () => {
   }, [dispatch, page, limit, refetch]);
 
   const handleLimitChange = useCallback((event) => {
+    console.log(event.target.value);
     setLimit(+event.target.value);
     setPage(1);
   }, []);
@@ -548,6 +544,10 @@ const AllRosters = () => {
           />
         </ScrollX>
       </MainCard>
+
+      <div style={{ marginTop: '20px' }}>
+        <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageIndex} />
+      </div>
 
       {remove && (
         <CustomAlertDelete
