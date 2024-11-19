@@ -21,7 +21,9 @@ import {
   Tooltip,
   Menu,
   MenuItem,
-  Fade
+  Fade,
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -38,7 +40,7 @@ import TripCard from 'components/cards/trips/TripCard';
 import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
 import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
 
-import { dispatch, set, useSelector } from 'store';
+import { dispatch, useSelector } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reducers/invoice';
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
@@ -55,13 +57,15 @@ import { APP_DEFAULT_PATH } from 'config';
 import { Link } from 'react-router-dom';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
+import LoadingButton from 'themes/overrides/LoadingButton';
 
 const avatarImage = require.context('assets/images/users', true);
 
 const TRIP_STATUS = {
   PENDING: 1,
   COMPLETED: 2,
-  CANCELLED: 3
+  CANCELLED: 3,
+  UNATTENDED: 4
 };
 
 const POPUP_TYPE = {
@@ -77,6 +81,8 @@ const getTabName = (status) => {
       return 'Completed';
     case TRIP_STATUS.CANCELLED:
       return 'Cancelled';
+    case TRIP_STATUS.UNATTENDED:
+      return 'Unattended';
     default:
       return 'All';
   }
@@ -100,9 +106,81 @@ const changeStatusFromAPI = async (tripId, updatedStatus, remarks) => {
   }
 };
 
+const DeleteButton = ({ selected = [], visible, deleteURL }) => {
+  console.log('selected', selected);
+  console.log('DataURL', deleteURL);
+  const [loading, setLoading] = useState(false);
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      await axiosServices.delete(deleteURL, {
+        data: {
+          data: {
+            Ids: selected
+          }
+        }
+      });
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Deleted successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+      dispatch(getInvoiceList());
+    } catch (error) {
+      console.log('Error in delete', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {visible && selected.length > 0 && (
+        <>
+          <Button
+            variant="contained"
+            color="error"
+            size="medium"
+            startIcon={loading ? <CircularProgress size="20" /> : <Trash />}
+            sx={{
+              position: 'absolute',
+              right: -1,
+              top: -1,
+              borderRadius: '0 4px 0 4px'
+            }}
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            Delete ({selected.length})
+          </Button>
+        </>
+      )}
+    </>
+  );
+};
+
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns, data }) {
+function ReactTable({ columns, data, deleteButton = false, deleteURL }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -145,6 +223,12 @@ function ReactTable({ columns, data }) {
     useRowSelect
   );
 
+  console.log('selectedRowIds = ', selectedRowIds);
+
+  const selectedRowIdsArray = Object.keys(selectedRowIds); // Get keys of selected rows
+  const selectedRows = selectedRowIdsArray.map((id) => rows[id]?.original?._id).filter(Boolean); // Map to _id of rows
+  console.log('selectedRows = ', selectedRows);
+
   const componentRef = useRef(null);
 
   // ================ Tab ================
@@ -158,7 +242,8 @@ function ReactTable({ columns, data }) {
   const counts = {
     Pending: countGroup.filter((status) => status === TRIP_STATUS.PENDING).length,
     Completed: countGroup.filter((status) => status === TRIP_STATUS.COMPLETED).length,
-    Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length
+    Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length,
+    Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length
   };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
@@ -209,16 +294,19 @@ function ReactTable({ columns, data }) {
           ))}
         </Tabs>
       </Box>
-      <TableRowSelection selected={Object.keys(selectedRowIds).length} />
-      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
+      {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
+
+      <DeleteButton selected={selectedRows} visible={deleteButton} deleteURL={deleteURL} />
+
+      {/* <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
         <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          {/* <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} /> */}
+          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         </Stack>
         <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
           <CSVExport data={data} filename={'invoice-list.csv'} />
         </Stack>
-      </Stack>
-      <Box ref={componentRef}>
+      </Stack> */}
+      <Box ref={componentRef} sx={{ mt: 2 }}>
         <ScrollX>
           <Table {...getTableProps()}>
             <TableHead>
@@ -284,7 +372,7 @@ const TripList = () => {
   const [data, setData] = useState(null);
   const [refetch, setRefetch] = useState(false);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
 
   useEffect(() => {
     dispatch(getInvoiceList()).then(() => setLoading(false));
@@ -860,7 +948,7 @@ const TripList = () => {
         <MainCard content={false}>
           {/* <ScrollX> */}
           {/* <ReactTable columns={columns} data={dummyData} /> */}
-          {data?.length > 0 && <ReactTable columns={columns} data={data} />}
+          {data?.length > 0 && <ReactTable columns={columns} data={data} deleteButton deleteURL="/assignTrip/delete/trips" />}
           {/* </ScrollX> */}
         </MainCard>
       </Stack>
