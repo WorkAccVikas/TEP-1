@@ -179,6 +179,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     fetchCabs();
   }, []);
 
+  console.log({ tripData });
   useEffect(() => {
     if (tripData?.length > 0) {
       const mappedData = tripData.map((item) => ({
@@ -230,9 +231,37 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 vehicleTypeName: item.vehicleTypeArray[0]?.vehicleTypeName || 'N/A' // Fallback for undefined vehicleTypeName
               }
             : { _id: null, vehicleTypeName: item.vehicleType || 'N/A' }, // Fallback for undefined vehicleType
+        __cabOptions:
+          item.cabOptionsArray?.length === 1
+            ? {
+                _id: item.cabOptionsArray[0]?._id || null, // Add fallback for undefined
+                vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' }, // Fallback for undefined vehicleType
+        __driverOptions:
+          item.driverOptionsArray?.length === 1
+            ? {
+                _id: item.driverOptionsArray[0]?._id || null, // Add fallback for undefined
+                userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, userName: item.userName || 'N/A' }, // Fallback for undefined vehicleType
 
-        _driver: { _id: null, userName: null },
-        _cab: { _id: null, vehicleNumber: null },
+        // _driver: { _id: null, userName: null },
+        _driver:
+          item.driverOptionsArray?.length === 1
+            ? {
+                _id: item.driverOptionsArray[0]?._id || null, // Add fallback for undefined
+                userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, userName: item.userName || 'N/A' },
+
+        _cab:
+          item.cabOptionsArray?.length === 1
+            ? {
+                _id: item.cabOptionsArray[0]?._id || null, // Add fallback for undefined
+                vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
+              }
+            : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
         _zoneName_options: zoneInfo || [], // Ensure zoneInfo is not undefined
         _vehicleType_options: vehicleTypeInfo || [], // Ensure vehicleTypeInfo is not undefined
         _drivers_options: drivers || [], // Ensure drivers is not undefined
@@ -261,7 +290,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           className: 'cell-center'
         }
       },
-    
+
       {
         header: 'Time',
         accessorKey: '_trip_time',

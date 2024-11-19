@@ -2,14 +2,13 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Bill, MenuBoard, Setting2, Wallet } from 'iconsax-react';
+import { Bill, Card, MenuBoard } from 'iconsax-react';
 
 // icons
 const icons = {
   samplePage: MenuBoard,
-  setting:Setting2,
+  advance:Card,
   invoice: Bill,
-  account:Wallet
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -45,13 +44,22 @@ const invoices = {
       // ]
     },
      // Advance
-    //  {
-    //     id: 'advance',
-    //     title: <FormattedMessage id="advance" />,
-    //     type: 'item',
-    //     // url: '/apps/invoices/list',
-    //     icon: icons.invoice,
-    //   },
+      {
+        id: 'advance',
+        title: <FormattedMessage id="advance" />,
+        type: 'collapse',
+        icon: icons.advance,
+        url: '/apps/invoices/advance',
+        children: [
+          {
+            id: 'advance-type',
+            title: <FormattedMessage id="advance-type" />,
+            type: 'item',
+            url: '/apps/invoices/advance-type',
+            // icon: icons.upload
+          },
+        ]
+      },
   ]
 };
 

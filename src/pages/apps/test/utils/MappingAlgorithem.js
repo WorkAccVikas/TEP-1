@@ -1,77 +1,104 @@
-export function getMergeResult(data, zone_zoneType, vehicleType) {
+export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
   let ans = [];
-  // Create a map from zone_zoneType for quick lookup
-  let zoneMap = new Map();
-  zone_zoneType.forEach((zone) => {
-    zoneMap.set(zone.zoneName.replaceAll(/\s+/g, '')?.toLowerCase(), {
-      id: zone._id,
-      zoneType: zone.zoneType.map((type) => ({
-        id: type._id,
-        zoneTypeName: type.zoneTypeName
-      }))
+
+  console.log({ data });
+  console.log({ cabOptions });
+
+  // Create maps for quick lookup
+  let cabMap = new Map();
+  cabOptions&&cabOptions.forEach((cab) => {
+    cabMap.set(cab.vehicleNumber.replaceAll(/\s+/g, '').toUpperCase(), {
+      id: cab._id,
+      drivers: cab.linkedDrivers
+        .filter((driver) => driver.driverId !== null) // Exclude drivers with null driverId
+        .map((driver) => ({
+          _id: driver.driverId._id,
+          userName: driver.driverId.userName,
+        })),
     });
   });
 
-  // Create a map from vehicleType for quick lookup
+  console.log({ cabMap });
+
+  let zoneMap = new Map();
+  zone_zoneType.forEach((zone) => {
+    zoneMap.set(zone.zoneName.replaceAll(/\s+/g, '').toLowerCase(), {
+      id: zone._id,
+      zoneType: zone.zoneType.map((type) => ({
+        id: type._id,
+        zoneTypeName: type.zoneTypeName,
+      })),
+    });
+  });
+
   let vehicleMap = new Map();
   vehicleType.forEach((vehicle) => {
-    vehicleMap.set(vehicle.vehicleTypeName.replaceAll(/\s+/g, '')?.toLowerCase(), vehicle);
+    vehicleMap.set(vehicle.vehicleTypeName.replaceAll(/\s+/g, '').toLowerCase(), vehicle);
   });
 
   data.forEach((val) => {
     let obj = { ...val };
 
-    // Arrays to hold matched zone names, zone types, and vehicle types
+    // Initialize arrays
     let zoneNameArray = [];
     let zoneTypeArray = [];
     let vehicleTypeArray = [];
+    let cabOptionsArray = [];
+    let driverOptionsArray = [];
 
-    // Get the zone data from the map
-    let zoneData = zoneMap.get(obj.zoneName.replaceAll(/\s+/g, '')?.toLowerCase());
+    // Match zone data
+    let zoneData = zoneMap.get(obj.zoneName.replaceAll(/\s+/g, '').toLowerCase());
     if (zoneData) {
       zoneNameArray.push({ id: zoneData.id, name: obj.zoneName });
       zoneTypeArray.push(...zoneData.zoneType);
     }
 
-    // Check if vehicleTypeName exists and is a string
+    // Match cab data and populate cabOptionsArray and DriverOptionsArray
+    let cabData = cabMap.get(obj.vehicleNumber?.replaceAll(/\s+/g, '').toUpperCase());
+    if (cabData) {
+      cabOptionsArray.push({ _id: cabData.id, vehicleNumber: obj.vehicleNumber });
+      driverOptionsArray = [...cabData.drivers];
+    }
+
+    // Match vehicle type
     if (typeof obj.vehicleType === 'string') {
-      let vehicleData = vehicleMap.get(obj.vehicleType.replaceAll(/\s+/g, '')?.toLowerCase());
+      let vehicleData = vehicleMap.get(obj.vehicleType.replaceAll(/\s+/g, '').toLowerCase());
       if (vehicleData) {
         vehicleTypeArray.push(vehicleData);
       }
     }
 
-    // Add the new arrays to the object
+    console.log({ cabOptionsArray });
+    console.log({ driverOptionsArray });
+
+    // Add matched zone data
     obj.zoneNameArray = zoneNameArray;
 
-    // Handle zoneTypeArray based on matching with zoneType in main data
+    // Handle zone type array
     if (zoneTypeArray.length > 0) {
-      // Find matches based on zoneType in the main data
-      let matchedZoneTypes = zoneTypeArray.filter((type) => type.zoneTypeName?.toLowerCase() === obj.zoneType?.toLowerCase());
-
-      // If there's exactly one match, set zoneTypeArray to that match
-      if (matchedZoneTypes.length === 1) {
-        obj.zoneTypeArray = [matchedZoneTypes[0]]; // Keep only the matched type
-      } else {
-        obj.zoneTypeArray = zoneTypeArray; // Retain original zoneTypeArray
-      }
+      let matchedZoneTypes = zoneTypeArray.filter(
+        (type) => type.zoneTypeName?.toLowerCase() === obj.zoneType?.toLowerCase()
+      );
+      obj.zoneTypeArray = matchedZoneTypes.length === 1 ? [matchedZoneTypes[0]] : zoneTypeArray;
     } else {
-      obj.zoneTypeArray = zoneTypeArray; // Maintain original if no zone types found
+      obj.zoneTypeArray = zoneTypeArray;
     }
 
-    // Determine the status based on the lengths of arrays
+    // Determine status
     if (zoneNameArray.length === 0 || vehicleTypeArray.length === 0) {
-      obj.status = 2; // No zone or vehicle type, mark as discarded (2)
+      obj.status = 2; // Discarded
     } else if (zoneNameArray.length !== 0 && vehicleTypeArray.length !== 0) {
-      obj.status = 1; // Both zone and vehicle type exist, mark as verified (1)
+      obj.status = 1; // Verified
     } else if (vehicleTypeArray.length === 1 && obj.zoneTypeArray.length === 1) {
-      obj.status = 1; // Both arrays have exactly 1 entry, mark as verified (1)
+      obj.status = 1; // Verified
     } else {
-      obj.status = 0; // Otherwise, mark as unverified (0)
+      obj.status = 0; // Unverified
     }
 
-    // Add vehicle type array (remains unaffected)
+    // Add additional arrays
     obj.vehicleTypeArray = vehicleTypeArray;
+    obj.cabOptionsArray = cabOptionsArray;
+    obj.driverOptionsArray = driverOptionsArray;
 
     ans.push(obj);
   });

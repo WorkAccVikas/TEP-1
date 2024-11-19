@@ -108,6 +108,7 @@ const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
 const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
+const ExcelTemplatePage  = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
 // ==============================|| MAIN ROUTES ||============================== //
 
 const CabProvidorRoutes = {
@@ -173,10 +174,10 @@ const CabProvidorRoutes = {
                   path: 'assign-trips',
                   element: <AssignTrips />
                 },
-                // {
-                //   path: 'test',
-                //   element: <RosterDashboard1 />
-                // },
+                {
+                  path: 'test-download',
+                  element: <ExcelTemplatePage  />
+                },
                 {
                   path: 'test-map',
                   element: <MapRosterFileTest />
