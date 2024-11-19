@@ -7,6 +7,8 @@ import { Provider as ReduxProvider } from 'react-redux';
 // fonts
 import 'assets/fonts/inter/inter.css';
 
+import './index.css';
+
 // scroll bar
 import 'simplebar/dist/simplebar.css';
 import 'slick-carousel/slick/slick.css';
