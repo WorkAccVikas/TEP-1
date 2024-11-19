@@ -18,7 +18,8 @@ import {
   TableHead,
   TableRow,
   useMediaQuery,
-  Tooltip
+  Tooltip,
+  Button
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -50,6 +51,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import Error500 from 'pages/maintenance/error/500';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
+import { ThemeMode } from 'config';
+import axiosServices from 'utils/axios';
+import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -204,11 +208,6 @@ function ReactTable({ columns, data, setPage, limit, setLimit, lastPageNo }) {
                 </Fragment>
               );
             })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
-                <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
-              </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </Box>
@@ -224,9 +223,14 @@ ReactTable.propTypes = {
 // ==============================|| INVOICE - LIST ||============================== //
 
 const AllRosters = () => {
+  const [remove, setRemove] = useState(false);
+  const [deleteID, setDeleteID] = useState(null);
   const { alertPopup } = useSelector((state) => state.invoice);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+  const [refetch, setRefetch] = useState(false);
 
   const { rosterFiles, metaData, loading, error } = useSelector((state) => state.rosterFile);
 
@@ -234,11 +238,21 @@ const AllRosters = () => {
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
 
+  const handleCloseForRemove = useCallback(() => {
+    setRemove(false);
+    setDeleteID(null);
+  }, []);
+
+  const handleRefetch = useCallback(() => {
+    setRefetch((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     dispatch(fetchCompaniesRosterFile({ page: page, limit: limit }));
-  }, [dispatch, page, limit]);
+  }, [dispatch, page, limit, refetch]);
 
   const handleLimitChange = useCallback((event) => {
+    console.log(event.target.value);
     setLimit(+event.target.value);
     setPage(1);
   }, []);
@@ -257,6 +271,43 @@ const AllRosters = () => {
   const filteredData = useMemo(() => {
     return rosterFiles.filter((row) => row.isVisited === 1); // Filter where isVisited is 1
   }, [rosterFiles]);
+
+  const handleDelete = useCallback(async () => {
+    try {
+      console.log('Id = ', deleteID);
+
+      if (!deleteID) return;
+
+      await axiosServices.delete(`/tripData/delete/roster?Id=${deleteID}`);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Roster deleted successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+      setRemove(false);
+      setDeleteID(null);
+      handleRefetch();
+    } catch (error) {
+      console.log('Error in delete roster = ', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    }
+  }, [deleteID, dispatch, handleRefetch]);
 
   const columns = useMemo(() => {
     const handleMapClick = (rowData) => {
@@ -293,11 +344,11 @@ const AllRosters = () => {
       },
       {
         Header: 'Total Entries',
-        accessor: () => getRandomNumber(1, 100), // Random number between 1 and 100
+        accessor: () => getRandomNumber(1, 100) // Random number between 1 and 100
       },
       {
         Header: 'Trips',
-        accessor: () => getRandomNumber(1, 50), // Random number between 1 and 50
+        accessor: () => getRandomNumber(1, 50) // Random number between 1 and 50
       },
       {
         Header: 'Added By',
@@ -313,33 +364,59 @@ const AllRosters = () => {
       {
         Header: 'Action',
         accessor: 'isVisited',
+        disableSortBy: true,
+        className: 'cell-center',
         Cell: ({ row }) => {
           const isVisited = row.original.isVisited;
 
           if (isVisited === 1) {
             return (
-              <Chip
-                color="success"
-                label="View Roster"
-                size="small"
-                variant="light"
-                onClick={() => handleViewClick(row.original)}
-                sx={{
-                  ':hover': {
-                    backgroundColor: 'rgba(0, 255, 5, 0.3)',
-                    cursor: 'pointer'
-                  }
-                }}
-              />
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  color="success"
+                  label="View Roster"
+                  size="small"
+                  variant="light"
+                  title="View Roster"
+                  onClick={() => handleViewClick(row.original)}
+                  sx={{
+                    ':hover': {
+                      backgroundColor: 'rgba(0, 255, 5, 0.3)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                />
+
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Delete Roster"
+                >
+                  <Button
+                    color="error"
+                    onClick={() => {
+                      setRemove(true);
+                      setDeleteID(row.original._id);
+                    }}
+                  >
+                    <Trash />
+                  </Button>
+                </Tooltip>
+              </Stack>
             );
           }
           return null;
         }
       }
     ];
-  }, [navigate]);
+  }, [navigate, handleDelete, mode, theme]);
 
-  const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
   const widgetsData = [
@@ -372,14 +449,17 @@ const AllRosters = () => {
     }
   ];
 
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Roster', to: '/apps/roster/all-roster' }];
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Roster', to: '/apps/roster/all-roster' }
+  ];
 
   if (loading) return <TableSkeleton rows={10} columns={9} />;
   if (error) return <Error500 />;
 
   return (
     <>
-    <Breadcrumbs custom heading="Roster" links={breadcrumbLinks} />
+      <Breadcrumbs custom heading="Roster" links={breadcrumbLinks} />
 
       <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
         <Grid item md={8}>
@@ -464,7 +544,19 @@ const AllRosters = () => {
           />
         </ScrollX>
       </MainCard>
-      {/* <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} handleClose={handleClose} /> */}
+
+      <div style={{ marginTop: '20px' }}>
+        <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageIndex} />
+      </div>
+
+      {remove && (
+        <CustomAlertDelete
+          title={'This action is irreversible. Please check before deleting.'}
+          open={remove}
+          handleClose={handleCloseForRemove}
+          handleDelete={handleDelete}
+        />
+      )}
     </>
   );
 };
