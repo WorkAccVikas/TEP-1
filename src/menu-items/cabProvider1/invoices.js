@@ -14,18 +14,18 @@ const icons = {
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
 
 const invoices = {
-  id: 'group-setting',
+  id: 'group-invoices',
   title: <FormattedMessage id="invoices" />,
   type: 'group',
   icon: icons.samplePage,
   children: [
-     // Invoices
+    // Invoices
     {
       id: 'invoice',
       title: <FormattedMessage id="invoice" />,
       type: 'item',
       url: '/apps/invoices/list',
-      icon: icons.invoice,
+      icon: icons.invoice
       // children: [
       //   {
       //     id: 'list',
@@ -43,23 +43,23 @@ const invoices = {
       //   }
       // ]
     },
-     // Advance
-      {
-        id: 'advance',
-        title: <FormattedMessage id="advance" />,
-        type: 'collapse',
-        icon: icons.advance,
-        url: '/apps/invoices/advance',
-        children: [
-          {
-            id: 'advance-type',
-            title: <FormattedMessage id="advance-type" />,
-            type: 'item',
-            url: '/apps/invoices/advance-type',
-            // icon: icons.upload
-          },
-        ]
-      },
+    // Advance
+    {
+      id: 'advance',
+      title: <FormattedMessage id="advance" />,
+      type: 'collapse',
+      icon: icons.advance,
+      url: '/apps/invoices/advance',
+      children: [
+        {
+          id: 'advance-type',
+          title: <FormattedMessage id="advance-type" />,
+          type: 'item',
+          url: '/apps/invoices/advance-type'
+          // icon: icons.upload
+        }
+      ]
+    }
   ]
 };
 
