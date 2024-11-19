@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import {
   Avatar,
   Box,
@@ -67,7 +67,7 @@ const validationSchema = Yup.object().shape({
     })
 });
 
-const ManageAccountSettings = memo(({ initialValues }) => {
+const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
   console.log('ManageAccountSettings Render');
   console.log(initialValues);
 
@@ -149,10 +149,18 @@ const ManageAccountSettings = memo(({ initialValues }) => {
     }
   };
 
+  useEffect(() => {
+    if (!isFirstTime) {
+      if (initialValues.logo) setLogoPreview(initialValues.logo);
+
+      if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+    }
+  }, [initialValues, isFirstTime]);
+
   const formik = useFormik({
     initialValues: {
-      name: '',
-      title: '',
+      name: initialValues?.name || '',
+      title: initialValues?.title || '',
       logo: null,
       favIcon: null
     },
@@ -164,6 +172,15 @@ const ManageAccountSettings = memo(({ initialValues }) => {
         console.log(values);
 
         // TODO : API call FOR ADD/UPDATE (ONE API ONLY)
+
+        const formData = new FormData();
+
+        formData.append('name', values.name);
+        formData.append('title', values.title);
+        if (values.logo) formData.append('logo', values.logo);
+        if (values.favIcon) formData.append('favIcon', values.favIcon);
+
+        console.log(formData);
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -177,7 +194,7 @@ const ManageAccountSettings = memo(({ initialValues }) => {
           dispatch(
             openSnackbar({
               open: true,
-              message: 'Account details have been successfully updated',
+              message: `Account details have been successfully ${isFirstTime ? 'created' : 'updated'}`,
               variant: 'alert',
               alert: {
                 color: 'success'
@@ -482,8 +499,13 @@ const ManageAccountSettings = memo(({ initialValues }) => {
                 >
                   Cancel
                 </Button>
-                <Button variant="contained" type="submit" title="Save" disabled={formik.isSubmitting || !formik.dirty}>
-                  Save
+                <Button
+                  variant="contained"
+                  type="submit"
+                  title={isFirstTime ? 'Save' : 'Update'}
+                  disabled={formik.isSubmitting || !formik.dirty}
+                >
+                  {isFirstTime ? 'Save' : 'Update'}
                 </Button>
               </Stack>
             </Stack>
@@ -493,5 +515,8 @@ const ManageAccountSettings = memo(({ initialValues }) => {
     </>
   );
 });
+
+// Add displayName for debugging
+ManageAccountSettings.displayName = 'ManageAccountSettings';
 
 export default ManageAccountSettings;
