@@ -14,18 +14,18 @@ const icons = {
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
 
 const invoices = {
-  id: 'group-setting',
+  id: 'group-invoices',
   title: <FormattedMessage id="invoices" />,
   type: 'group',
   icon: icons.samplePage,
   children: [
-     // Invoices
+    // Invoices
     {
       id: 'invoice',
       title: <FormattedMessage id="invoice" />,
       type: 'item',
       url: '/apps/invoices/list',
-      icon: icons.invoice,
+      icon: icons.invoice
       // children: [
       //   {
       //     id: 'list',
