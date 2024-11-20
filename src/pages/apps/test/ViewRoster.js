@@ -118,7 +118,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
   }, [activeTab]);
 
   useEffect(() => {
-    const selectedRowsData = selectedFlatRows.map((row) => row.original);
+    const selectedRowsData = selectedFlatRows.filter((row) => row.original.status !== 3).map((row) => row.original);
     handleSetSelectedData(selectedRowsData); // Pass selected rows data to the parent or manage it here
   }, [selectedFlatRows, handleSetSelectedData]);
 
@@ -493,7 +493,6 @@ const ViewRosterTest1 = () => {
   const handleAssignDialogClose = () => {
     setOpenAssignTripDialog(false);
   };
-
   if (loading) return <Loader />;
 
   return (
