@@ -12,7 +12,7 @@ const icons = {
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
 
 const dashboard = {
-  id: 'group-setting',
+  id: 'dashboard-setting',
   title: <FormattedMessage id="dashboard" />,
   type: 'group',
   icon: icons.dashboard,
