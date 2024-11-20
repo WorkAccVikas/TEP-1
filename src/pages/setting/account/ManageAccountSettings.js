@@ -25,20 +25,10 @@ import { FaRegUserCircle } from 'react-icons/fa';
 import { textAlign } from '@mui/system';
 import { addAccountSetting, mutateAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
 
-// const CONFIG = {
-//   logo: {
-//     fileSize: 2 * 1024 * 1024, // 2MB
-//     fileFormat: ['image/jpeg', 'image/png']
-//   },
-//   smallLogo: {
-//     fileSize: 1 * 1024 * 1024, // 1MB
-//     fileFormat: ['image/jpeg', 'image/png']
-//   },
-//   favIcon: {
-//     fileSize: 512 * 1024, // 512KB
-//     fileFormat: ['image/x-icon', 'image/png', 'image/svg+xml']
-//   }
-// };
+const MAX_LOGO_WIDTH = 100;
+const MAX_LOGO_HEIGHT = 50;
+const MAX_SMALL_LOGO_WIDTH = 50;
+const MAX_SMALL_LOGO_HEIGHT = 25;
 
 // Function to calculate sizes in bytes
 function sizeInKB(value) {
@@ -49,9 +39,11 @@ function sizeInMB(value) {
   return sizeInKB(value) * 1024;
 }
 
-function Config(fileSize, fileFormat) {
+function Config(fileSize, fileFormat, width = null, height = null) {
   this.fileSize = fileSize;
   this.fileFormat = fileFormat;
+  this.width = width;
+  this.height = height;
 }
 
 Config.prototype.getSizeString = function () {
@@ -66,16 +58,10 @@ Config.prototype.getSizeString = function () {
   return `${Math.round(size)} ${sizes[index]}`;
 };
 
-// const CONFIG = {
-//   logo: new Config(2 * 1024 * 1024, ['image/jpeg', 'image/png']),
-//   smallLogo: new Config(1 * 1024 * 1024, ['image/jpeg', 'image/png']),
-//   favIcon: new Config(512 * 1024, ['image/x-icon', 'image/png', 'image/svg+xml'])
-// };
-
 // Configuration object using size functions
 const CONFIG = {
-  logo: new Config(sizeInMB(2), ['image/jpeg', 'image/png']),
-  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png']),
+  logo: new Config(sizeInMB(2), ['image/jpeg', 'image/png'], MAX_LOGO_WIDTH, MAX_LOGO_HEIGHT),
+  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png'], MAX_SMALL_LOGO_WIDTH, MAX_SMALL_LOGO_HEIGHT),
   favIcon: new Config(sizeInKB(512), ['image/x-icon', 'image/png', 'image/svg+xml'])
 };
 
@@ -199,10 +185,34 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
       }
 
       const reader = new FileReader();
-      reader.onload = () => {
-        setLogoPreview(reader.result);
-        formik.setFieldValue('logo', file);
-        formik.setFieldTouched('logo', true); // Mark the field as touched
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Check the dimensions of the image
+          if (img.width !== CONFIG.logo.width || img.height !== CONFIG.logo.height) {
+            // Image dimensions don't match
+            formik.setFieldValue('logo', null);
+            setLogoPreview('');
+            formik.setFieldTouched('logo', true);
+            // Manually set error for logo field
+            formik.setFieldError('logo', `Invalid image dimensions. The image must be ${CONFIG.logo.width}x${CONFIG.logo.height} pixels.`);
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: `Invalid image dimensions. The image must be ${CONFIG.logo.width}x${CONFIG.logo.height} pixels.`,
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: true
+              })
+            );
+            return;
+          }
+          setLogoPreview(e.target.result); // Set image preview
+          formik.setFieldValue('logo', file);
+          formik.setFieldTouched('logo', true); // Mark the field as touched
+        };
+        img.src = e.target.result; // Set the source of the image
       };
       reader.readAsDataURL(file);
     }
@@ -227,7 +237,16 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
 
   const formik = useFormik({
     initialValues: {
-      name: initialValues?.name || '',
+      /*************  ✨ Codeium Command ⭐  *************/
+      /**
+       * Called when the image is loaded. Checks the dimensions of the image
+       * and validates them. If the dimensions are too large, it clears the
+       * logo field, sets the logoPreview to an empty string, marks the
+       * field as touched, and shows a snackbar with an error message.
+       * @function
+       * @param {Object} e - The event object
+       */
+      /******  3dcc8e55-3cb1-4c10-a174-fed6d5af0418  *******/ name: initialValues?.name || '',
       title: initialValues?.title || '',
       logo: null,
       smallLogo: null,
@@ -337,10 +356,11 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
       }
 
       const reader = new FileReader();
+
       reader.onload = () => {
-        setFaviconPreview(reader.result);
-        formik.setFieldValue('favIcon', file);
-        formik.setFieldTouched('favIcon', true);
+        setSmallLogoPreview(reader.result);
+        formik.setFieldValue('smallLogo', file);
+        formik.setFieldTouched('smallLogo', true);
       };
       reader.readAsDataURL(file);
     }
@@ -398,10 +418,45 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
       }
 
       const reader = new FileReader();
-      reader.onload = () => {
-        setSmallLogoPreview(reader.result);
-        formik.setFieldValue('smallLogo', file);
-        formik.setFieldTouched('smallLogo', true);
+      // reader.onload = () => {
+      //   setSmallLogoPreview(reader.result);
+      //   formik.setFieldValue('smallLogo', file);
+      //   formik.setFieldTouched('smallLogo', true);
+      // };
+      // reader.readAsDataURL(file);
+
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          console.log(img.width, img.height);
+          // Check the dimensions of the image
+          if (img.width !== CONFIG.smallLogo.width || img.height !== CONFIG.smallLogo.height) {
+            // Image dimensions don't match
+            formik.setFieldValue('smallLogo', null);
+            setLogoPreview('');
+            formik.setFieldTouched('smallLogo', true);
+            // Manually set error for smallLogo field
+            formik.setFieldError(
+              'smallLogo',
+              `Invalid image dimensions. The image must be ${CONFIG.smallLogo.width}x${CONFIG.smallLogo.height} pixels.`
+            );
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: `Invalid image dimensions. The image must be ${CONFIG.smallLogo.width}x${CONFIG.smallLogo.height} pixels.`,
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: true
+              })
+            );
+            return;
+          }
+          setSmallLogoPreview(e.target.result); // Set image preview
+          formik.setFieldValue('smallLogo', file);
+          formik.setFieldTouched('smallLogo', true); // Mark the field as touched
+        };
+        img.src = e.target.result; // Set the source of the image
       };
       reader.readAsDataURL(file);
     }
@@ -492,7 +547,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                             onDrop={(e) => {
                               e.preventDefault();
                               const file = e.dataTransfer.files[0];
-                              handleLogoChange({ target: { files: [file] } });
+                              handleSmallLogoChange({ target: { files: [file] } });
                             }}
                             style={{
                               width: 150,
