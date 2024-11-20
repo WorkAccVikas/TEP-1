@@ -60,12 +60,25 @@ export const addUser = createAsyncThunk('users/addUser', async (user, { rejectWi
   }
 });
 
-// Define the async thunk for updating a user
-export const updateUser = createAsyncThunk('users/updateUser', async ({ id, updatedData }, { rejectWithValue }) => {
+// Update user basic details
+export const updateUserBasicDetails = createAsyncThunk('users/updateUserBasicDetails', async (pyload, { rejectWithValue }) => {
   try {
-    // Replace with your actual endpoint
-    const response = await axios.put(`/users/${id}`, updatedData);
-    return response.data;
+    const response = await axios.put(`/cabProvider/update/my/basic/details`, pyload, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return { success: response.data.success, message: response.data.message };
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// Update specific basic details
+export const updateUserSpecificDetails = createAsyncThunk('users/updateUserSpecificDetails', async (pyload, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/cabProvider/update/my/details`, pyload);
+    return { success: response.data.success, message: response.data.message };
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
@@ -183,18 +196,18 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
-      .addCase(updateUser.pending, (state) => {
+      .addCase(updateUserBasicDetails.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateUser.fulfilled, (state, action) => {
+      .addCase(updateUserBasicDetails.fulfilled, (state, action) => {
         const index = state.users.findIndex((user) => user._id === action.payload._id);
         if (index !== -1) {
           state.users[index] = action.payload;
         }
         state.loading = false;
       })
-      .addCase(updateUser.rejected, (state, action) => {
+      .addCase(updateUserBasicDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
