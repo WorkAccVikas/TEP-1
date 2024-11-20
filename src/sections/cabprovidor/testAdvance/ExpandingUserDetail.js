@@ -84,7 +84,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
     return (
       <TableRow>
         <TableCell colSpan={12} sx={{ textAlign: 'center' }}>
-        <CircularProgress size={20} color="inherit" />
+          <CircularProgress size={20} color="inherit" />
         </TableCell>
       </TableRow>
     );
@@ -103,7 +103,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
         close: true
       })
     );
-  
+
     // Render the error message in the table row
     return (
       <TableRow>
@@ -118,7 +118,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   const personalDetailsColumns = [
     { Header: 'Transaction Id', accessor: 'id' },
     { Header: 'Date', accessor: 'date' },
-    { Header: 'Amount', accessor: 'amount' },
+    { Header: 'Amount', accessor: 'amount' }
     // { Header: 'Approved Remark', accessor: 'approvedRemark' }
   ];
 
@@ -153,15 +153,15 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
         return driver ? driver.userName : 'Not Linked';
-      },
+      }
     },
     {
       Header: 'Driver Contact',
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
         return driver ? driver.contactNumber : 'Not Available';
-      },
-    },
+      }
+    }
   ];
 
   const backColor = alpha(theme.palette.primary.lighter, 0.1);
@@ -248,7 +248,121 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                     <Typography variant="h6" color="primary" sx={{ pb: 1 }}>
                       Bank Details
                     </Typography>
-                    <List
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                          Bank Name
+                        </Typography>
+                        <Typography
+                          title={personalDetails.bankName}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            // maxWidth: '200px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.bankName}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                          Branch Name
+                        </Typography>
+                        <Typography
+                          title={personalDetails.branchName}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            // maxWidth: '200px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.branchName}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                          IFSC Code
+                        </Typography>
+                        <Typography
+                          title={personalDetails.IFSC_code}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            // maxWidth: '200px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.IFSC_code}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                          Account Number
+                        </Typography>
+                        <Typography
+                          title={personalDetails.accountNumber}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            // maxWidth: '200px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.accountNumber}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                        Account Holder Name
+                        </Typography>
+                        <Typography
+                          title={personalDetails.accountHolderName}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            // maxWidth: '200px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.accountHolderName}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack gap={2} sx={{pt: '4px'}}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
+                        Address
+                        </Typography>
+                        <Typography
+                          title={personalDetails.bankAddress}
+                          sx={{
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            maxWidth: '150px',
+                            textAlign: 'right' // Ensures it aligns to the end
+                          }}
+                        >
+                          {personalDetails.bankAddress}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    {/* <List
                       component="nav"
                       aria-label="main mailbox folders"
                       sx={{ py: 0, '& .MuiListItem-root': { p: 0 }, '& .MuiListItemIcon-root': { minWidth: 28 } }}
@@ -325,7 +439,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           <Typography align="right" >{personalDetails.bankAddress}</Typography>
                         </ListItemSecondaryAction>
                       </ListItem>
-                    </List>
+                    </List> */}
                   </Grid>
                 </Grid>
               </MainCard>
@@ -335,23 +449,12 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
             <Stack spacing={0} sx={{ width: '100%' }}>
               <MainCard title="Payment History" sx={{ width: '100%' }}>
                 <div style={{ height: 'auto' }}>
-                  <ReactTable
-                    columns={personalDetailsColumns}
-                    data={personalDetailsData}
-                    defaultPageSize={5}
-                    hideHeader
-                  />
+                  <ReactTable columns={personalDetailsColumns} data={personalDetailsData} defaultPageSize={5} hideHeader />
                 </div>
               </MainCard>
               <MainCard title="Vehicle Details" sx={{ width: '100%' }}>
                 <div style={{ height: 'auto' }}>
-                  <ReactTable
-                    columns={aboutMeColumns}
-                    data={vehicleData}
-                    showPagination={false}
-                    defaultPageSize={5}
-                    hideHeader
-                  />
+                  <ReactTable columns={aboutMeColumns} data={vehicleData} showPagination={false} defaultPageSize={5} hideHeader />
                 </div>
               </MainCard>
             </Stack>
