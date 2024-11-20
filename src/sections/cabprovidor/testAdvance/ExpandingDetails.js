@@ -2,7 +2,22 @@ import PropTypes from 'prop-types';
 import { useCallback, useMemo, Fragment, useState, useEffect } from 'react';
 
 // material-ui
-import { Box, Button, Chip, CircularProgress, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  useTheme
+} from '@mui/material';
 
 // third-party
 import { useExpanded, useTable } from 'react-table';
@@ -22,14 +37,34 @@ import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { dispatch } from 'store';
 import { fetchAdvances } from 'store/slice/cabProvidor/advanceSlice';
+import { PopupTransition } from 'components/@extended/Transitions';
+import AdvanceForm from '../advances/AdvanceForm';
+import { TablePagination } from 'components/third-party/ReactTable';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 // ==============================|| REACT TABLE ||============================== //
 
 function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } = useTable(
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    visibleColumns,
+    gotoPage,
+    setPageSize,
+    state: { pageIndex, pageSize }
+  } = useTable(
     {
       columns: userColumns,
-      data
+      data,
+      initialState: {
+        pageIndex: 0,
+        pageSize: 10,
+        hiddenColumns: ['requestedById._id']
+      }
     },
     useExpanded
   );
@@ -65,6 +100,11 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
             </Fragment>
           );
         })}
+        <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
+          <TableCell sx={{ p: 2, py: 3 }} colSpan={12}>
+            <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+          </TableCell>
+        </TableRow>
       </TableBody>
     </Table>
   );
@@ -85,7 +125,8 @@ const ExpandingDetails = () => {
   const { advances, metaData, loading, error } = useSelector((state) => state.advances);
   const [advanceData, setAdvanceData] = useState(null);
   const [add, setAdd] = useState(false);
-  
+  const [key, setKey] = useState(0);
+
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
   };
@@ -135,7 +176,7 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Requested Amount',
-        accessor: 'amount'
+        accessor: 'requestedAmount'
       },
       {
         Header: 'Advance Type',
@@ -151,7 +192,6 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Status',
-        className: 'cell-center',
         accessor: 'isApproved',
         Cell: ({ row }) => {
           const isApproved = row.original.isApproved;
@@ -167,22 +207,71 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approved_amount'
+        accessor: 'approvedAmount'
       },
+      // {
+      //   Header: 'Actions',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     const handleToggle = () => {
+      //       setAdvanceData(row.original);
+      //       handleAdd();
+      //     };
+
+      //     const getSwitchColor = () => {
+      //       if (row.original.isApproved === 1) return 'success'; // Green when approved
+      //       if (row.original.isApproved === 2) return 'error'; // Red when rejected
+      //       return 'default'; // Default color for pending
+      //     };
+
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
+      //         <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
+      //           <Tooltip
+      //             componentsProps={{
+      //               tooltip: {
+      //                 sx: {
+      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                   opacity: 0.9
+      //                 }
+      //               }
+      //             }}
+      //             title={row.original.isApproved === 1 ? 'Reject' : 'Approve'}
+      //           >
+      //             <Switch
+      //               checked={row.original.isApproved === 1 || row.original.isApproved === 2}
+      //               onChange={handleToggle}
+      //               color={getSwitchColor()}
+      //             />
+      //           </Tooltip>
+      //         </WrapperButton>
+      //       </Stack>
+      //     );
+      //   }
+      // }
       {
         Header: 'Actions',
-        className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
           const handleToggle = () => {
-            setAdvanceData(row.original);
-            handleAdd();
+            // Only open the dialog if the status is not approved or rejected
+            if (row.original.isApproved !== 1 && row.original.isApproved !== 2) {
+              setAdvanceData(row.original);
+              handleAdd();
+            }
           };
 
           const getSwitchColor = () => {
             if (row.original.isApproved === 1) return 'success'; // Green when approved
             if (row.original.isApproved === 2) return 'error'; // Red when rejected
             return 'default'; // Default color for pending
+          };
+
+          const getTooltipTitle = () => {
+            // Only show "Approve" if it's not already approved or rejected
+            if (row.original.isApproved === 1) return 'Approved'; // No action for already approved
+            if (row.original.isApproved === 2) return 'Rejected'; // No action for rejected
+            return 'Approve'; // Default for pending state
           };
 
           return (
@@ -197,12 +286,13 @@ const ExpandingDetails = () => {
                       }
                     }
                   }}
-                  title={row.original.isApproved === 1 ? 'Reject' : 'Approve'}
+                  title={getTooltipTitle()} // Conditional tooltip title
                 >
                   <Switch
                     checked={row.original.isApproved === 1 || row.original.isApproved === 2}
                     onChange={handleToggle}
                     color={getSwitchColor()}
+                    disabled={row.original.isApproved === 1 || row.original.isApproved === 2} // Disable switch for approved/rejected
                   />
                 </Tooltip>
               </WrapperButton>
@@ -214,13 +304,23 @@ const ExpandingDetails = () => {
     []
   );
 
-  const renderRowSubComponent = useCallback(({ row: { id } }) => <ExpandingUserDetail data={advances[Number(id)]} />, [advances]);
+  // const renderRowSubComponent = useCallback(
+  //   ({ row: { requestedById } }) => <ExpandingUserDetail data={advances[Number(requestedById)]} />,
+  //   [advances]
+  // );
+
+  const renderRowSubComponent = useCallback(
+    ({ row }) => (
+      <ExpandingUserDetail requestedById={row.original.requestedById} isDriver={row.original.isDriver} isVendor={row.original.isVendor} />
+    ),
+    []
+  );
 
   return (
     <>
       <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
         <Stack direction={'row'} alignItems="center" spacing={2}>
-        <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ}>
+          <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ}>
             <Button
               variant="contained"
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
@@ -233,19 +333,29 @@ const ExpandingDetails = () => {
           </WrapperButton>
         </Stack>
       </Stack>
-      <MainCard
-        // title="Expanding User Details"
-        content={false}
-        // secondary={
-        //   <>
-        //     <CSVExport data={data} filename={'expanding-details-table.csv'} />
-        //   </>
-        // }
-      >
+      <MainCard content={false}>
         <ScrollX>
-          <ReactTable columns={columns}  data={advances} renderRowSubComponent={renderRowSubComponent} />
+          {loading ? (
+            <TableSkeleton rows={10} columns={8} />
+          ) : advances?.length === 0 ? (
+            <EmptyTableDemo />
+          ) : (
+            <ReactTable columns={columns} data={advances} renderRowSubComponent={renderRowSubComponent} />
+          )}
         </ScrollX>
       </MainCard>
+      <Dialog
+        maxWidth="sm"
+        TransitionComponent={PopupTransition}
+        keepMounted
+        fullWidth
+        onClose={handleAdd}
+        open={add}
+        sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <AdvanceForm advanceData={advanceData} onCancel={handleAdd} key={key} setKey={setKey} />
+      </Dialog>
     </>
   );
 };
