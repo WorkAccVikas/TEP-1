@@ -8,7 +8,7 @@ export const useFilePreview = (config, fieldName, formik, initialFile = null) =>
 
   const handlePreviewChange = useCallback((val) => {
     setPreview(val);
-  });
+  }, []);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
