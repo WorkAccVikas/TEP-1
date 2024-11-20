@@ -47,7 +47,7 @@ function ReactTable({
       filterTypes,
       initialState: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 5,
         hiddenColumns: ['_id', 'advanceTypeId._id', 'maxUsersOnEachCabProviders', 'maxUsersOnEachCompany', 'maxUsersOnEachVendors'],
         sortBy: [sortBy]
       }
@@ -147,7 +147,7 @@ function ReactTable({
               );
             })}
             <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
+              <TableCell sx={{ pt: 2}} colSpan={12}>
                 <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
               </TableCell>
             </TableRow>

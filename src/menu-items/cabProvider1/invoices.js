@@ -59,15 +59,7 @@ const invoices = {
             // icon: icons.upload
           },
         ]
-      },
-       // test
-       {
-        id: 'test',
-        title: <FormattedMessage id="test" />,
-        type: 'item',
-        icon: icons.advance,
-        url: '/apps/invoices/test',
-      },
+      }
   ]
 };
 

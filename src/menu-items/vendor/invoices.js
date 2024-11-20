@@ -16,24 +16,25 @@ const invoices = {
   id: 'group-setting',
   title: <FormattedMessage id="invoices" />,
   type: 'group',
+  url: '/apps/invoices/list',
   icon: icons.samplePage,
-  children: [
-    // Invoices
-    {
-      id: 'invoice',
-      title: <FormattedMessage id="invoice" />,
-      type: 'item',
-      url: '/apps/invoices/list',
-      icon: icons.invoice
-    },
-    {
-      id: 'create',
-      title: <FormattedMessage id="create" />,
-      type: 'item',
-      url: '/apps/invoices/create',
-      icon: icons.upload
-    }
-  ]
+  // children: [
+  //   // Invoices
+  //   {
+  //     id: 'invoice',
+  //     title: <FormattedMessage id="invoice" />,
+  //     type: 'item',
+  //     url: '/apps/invoices/list',
+  //     icon: icons.invoice
+  //   },
+  //   {
+  //     id: 'create',
+  //     title: <FormattedMessage id="create" />,
+  //     type: 'item',
+  //     url: '/apps/invoices/create',
+  //     icon: icons.upload
+  //   }
+  // ]
 };
 
 export default invoices;

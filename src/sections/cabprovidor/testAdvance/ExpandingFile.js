@@ -13,7 +13,7 @@ const Expanding = () => {
   return (
     // <Grid container spacing={3}>
       <Grid item xs={12}>
-        <ExpandingDetails data={data.slice(11, 19)} />
+        <ExpandingDetails/>
       </Grid>
     // </Grid>
   );

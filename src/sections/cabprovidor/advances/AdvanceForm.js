@@ -2,7 +2,19 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 
 // material-ui
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, InputLabel, Stack, TextField, useTheme } from '@mui/material';
+import {
+  Button,
+  Chip,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  InputLabel,
+  Stack,
+  TextField,
+  useTheme
+} from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -14,6 +26,7 @@ import { useFormik, FormikProvider } from 'formik';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { useDispatch } from 'react-redux';
 import axiosServices from 'utils/axios';
+import { useEffect } from 'react';
 
 const CustomerSchema = Yup.object().shape({});
 
@@ -24,18 +37,20 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
+  console.log('advanceData', advanceData);
+
   const handleReject = async () => {
     try {
-      const response = await axiosServices.put(
-        `/advance/status/update`,
-        {
-          data: {
-            _id: advanceData._id, // Assuming `_id` is part of row data
-            isApproved: 2,
-            approved_amount: advanceData.approved_amount
-          }
-        },
-      );
+      const response = await axiosServices.put(`/advance/status/update`, {
+        data: {
+          _id: advanceData._id, // Assuming `_id` is part of row data
+          isApproved: 2,
+          approvedAmount: values.approvedAmount,
+          finalAmount: values.finalPayableAmount,
+          approvedRemark: values.approvedRemark,
+          transactionId: values.transactionId
+        }
+      });
 
       if (response.status === 200) {
         const snackbarColor = 'error'; // Green for approved, red for rejected
@@ -54,6 +69,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
           })
         );
         setKey(key + 1);
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -77,21 +93,23 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
   };
 
   const formik = useFormik({
-    initialValues: { amount: advanceData?.amount || '', approved_amount: advanceData?.approved_amount || '' },
+    initialValues: {
+      requestedAmount: advanceData?.requestedAmount || ''
+    },
     validationSchema: CustomerSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const response = await axiosServices.put(
-          `/advance/status/update`,
-          {
-            data: {
-              _id: advanceData._id, // Assuming `_id` is part of row data
-              isApproved: 1,
-              approved_amount: values.approved_amount
-            }
-          },
-        );
+        const response = await axiosServices.put(`/advance/status/update`, {
+          data: {
+            _id: advanceData._id,
+            isApproved: 1,
+            approvedAmount: values.approvedAmount,
+            finalAmount: values.finalPayableAmount,
+            approvedRemark: values.approvedRemark,
+            transactionId: values.transactionId
+          }
+        });
 
         if (response.status === 200) {
           const snackbarColor = 'success'; // Green for approved, red for rejected
@@ -132,44 +150,147 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
     }
   });
 
+  useEffect(() => {
+    if (formik.values.requestedAmount && advanceData?.advanceTypeId?.interestRate) {
+      // Calculate the payable amount
+      const requestedAmount = parseFloat(formik.values.requestedAmount);
+      const interestRate = advanceData?.advanceTypeId?.interestRate;
+
+      if (!isNaN(requestedAmount) && !isNaN(interestRate)) {
+        const payableAmount = requestedAmount - requestedAmount * (interestRate / 100);
+        formik.setFieldValue('payableAmount', payableAmount.toFixed(2)); // Set the calculated payable amount
+      }
+    }
+  }, [formik.values.requestedAmount, advanceData?.advanceTypeId?.interestRate]);
+
+  useEffect(() => {
+    if (formik.values.approvedAmount && advanceData?.advanceTypeId?.interestRate) {
+      // Calculate the final payable amount
+      const approvedAmount = parseFloat(formik.values.approvedAmount);
+      const interestRate = advanceData?.advanceTypeId?.interestRate;
+  
+      if (!isNaN(approvedAmount) && !isNaN(interestRate)) {
+        const finalPayableAmount = approvedAmount - (approvedAmount * (interestRate / 100));
+        formik.setFieldValue('finalPayableAmount', finalPayableAmount.toFixed(2)); // Set the calculated final payable amount
+      }
+    }
+  }, [formik.values.approvedAmount, advanceData?.advanceTypeId?.interestRate]);
+
   return (
     <>
       <FormikProvider value={formik}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <form onSubmit={formik.handleSubmit}>
-            <DialogTitle>Approve/Reject Advance</DialogTitle>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12 }}>
+              <DialogTitle style={{ margin: 0, padding: 0 }}>Approve/Reject Advance</DialogTitle>
+              <Chip label={`Interest Rate: ${advanceData?.advanceTypeId?.interestRate}%`} size="small" color="success" variant="light" />
+            </div>
             <Divider />
-            <DialogContent sx={{ p: 2.5 }} direction="row">
-              <Stack spacing={3}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="advanceTypeName">Requested Amount</InputLabel>
-                  <TextField
-                    fullWidth
-                    id="amount"
-                    name="amount"
-                    value={formik.values.amount}
-                    onChange={formik.handleChange}
-                    placeholder="Enter Requested Amount"
-                    error={Boolean(formik.touched.amount && formik.errors.amount)}
-                    helperText={formik.touched.amount && formik.errors.amount}
-                  />
-                </Stack>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="interestRate">Approved Amount</InputLabel>
-                  <TextField
-                    fullWidth
-                    id="approved_amount"
-                    name="approved_amount"
-                    value={formik.values.approved_amount}
-                    onChange={formik.handleChange}
-                    placeholder="Enter Approved Amount"
-                    type="number"
-                    error={Boolean(formik.touched.approved_amount && formik.errors.approved_amount)}
-                    helperText={formik.touched.approved_amount && formik.errors.approved_amount}
-                  />
-                </Stack>
-              </Stack>
+            <DialogContent sx={{ p: 2.5 }}>
+              <Grid container spacing={3}>
+                {/* Row 1: 2 Fields */}
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="requestedAmount">Requested Amount</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="requestedAmount"
+                      name="requestedAmount"
+                      value={formik.values.requestedAmount}
+                      defaultValue="Read Only"
+                      onChange={formik.handleChange}
+                      placeholder="Enter Requested Amount"
+                      error={Boolean(formik.touched.requestedAmount && formik.errors.requestedAmount)}
+                      helperText={formik.touched.requestedAmount && formik.errors.requestedAmount}
+                      InputProps={{
+                        readOnly: true
+                      }}
+                    />
+                  </Stack>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="finalAmount">Payable Amount</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="payableAmount"
+                      name="payableAmount"
+                      value={formik.values.payableAmount}
+                      onChange={formik.handleChange}
+                      placeholder="Enter Final Amount"
+                      error={Boolean(formik.touched.payableAmount && formik.errors.payableAmount)}
+                      helperText={formik.touched.payableAmount && formik.errors.payableAmount}
+                    />
+                  </Stack>
+                </Grid>
+
+                {/* Row 2: 2 Fields */}
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="approvedAmount">Approved Amount</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="approvedAmount"
+                      name="approvedAmount"
+                      value={formik.values.approvedAmount}
+                      type='number'
+                      onChange={formik.handleChange}
+                      placeholder="Enter Approved Amount"
+                      error={Boolean(formik.touched.approvedAmount && formik.errors.approvedAmount)}
+                      helperText={formik.touched.approvedAmount && formik.errors.approvedAmount}
+                    />
+                  </Stack>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="finalAmount">Final Payable Amount</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="finalPayableAmount"
+                      name="finalPayableAmount"
+                      value={formik.values.finalPayableAmount}
+                      onChange={formik.handleChange}
+                      placeholder="Enter Final Amount"
+                      error={Boolean(formik.touched.finalPayableAmount && formik.errors.finalPayableAmount)}
+                      helperText={formik.touched.finalPayableAmount && formik.errors.finalPayableAmount}
+                    />
+                  </Stack>
+                </Grid>
+
+                {/* Row 3: 2 Fields */}
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="transactionId">Transaction Id</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="transactionId"
+                      name="transactionId"
+                      value={formik.values.transactionId}
+                      onChange={formik.handleChange}
+                      placeholder="Enter Transaction Id"
+                      error={Boolean(formik.touched.transactionId && formik.errors.transactionId)}
+                      helperText={formik.touched.transactionId && formik.errors.transactionId}
+                    />
+                  </Stack>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="finalAmount">Remark</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="approvedRemark"
+                      name="approvedRemark"
+                      value={formik.values.approvedRemark}
+                      onChange={formik.handleChange}
+                      placeholder="Enter Remarks"
+                      error={Boolean(formik.touched.approvedRemark && formik.errors.approvedRemark)}
+                      helperText={formik.touched.approvedRemark && formik.errors.approvedRemark}
+                    />
+                  </Stack>
+                </Grid>
+              </Grid>
             </DialogContent>
+
             <Divider />
             <DialogActions sx={{ p: 2.5 }}>
               <Stack direction="row" spacing={2} alignItems="center">
@@ -179,7 +300,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
                 <Button onClick={handleReject} variant="contained" color="error">
                   Reject
                 </Button>
-                <Button type="submit" variant="contained">
+                <Button type="submit" variant="contained" disabled={!(formik.values.transactionId && formik.values.approvedAmount)}>
                   Approve
                 </Button>
               </Stack>
