@@ -1,24 +1,6 @@
 import PropTypes from 'prop-types';
-import { useMemo, useState, forwardRef, useEffect } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 
-// material-ui
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Tooltip from '@mui/material/Tooltip';
-import Stack from '@mui/material/Stack';
-// third-party
-import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
-
-// project-imports
-import ScrollX from 'components/ScrollX';
-import MainCard from 'components/MainCard';
-
-import makeData from 'data/react-table';
-// material-ui
 import Slide from '@mui/material/Slide';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
@@ -31,23 +13,20 @@ import IconButton from 'components/@extended/IconButton';
 
 // assets
 import { Add } from 'iconsax-react';
-import CSVExport from 'components/third-party/CSVExport';
-import CellEditable from './CellEditable';
 import axiosServices from 'utils/axios';
-// import CellEditable from 'components/third-party/CellEditable';
-import { CloseCircle, Edit2, Send } from 'iconsax-react';
-import RowEditable from './RowEditable';
+import { Autocomplete, Checkbox, FormControl, FormHelperText, MenuItem, Select, TextField, Tooltip } from '@mui/material';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 export default function AssignTripsDialog({ data: tripData, open, handleClose, setInitateRender, fileData }) {
-  // const [data, setData] = useState(() => makeData(10));
   const [data, setData] = useState([]);
+
   const [payload1, setPayload1] = useState([]);
   const [zoneInfo, setZoneInfo] = useState([]);
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [cabOptions, setCabOptions] = useState([]);
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -55,7 +34,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   };
 
   const generateTrips = async () => {
-    console.log({ payload1 });
     const assignedTripsArray = payload1.map((item) => {
       return {
         _roster_id: item._roster_id,
@@ -67,19 +45,32 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         zoneNameID: item._zoneName._id,
         zoneTypeID: item._zoneType._id,
         location: item.location,
-        guard: item._guard_1,
-        guardPrice: item._guard_price_1,
         vehicleTypeID: item._vehicleType._id,
         vehicleNumber: item._cab._id,
         driverId: item._driver._id,
-        companyRate: item._companyRate,
-        _driverRate_or_vendorRate: item._driverRate_or_vendorRate,
+        remarks: item.remarks,
+
+        guard: item._guardRequired ? 1 : 0,
         addOnRate: item._additional_rate,
-        penalty: item._penalty_1,
-        remarks: 'gg1'
+
+        companyRate: item._companyRate,
+        vendorRate: item._vendorRate,
+        driverRate: item._driverRate,
+
+        companyGuardPrice: item._companyGuardRate,
+        driverGuardPrice: item._driverGuardRate,
+        vendorGuardPrice: item._vendorGuardRate,
+
+        companyPenalty: item._companyPenaltyRate,
+        driverPenalty: item._driverPenaltyRate,
+        vendorPenalty: item._vendorPenaltyRate,
+        rosterTripId: item.rosterTripId,
+        mcdCharge: item._mcdRate,
+        tollCharge: item._tollCharge
       };
     });
 
+    console.log({ assignedTripsArray });
     const rosterUploadArray = payload1.map((item) => {
       return {
         vehicleTypeArray: item._vehicleType ? [{ _id: item._vehicleType._id, vehicleTypeName: item._vehicleType.vehicleTypeName }] : [],
@@ -88,6 +79,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
 
         zoneTypeArray: item._zoneType ? [{ _id: item._zoneType._id, zoneTypeName: item._zoneType.zoneTypeName }] : [],
 
+        cabOptionsArray: item._cab ? [{ _id: item._cab._id, vehicleNumber: item._cab.vehicleNumber }] : [],
+        driverOptionsArray: item._driver ? [{ _id: item._driver._id, userName: item._driver.userName }] : [],
         zoneName: item._zoneName?.zoneName || 'N/A',
         zoneType: item._zoneType?.zoneTypeName || 'N/A',
         vehicleType: item._vehicleType?.vehicleTypeName || 'N/A',
@@ -147,11 +140,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     } catch (err) {
       console.error(err);
     }
-
-    // setPayload1([]);
   };
 
-  //helper data fetch
   useEffect(() => {
     const fetchAllZoneInfo = async () => {
       const response = await axiosServices.get('/zoneType/grouped/by/zone');
@@ -179,237 +169,613 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     fetchCabs();
   }, []);
 
-  console.log({ tripData });
   useEffect(() => {
     if (tripData?.length > 0) {
-      const mappedData = tripData.map((item) => ({
-        ...item, // Spread existing properties
-        location: item.location,
-        _trip_date: item.tripDate,
-        _trip_time: item.tripTime,
-        _discount_1: 0, // Default values
-        _penalty_1: item.penalty,
-        _dual_trip: 0,
-        _trip_status: item.status,
-        _file_id: item.rosterFileId,
-        _roster_id: item?._id,
-        _dualTrip_1: 0,
-        _guard_1: item.guard,
-        _company_info: item?.companyID,
-        _additional_rate: item.addOnRate,
-        _guard_price_1: item.guardPrice,
-        _tax_1: 0,
-        _companyRate: item.vehicleRate,
-        _driverRate_or_vendorRate: 0,
-        // _vendorrateRate: 0,
+      const mappedData = tripData
+        .filter((item) => item.status !== 3)
+        .map((item) => ({
+          ...item, // Spread existing properties
+          _location: item.location,
+          _trip_date: item.tripDate,
+          _trip_time: item.tripTime,
+          _trip_status: item.status,
+          _file_id: item.rosterFileId,
+          _roster_id: item?._id,
+          _company_info: item?.companyID,
+          _guardRequired: item.guardPrice > 0 ? true : false,
 
-        _zoneName:
-          item.zoneNameArray?.length === 1
-            ? {
-                _id: item.zoneNameArray[0]?._id || null, // Add fallback for undefined
-                zoneName: item.zoneNameArray[0]?.zoneName || 'N/A', // Fallback for undefined zoneName
-                zoneType: zoneInfo?.find((zone) => zone?._id === item.zoneNameArray[0]?._id)?.zoneType || [] // Fallback for undefined zoneType
-              }
-            : {
-                _id: null,
-                zoneName: item.zoneName || 'N/A', // Fallback for undefined zoneName
-                zoneType: [] // Fallback for no matching zoneType
-              },
+          _incomingCompanyRate: item.vehicleRate,
+          _incomingGuardRate: item.guardPrice,
+          _inccomingVehicleType: item.vehicleType,
 
-        _zoneType:
-          item.zoneTypeArray?.length === 1
-            ? {
-                _id: item.zoneTypeArray[0]?._id || null, // Add fallback for undefined
-                zoneTypeName: item.zoneTypeArray[0]?.zoneTypeName || 'N/A' // Fallback for undefined zoneTypeName
-              }
-            : { _id: null, zoneTypeName: item.zoneType || 'N/A' }, // Fallback for undefined zoneType
+          _companyRate: item.vehicleRate,
+          _companyDualRate: 0,
+          _companyGuardRate: 0,
+          _companyPenaltyRate: item.penalty,
 
-        _vehicleType:
-          item.vehicleTypeArray?.length === 1
-            ? {
-                _id: item.vehicleTypeArray[0]?._id || null, // Add fallback for undefined
-                vehicleTypeName: item.vehicleTypeArray[0]?.vehicleTypeName || 'N/A' // Fallback for undefined vehicleTypeName
-              }
-            : { _id: null, vehicleTypeName: item.vehicleType || 'N/A' }, // Fallback for undefined vehicleType
-        __cabOptions:
-          item.cabOptionsArray?.length === 1
-            ? {
-                _id: item.cabOptionsArray[0]?._id || null, // Add fallback for undefined
-                vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
-              }
-            : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' }, // Fallback for undefined vehicleType
-        __driverOptions:
-          item.driverOptionsArray?.length === 1
-            ? {
-                _id: item.driverOptionsArray[0]?._id || null, // Add fallback for undefined
-                userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
-              }
-            : { _id: null, userName: item.userName || 'N/A' }, // Fallback for undefined vehicleType
+          _driverRate: 0,
+          _driverDualRate: 0,
+          _driverGuardRate: 0,
+          _driverPenaltyRate: 0,
 
-        // _driver: { _id: null, userName: null },
-        _driver:
-          item.driverOptionsArray?.length === 1
-            ? {
-                _id: item.driverOptionsArray[0]?._id || null, // Add fallback for undefined
-                userName: item.driverOptionsArray[0]?.userName || 'N/A' // Fallback for undefined vehicleTypeName
-              }
-            : { _id: null, userName: item.userName || 'N/A' },
+          _vendorRate: 0,
+          _vendorDualRate: 0,
+          _vendorGuardRate: 0,
+          _vendorPenaltyRate: 0,
 
-        _cab:
-          item.cabOptionsArray?.length === 1
-            ? {
-                _id: item.cabOptionsArray[0]?._id || null, // Add fallback for undefined
-                vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A' // Fallback for undefined vehicleTypeName
-              }
-            : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
-        _zoneName_options: zoneInfo || [], // Ensure zoneInfo is not undefined
-        _vehicleType_options: vehicleTypeInfo || [], // Ensure vehicleTypeInfo is not undefined
-        _drivers_options: drivers || [], // Ensure drivers is not undefined
-        _cab_options: cabOptions || [] // Ensure drivers is not undefined
-      }));
+          _driverRate_or_vendorRate: 0,
+          _driverDualRate_or_vendorDualRate: 0,
+          _driverGuardRate_or_vendorGuardRate: 0,
+          _driverPenaltyRate_or_vendorPenaltyRate: 0,
 
-      setData(mappedData);
+          _additional_rate: item.addOnRate,
+          _mcdRate: 0,
+          _tollCharge: 0,
+
+          _zoneName:
+            item.zoneNameArray?.length === 1
+              ? {
+                  _id: item.zoneNameArray[0]?._id || null,
+                  zoneName: item.zoneNameArray[0]?.zoneName || 'N/A',
+                  zoneType: zoneInfo?.find((zone) => zone?._id === item.zoneNameArray[0]?._id)?.zoneType || []
+                }
+              : {
+                  _id: null,
+                  zoneName: item.zoneName || 'N/A',
+                  zoneType: []
+                },
+
+          _zoneType:
+            item.zoneTypeArray?.length === 1
+              ? {
+                  _id: item.zoneTypeArray[0]?._id || null,
+                  zoneTypeName: item.zoneTypeArray[0]?.zoneTypeName || 'N/A'
+                }
+              : { _id: null, zoneTypeName: item.zoneType || 'N/A' },
+
+          _vehicleType:
+            item.vehicleTypeArray?.length === 1
+              ? {
+                  _id: item.vehicleTypeArray[0]?._id || null,
+                  vehicleTypeName: item.vehicleTypeArray[0]?.vehicleTypeName || 'N/A'
+                }
+              : { _id: null, vehicleTypeName: item.vehicleType || 'N/A' },
+
+          _driver:
+            item.driverOptionsArray?.length === 1
+              ? {
+                  _id: item.driverOptionsArray[0]?._id || null,
+                  userName: item.driverOptionsArray[0]?.userName || 'N/A'
+                }
+              : { _id: null, userName: item.userName || 'N/A' },
+
+          _cab:
+            item.cabOptionsArray?.length === 1
+              ? {
+                  _id: item.cabOptionsArray[0]?._id || null,
+                  vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A'
+                }
+              : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
+          _zoneName_options: zoneInfo || [],
+          _vehicleType_options: vehicleTypeInfo || [],
+          _drivers_options: drivers || [],
+          _cab_options: cabOptions || []
+        }));
+
+      // Filter mapped data where all required `_id` fields are present
+      const validData = mappedData.filter(
+        (item) =>
+          item.status !== 3 && item._zoneName._id && item._zoneType._id && item._vehicleType._id && item._driver._id && item._cab._id
+      );
+
+      // Update the state with filtered valid data
+      setPayload1((prevPayload) => [
+        ...prevPayload.filter((p) => !validData.some((d) => d._roster_id === p._roster_id)), // Remove duplicates
+        ...validData
+      ]);
+
+      setData(mappedData); // Update main data state
     }
   }, [tripData, drivers, vehicleTypeInfo, zoneInfo]);
+  console.log({ data });
 
-  const columns = useMemo(
-    () => [
-      {
-        header: 'Trip Id',
-        accessorKey: 'rosterTripId',
-        dataType: 'plain_text',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Date',
-        accessorKey: '_trip_date',
-        dataType: 'date',
-        meta: {
-          className: 'cell-center'
-        }
-      },
+  const handleChange = (rowIndex, key, value) => {
+    const updatedData = [...data];
+    updatedData[rowIndex][key] = value; // Update the specific field
+    const { _zoneName, _zoneType, _vehicleType, _driver, _cab } = updatedData[rowIndex];
 
-      {
-        header: 'Time',
-        accessorKey: '_trip_time',
-        dataType: 'plain_text',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Zone Name',
-        accessorKey: '_zoneName',
-        dataType: 'zoneName',
-        meta: {
-          zoneInfo: zoneInfo
-        }
-      },
-      {
-        header: 'Zone Type',
-        accessorKey: '_zoneType',
-        dataType: 'zoneType'
-      },
-      {
-        header: 'Vehicle Type',
-        accessorKey: '_vehicleType',
-        dataType: 'vehicleType'
-      },
-      {
-        header: 'Cab',
-        accessorKey: '_cab',
-        dataType: 'cab'
-      },
-      {
-        header: 'Driver',
-        accessorKey: '_driver',
-        dataType: 'driver'
-      },
+    if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
+      setPayload1((prevPayload) => {
+        // Check if the current `_id` already exists in `prevPayload`
+        const existingIndex = prevPayload.findIndex((item) => item._id === updatedData[rowIndex]._id);
 
-      {
-        header: 'Dual Trip',
-        accessorKey: '_dual_trip',
-        dataType: 'checkbox',
-        meta: {
-          className: 'cell-center'
+        if (existingIndex !== -1) {
+          // If it exists, replace the existing entry
+          const updatedPayload = [...prevPayload];
+          updatedPayload[existingIndex] = updatedData[rowIndex];
+          return updatedPayload;
+        } else {
+          // If it doesn't exist, add it to the array
+          return [...prevPayload, updatedData[rowIndex]];
         }
-      },
-      {
-        header: 'Guard',
-        accessorKey: '_guard_1',
-        dataType: 'checkbox',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      // {
-      //   header: 'Fetch Rate',
-      //   accessorKey: 'select',
-      //   dataType: 'fetchButton'
-      // },
-      {
-        header: 'Guard Price',
-        accessorKey: '_guard_price_1',
-        dataType: 'guardPrice',
-        meta: {
-          className: 'cell-center'
-        }
-      },
+      });
+    }
 
-      {
-        header: 'Company Rate',
-        accessorKey: '_companyRate',
-        dataType: 'companyRate',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Penalty',
-        accessorKey: '_penalty_1',
-        dataType: 'penalty',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Additonal rate',
-        accessorKey: '_additional_rate',
-        dataType: 'additionalRate',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Driver/Vendor Rate',
-        accessorKey: '_driverRate_or_vendorRate',
-        dataType: 'driverVendorRate',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        header: 'Location',
-        accessorKey: 'location',
-        dataType: 'plain_text',
-        meta: {
-          className: 'cell-center'
-        }
-      },
+    setData(updatedData);
+  };
 
-      {
-        header: 'Actions',
-        id: 'edit',
-        cell: (info) => <EditAction {...info} payload1={payload1} setPayload1={setPayload1} />,
-        meta: {
-          className: 'cell-center'
+  const bulkSync = () => {
+    const updatedData = [...data];
+
+    payload1.forEach(async (trip) => {
+      console.log(trip);
+      const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab } = trip;
+
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
+        const payload = {
+          data: {
+            companyID: '66e010556265e5aad31f9b40',
+            vehicleTypeID: '66c57911777b0e58991125f3',
+            zoneNameID: '6683e597643aeaa0469223a3',
+            zoneTypeID: '6683e5c6643aeaa0469223b3',
+            driverId: '66ed052952b00bf1e93a4abb'
+          }
+        };
+
+        try {
+          const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+          console.log(response.data);
+          const amounts = response.data.data;
+          // Update all rows in updatedData with the same _id
+          updatedData.forEach((row) => {
+            if (row._id === _id) {
+              row['_companyRate'] = amounts.companyAmount;
+              row['_vendorRate'] = amounts.vendorAmount;
+              row['_driverRate'] = amounts.driverAmount;
+
+              if (row._guardRequired) {
+                row['_vendorGuardRate'] = amounts.vendorGuardPrice;
+                row['_driverGuardRate'] = amounts.driverGuardPrice;
+                row['_companyGuardRate'] = amounts.companyGuardPrice;
+                row['_driverGuardRate_or_vendorGuardRate'] = amounts.driverGuardPrice || amounts.vendorGuardPrice;
+              } else {
+                row['_companyGuardRate'] = 0;
+                row['_driverGuardRate'] = 0;
+                row['_vendorGuardRate'] = 0;
+                row['_driverGuardRate_or_vendorGuardRate'] = 0;
+              }
+
+              row['_companyDualRate'] = amounts.companyDualAmount;
+              row['_vendorDualRate'] = amounts.vendorDualAmount;
+              row['_driverDualRate'] = amounts.driverDualAmount;
+
+              row['_driverRate_or_vendorRate'] = amounts.driverAmount || amounts.vendorAmount;
+
+              row['_driverDualRate_or_vendorDualRate'] = amounts.driverDualAmount || amounts.vendorDualAmount;
+            }
+          });
+
+          console.log({ updatedData });
+          // Update state after all async operations
+          setData([...updatedData]);
+        } catch (error) {
+          console.error('Error syncing data:', error);
         }
       }
-    ],
-    []
-  );
+    });
+  };
+
+  const renderInputField = (key, value, rowIndex, row) => {
+    switch (key) {
+      case 'tripDate': {
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const day = String(date.getDate()).padStart(2, '0'); // Ensure 2 digits
+          const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+          const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
+          return `${day}-${month}-${year}`;
+        };
+        return (
+          <Tooltip title={formatDate(value) || ''} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={formatDate(value)}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '80px' // Ensures enough space for full date
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case 'tripTime': {
+        return (
+          <Tooltip title={value || ''} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={value}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '80px' // Ensures enough space for full date
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case 'rosterTripId':
+      case 'location': {
+        return (
+          <Tooltip title={value || ''} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={value}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '60px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap' // Prevents text from wrapping
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case '_companyRate':
+      case '_companyGuardRate':
+      case '_companyPenalty':
+      case '_driverRate_or_vendorRate':
+      case '_driverGuardRate_or_vendorGuardRate':
+        return (
+          <Tooltip title={value || 0} arrow>
+            <TextField
+              placeholder={value || 0}
+              id="outlined-start-adornment"
+              value={value} // Use value to make it fixed
+              type="number"
+              InputProps={{
+                readOnly: true,
+                // startAdornment: '₹',
+
+                inputProps: {
+                  sx: {
+                    '::-webkit-outer-spin-button': { display: 'none' },
+                    '::-webkit-inner-spin-button': { display: 'none' },
+                    '-moz-appearance': 'textfield' // Firefox
+                  }
+                }
+              }}
+              sx={{
+                input: {
+                  textAlign: 'left' // Optional: Align text to the right
+                }
+              }}
+            />
+          </Tooltip>
+        );
+      /* break omitted */
+      case 'tripType': {
+        return (
+          <Tooltip title={value == 1 ? 'Pickup' : value == 2 ? 'Drop' : 'Unknown'} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={value == 1 ? 'Pickup' : value == 2 ? 'Drop' : 'Unknown'}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '60px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap' // Prevents text from wrapping
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case '_zoneName': {
+        return (
+          <Tooltip title={value._id ? value.zoneName : 'N/A' || ''} arrow>
+            <FormControl sx={{ width: 120 }} error={!value?._id}>
+              {/* Optional Helper Text */}
+              <Select
+                value={JSON.stringify(value)} // Using stringified value
+                onChange={(e) => handleChange(rowIndex, key, JSON.parse(e.target.value))}
+                displayEmpty
+                inputProps={{ 'aria-label': 'Zone Name' }}
+                sx={{ width: '100%', color: value?._id ? 'inherit' : 'red' }}
+              >
+                {/* Placeholder item when value is missing */}
+                {!value?._id && (
+                  <MenuItem value="" sx={{ color: 'text.secondary' }}>
+                    Select Zone
+                  </MenuItem>
+                )}
+
+                {/* Option for the selected zone */}
+                {value && (
+                  <MenuItem key={value._id} value={JSON.stringify(value)}>
+                    {value.zoneName}
+                  </MenuItem>
+                )}
+
+                {/* Map over all zones */}
+                {zoneInfo.map((zone) => (
+                  <MenuItem key={zone._id} value={JSON.stringify(zone)}>
+                    {zone.zoneName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case '_zoneType': {
+        return (
+          <Tooltip title={value._id ? value.zoneTypeName : 'N/A' || ''} arrow>
+            <FormControl sx={{ width: '100%', maxWidth: 200 }} error={!value?._id}>
+              {/* Optional Helper Text */}
+              <Select
+                value={JSON.stringify(value)} // Using stringified value
+                onChange={(e) => handleChange(rowIndex, key, JSON.parse(e.target.value))}
+                displayEmpty
+                inputProps={{ 'aria-label': 'Zone Type' }}
+                sx={{ width: '100%', color: value?._id ? 'inherit' : 'red' }}
+              >
+                {/* Placeholder item when value is missing */}
+                {!value?._id && (
+                  <MenuItem value="" sx={{ color: 'text.secondary' }}>
+                    Select Zone Type
+                  </MenuItem>
+                )}
+
+                {/* Option for the selected zone type */}
+                {value && (
+                  <MenuItem key={value._id} value={JSON.stringify(value)}>
+                    {value.zoneTypeName}
+                  </MenuItem>
+                )}
+
+                {/* Map over all zoneTypes, excluding the selected one */}
+                {row._zoneName.zoneType
+                  .filter((zone) => zone._id !== value._id) // Exclude selected value if needed
+                  .map((zone) => (
+                    <MenuItem key={zone._id} value={JSON.stringify(zone)}>
+                      {zone.zoneTypeName}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      case '_cab': {
+        return (
+          <FormControl sx={{ width: '100%', maxWidth: 200 }} error={!value?._id}>
+            {/* Optional Helper Text */}
+            <FormHelperText>{!value?._id ? 'Invalid Cab' : ''}</FormHelperText>
+
+            <Select
+              value={JSON.stringify(value)} // Using stringified value
+              onChange={(e) => handleChange(rowIndex, key, JSON.parse(e.target.value))}
+              displayEmpty
+              inputProps={{ 'aria-label': 'Cab' }}
+              sx={{ width: '100%' }} // Make the Select element fill the FormControl's width
+            >
+              {/* Placeholder item when value is missing */}
+              {!value?._id && (
+                <MenuItem value="" sx={{ color: 'text.secondary' }}>
+                  Select Cab
+                </MenuItem>
+              )}
+
+              {/* Option for the selected cab */}
+              {value && (
+                <MenuItem key={value._id} value={JSON.stringify(value)}>
+                  {value.vehicleNumber}
+                </MenuItem>
+              )}
+
+              {/* Map over all cab options */}
+              {row._cab_options.map((cab) => (
+                <MenuItem key={cab._id} value={JSON.stringify(cab)}>
+                  {cab.vehicleNumber}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      }
+      /* break omitted */
+      case '_vehicleType': {
+        return (
+          <FormControl sx={{ width: '100%', maxWidth: 200 }} error={!value?._id}>
+            {/* Optional Helper Text */}
+            <FormHelperText>{!value?._id ? 'Invalid Cab' : ''}</FormHelperText>
+
+            <Select
+              value={JSON.stringify(value)} // Using stringified value
+              onChange={(e) => handleChange(rowIndex, key, JSON.parse(e.target.value))}
+              displayEmpty
+              inputProps={{ 'aria-label': 'Cab' }}
+              sx={{ width: '100%' }} // Make the Select element fill the FormControl's width
+            >
+              {/* Placeholder item when value is missing */}
+              {!value?._id && (
+                <MenuItem value="" sx={{ color: 'text.secondary' }}>
+                  Select Vehicle Type
+                </MenuItem>
+              )}
+
+              {/* Option for the selected cab */}
+              {value && (
+                <MenuItem key={value._id} value={JSON.stringify(value)}>
+                  {value.vehicleTypeName}
+                </MenuItem>
+              )}
+
+              {/* Map over all cab options */}
+              {row._vehicleType_options.map((cab) => (
+                <MenuItem key={cab._id} value={JSON.stringify(cab)}>
+                  {cab.vehicleTypeName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      }
+      /* break omitted */
+      case '_driver': {
+        return (
+          <FormControl sx={{ width: '100%', maxWidth: 150 }} error={!value?._id}>
+            {/* Optional Helper Text */}
+            <Select
+              value={JSON.stringify(value)} // Using stringified value
+              onChange={(e) => handleChange(rowIndex, key, JSON.parse(e.target.value))}
+              displayEmpty
+              inputProps={{ 'aria-label': 'Driver' }}
+              sx={{ width: '100%', color: value?._id ? 'inherit' : 'red' }} // Make the Select element fill the FormControl's width
+            >
+              {/* Option for the selected driver */}
+              {!value._id && (
+                <MenuItem key={value._id} value={JSON.stringify(value)}>
+                  {'N/A'}
+                </MenuItem>
+              )}
+              {value._id && (
+                <MenuItem key={value._id} value={JSON.stringify(value)}>
+                  {value.userName}
+                </MenuItem>
+              )}
+
+              {/* Map over driverOptionsArray or _drivers_options */}
+              {(row.driverOptionsArray.length === 0 ? row._drivers_options : row.driverOptionsArray).map((driver) => (
+                <MenuItem key={driver._id} value={JSON.stringify(driver)}>
+                  {driver.userName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      }
+      /* break omitted */
+      case '_guardRequired':
+        return (
+          <Checkbox
+            checked={!!value} // Convert 1/0 to true/false
+            onChange={(e) => handleChange(rowIndex, key, e.target.checked ? 1 : 0)} // Convert true/false back to 1/0
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '0 auto' // Ensures it's centered horizontally
+            }}
+          />
+        );
+      /* break omitted */
+      case '_driverPenalty':
+      case '_additional_rate':
+      case '_tollCharge':
+      case '_mcdRate':
+      case '_driverPenaltyRate_or_vendorPenaltyRate': {
+        return (
+          <Tooltip title={value || 0} arrow>
+            <TextField
+              placeholder="0"
+              id="outlined-start-adornment"
+              onChange={(e) => handleChange(rowIndex, key, e.target.value)}
+              type="number"
+              InputProps={{
+                // startAdornment: '₹',
+                inputProps: {
+                  sx: {
+                    '::-webkit-outer-spin-button': { display: 'none' },
+                    '::-webkit-inner-spin-button': { display: 'none' },
+                    '-moz-appearance': 'textfield' // Firefox
+                  }
+                }
+              }}
+              sx={{
+                input: {
+                  textAlign: 'left' // Optional: Align text to the right
+                },
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '60px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap' // Prevents text from wrapping
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      /* break omitted */
+      default:
+        return null;
+    }
+  };
+
+  const displayKeys = [
+    'rosterTripId',
+    'tripDate',
+    'tripTime',
+    'tripType',
+    '_zoneName',
+    '_zoneType',
+    'location',
+    '_vehicleType',
+    '_cab',
+    '_driver',
+    '_guardRequired',
+    // 'sync',
+    '_companyRate',
+    '_companyGuardRate',
+    '_companyPenalty',
+    '_driverRate_or_vendorRate',
+    '_driverGuardRate_or_vendorGuardRate',
+    '_driverPenaltyRate_or_vendorPenaltyRate',
+    '_additional_rate',
+    '_mcdRate',
+    '_tollCharge'
+  ];
+  const headerMap = {
+    tripDate: 'Date',
+    tripTime: 'Time',
+    rosterTripId: 'Trip ID',
+    tripType: 'Type',
+    _zoneName: 'Zone Name',
+    _zoneType: 'Zone Type',
+    location: 'Location',
+    _vehicleType: 'Vehicle Type',
+    _cab: 'Vehicle',
+    _driver: 'Driver',
+    _guardRequired: 'Guard',
+    sync: 'Sync',
+    _companyRate: 'Company Rate',
+    _companyGuardRate: 'Company Guard Rate',
+    _companyPenalty: 'Company Penalty Rate',
+    _driverRate_or_vendorRate: 'Driver Rate',
+    _driverGuardRate_or_vendorGuardRate: 'Driver Guard Rate',
+    _driverPenaltyRate_or_vendorPenaltyRate: 'Driver Penalty Rate',
+    _additional_rate: 'Extra Charges',
+    _mcdRate: 'MCD charge',
+    _tollCharge: 'Toll Charges'
+  };
 
   return (
     <>
@@ -422,157 +788,81 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
               Assign New Trips
             </Typography>
-            <Button sx={{ ml: 2, flex: 0.2 }} color="success" variant="contained" onClick={generateTrips}>
-              Save
+            {/* <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
+              {`Trips Ready: ${payload1.length}`}
+            </Typography> */}
+            <Button sx={{ ml: 2, flex: 0.2 }} color="secondary" variant="contained" onClick={bulkSync}>
+              {`Sync ${payload1.length} Trips`}
+            </Button>
+            <Button sx={{ ml: 2, flex: 0.2 }} color="success" variant="contained" disabled={payload1.length === 0} onClick={generateTrips}>
+              {/* Save */}
+              {`Generate ${payload1.length} Trips`}
             </Button>
           </Toolbar>
         </AppBar>
-        <ReactTable {...{ data, columns, setData }} />
+
+        {data.length > 0 && (
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr>
+                <th
+                  style={{
+                    border: '1px solid black',
+                    padding: '8px',
+                    textAlign: 'left'
+                  }}
+                >
+                  Sr No
+                </th>
+                {displayKeys.map((key) => (
+                  <th
+                    key={key}
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {headerMap[key] || key} {/* Use the mapped header or fallback to key */}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  style={{
+                    backgroundColor: rowIndex % 2 === 1 ? '#fff' : '#f0f9f9' // Alternate row colors
+                  }}
+                >
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {rowIndex + 1} {/* Serial Number */}
+                  </td>
+                  {displayKeys.map((key) => (
+                    <td
+                      key={key}
+                      style={{
+                        border: '1px solid black',
+                        padding: '0px',
+                        height: '50px'
+                      }}
+                    >
+                      {renderInputField(key, row[key], rowIndex, row)} {/* Pass the entire row */}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </Dialog>
     </>
-  );
-}
-// ==============================|| REACT TABLE ||============================== //
-
-function EditAction({ row, table, setPayload1, payload1 }) {
-  const meta = table?.options?.meta;
-
-  const setSelectedRow = (e) => {
-    meta?.setSelectedRow((old) => ({
-      ...old,
-      [row.id]: !old[row.id]
-    }));
-    // @ts-ignore
-    meta?.revertData(row.index, e?.currentTarget.name === 'cancel');
-  };
-
-  const saveRow = () => {
-    const rosterId = row.original._roster_id; // Assuming rosterId exists in row.original
-    const { _drivers_options, _vehicleType_options, _zoneName_options, ...cleanedRow } = row.original;
-
-    setPayload1((prev) => {
-      // Check if the current row already exists in payload1 based on rosterId
-      const existingRowIndex = prev.findIndex((item) => item._roster_id === rosterId);
-
-      if (existingRowIndex > -1) {
-        // If the row exists, replace it with the cleaned row (without unwanted keys)
-        const updatedPayload = [...prev];
-        updatedPayload[existingRowIndex] = cleanedRow; // Overwrite the existing row with the cleaned data
-        return updatedPayload;
-      } else {
-        // If the row does not exist, add the cleaned row to the array
-        return [...prev, cleanedRow];
-      }
-    });
-
-    // Reset the selectedRow state
-    meta?.setSelectedRow((old) => ({
-      ...old,
-      [row.id]: !old[row.id]
-    }));
-  };
-
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      {meta?.selectedRow[row.id] && (
-        <Tooltip title="Cancel">
-          <IconButton color="error" name="cancel" onClick={setSelectedRow}>
-            <CloseCircle size="15" variant="Outline" />
-          </IconButton>
-        </Tooltip>
-      )}
-      <Tooltip title={meta?.selectedRow[row.id] ? 'Save' : 'Edit'}>
-        <IconButton
-          color={meta?.selectedRow[row.id] ? 'success' : 'primary'}
-          onClick={meta?.selectedRow[row.id] ? saveRow : setSelectedRow}
-        >
-          {meta?.selectedRow[row.id] ? <Send size="15" variant="Outline" /> : <Edit2 variant="Outline" />}
-        </IconButton>
-      </Tooltip>
-    </Stack>
-  );
-}
-
-// ==============================|| REACT TABLE ||============================== //
-
-function ReactTable({ columns, data, setData }) {
-  const [originalData, setOriginalData] = useState(() => [...data]);
-  const [selectedRow, setSelectedRow] = useState({});
-
-  const table = useReactTable({
-    data,
-    columns,
-    defaultColumn: {
-      cell: RowEditable
-    },
-    getCoreRowModel: getCoreRowModel(),
-    meta: {
-      selectedRow,
-      setSelectedRow,
-      revertData: (rowIndex, revert) => {
-        if (revert) {
-          setData((old) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
-        } else {
-          setOriginalData((old) => old.map((row, index) => (index === rowIndex ? data[rowIndex] : row)));
-        }
-      },
-      updateData: (rowIndex, columnId, value) => {
-        setData((old) =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                ...old[rowIndex],
-                [columnId]: value
-              };
-            }
-            return row;
-          })
-        );
-      }
-    },
-    debugTable: true
-  });
-
-  let headers = [];
-  table.getAllColumns().map(
-    (columns) =>
-      // @ts-ignore
-      columns.columnDef.accessorKey &&
-      headers.push({
-        label: typeof columns.columnDef.header === 'string' ? columns.columnDef.header : '#',
-        // @ts-ignore
-        key: columns.columnDef.accessorKey
-      })
-  );
-
-  return (
-    <ScrollX>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableCell key={header.id} {...header.column.columnDef.meta}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} {...cell.column.columnDef.meta}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </ScrollX>
   );
 }

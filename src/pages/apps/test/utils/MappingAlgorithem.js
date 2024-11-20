@@ -6,17 +6,18 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
 
   // Create maps for quick lookup
   let cabMap = new Map();
-  cabOptions&&cabOptions.forEach((cab) => {
-    cabMap.set(cab.vehicleNumber.replaceAll(/\s+/g, '').toUpperCase(), {
-      id: cab._id,
-      drivers: cab.linkedDrivers
-        .filter((driver) => driver.driverId !== null) // Exclude drivers with null driverId
-        .map((driver) => ({
-          _id: driver.driverId._id,
-          userName: driver.driverId.userName,
-        })),
+  cabOptions &&
+    cabOptions.forEach((cab) => {
+      cabMap.set(cab.vehicleNumber.replaceAll(/\s+/g, '').toUpperCase(), {
+        id: cab._id,
+        drivers: cab.linkedDrivers
+          .filter((driver) => driver.driverId !== null) // Exclude drivers with null driverId
+          .map((driver) => ({
+            _id: driver.driverId._id,
+            userName: driver.driverId.userName
+          }))
+      });
     });
-  });
 
   console.log({ cabMap });
 
@@ -26,8 +27,8 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
       id: zone._id,
       zoneType: zone.zoneType.map((type) => ({
         id: type._id,
-        zoneTypeName: type.zoneTypeName,
-      })),
+        zoneTypeName: type.zoneTypeName
+      }))
     });
   });
 
@@ -53,10 +54,11 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
       zoneTypeArray.push(...zoneData.zoneType);
     }
 
-    // Match cab data and populate cabOptionsArray and DriverOptionsArray
-    let cabData = cabMap.get(obj.vehicleNumber?.replaceAll(/\s+/g, '').toUpperCase());
+    let vehicleNumber = obj.vehicleNumber?.replaceAll(/\s+/g, '').toUpperCase() ?? '';
+    let cabData = cabMap.get(vehicleNumber);
+
     if (cabData) {
-      cabOptionsArray.push({ _id: cabData.id, vehicleNumber: obj.vehicleNumber });
+      cabOptionsArray.push({ _id: cabData.id, vehicleNumber: obj.vehicleNumber || 'Unknown' });
       driverOptionsArray = [...cabData.drivers];
     }
 
@@ -76,9 +78,7 @@ export function getMergeResult(data, zone_zoneType, vehicleType, cabOptions) {
 
     // Handle zone type array
     if (zoneTypeArray.length > 0) {
-      let matchedZoneTypes = zoneTypeArray.filter(
-        (type) => type.zoneTypeName?.toLowerCase() === obj.zoneType?.toLowerCase()
-      );
+      let matchedZoneTypes = zoneTypeArray.filter((type) => type.zoneTypeName?.toLowerCase() === obj.zoneType?.toLowerCase());
       obj.zoneTypeArray = matchedZoneTypes.length === 1 ? [matchedZoneTypes[0]] : zoneTypeArray;
     } else {
       obj.zoneTypeArray = zoneTypeArray;
