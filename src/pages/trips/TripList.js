@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -21,7 +21,9 @@ import {
   Tooltip,
   Menu,
   MenuItem,
-  Fade
+  Fade,
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -38,7 +40,7 @@ import TripCard from 'components/cards/trips/TripCard';
 import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
 import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
 
-import { dispatch, set, useSelector } from 'store';
+import { dispatch, useSelector } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reducers/invoice';
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
@@ -55,13 +57,16 @@ import { APP_DEFAULT_PATH } from 'config';
 import { Link } from 'react-router-dom';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
+import LoadingButton from 'themes/overrides/LoadingButton';
+import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
 
 const avatarImage = require.context('assets/images/users', true);
 
 const TRIP_STATUS = {
   PENDING: 1,
   COMPLETED: 2,
-  CANCELLED: 3
+  CANCELLED: 3,
+  UNATTENDED: 4
 };
 
 const POPUP_TYPE = {
@@ -77,6 +82,8 @@ const getTabName = (status) => {
       return 'Completed';
     case TRIP_STATUS.CANCELLED:
       return 'Cancelled';
+    case TRIP_STATUS.UNATTENDED:
+      return 'Unattended';
     default:
       return 'All';
   }
@@ -100,9 +107,98 @@ const changeStatusFromAPI = async (tripId, updatedStatus, remarks) => {
   }
 };
 
+const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
+  console.log('selected', selected);
+  console.log('DataURL', deleteURL);
+  const [remove, setRemove] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      await axiosServices.delete(deleteURL, {
+        data: {
+          data: {
+            Ids: selected
+          }
+        }
+      });
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Deleted successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+
+      handleRefetch();
+    } catch (error) {
+      console.log('Error in delete', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseForRemove = useCallback(() => {
+    setRemove(false);
+  }, []);
+
+  return (
+    <>
+      {visible && selected.length > 0 && (
+        <>
+          <Button
+            variant="contained"
+            color="error"
+            size="medium"
+            startIcon={loading ? <CircularProgress size="20" /> : <Trash />}
+            sx={{
+              position: 'absolute',
+              right: -1,
+              top: -1,
+              borderRadius: '0 4px 0 4px'
+            }}
+            // onClick={handleDelete}
+            onClick={() => setRemove(true)}
+            disabled={loading}
+          >
+            Delete ({selected.length})
+          </Button>
+
+          {remove && (
+            <CustomAlertDelete
+              title={'This action is irreversible. Please check before deleting.'}
+              open={remove}
+              handleClose={handleCloseForRemove}
+              handleDelete={handleDelete}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns, data }) {
+function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -145,6 +241,15 @@ function ReactTable({ columns, data }) {
     useRowSelect
   );
 
+  console.log('selectedRowIds = ', selectedRowIds);
+
+  const selectedRowIdsArray = Object.keys(selectedRowIds); // Get keys of selected rows
+  const selectedRows = selectedRowIdsArray.map((id) => rows[id]?.original?._id).filter(Boolean);
+  // .filter((item) => item.assignedStatus === TRIP_STATUS.COMPLETED); // Map to _id of rows
+  console.log('selectedRows = ', selectedRows);
+
+  console.log('rows', rows);
+
   const componentRef = useRef(null);
 
   // ================ Tab ================
@@ -158,7 +263,8 @@ function ReactTable({ columns, data }) {
   const counts = {
     Pending: countGroup.filter((status) => status === TRIP_STATUS.PENDING).length,
     Completed: countGroup.filter((status) => status === TRIP_STATUS.COMPLETED).length,
-    Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length
+    Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length,
+    Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length
   };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
@@ -209,56 +315,60 @@ function ReactTable({ columns, data }) {
           ))}
         </Tabs>
       </Box>
-      <TableRowSelection selected={Object.keys(selectedRowIds).length} />
-      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
+      {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
+
+      <DeleteButton selected={selectedRows} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+
+      {/* <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
         <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          {/* <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} /> */}
+          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         </Stack>
         <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
           <CSVExport data={data} filename={'invoice-list.csv'} />
         </Stack>
-      </Stack>
-      <Box ref={componentRef}>
-        <Table {...getTableProps()}>
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                    <HeaderSort column={column} sort />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row);
-              return (
-                <Fragment key={i}>
-                  <TableRow
-                    {...row.getRowProps()}
-                    onClick={() => {
-                      row.toggleRowSelected();
-                    }}
-                    sx={{ cursor: 'pointer', bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit' }}
-                  >
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell} {...cell.getCellProps([{ className: cell.column.className }])}>
-                        {cell.render('Cell')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </Fragment>
-              );
-            })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      </Stack> */}
+      <Box ref={componentRef} sx={{ mt: 2 }}>
+        <ScrollX>
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, i) => {
+                prepareRow(row);
+                return (
+                  <Fragment key={i}>
+                    <TableRow
+                      {...row.getRowProps()}
+                      onClick={() => {
+                        row.toggleRowSelected();
+                      }}
+                      sx={{ cursor: 'pointer', bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit' }}
+                    >
+                      {row.cells.map((cell) => (
+                        <TableCell key={cell} {...cell.getCellProps([{ className: cell.column.className }])}>
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollX>
+
+        <Box sx={{ p: 2, py: 3 }}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </Box>
       </Box>
     </>
   );
@@ -272,7 +382,7 @@ ReactTable.propTypes = {
 // ==============================|| TRIP - LIST ||============================== //
 
 const TripList = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [alertCancelOpen, setAlertCancelOpen] = useState(false);
@@ -283,10 +393,10 @@ const TripList = () => {
   const [data, setData] = useState(null);
   const [refetch, setRefetch] = useState(false);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
 
   useEffect(() => {
-    dispatch(getInvoiceList()).then(() => setLoading(false));
+    // dispatch(getInvoiceList()).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -417,10 +527,13 @@ const TripList = () => {
     setCancelText(event.target.value);
   };
 
+  const handleRefetch = useCallback(() => {
+    setRefetch((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // TODO : GET ALL TRIPS
         const response = await axiosServices.get('/assignTrip/all/trips/cabProvider', {
           params: {
             startDate: formatDateForApi(startDate),
@@ -857,10 +970,12 @@ const TripList = () => {
         </Stack>
 
         <MainCard content={false}>
-          <ScrollX>
-            {/* <ReactTable columns={columns} data={dummyData} /> */}
-            {data?.length > 0 && <ReactTable columns={columns} data={data} />}
-          </ScrollX>
+          {/* <ScrollX> */}
+          {/* <ReactTable columns={columns} data={dummyData} /> */}
+          {data?.length > 0 && (
+            <ReactTable columns={columns} data={data} deleteButton deleteURL="/assignTrip/delete/trips" handleRefetch={handleRefetch} />
+          )}
+          {/* </ScrollX> */}
         </MainCard>
       </Stack>
 

@@ -17,6 +17,7 @@ import AddRosterFileForm from 'pages/apps/test/components/AddRosterFileForm';
 import DriverRate from 'pages/management/driver/driverRate/DriverRate';
 import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelisting';
 import TripView from 'pages/trips/TripView';
+import ExpandingFile from 'sections/cabprovidor/testAdvance/ExpandingFile';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -104,8 +105,11 @@ const RosterDashboard1 = Loadable(lazy(() => import('pages/apps/test/dashboard')
 
 // Settings
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
+const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
+const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
+const ExcelTemplatePage  = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
 // ==============================|| MAIN ROUTES ||============================== //
 
 const CabProvidorRoutes = {
@@ -171,10 +175,10 @@ const CabProvidorRoutes = {
                   path: 'assign-trips',
                   element: <AssignTrips />
                 },
-                // {
-                //   path: 'test',
-                //   element: <RosterDashboard1 />
-                // },
+                {
+                  path: 'test-download',
+                  element: <ExcelTemplatePage  />
+                },
                 {
                   path: 'test-map',
                   element: <MapRosterFileTest />
@@ -227,7 +231,12 @@ const CabProvidorRoutes = {
                   path: 'advance-type',
                   element: <AdvanceType />
                   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
-                }
+                },
+                {
+                  path: 'test',
+                  element: <ExpandingFile />
+                  //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
+                },
               ]
             },
 
@@ -446,14 +455,24 @@ const CabProvidorRoutes = {
         {
           path: 'settings',
           children: [
-            // {
-            //   path: 'account',
-            //   element: <UnderConstruction title="Account Settings" />
-            // },
-            // {
-            //   path: 'roster',
-            //   element: <UnderConstruction title="Roster Settings" />
-            // },
+            {
+              path: 'account',
+              element: <AccountSettings />
+            },
+
+            // Roster Settings
+            {
+              path: 'roster',
+              children: [
+                // Create Roster Template
+                {
+                  path: 'create-template',
+                  element: <RosterSetting />
+                }
+              ]
+            },
+
+            // Invoice Settings
             {
               path: 'invoice',
               element: <InvoiceSettings />

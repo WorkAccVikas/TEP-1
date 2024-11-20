@@ -224,6 +224,7 @@ const ViewRosterTest = () => {
   const [zoneInfo, setZoneInfo] = useState(null);
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState(null);
   const [mappedRowData, setMappedRowData] = useState([]);
+  const [cabOptions, setCabOptions] = useState(null);
   const requiredHeaders = Object.values(selectedValue?.mappedData);
   console.log({ selectedValue });
   useEffect(() => {
@@ -390,20 +391,27 @@ const ViewRosterTest = () => {
     setVehicleTypeInfo(vehicleTypes);
   };
 
+  const fetchCabs = async () => {
+    const response = await axiosServices.get('/vehicle/all/linked/drivers');
+    setCabOptions(response.data.data);
+  };
+
   useEffect(() => {
     setLoading(true); // Set loading to true when fetching data
     fetchAllZoneInfo();
     fetchAllVehicleTypeInfo();
+    fetchCabs();
   }, []);
 
   useEffect(() => {
-    if (excelData.length > 0 && zoneInfo && vehicleTypeInfo) {
-      const result = getMergeResult(excelData, zoneInfo, vehicleTypeInfo);
+    if (excelData.length > 0 && zoneInfo && vehicleTypeInfo && cabOptions) {
+      const result = getMergeResult(excelData, zoneInfo, vehicleTypeInfo, cabOptions);
       setMappedRowData(result);
       setLoading(false); // Set loading to false after processing is complete
     }
-  }, [excelData, zoneInfo, vehicleTypeInfo]);
+  }, [excelData, zoneInfo, vehicleTypeInfo, cabOptions]);
 
+  console.log({mappedRowData})
   const columns = useMemo(
     () => [
       {

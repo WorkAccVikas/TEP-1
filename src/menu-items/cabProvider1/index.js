@@ -6,7 +6,7 @@ import master from './master';
 import setting from './setting';
 
 const cabProviderMenuItems = {
-  items: [dashboard, roster, management,invoices, master, setting]
+  items: [dashboard, roster, management, invoices, master, setting]
 };
 
 export default cabProviderMenuItems;

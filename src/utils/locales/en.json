@@ -46,8 +46,11 @@
   "list": "List",
   "trips": "Trips",
   "cab type": "Cab Type",
-  "view-driver-rate":"View Driver Rate",
-  "view-vendor-rate":"View Vendor Rate",
-  "files":"Files",
-  "user-setting":"User Setting"
+  "view-driver-rate": "View Driver Rate",
+  "view-vendor-rate": "View Vendor Rate",
+  "files": "Files",
+  "user-setting": "User Setting",
+  "create template": "Create Template",
+  "advance-type":"Advance Type",
+  "test":"Test"
 }
