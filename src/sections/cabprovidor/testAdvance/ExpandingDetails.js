@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useCallback, useMemo, Fragment, useState } from 'react';
+import { useCallback, useMemo, Fragment, useState, useEffect } from 'react';
 
 // material-ui
 import { Box, Button, Chip, CircularProgress, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
@@ -19,6 +19,9 @@ import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
 import { ThemeMode } from 'config';
 import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import { dispatch } from 'store';
+import { fetchAdvances } from 'store/slice/cabProvidor/advanceSlice';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -75,14 +78,26 @@ ReactTable.propTypes = {
 
 // ==============================|| REACT TABLE - EXPANDING DETAILS ||============================== //
 
-const ExpandingDetails = ({ data }) => {
+const ExpandingDetails = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
-  const [loading , setLoading] = useState(false);
+  const { advances, metaData, loading, error } = useSelector((state) => state.advances);
+  const [advanceData, setAdvanceData] = useState(null);
+  const [add, setAdd] = useState(false);
+  
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
   };
+
+  const handleAdd = () => {
+    setAdd(!add);
+    if (advanceData && !add) setAdvanceData(null);
+  };
+
+  useEffect(() => {
+    dispatch(fetchAdvances());
+  }, [dispatch]);
 
   const columns = useMemo(
     () => [
@@ -102,53 +117,74 @@ const ExpandingDetails = ({ data }) => {
       },
       {
         Header: 'UserType',
-        accessor: 'firstName'
+        accessor: 'isDriver',
+        Cell: ({ row }) => {
+          const isDriver = row.original.isDriver;
+          const isVendor = row.original.isVendor;
+
+          if (isDriver) {
+            return <Chip color="success" label="Driver" size="small" variant="light" />;
+          } else if (isVendor) {
+            return <Chip color="primary" label="Vendor" size="small" variant="light" />;
+          }
+        }
       },
       {
         Header: 'Requested By',
-        accessor: 'lastName'
+        accessor: 'requestedById.userName'
       },
       {
         Header: 'Requested Amount',
-        accessor: 'age'
+        accessor: 'amount'
       },
       {
         Header: 'Advance Type',
-        accessor: 'orderStatus'
+        accessor: 'advanceTypeId.advanceTypeName'
       },
       {
         Header: 'Interest Rate',
-        accessor: 'progress'
+        accessor: 'advanceTypeId.interestRate'
       },
       {
         Header: 'Remarks',
-        accessor: 'about'
+        accessor: 'remarks'
       },
       {
         Header: 'Status',
-        accessor: 'status',
-        Cell: ({ value }) => {
-          switch (value) {
-            case 'Complicated':
-              return <Chip color="error" label="Complicated" size="small" variant="light" />;
-            case 'Relationship':
-              return <Chip color="success" label="Relationship" size="small" variant="light" />;
-            case 'Single':
-            default:
-              return <Chip color="info" label="Single" size="small" variant="light" />;
+        className: 'cell-center',
+        accessor: 'isApproved',
+        Cell: ({ row }) => {
+          const isApproved = row.original.isApproved;
+
+          if (isApproved == 1) {
+            return <Chip color="success" label="Approved" size="small" variant="light" />;
+          } else if (isApproved == 2) {
+            return <Chip color="error" label="Rejected" size="small" variant="light" />;
+          } else {
+            return <Chip color="warning" label="Pending" size="small" variant="light" />;
           }
         }
       },
       {
         Header: 'Approved Amount',
-        accessor: 'avatar'
+        accessor: 'approved_amount'
       },
-
       {
         Header: 'Actions',
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
+          const handleToggle = () => {
+            setAdvanceData(row.original);
+            handleAdd();
+          };
+
+          const getSwitchColor = () => {
+            if (row.original.isApproved === 1) return 'success'; // Green when approved
+            if (row.original.isApproved === 2) return 'error'; // Red when rejected
+            return 'default'; // Default color for pending
+          };
+
           return (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
               <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
@@ -161,12 +197,12 @@ const ExpandingDetails = ({ data }) => {
                       }
                     }
                   }}
-                  title={'Approve'}
+                  title={row.original.isApproved === 1 ? 'Reject' : 'Approve'}
                 >
                   <Switch
-                  // checked={row.original.isApproved === 1 || row.original.isApproved === 2}
-                  // onChange={handleToggle}
-                  // color={getSwitchColor()}
+                    checked={row.original.isApproved === 1 || row.original.isApproved === 2}
+                    onChange={handleToggle}
+                    color={getSwitchColor()}
                   />
                 </Tooltip>
               </WrapperButton>
@@ -178,7 +214,7 @@ const ExpandingDetails = ({ data }) => {
     []
   );
 
-  const renderRowSubComponent = useCallback(({ row: { id } }) => <ExpandingUserDetail data={data[Number(id)]} />, [data]);
+  const renderRowSubComponent = useCallback(({ row: { id } }) => <ExpandingUserDetail data={advances[Number(id)]} />, [advances]);
 
   return (
     <>
@@ -207,7 +243,7 @@ const ExpandingDetails = ({ data }) => {
         // }
       >
         <ScrollX>
-          <ReactTable columns={columns} data={data} renderRowSubComponent={renderRowSubComponent} />
+          <ReactTable columns={columns}  data={advances} renderRowSubComponent={renderRowSubComponent} />
         </ScrollX>
       </MainCard>
     </>
