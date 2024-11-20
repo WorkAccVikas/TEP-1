@@ -3,8 +3,20 @@ import GenericDialog from 'components/alertDialog/GenericDialog';
 import CustomCircularLoader from 'components/CustomCircularLoader';
 import Loadable from 'components/Loadable';
 import { lazy, useState, useCallback, useEffect } from 'react';
+import { dispatch } from 'store';
+import { addAccountSetting, fetchAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
 
 const ManageAccountSettings = Loadable(lazy(() => import('pages/setting/account/ManageAccountSettings')));
+
+export const FAKE_ACCOUNT_SETTINGS = {
+  name: 'Ram',
+  title: 'Ram Travels',
+  logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Kim_Jong-un_April_2019_%28cropped%29.jpg',
+  smallLogo: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTri4LTaGmAlYGNUVKjevQgLD5F_nbTsXvr5A&s`,
+  favIcon: 'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
+};
+
+export const FAKE_ACCOUNT_SETTINGS_2 = null;
 
 const AccountSettings = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -29,17 +41,15 @@ const AccountSettings = () => {
     (async () => {
       try {
         // TODO : API call for fetch account settings
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        const response = {
-          status: 200,
-          data: {
-            name: 'Ram',
-            title: 'Ram Travels',
-            logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Kim_Jong-un_April_2019_%28cropped%29.jpg',
-            favIcon: 'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
-          }
-          // data: null
-        };
+        // await new Promise((resolve) => setTimeout(resolve, 3000));
+        // const response = {
+        //   status: 200,
+        //   data: FAKE_ACCOUNT_SETTINGS,
+        //   // data: FAKE_ACCOUNT_SETTINGS_2
+        // };
+
+        const response = await dispatch(fetchAccountSettings()).unwrap();
+        console.log(`🚀 ~ response:`, response);
 
         if (response.status === 200) {
           if (!response.data) {
@@ -49,6 +59,7 @@ const AccountSettings = () => {
             return;
           }
           setData(response.data);
+          dispatch(addAccountSetting(response.data));
           setIsSettingsVisible(true);
         }
       } catch (error) {

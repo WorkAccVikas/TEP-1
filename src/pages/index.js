@@ -29,6 +29,7 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import moment from 'moment';
 import { formatDateForApi, formatDateUsingMoment } from 'utils/helper';
+import { fetchAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -55,6 +56,8 @@ const Dashboard = () => {
     dispatch(fetchAllVehicleTypes());
     dispatch(fetchZoneNames());
     dispatch(fetchAllZoneTypes());
+    dispatch(fetchAccountSettings());
+
   }, [dispatch]);
 
   useEffect(() => {
