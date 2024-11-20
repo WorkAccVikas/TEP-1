@@ -26,10 +26,20 @@ import { useLocation, useNavigate } from 'react-router';
 import { fetchAllDrivers } from 'store/slice/cabProvidor/driverSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
+import { APP_DEFAULT_PATH } from 'config';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
-const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1, initialDriverID, handleSelectedCompanyName, handleSelectedDriverName }) => {
+const AddDriverRateDialog = ({
+  open,
+  onClose,
+  setSelectedCompany,
+  setDriverID1,
+  initialDriverID,
+  handleSelectedCompanyName,
+  handleSelectedDriverName
+}) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
   const [driverID, setDriverID] = useState(initialDriverID);
   const navigate = useNavigate();
@@ -51,15 +61,15 @@ const AddDriverRateDialog = ({ open, onClose, setSelectedCompany, setDriverID1, 
       return;
     }
 
-     // Fetch company name (assuming selectedCompany contains company object with name)
-     const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';  
+    // Fetch company name (assuming selectedCompany contains company object with name)
+    const selectedCompanyName = selectedCompany ? selectedCompany.company_name : '';
 
-     // Fetch vendor name based on vendorID
+    // Fetch vendor name based on vendorID
     const selectedDriver = allDrivers.find((driver) => driver.driverId._id === driverID);
-    const selectedDriverName = selectedDriver ? selectedDriver.driverId.userName : ''; 
+    const selectedDriverName = selectedDriver ? selectedDriver.driverId.userName : '';
 
-     handleSelectedCompanyName(selectedCompanyName);
-     handleSelectedDriverName(selectedDriverName); 
+    handleSelectedCompanyName(selectedCompanyName);
+    handleSelectedDriverName(selectedDriverName);
     setSelectedCompany(selectedCompany); // Save selected company
     setDriverID1(driverID);
     onClose();
@@ -199,6 +209,12 @@ const DriverRate = () => {
   }, [data]);
   useEffect(() => {}, [companyRate]);
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Driver', to: '/management/driver/view' },
+    { title: 'Driver Rates' }
+  ];
+
   return (
     <>
       {/* Company selection dialog */}
@@ -214,43 +230,46 @@ const DriverRate = () => {
 
       {/* Render CompanyRateListing once a company is selected */}
       {!dialogOpen && selectedCompany && driverID1 && !showCompanyList ? (
-        <Stack gap={1} spacing={1}>
-          {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
+        <>
+          <Breadcrumbs custom links={breadcrumbLinks} />
+          <Stack gap={1} spacing={1}>
+            {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
-          {/* {companyList.length !== 0 && ( */}
+            {/* {companyList.length !== 0 && ( */}
 
-          <MainCard
-            title={
-              <Stack direction="row" alignItems="center" gap={1}>
-                Driver Rates between {' '}
-                <>
-                  {isSelectingCompany ? (
-                    <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
-                  ) : (
-                    <Chip
-                      label={selectedCompanyName || 'Select a company'}
-                      color="primary"
-                      onClick={() => setIsSelectingCompany(true)} // Open the search component on click
-                    />
-                  )}
-                </> and{' '}
-                <Chip label={selectedDriverName} color="secondary" />
-              </Stack>
-            }
-          >
-            <DriverTable
-              data={driverList}
-              page={page}
-              setPage={setPage}
-              limit={limit}
-              setLimit={setLimit}
-              updateKey={updateKey}
-              setUpdateKey={setUpdateKey}
-              loading={loading}
-            />
-          </MainCard>
-          {/* )} */}
-        </Stack>
+            <MainCard
+              title={
+                <Stack direction="row" alignItems="center" gap={1}>
+                  Driver Rates between{' '}
+                  <>
+                    {isSelectingCompany ? (
+                      <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
+                    ) : (
+                      <Chip
+                        label={selectedCompanyName || 'Select a company'}
+                        color="primary"
+                        onClick={() => setIsSelectingCompany(true)} // Open the search component on click
+                      />
+                    )}
+                  </>{' '}
+                  and <Chip label={selectedDriverName} color="secondary" />
+                </Stack>
+              }
+            >
+              <DriverTable
+                data={driverList}
+                page={page}
+                setPage={setPage}
+                limit={limit}
+                setLimit={setLimit}
+                updateKey={updateKey}
+                setUpdateKey={setUpdateKey}
+                loading={loading}
+              />
+            </MainCard>
+            {/* )} */}
+          </Stack>
+        </>
       ) : null}
     </>
   );
