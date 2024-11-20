@@ -177,7 +177,8 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
     validationSchema: specificDataValidationSchema,
     onSubmit: async (values) => {
       try {
-        const result = await dispatch(updateUserSpecificDetails({ data: { values } }));
+        console.log({ data: values });
+        const result = await dispatch(updateUserSpecificDetails({ data:  values  }));
         if (result.payload.success) {
           setSpecificData((prevState) => ({
             ...prevState,
@@ -383,7 +384,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                             variant="contained"
                             color="primary"
                             type="submit"
-                            disabled={!formik.dirty || !formik.isValid || formik.isSubmitting}
+                            disabled={!formik.dirty || formik.isSubmitting}
                           >
                             Update
                           </Button>
@@ -612,7 +613,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                         <Button
                           type="submit"
                           variant="contained"
-                          disabled={!specificFormik.dirty || !specificFormik.isValid || specificFormik.isSubmitting}
+                          disabled={!specificFormik.dirty || specificFormik.isSubmitting}
                         >
                           Save
                         </Button>
