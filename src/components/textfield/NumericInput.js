@@ -26,7 +26,6 @@ const NumericInput = ({ fieldName, label, value, onChange, onBlur, error, helper
       InputProps={{
         startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
       }}
-      margin="normal"
       {...props} // Allow for other props like sx, etc.
     />
   );
@@ -35,7 +34,7 @@ const NumericInput = ({ fieldName, label, value, onChange, onBlur, error, helper
 // Prop validation
 NumericInput.propTypes = {
   fieldName: PropTypes.string.isRequired, // The field name should be a required string
-  label: PropTypes.string, // The label 
+  label: PropTypes.string, // The label
   value: PropTypes.oneOfType([
     // Value can be either a string or a number
     PropTypes.string,
