@@ -309,8 +309,9 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     payload1.forEach(async (trip) => {
       console.log({ trip });
       const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
-
-      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id & companyID._id) {
+      console.log({ companyID });
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id ) {
+        console.log(companyID._id);
         const payload = {
           data: {
             companyID: companyID._id,
@@ -360,6 +361,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         } catch (error) {
           console.error('Error syncing data:', error);
         }
+      } else {
+        alert('Error found');
       }
     });
   };
@@ -409,8 +412,27 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         );
       }
       /* break omitted */
-      case 'rosterTripId':
       case 'location': {
+        return (
+          <Tooltip title={value || ''} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={value}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '200px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'wrap' // Prevents text from wrapping
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      case 'rosterTripId': {
         return (
           <Tooltip title={value || ''} arrow>
             <TextField
