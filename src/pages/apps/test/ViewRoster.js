@@ -118,7 +118,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
   }, [activeTab]);
 
   useEffect(() => {
-    const selectedRowsData = selectedFlatRows.map((row) => row.original);
+    const selectedRowsData = selectedFlatRows.filter((row) => row.original.status !== 3).map((row) => row.original);
     handleSetSelectedData(selectedRowsData); // Pass selected rows data to the parent or manage it here
   }, [selectedFlatRows, handleSetSelectedData]);
 
@@ -173,23 +173,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
         <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
           <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         </Stack>
-        <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
-          <>
-            {/* {headerGroups.map((group) => (
-              <Stack key={group} direction={matchDownSM ? 'column' : 'row'} spacing={2} {...group.getHeaderGroupProps()}>
-                {group.headers.map(
-                  (column) =>
-                    column.canFilter && (
-                      <Box key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                        {column.render('Filter')}
-                      </Box>
-                    )
-                )}
-              </Stack>
-            ))} */}
-          </>
-          <CSVExport data={data} filename={'invoice-list.csv'} />
-        </Stack>
+       
       </Stack>
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
@@ -275,7 +259,6 @@ const ViewRosterTest1 = () => {
       setRosterData(stateData);
     }
   }, []);
-  console.log({ rosterData });
   useEffect(() => {
     const fetchRosterData = async (id) => {
       const response = await axiosServices.post('/tripData/trip/requests/company', {
@@ -494,7 +477,6 @@ const ViewRosterTest1 = () => {
   const handleAssignDialogClose = () => {
     setOpenAssignTripDialog(false);
   };
-
   if (loading) return <Loader />;
 
   return (

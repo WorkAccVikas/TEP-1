@@ -13,6 +13,7 @@ const GenericSelect = ({
   helperText,
   fullWidth = false,
   renderOption, // New prop to allow custom rendering of MenuItem
+  placeholder,
   ...rest
 }) => {
   // If Formik is being used, fetch the field and meta from Formik
@@ -20,6 +21,10 @@ const GenericSelect = ({
   const [field, meta, helpers] = formik ? useField(name) : [];
 
   const isError = formik ? Boolean(meta?.touched && meta?.error) : Boolean(error);
+
+  // Determine the current value
+  const currentValue = formik ? field?.value : value;
+  console.log(`🚀 ~ currentValue:`, currentValue);
 
   // Handle the change for Formik and non-Formik forms
   const handleChange = (event) => {
@@ -32,7 +37,26 @@ const GenericSelect = ({
 
   return (
     <FormControl fullWidth={fullWidth} error={isError}>
-      <TextField select label={label} name={name} value={formik ? field?.value : value} onChange={handleChange} {...rest}>
+      <TextField
+        select
+        label={label}
+        name={name}
+        value={currentValue || ''}
+        onChange={handleChange}
+        {...rest}
+        SelectProps={{
+          displayEmpty: true
+        }}
+        InputProps={{
+          style: { color: currentValue ? 'inherit' : 'gray' } // Placeholder styling
+        }}
+      >
+        {/* Add a placeholder as the first option if provided */}
+        {placeholder && (
+          <MenuItem value="" disabled>
+            {placeholder}
+          </MenuItem>
+        )}
         {options.map((option) =>
           renderOption ? (
             renderOption(option) // If renderOption is provided, use it
@@ -50,16 +74,17 @@ const GenericSelect = ({
 
 // PropTypes validation
 GenericSelect.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      value: PropTypes.string.isRequired,
+      // value: PropTypes.string.isRequired,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       label: PropTypes.string.isRequired
     })
   ),
   formik: PropTypes.bool,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
   error: PropTypes.bool,
   helperText: PropTypes.string,

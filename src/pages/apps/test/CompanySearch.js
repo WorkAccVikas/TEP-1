@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 
-const SearchComponent = ({ setSelectedCompany, sx }) => {
+const SearchComponent = ({ setSelectedCompany, sx, value }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -58,6 +58,7 @@ const SearchComponent = ({ setSelectedCompany, sx }) => {
       <Autocomplete
         id="asynchronous-demo"
         open={open}
+        value={value}
         onOpen={() => {
           setOpen(true);
         }}

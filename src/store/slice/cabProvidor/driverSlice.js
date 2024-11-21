@@ -124,10 +124,20 @@ export const fetchDriverDetails = createAsyncThunk('driver/fetchDetails', async 
   }
 });
 
+export const fetchDrivers1 = createAsyncThunk('drivers/fetchDrivers1', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/driver/all?drivertype=1`);
+    return response.data.data.result; // This should match the shape of the data you expect
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 const initialState = {
   ...commonInitialState,
   drivers: [], // Empty array initially
   allDrivers: [],
+  drivers1: [],
   metaData: {
     totalCount: 0,
     page: 1,
@@ -218,6 +228,18 @@ const driverSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchAllDrivers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      .addCase(fetchDrivers1.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDrivers1.fulfilled, (state, action) => {
+        state.drivers1 = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchDrivers1.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       });

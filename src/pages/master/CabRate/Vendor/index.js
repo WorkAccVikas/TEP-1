@@ -44,7 +44,7 @@ const getInitialValue = (data) => {
   return data ? {} : { vendorId: [], rateData: [] };
 };
 
-const FIXED_COLUMN_COUNT = 6;
+const FIXED_COLUMN_COUNT = 5;
 
 const calculateMinWidth = (columnCount) => {
   const widthPerColumn = 200; // Set a fixed width per column (adjust as needed)
@@ -310,7 +310,7 @@ const AddCabRateVendor = () => {
     }
 
     if (optionType === 'selectOption') {
-      setColumnCount((p) => p + (cabAmount?.length || 0));
+      setColumnCount((p) => p + 1);
     } else if (optionType === 'removeOption') {
       setColumnCount((p) => p - 1);
     } else if (optionType === 'clear') {

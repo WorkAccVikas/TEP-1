@@ -226,7 +226,6 @@ const ViewRosterTest = () => {
   const [mappedRowData, setMappedRowData] = useState([]);
   const [cabOptions, setCabOptions] = useState(null);
   const requiredHeaders = Object.values(selectedValue?.mappedData);
-  console.log({ selectedValue });
   useEffect(() => {
     if (fileData?.rosterUrl) {
       fetchExcelData(fileData.rosterUrl);
@@ -324,7 +323,6 @@ const ViewRosterTest = () => {
                 value = value.toLowerCase() === pickupType.toLowerCase() ? 1 : value.toLowerCase() === dropType.toLowerCase() ? 2 : 'N/A';
               }
 
-              console.log({ key });
               rowObject[key] = value;
             }
           });
@@ -349,7 +347,6 @@ const ViewRosterTest = () => {
             rowObject['guard'] = 1;
           }
 
-          console.log({ rowObject });
           return rowObject;
         })
         .filter((row) => row !== null); // Filter out null rows
@@ -376,7 +373,6 @@ const ViewRosterTest = () => {
     processBatch(); // Start processing
   };
 
-  console.log({ excelData });
   const fetchAllZoneInfo = async () => {
     const response = await axiosServices.get('/zoneType/grouped/by/zone');
     setZoneInfo(response.data.data);
@@ -411,7 +407,6 @@ const ViewRosterTest = () => {
     }
   }, [excelData, zoneInfo, vehicleTypeInfo, cabOptions]);
 
-  console.log({mappedRowData})
   const columns = useMemo(
     () => [
       {
@@ -582,7 +577,6 @@ const ViewRosterTest = () => {
     const startDate = earliestDate._i;
     const endDate = latestDate._i;
 
-    console.log({ mappedRowData });
     const payload = {
       data: {
         rosterFileId: rosterFileId,

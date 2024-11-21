@@ -23,7 +23,8 @@ import {
   MenuItem,
   Fade,
   Button,
-  CircularProgress
+  CircularProgress,
+  Dialog
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -46,7 +47,7 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
+import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
 import TripChart from 'components/cards/trips/TripChart';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
@@ -59,6 +60,12 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import LoadingButton from 'themes/overrides/LoadingButton';
 import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
+import AddNewTrip from './AddNewTrip';
+import { fetchZoneNames } from 'store/slice/cabProvidor/ZoneNameSlice';
+import { fetchAllZoneTypes } from 'store/slice/cabProvidor/zoneTypeSlice';
+import { fetchAllVehicleTypesForAll } from 'store/slice/cabProvidor/vehicleTypeSlice';
+import { fetchAllDrivers, fetchDrivers1 } from 'store/slice/cabProvidor/driverSlice';
+import { fetchCab1 } from 'store/slice/cabProvidor/cabSlice';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -198,7 +205,7 @@ const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch }) {
+function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch, handleOpen, handleClose }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -280,40 +287,46 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
   return (
     <>
       <Box sx={{ p: 3, pb: 0, width: '100%' }}>
-        <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          {groups.map((status, index) => (
-            <Tab
-              key={index}
-              label={getTabName(status)}
-              value={status}
-              icon={
-                <Chip
-                  label={
-                    status === 'All'
-                      ? data.length
-                      : status === TRIP_STATUS.COMPLETED
-                      ? counts.Completed
-                      : status === TRIP_STATUS.PENDING
-                      ? counts.Pending
-                      : counts.Cancelled
-                  }
-                  color={
-                    status === 'All'
-                      ? 'primary'
-                      : status === TRIP_STATUS.COMPLETED
-                      ? 'success'
-                      : status === TRIP_STATUS.PENDING
-                      ? 'warning'
-                      : 'error'
-                  }
-                  variant="light"
-                  size="small"
-                />
-              }
-              iconPosition="end"
-            />
-          ))}
-        </Tabs>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            {groups.map((status, index) => (
+              <Tab
+                key={index}
+                label={getTabName(status)}
+                value={status}
+                icon={
+                  <Chip
+                    label={
+                      status === 'All'
+                        ? data.length
+                        : status === TRIP_STATUS.COMPLETED
+                        ? counts.Completed
+                        : status === TRIP_STATUS.PENDING
+                        ? counts.Pending
+                        : counts.Cancelled
+                    }
+                    color={
+                      status === 'All'
+                        ? 'primary'
+                        : status === TRIP_STATUS.COMPLETED
+                        ? 'success'
+                        : status === TRIP_STATUS.PENDING
+                        ? 'warning'
+                        : 'error'
+                    }
+                    variant="light"
+                    size="small"
+                  />
+                }
+                iconPosition="end"
+              />
+            ))}
+          </Tabs>
+
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
+            Add Trip
+          </Button>
+        </Stack>
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
 
@@ -392,12 +405,35 @@ const TripList = () => {
   const [cancelText, setCancelText] = useState('');
   const [data, setData] = useState(null);
   const [refetch, setRefetch] = useState(false);
+  const [id, setId] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [drivers, setDrivers] = useState([]);
+  const [cabOptions, setCabOptions] = useState([]);
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
 
   useEffect(() => {
     // dispatch(getInvoiceList()).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    dispatch(fetchZoneNames());
+    dispatch(fetchAllZoneTypes());
+    dispatch(fetchAllVehicleTypesForAll());
+    dispatch(fetchDrivers1());
+    dispatch(fetchCab1());
+
+    // const fetchDrivers = async () => {
+    //   const response = await axiosServices.get('/driver/all?drivertype=1');
+    //   setDrivers(response.data.data.result);
+    // };
+
+    // const fetchCabs = async () => {
+    //   const response = await axiosServices.get('/vehicle/all/linked/drivers');
+    //   setCabOptions(response.data.data);
+    // };
+
+    // fetchDrivers();
+    // fetchCabs();
   }, []);
 
   const [invoiceId, setInvoiceId] = useState(0);
@@ -632,6 +668,116 @@ const TripList = () => {
         disableFilters: true
       },
       {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          // console.log('row', row);
+
+          const [anchorEl, setAnchorEl] = useState(null);
+          const [status, setStatus] = useState(null);
+
+          const handleMenuClick = (event) => {
+            setAnchorEl(event.currentTarget);
+          };
+
+          const handleMenuClose = () => {
+            setAnchorEl(null);
+          };
+
+          const handleCompleted = () => {
+            // alert('Completed');
+            console.log('row', row.original);
+            row.original.status = 'Completed'; // Update the row's status
+            setSelectedRow(row.original);
+
+            setUpdatedStatus(TRIP_STATUS.COMPLETED);
+            setPopup(POPUP_TYPE.ALERT_DIALOG);
+            setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handlePending = () => {
+            // alert('Pending');
+            console.log('row', row.original);
+            row.original.status = 'Pending'; // Update the row's status
+            setSelectedRow(row.original);
+            // setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handleCancelled = () => {
+            // alert('Cancelled');
+            console.log('row', row.original);
+            row.original.status = 'Cancelled'; // Update the row's status
+            setSelectedRow(row.original);
+            setUpdatedStatus(TRIP_STATUS.CANCELLED);
+            // setAlertCancelOpen(true);
+            setPopup(POPUP_TYPE.FORM_DIALOG);
+
+            setAlertOpen(true);
+
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const openMenu = Boolean(anchorEl);
+
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
+                <More style={{ fontSize: '1.15rem' }} />
+              </IconButton>
+              <Menu
+                id="fade-menu"
+                MenuListProps={{
+                  'aria-labelledby': 'fade-button'
+                }}
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleMenuClose}
+                TransitionComponent={Fade}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
+                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
+                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
+              </Menu>
+            </Stack>
+          );
+        }
+      },
+      {
+        Header: 'Status',
+        accessor: 'assignedStatus',
+        id: 'status', // Explicitly set id to 'status' for clarity
+        disableFilters: true,
+        // filter: 'includes',
+        Cell: ({ value }) => {
+          switch (value) {
+            case TRIP_STATUS.PENDING: {
+              return <Chip label="Pending" color="warning" variant="light" />;
+            }
+            case TRIP_STATUS.COMPLETED: {
+              return <Chip label="Completed" color="success" variant="light" />;
+            }
+            case TRIP_STATUS.CANCELLED: {
+              return <Chip label="Cancelled" color="error" variant="light" />;
+            }
+            default: {
+              return <Chip label="Not Defined" color="error" variant="light" />;
+            }
+          }
+        }
+      },
+
+      {
         title: '_id',
         Header: '_id'
       },
@@ -726,115 +872,6 @@ const TripList = () => {
       {
         Header: 'Remarks',
         accessor: 'remarks'
-      },
-      {
-        Header: 'Status',
-        accessor: 'assignedStatus',
-        id: 'status', // Explicitly set id to 'status' for clarity
-        disableFilters: true,
-        // filter: 'includes',
-        Cell: ({ value }) => {
-          switch (value) {
-            case TRIP_STATUS.PENDING: {
-              return <Chip label="Pending" color="warning" variant="light" />;
-            }
-            case TRIP_STATUS.COMPLETED: {
-              return <Chip label="Completed" color="success" variant="light" />;
-            }
-            case TRIP_STATUS.CANCELLED: {
-              return <Chip label="Cancelled" color="error" variant="light" />;
-            }
-            default: {
-              return <Chip label="Not Defined" color="error" variant="light" />;
-            }
-          }
-        }
-      },
-      {
-        Header: 'Actions',
-        className: 'cell-center',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          // console.log('row', row);
-
-          const [anchorEl, setAnchorEl] = useState(null);
-          const [status, setStatus] = useState(null);
-
-          const handleMenuClick = (event) => {
-            setAnchorEl(event.currentTarget);
-          };
-
-          const handleMenuClose = () => {
-            setAnchorEl(null);
-          };
-
-          const handleCompleted = () => {
-            // alert('Completed');
-            console.log('row', row.original);
-            row.original.status = 'Completed'; // Update the row's status
-            setSelectedRow(row.original);
-
-            setUpdatedStatus(TRIP_STATUS.COMPLETED);
-            setPopup(POPUP_TYPE.ALERT_DIALOG);
-            setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const handlePending = () => {
-            // alert('Pending');
-            console.log('row', row.original);
-            row.original.status = 'Pending'; // Update the row's status
-            setSelectedRow(row.original);
-            // setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const handleCancelled = () => {
-            // alert('Cancelled');
-            console.log('row', row.original);
-            row.original.status = 'Cancelled'; // Update the row's status
-            setSelectedRow(row.original);
-            setUpdatedStatus(TRIP_STATUS.CANCELLED);
-            // setAlertCancelOpen(true);
-            setPopup(POPUP_TYPE.FORM_DIALOG);
-
-            setAlertOpen(true);
-
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const openMenu = Boolean(anchorEl);
-
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                <More style={{ fontSize: '1.15rem' }} />
-              </IconButton>
-              <Menu
-                id="fade-menu"
-                MenuListProps={{
-                  'aria-labelledby': 'fade-button'
-                }}
-                anchorEl={anchorEl}
-                open={openMenu}
-                onClose={handleMenuClose}
-                TransitionComponent={Fade}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
-                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
-                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
-              </Menu>
-            </Stack>
-          );
-        }
       }
     ],
     []
@@ -877,6 +914,13 @@ const TripList = () => {
     { title: 'Home', to: APP_DEFAULT_PATH },
     { title: 'Trips', to: '/apps/trips/list' }
   ];
+
+  const handleCloseModal = useCallback(() => {
+    setIsOpen(false);
+    setId('');
+  }, []);
+
+  const handleModalOpen = useCallback(() => setIsOpen(true), []);
 
   // console.log('Data = ', data);
 
@@ -973,7 +1017,15 @@ const TripList = () => {
           {/* <ScrollX> */}
           {/* <ReactTable columns={columns} data={dummyData} /> */}
           {data?.length > 0 && (
-            <ReactTable columns={columns} data={data} deleteButton deleteURL="/assignTrip/delete/trips" handleRefetch={handleRefetch} />
+            <ReactTable
+              columns={columns}
+              data={data}
+              deleteButton
+              deleteURL="/assignTrip/delete/trips"
+              handleRefetch={handleRefetch}
+              handleClose={handleCloseModal}
+              handleOpen={handleModalOpen}
+            />
           )}
           {/* </ScrollX> */}
         </MainCard>
@@ -1002,6 +1054,19 @@ const TripList = () => {
           title="Cancel Trip"
           content="Are you sure you want to cancel this trip?"
         />
+      )}
+
+      {isOpen && (
+        <Dialog
+          fullScreen
+          open={isOpen}
+          onClose={handleCloseModal}
+          fullWidth
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
+        </Dialog>
       )}
     </>
   );
