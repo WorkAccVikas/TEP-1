@@ -409,8 +409,27 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         );
       }
       /* break omitted */
-      case 'rosterTripId':
-      case 'location': {
+      case 'location':{
+        return (
+          <Tooltip title={value || ''} arrow>
+            <TextField
+              id="outlined-number-read-only"
+              value={value}
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '200px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'wrap' // Prevents text from wrapping
+              }}
+            />
+          </Tooltip>
+        );
+      }
+      case 'rosterTripId': {
         return (
           <Tooltip title={value || ''} arrow>
             <TextField
