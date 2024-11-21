@@ -1,5 +1,18 @@
 import PropTypes from 'prop-types';
-import { Button, CircularProgress, Dialog, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo, useState } from 'react';
@@ -14,17 +27,19 @@ import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { deleteAdvanceType } from 'store/slice/cabProvidor/advanceTypeSlice';
 import WrapperButton from 'components/common/guards/WrapperButton';
-import { MODULE, PERMISSIONS } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import { useSelector } from 'react-redux';
 
-const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, updateKey, setUpdateKey,loading }) => {
+const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, updateKey, setUpdateKey, loading }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const [add, setAdd] = useState(false);
   const [customer, setCustomer] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [alertopen, setAlertOpen] = useState(false);
+  const userType = useSelector((state) => state.auth.userType);
 
   const handleAdvanceType = (actionType) => {
     if (actionType === 'add') {
@@ -193,17 +208,19 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
     <>
       <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
         <Stack direction={'row'} alignItems="center" spacing={2}>
-          <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.CREATE}>
-            <Button
-              variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-              onClick={() => handleAdvanceType('add')}
-              size="small"
-              disabled={loading} // Disable button while loading
-            >
-              {loading ? 'Loading...' : '  Add Advance Type'}
-            </Button>
-          </WrapperButton>
+          {USERTYPE.iscabProvider === userType && (
+            // <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                onClick={() => handleAdvanceType('add')}
+                size="small"
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Add Advance Type'}
+              </Button>
+            // </WrapperButton>
+          )}
         </Stack>
       </Stack>
 

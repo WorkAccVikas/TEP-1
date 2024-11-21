@@ -14,7 +14,7 @@ import IconButton from 'components/@extended/IconButton';
 // assets
 import { Add } from 'iconsax-react';
 import axiosServices from 'utils/axios';
-import { Autocomplete, Checkbox, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, Box, Checkbox, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -181,11 +181,13 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           _file_id: item.rosterFileId,
           _roster_id: item?._id,
           _company_info: item?.companyID,
-          _guardRequired: item.guardPrice > 0 ? true : false,
 
           _incomingCompanyRate: item.vehicleRate,
           _incomingGuardRate: item.guardPrice,
           _inccomingVehicleType: item.vehicleType,
+
+          _guardRequired: item.guardPrice > 0 ? true : false,
+          _isDualTrip: 0,
 
           _companyRate: item.vehicleRate,
           _companyDualRate: 0,
@@ -310,7 +312,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       console.log({ trip });
       const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
       console.log({ companyID });
-      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id ) {
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
         console.log(companyID._id);
         const payload = {
           data: {
@@ -329,9 +331,15 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           // Update all rows in updatedData with the same _id
           updatedData.forEach((row) => {
             if (row._id === _id) {
-              row['_companyRate'] = amounts.companyAmount;
-              row['_vendorRate'] = amounts.vendorAmount;
-              row['_driverRate'] = amounts.driverAmount;
+              if (row._isDualTrip > 0) {
+                row['_companyRate'] = amounts.companyDualAmount;
+                row['_vendorRate'] = amounts.vendorDualAmount;
+                row['_driverRate'] = amounts.driverDualAmount;
+              } else {
+                row['_companyRate'] = amounts.companyAmount;
+                row['_vendorRate'] = amounts.vendorAmount;
+                row['_driverRate'] = amounts.driverAmount;
+              }
 
               if (row._guardRequired) {
                 row['_vendorGuardRate'] = amounts.vendorGuardPrice;
@@ -364,6 +372,63 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       } else {
         alert('Error found');
       }
+    });
+  };
+
+  const [currentGroup, setCurrentGroup] = useState(1); // Track the next group number
+  const [pairs, setPairs] = useState({}); // Map of row indices to group numbers
+
+  const handleCheckboxChange = (rowIndex, key) => {
+    setData((prevData) => {
+      // Directly mutate the part of data that changes
+      const updatedData = [...prevData];
+      const newPairs = { ...pairs }; // Create a copy of pairs
+
+      const isSelected = newPairs[rowIndex]; // Check if the current row is part of a pair
+
+      if (isSelected) {
+        // Deselect the row
+        delete newPairs[rowIndex];
+
+        // Find all rows in the same group
+        const groupMembers = Object.entries(newPairs).filter(([_, group]) => group === isSelected);
+
+        if (groupMembers.length === 0) {
+          // Reset the group number if the pair is incomplete
+          setCurrentGroup((prev) => Math.min(prev, isSelected));
+        }
+
+        // Reset the value in the data
+        updatedData[rowIndex][key] = 0;
+
+        // Reset the other row in the pair if it was incomplete
+        if (groupMembers.length === 1) {
+          const [incompleteRowIndex] = groupMembers[0];
+          updatedData[parseInt(incompleteRowIndex, 10)][key] = 0;
+        }
+      } else {
+        // Select the row and handle pairing logic
+        const groupMembers = Object.entries(newPairs).filter(([_, group]) => group === currentGroup);
+
+        if (groupMembers.length < 2) {
+          newPairs[rowIndex] = currentGroup; // Add to current group
+          updatedData[rowIndex][key] = currentGroup;
+
+          if (groupMembers.length === 1) {
+            // Pair the rows and increment the group number
+            const [firstRowIndex] = groupMembers[0];
+            updatedData[parseInt(firstRowIndex, 10)][key] = currentGroup;
+            setCurrentGroup((prev) => prev + 1); // Increment group for next pair
+          }
+        } else {
+          alert('Group is full, select another pair.');
+        }
+      }
+
+      // Only update pairs and data if there is a change
+      setPairs(newPairs);
+
+      return updatedData; // Return updated data for state change
     });
   };
 
@@ -743,6 +808,51 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           </Tooltip>
         );
       }
+      case '_isDualTrip': {
+        return (
+          <Checkbox
+            checked={data[rowIndex][key] > 0} // Check if value is 1 to show as checked
+            onChange={() => handleCheckboxChange(rowIndex, key)} // Call the checkbox change handler
+            icon={
+              <Box
+                sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  border: '2px solid gray', // Border color when unchecked
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'transparent' // No background color when unchecked
+                }}
+              >
+                <Typography variant="body2" color="gray">
+                  {data[rowIndex][key]} {/* Display number 0 or 1 */}
+                </Typography>
+              </Box>
+            }
+            checkedIcon={
+              <Box
+                sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  backgroundColor: 'green', // Green background when checked
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  border: '2px solid darkgreen' // Dark green border for distinction
+                }}
+              >
+                <Typography variant="body2" color="white">
+                  {data[rowIndex][key]} {/* Display the number 1 */}
+                </Typography>
+              </Box>
+            }
+          />
+        );
+      }
+
       /* break omitted */
       default:
         return null;
@@ -761,6 +871,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     '_cab',
     '_driver',
     '_guardRequired',
+    '_isDualTrip',
     // 'sync',
     '_companyRate',
     '_companyGuardRate',
@@ -793,7 +904,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     _driverPenaltyRate_or_vendorPenaltyRate: 'Driver Penalty Rate',
     _additional_rate: 'Extra Charges',
     _mcdRate: 'MCD charge',
-    _tollCharge: 'Toll Charges'
+    _tollCharge: 'Toll Charges',
+    _isDualTrip: 'Dual Trip'
   };
 
   return (

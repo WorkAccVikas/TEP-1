@@ -30,6 +30,7 @@ import { useEffect, useState } from 'react';
 import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { dispatch } from 'store';
+import { format } from 'date-fns';
 
 // ==============================|| EXPANDING TABLE - USER DETAILS ||============================== //
 
@@ -43,6 +44,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   const [personalDetails, setPersonalDetails] = useState(null);
   const [tripAnalysisData, setTripAnalysisData] = useState(null);
   const [vehicleData, setVehicleData] = useState(null);
+  const [transactionData, setTransactionData] = useState(null);
 
   console.log('apiData', apiData);
   console.log('requestedById', requestedById);
@@ -51,6 +53,12 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   console.log('personalDetails', personalDetails);
   console.log('tripAnalysisData', tripAnalysisData);
   console.log('vehicleData', vehicleData);
+  console.log('transactionData', transactionData);
+
+  const totalApprovedAmount = (transactionData || []).reduce(
+    (sum, transaction) => sum + transaction.approvedAmount,
+    0 
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +75,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
         setTripAnalysisData(response.data.tripAnalysisData);
         const vehicleList = Array.isArray(response.data.vehicleData.totalVehicleList) ? response.data.vehicleData.totalVehicleList : [];
         setVehicleData(vehicleList);
+        setTransactionData(response.data.transactionData);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -114,37 +123,20 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
     );
   }
 
-  // Columns for the "Personal Details" table
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return format(date, 'dd/MM/yyyy'); // Format: Day/Month/Year
+  };
+
+  // Columns for the Payment History table
   const personalDetailsColumns = [
-    { Header: 'Transaction Id', accessor: 'id' },
-    { Header: 'Date', accessor: 'date' },
-    { Header: 'Amount', accessor: 'amount' }
-    // { Header: 'Approved Remark', accessor: 'approvedRemark' }
+    { Header: 'Transaction Id', accessor: 'transactionId' },
+    { Header: 'Date', accessor: 'updatedAt', Cell: ({ value }) => formatDate(value) },
+    { Header: 'Approved Amount', accessor: 'approvedAmount', className: 'cell-center' },
+    { Header: 'Final Amount', accessor: 'finalAmount', className: 'cell-center' }
   ];
 
-  // Dummy data for the "Personal Details" table
-  const personalDetailsData = [
-    {
-      id: 'TXN12345',
-      date: '2024-11-18',
-      amount: '₹150.00',
-      approvedRemark: 'Payment for services'
-    },
-    {
-      id: 'TXN67890',
-      date: '2024-11-19',
-      amount: '₹200.00',
-      approvedRemark: 'Approved for project'
-    },
-    {
-      id: 'TXN54321',
-      date: '2024-11-20',
-      amount: '₹350.00',
-      approvedRemark: 'Reimbursement'
-    }
-  ];
-
-  // Columns for the "About Me" table
+  // Columns for the Vehicle Details table
   const aboutMeColumns = [
     { Header: 'Vehicle No.', accessor: 'vehicleNumber' },
     { Header: 'Vehicle Name', accessor: 'vehicleName' },
@@ -224,7 +216,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                       <Divider orientation="vertical" flexItem />
                       <Stack spacing={0.5} alignItems="center">
                         <Typography variant="h6" color="primary">
-                          ₹{tripAnalysisData.totalPayment}
+                          ₹{totalApprovedAmount}
                         </Typography>
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
                           Total Payment
@@ -248,7 +240,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                     <Typography variant="h6" color="primary" sx={{ pb: 1 }}>
                       Bank Details
                     </Typography>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
                           Bank Name
@@ -267,7 +259,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                         </Typography>
                       </Stack>
                     </Stack>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
                           Branch Name
@@ -286,7 +278,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                         </Typography>
                       </Stack>
                     </Stack>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
                           IFSC Code
@@ -305,7 +297,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                         </Typography>
                       </Stack>
                     </Stack>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
                           Account Number
@@ -324,10 +316,10 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                         </Typography>
                       </Stack>
                     </Stack>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
-                        Account Holder Name
+                          Account Holder Name
                         </Typography>
                         <Typography
                           title={personalDetails.accountHolderName}
@@ -343,10 +335,10 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                         </Typography>
                       </Stack>
                     </Stack>
-                    <Stack gap={2} sx={{pt: '4px'}}>
+                    <Stack gap={2} sx={{ pt: '4px' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography color="#6d6e6e" sx={{ fontWeight: 700 }}>
-                        Address
+                          Address
                         </Typography>
                         <Typography
                           title={personalDetails.bankAddress}
@@ -449,7 +441,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
             <Stack spacing={0} sx={{ width: '100%' }}>
               <MainCard title="Payment History" sx={{ width: '100%' }}>
                 <div style={{ height: 'auto' }}>
-                  <ReactTable columns={personalDetailsColumns} data={personalDetailsData} defaultPageSize={5} hideHeader />
+                  <ReactTable columns={personalDetailsColumns} data={transactionData} defaultPageSize={5} hideHeader />
                 </div>
               </MainCard>
               <MainCard title="Vehicle Details" sx={{ width: '100%' }}>
