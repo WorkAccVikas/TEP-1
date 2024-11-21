@@ -122,7 +122,6 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
     },
     [navigate] // Use 'navigate' as a dependency
   );
-  console.log({ templates });
   useEffect(() => {
     const fetchRosterTemplate = async () => {
       const response = await axiosServices.get('/tripData/list/roster/settings');

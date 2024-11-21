@@ -43,7 +43,7 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
+import { Edit, Eye, EyeSlash, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
 import PaginationBox from 'components/tables/Pagination';
 import { useDispatch } from 'react-redux';
 import { fetchCompaniesRosterFile } from 'store/slice/cabProvidor/rosterFileSlice';
@@ -103,77 +103,8 @@ function ReactTable({ columns, data, setPage, limit, setLimit, lastPageNo }) {
   const componentRef = useRef(null);
 
   // ================ Tab ================
-
-  //   const groups = ['All', ...new Set(data.map((item) => item.status))];
-  const countGroup = data.map((item) => item.status);
-  //   const counts = countGroup.reduce(
-  //     (acc, value) => ({
-  //       ...acc,
-  //       [value]: (acc[value] || 0) + 1
-  //     }),
-  //     {}
-  //   );
-
-  //   const [activeTab, setActiveTab] = useState(groups[0]);
-
-  //   useEffect(() => {
-  //     setFilter('status', activeTab === 'All' ? '' : activeTab);
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [activeTab]);
-
   return (
     <>
-      {/* <Box sx={{ p: 3, pb: 0, width: '100%' }}>
-        <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          {groups.map((status, index) => (
-            <Tab
-              key={index}
-              label={status}
-              value={status}
-              icon={
-                <Chip
-                  label={
-                    status === 'All'
-                      ? data.length
-                      : status === 'Paid'
-                      ? counts.Paid
-                      : status === 'Unpaid'
-                      ? counts.Unpaid
-                      : counts.Cancelled
-                  }
-                  color={status === 'All' ? 'primary' : status === 'Paid' ? 'success' : status === 'Unpaid' ? 'warning' : 'error'}
-                  variant="light"
-                  size="small"
-                />
-              }
-              iconPosition="end"
-            />
-          ))}
-        </Tabs>
-      </Box> */}
-      {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
-      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
-        <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
-        </Stack>
-        <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
-          {/* <>
-            {headerGroups.map((group) => (
-              <Stack key={group} direction={matchDownSM ? 'column' : 'row'} spacing={2} {...group.getHeaderGroupProps()}>
-                {group.headers.map(
-                  (column) =>
-                    column.canFilter && (
-                      <Box key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                        {column.render('Filter')}
-                      </Box>
-                    )
-                )}
-              </Stack>
-            ))}
-          </> */}
-          <CSVExport data={data} filename={'invoice-list.csv'} />
-        </Stack>
-      </Stack>
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
           <TableHead>
@@ -225,7 +156,6 @@ ReactTable.propTypes = {
 const AllRosters = () => {
   const [remove, setRemove] = useState(false);
   const [deleteID, setDeleteID] = useState(null);
-  const { alertPopup } = useSelector((state) => state.invoice);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -257,20 +187,10 @@ const AllRosters = () => {
     setPage(1);
   }, []);
 
-  //   useEffect(() => {
-  //     dispatch(getInvoiceList()).then(() => setLoading(false));
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, []);
-
-  const [invoiceId, setInvoiceId] = useState(0);
-  const [getInvoiceId, setGetInvoiceId] = useState(0);
-
-  // Function to generate a random number between a given range
-  const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
   const filteredData = useMemo(() => {
     return rosterFiles.filter((row) => row.isVisited === 1); // Filter where isVisited is 1
   }, [rosterFiles]);
+  console.log({ filteredData });
 
   const handleDelete = useCallback(async () => {
     try {
@@ -310,10 +230,6 @@ const AllRosters = () => {
   }, [deleteID, dispatch, handleRefetch]);
 
   const columns = useMemo(() => {
-    const handleMapClick = (rowData) => {
-      handleClickOpen(rowData);
-    };
-
     const handleViewClick = (rowData) => {
       navigate('/apps/roster/test-view-1', { state: { fileData: rowData } });
     };
@@ -344,11 +260,17 @@ const AllRosters = () => {
       },
       {
         Header: 'Total Entries',
-        accessor: () => getRandomNumber(1, 100) // Random number between 1 and 100
+        accessor: 'totalCount',
+        Cell: ({ row }) => {
+          return <Typography>{row.original.totalCount}</Typography>;
+        }
       },
       {
         Header: 'Trips',
-        accessor: () => getRandomNumber(1, 50) // Random number between 1 and 50
+        accessor: 'totalCountWithStatus3',
+        Cell: ({ row }) => {
+          return <Typography>{row.original.totalCountWithStatus3}</Typography>;
+        }
       },
       {
         Header: 'Added By',
@@ -362,6 +284,28 @@ const AllRosters = () => {
         accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '')
       },
       {
+        Header: 'Status',
+        accessor: 'vendorDetails',
+        Cell: ({ row }) => {
+          console.log({ row });
+
+          return (
+            <>
+              <Chip
+                label={
+                  row.original.totalCount === row.original.totalCountWithStatus3
+                    ? 'Completed'
+                    : `${row.original.totalCount - row.original.totalCountWithStatus3} Pending`
+                }
+                color={row.original.totalCount === row.original.totalCountWithStatus3 ? 'success' : 'error'}
+                variant="light"
+                size="small"
+              />
+            </>
+          );
+        }
+      },
+      {
         Header: 'Action',
         accessor: 'isVisited',
         disableSortBy: true,
@@ -371,21 +315,22 @@ const AllRosters = () => {
 
           if (isVisited === 1) {
             return (
-              <Stack direction="row" spacing={1}>
-                <Chip
-                  color="success"
-                  label="View Roster"
-                  size="small"
-                  variant="light"
-                  title="View Roster"
-                  onClick={() => handleViewClick(row.original)}
-                  sx={{
-                    ':hover': {
-                      backgroundColor: 'rgba(0, 255, 5, 0.3)',
-                      cursor: 'pointer'
+              <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
                   }}
-                />
+                  title="View Roster"
+                >
+                  <IconButton color="secondary" onClick={() => handleViewClick(row.original)}>
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
 
                 <Tooltip
                   componentsProps={{
@@ -396,9 +341,9 @@ const AllRosters = () => {
                       }
                     }
                   }}
-                  title="Delete Roster"
+                  title="Delete"
                 >
-                  <Button
+                  <IconButton
                     color="error"
                     onClick={() => {
                       setRemove(true);
@@ -406,7 +351,7 @@ const AllRosters = () => {
                     }}
                   >
                     <Trash />
-                  </Button>
+                  </IconButton>
                 </Tooltip>
               </Stack>
             );
@@ -422,30 +367,30 @@ const AllRosters = () => {
   const widgetsData = [
     {
       title: 'Paid',
-      count: '7,825',
+      count: '0',
       percentage: 70.5,
       isLoss: false,
-      invoice: '9',
+      invoice: '0',
       color: theme.palette.success,
-      chartData: [200, 600, 100, 400, 300, 400, 50]
+      chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Unpaid',
-      count: '1,880',
+      count: '0',
       percentage: 27.4,
       isLoss: true,
-      invoice: '6',
+      invoice: '0',
       color: theme.palette.warning,
-      chartData: [100, 550, 300, 350, 200, 100, 300]
+      chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Overdue',
-      count: '3,507',
+      count: '0',
       percentage: 27.4,
       isLoss: true,
-      invoice: '4',
+      invoice: '0',
       color: theme.palette.error,
-      chartData: [100, 550, 200, 300, 100, 200, 300]
+      chartData: [0, 0, 0, 0, 0, 0, 0]
     }
   ];
 
@@ -507,7 +452,7 @@ const AllRosters = () => {
                       Current
                     </Typography>
                     <Typography variant="body1" color="white">
-                      109.1k
+                      0
                     </Typography>
                   </Stack>
                 </Box>
@@ -517,15 +462,15 @@ const AllRosters = () => {
                   Overdue
                 </Typography>
                 <Typography variant="body1" color="white">
-                  62k
+                  0
                 </Typography>
               </Stack>
             </Stack>
             <Typography variant="h4" color="white" sx={{ pt: 2, pb: 1, zIndex: 1 }}>
-              $43,078
+              ₹0
             </Typography>
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={90} />
+              <LinearWithLabel value={0} />
             </Box>
           </Box>
         </Grid>

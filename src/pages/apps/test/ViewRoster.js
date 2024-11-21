@@ -173,23 +173,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
         <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
           <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         </Stack>
-        <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
-          <>
-            {/* {headerGroups.map((group) => (
-              <Stack key={group} direction={matchDownSM ? 'column' : 'row'} spacing={2} {...group.getHeaderGroupProps()}>
-                {group.headers.map(
-                  (column) =>
-                    column.canFilter && (
-                      <Box key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                        {column.render('Filter')}
-                      </Box>
-                    )
-                )}
-              </Stack>
-            ))} */}
-          </>
-          <CSVExport data={data} filename={'invoice-list.csv'} />
-        </Stack>
+       
       </Stack>
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
