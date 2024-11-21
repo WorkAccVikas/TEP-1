@@ -29,6 +29,12 @@ import { useSelector } from 'store';
 import FormikAutocomplete from 'components/autocomplete/AutoComplete';
 import NumericInput from 'components/textfield/NumericInput';
 
+const NUMERIC_INPUT_FIELD = {
+  guardPrice: {
+    defaultValue: 0
+  }
+};
+
 const validationSchema = Yup.object().shape({
   companyID: Yup.string().required('Company is required'),
   tripDate: Yup.date().required('Trip date is required'),
@@ -40,7 +46,7 @@ const validationSchema = Yup.object().shape({
   driverId: Yup.string().required('Driver is required'),
   remarks: Yup.string().required('Remarks is required'),
 
-  guardPrice: Yup.number().typeError('Must be a number').min(0, 'Price must be at least ₹0').required('Price is required')
+  guardPrice: Yup.number().typeError('Must be a number').min(0, 'Guard Price must be at least ₹0')
 });
 
 const TRIP_TYPE = {
@@ -57,7 +63,6 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   const [details, setDetails] = useState(null);
 
   const zoneList = useSelector((state) => state.zoneName.zoneNames);
-  console.log(`🚀 ~ AddNewTrip ~ zoneList:`, zoneList);
   const zoneTypeList = useSelector((state) => state.zoneType.zoneTypes);
   const vehicleTypeList = useSelector((state) => state.vehicleTypes.vehicleTypes);
   const vehicleNumberList = useSelector((state) => state.cabs.cabs1);
@@ -150,11 +155,18 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       location: 'NSP',
       guard: 0,
       guardPrice: 0,
-      companyRate: '',
-      vendorRate: '',
-      driverRate: '',
-      addOnRate: '',
-      penalty: '',
+      // guardPrice: 90,
+      companyRate: 0,
+      // companyRate: 136,
+      vendorRate: 0,
+      // vendorRate: 86,
+      driverRate: 0,
+      // driverRate: 40,
+      addOnRate: 0,
+      // addOnRate: 30,
+      // penalty: 0,
+      penalty: 0,
+      // penalty: 115,
       remarks: ''
     },
     validationSchema,
@@ -187,6 +199,11 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       formik.setFieldValue(fieldName, value === '' ? defaultValue : Number(value), true);
       formik.handleBlur(event); // Trigger Formik's blur handling
     };
+
+  const handleChangeNumeric = (fieldName) => (event) => {
+    const value = event.target.value;
+    formik.setFieldValue(fieldName, value === '' ? '' : Number(value));
+  };
 
   return (
     <>
@@ -487,34 +504,108 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           fieldName="guardPrice"
                           // label="Guard Price"
                           value={formik.values.guardPrice}
-                          onChange={formik.handleChange}
+                          // onChange={formik.handleChange}
+                          onChange={handleChangeNumeric('guardPrice')}
                           onBlur={handleBlurField('guardPrice')}
                           error={formik.touched.guardPrice && Boolean(formik.errors.guardPrice)}
                           helperText={formik.touched.guardPrice && formik.errors.guardPrice}
                         />
                       </Stack>
                     </Grid>
-                  </Grid>
-                </Grid>
 
-                {/* Others */}
-                <Grid item xs={12}>
-                  <MainCard title="Others">
-                    <Grid container spacing={2}>
-                      {/* Remarks */}
-                      <Grid item xs={6}>
-                        <Stack gap={1}>
-                          <Typography variant="subtitle1">Remarks</Typography>
-                          <TextField fullWidth label="Remarks" variant="outlined" {...formik.getFieldProps('remarks')} />
-                          {formik.touched.remarks && formik.errors.remarks && (
-                            <Typography variant="caption" color="error">
-                              {formik.errors.remarks}
-                            </Typography>
-                          )}
-                        </Stack>
-                      </Grid>
+                    {/* Company Rate */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="companyRate">Company Rate</InputLabel>
+
+                        <NumericInput
+                          id="companyRate"
+                          fieldName="companyRate"
+                          value={formik.values.companyRate}
+                          onChange={handleChangeNumeric('companyRate')}
+                          onBlur={handleBlurField('companyRate')}
+                          error={formik.touched.companyRate && Boolean(formik.errors.companyRate)}
+                          helperText={formik.touched.companyRate && formik.errors.companyRate}
+                        />
+                      </Stack>
                     </Grid>
-                  </MainCard>
+
+                    {/* Vendor Rate */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="vendorRate">Vendor Rate</InputLabel>
+
+                        <NumericInput
+                          id="vendorRate"
+                          fieldName="vendorRate"
+                          value={formik.values.vendorRate}
+                          onChange={handleChangeNumeric('vendorRate')}
+                          onBlur={handleBlurField('vendorRate')}
+                          error={formik.touched.vendorRate && Boolean(formik.errors.vendorRate)}
+                          helperText={formik.touched.vendorRate && formik.errors.vendorRate}
+                        />
+                      </Stack>
+                    </Grid>
+
+                    {/* Driver Rate */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="driverRate">Driver Rate</InputLabel>
+
+                        <NumericInput
+                          id="driverRate"
+                          fieldName="driverRate"
+                          value={formik.values.driverRate}
+                          onChange={handleChangeNumeric('driverRate')}
+                          onBlur={handleBlurField('driverRate')}
+                          error={formik.touched.driverRate && Boolean(formik.errors.driverRate)}
+                          helperText={formik.touched.driverRate && formik.errors.driverRate}
+                        />
+                      </Stack>
+                    </Grid>
+
+                    {/* Add On Rate */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="addOnRate">Add On Rate</InputLabel>
+
+                        <NumericInput
+                          id="addOnRate"
+                          fieldName="addOnRate"
+                          value={formik.values.addOnRate}
+                          onChange={handleChangeNumeric('addOnRate')}
+                          onBlur={handleBlurField('addOnRate')}
+                          error={formik.touched.addOnRate && Boolean(formik.errors.addOnRate)}
+                          helperText={formik.touched.addOnRate && formik.errors.addOnRate}
+                        />
+                      </Stack>
+                    </Grid>
+
+                    {/* Penalty */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="penalty">Penalty</InputLabel>
+
+                        <NumericInput
+                          id="penalty"
+                          fieldName="penalty"
+                          value={formik.values.penalty}
+                          onChange={handleChangeNumeric('penalty')}
+                          onBlur={handleBlurField('penalty')}
+                          error={formik.touched.penalty && Boolean(formik.errors.penalty)}
+                          helperText={formik.touched.penalty && formik.errors.penalty}
+                        />
+                      </Stack>
+                    </Grid>
+
+                    {/* Remarks */}
+                    <Grid item xs={3}>
+                      <Stack gap={1}>
+                        <Typography variant="subtitle1">Remarks</Typography>
+                        <TextField fullWidth placeholder="Remarks" {...formik.getFieldProps('remarks')}  />
+                      </Stack>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </DialogContent>

@@ -172,7 +172,7 @@ function AddCompany() {
     //   .max(MAX_TEXTFIELD_LENGTH.address, 'Address is too long')
     //   .required('Address is required'),
     // city: yup.string().trim().required('City is required'),
-    state: yup.string().trim().required('State is required'),
+    // state: yup.string().trim().required('State is required'),
     billingCycle: yup
       .string()
       .required('Billing Cycle is required')
@@ -208,10 +208,10 @@ function AddCompany() {
         }
         return true; // Allow empty
       })
-      // .test('single-file', 'You can only upload one file', (value) => {
-      //   return Array.isArray(value) && value.length === 1 && value[0] instanceof File;
-      // })
-      // .required('Company Contract is required')
+    // .test('single-file', 'You can only upload one file', (value) => {
+    //   return Array.isArray(value) && value.length === 1 && value[0] instanceof File;
+    // })
+    // .required('Company Contract is required')
     // companyContract: yup.mixed().required('Company Contract is required')
   });
 
@@ -256,7 +256,9 @@ function AddCompany() {
         // formData.append('MCDAmount', values.MCDAmount);
         // formData.append('stateTax', values.stateTax);
         // formData.append('stateTaxAmount', values.stateTaxAmount);
-        formData.append('companyContract', values.files[0]);
+        if (values.files) {
+          formData.append('companyContract', values.files[0]);
+        }
 
         const resultAction = await dispatch(addCompany(formData));
 
@@ -278,6 +280,7 @@ function AddCompany() {
           navigate('/management/company/view');
         }
       } catch (error) {
+        console.log(error);
         dispatch(
           openSnackbar({
             open: true,
@@ -303,7 +306,7 @@ function AddCompany() {
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
-                  <InputLabel>Company Name</InputLabel>
+                  <InputLabel required>Company Name</InputLabel>
                   <TextField
                     fullWidth
                     placeholder="Enter Company Name"
@@ -334,7 +337,7 @@ function AddCompany() {
               </Grid>
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
-                  <InputLabel>Email</InputLabel>
+                  <InputLabel required>Email</InputLabel>
                   <TextField
                     fullWidth
                     placeholder="Enter Company Email"
@@ -349,7 +352,7 @@ function AddCompany() {
               </Grid>
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
-                  <InputLabel>Mobile Number</InputLabel>
+                  <InputLabel required>Mobile Number</InputLabel>
                   <TextField
                     fullWidth
                     placeholder="Enter Mobile Number"
@@ -404,7 +407,7 @@ function AddCompany() {
               </Grid>
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
-                  <InputLabel>GSTIN</InputLabel>
+                  <InputLabel required>GSTIN</InputLabel>
                   <TextField
                     fullWidth
                     placeholder="Enter GSTIN"
@@ -505,7 +508,7 @@ function AddCompany() {
               </Grid>
               <Grid item xs={12} lg={4}>
                 <Stack spacing={1}>
-                  <InputLabel>Billing Cycle</InputLabel>
+                  <InputLabel required>Billing Cycle</InputLabel>
                   <TextField
                     select
                     label="Select Billing Cycle"
