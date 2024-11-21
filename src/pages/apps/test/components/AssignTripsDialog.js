@@ -14,7 +14,7 @@ import IconButton from 'components/@extended/IconButton';
 // assets
 import { Add } from 'iconsax-react';
 import axiosServices from 'utils/axios';
-import { Autocomplete, Checkbox, FormControl, FormHelperText, MenuItem, Select, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, Checkbox, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -26,7 +26,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [cabOptions, setCabOptions] = useState([]);
-
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -308,17 +307,17 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     const updatedData = [...data];
 
     payload1.forEach(async (trip) => {
-      console.log(trip);
-      const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab } = trip;
+      console.log({ trip });
+      const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
 
-      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id & companyID._id) {
         const payload = {
           data: {
-            companyID: '66e010556265e5aad31f9b40',
-            vehicleTypeID: '66c57911777b0e58991125f3',
-            zoneNameID: '6683e597643aeaa0469223a3',
-            zoneTypeID: '6683e5c6643aeaa0469223b3',
-            driverId: '66ed052952b00bf1e93a4abb'
+            companyID: companyID._id,
+            vehicleTypeID: _vehicleType._id,
+            zoneNameID: _zoneName._id,
+            zoneTypeID: _zoneType._id,
+            driverId: _driver._id
           }
         };
 
@@ -422,10 +421,10 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               }}
               sx={{
                 width: 'fit-content', // Dynamically adjusts to the content
-                minWidth: '60px', // Ensures enough space for minimum display
+                minWidth: '120px', // Ensures enough space for minimum display
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap' // Prevents text from wrapping
+                whiteSpace: 'wrap' // Prevents text from wrapping
               }}
             />
           </Tooltip>
@@ -568,7 +567,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         return (
           <FormControl sx={{ width: '100%', maxWidth: 200 }} error={!value?._id}>
             {/* Optional Helper Text */}
-            <FormHelperText>{!value?._id ? 'Invalid Cab' : ''}</FormHelperText>
 
             <Select
               value={JSON.stringify(value)} // Using stringified value
@@ -606,7 +604,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         return (
           <FormControl sx={{ width: '100%', maxWidth: 200 }} error={!value?._id}>
             {/* Optional Helper Text */}
-            <FormHelperText>{!value?._id ? 'Invalid Cab' : ''}</FormHelperText>
 
             <Select
               value={JSON.stringify(value)} // Using stringified value
@@ -664,7 +661,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over driverOptionsArray or _drivers_options */}
-              {(row.driverOptionsArray.length === 0 ? row._drivers_options : row.driverOptionsArray).map((driver) => (
+              {row._drivers_options.map((driver) => (
                 <MenuItem key={driver._id} value={JSON.stringify(driver)}>
                   {driver.userName}
                 </MenuItem>

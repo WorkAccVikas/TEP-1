@@ -23,7 +23,8 @@ import {
   MenuItem,
   Fade,
   Button,
-  CircularProgress
+  CircularProgress,
+  Dialog
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -46,7 +47,7 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
+import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
 import TripChart from 'components/cards/trips/TripChart';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
@@ -59,6 +60,7 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import LoadingButton from 'themes/overrides/LoadingButton';
 import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
+import AddNewTrip from './AddNewTrip';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -199,6 +201,7 @@ const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
 // ==============================|| REACT TABLE ||============================== //
 
 function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch }) {
+  const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -277,43 +280,53 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   return (
     <>
       <Box sx={{ p: 3, pb: 0, width: '100%' }}>
-        <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          {groups.map((status, index) => (
-            <Tab
-              key={index}
-              label={getTabName(status)}
-              value={status}
-              icon={
-                <Chip
-                  label={
-                    status === 'All'
-                      ? data.length
-                      : status === TRIP_STATUS.COMPLETED
-                      ? counts.Completed
-                      : status === TRIP_STATUS.PENDING
-                      ? counts.Pending
-                      : counts.Cancelled
-                  }
-                  color={
-                    status === 'All'
-                      ? 'primary'
-                      : status === TRIP_STATUS.COMPLETED
-                      ? 'success'
-                      : status === TRIP_STATUS.PENDING
-                      ? 'warning'
-                      : 'error'
-                  }
-                  variant="light"
-                  size="small"
-                />
-              }
-              iconPosition="end"
-            />
-          ))}
-        </Tabs>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            {groups.map((status, index) => (
+              <Tab
+                key={index}
+                label={getTabName(status)}
+                value={status}
+                icon={
+                  <Chip
+                    label={
+                      status === 'All'
+                        ? data.length
+                        : status === TRIP_STATUS.COMPLETED
+                        ? counts.Completed
+                        : status === TRIP_STATUS.PENDING
+                        ? counts.Pending
+                        : counts.Cancelled
+                    }
+                    color={
+                      status === 'All'
+                        ? 'primary'
+                        : status === TRIP_STATUS.COMPLETED
+                        ? 'success'
+                        : status === TRIP_STATUS.PENDING
+                        ? 'warning'
+                        : 'error'
+                    }
+                    variant="light"
+                    size="small"
+                  />
+                }
+                iconPosition="end"
+              />
+            ))}
+          </Tabs>
+
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => setIsOpen(true)}>
+            Add Trip
+          </Button>
+        </Stack>
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
 
@@ -370,6 +383,19 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
           <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
+
+      {isOpen && (
+        <Dialog
+          fullScreen
+          open={isOpen}
+          onClose={handleClose}
+          fullWidth
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <AddNewTrip handleClose={handleClose} handleRefetch={handleRefetch} />
+        </Dialog>
+      )}
     </>
   );
 }

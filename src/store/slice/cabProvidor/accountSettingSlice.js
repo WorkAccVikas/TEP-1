@@ -22,8 +22,8 @@ export const fetchAccountSettings = createAsyncThunk('accountSettings/fetchAccou
     //   favIcon: 'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
     // };
 
-    // return { status: 200, data: FAKE_ACCOUNT_SETTINGS };
-    return { status: 200, data: FAKE_ACCOUNT_SETTINGS_2 };
+    return { status: 200, data: FAKE_ACCOUNT_SETTINGS };
+    // return { status: 200, data: FAKE_ACCOUNT_SETTINGS_2 };
     // eslint-disable-next-line no-unreachable
   } catch (error) {
     console.log('Error fetching account settings:', error);

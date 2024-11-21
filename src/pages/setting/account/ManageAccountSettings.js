@@ -24,21 +24,14 @@ import * as Yup from 'yup';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { textAlign } from '@mui/system';
 import { addAccountSetting, mutateAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
+import { useFilePreview } from 'hooks/useFilePreview';
 
-// const CONFIG = {
-//   logo: {
-//     fileSize: 2 * 1024 * 1024, // 2MB
-//     fileFormat: ['image/jpeg', 'image/png']
-//   },
-//   smallLogo: {
-//     fileSize: 1 * 1024 * 1024, // 1MB
-//     fileFormat: ['image/jpeg', 'image/png']
-//   },
-//   favIcon: {
-//     fileSize: 512 * 1024, // 512KB
-//     fileFormat: ['image/x-icon', 'image/png', 'image/svg+xml']
-//   }
-// };
+const MAX_LOGO_WIDTH = 100;
+const MAX_LOGO_HEIGHT = 50;
+const MAX_SMALL_LOGO_WIDTH = 50;
+const MAX_SMALL_LOGO_HEIGHT = 25;
+const MAX_FAV_ICON_WIDTH = 10;
+const MAX_FAV_ICON_HEIGHT = 10;
 
 // Function to calculate sizes in bytes
 function sizeInKB(value) {
@@ -49,9 +42,11 @@ function sizeInMB(value) {
   return sizeInKB(value) * 1024;
 }
 
-function Config(fileSize, fileFormat) {
+function Config(fileSize, fileFormat, width = null, height = null) {
   this.fileSize = fileSize;
   this.fileFormat = fileFormat;
+  this.width = width;
+  this.height = height;
 }
 
 Config.prototype.getSizeString = function () {
@@ -66,66 +61,93 @@ Config.prototype.getSizeString = function () {
   return `${Math.round(size)} ${sizes[index]}`;
 };
 
-// const CONFIG = {
-//   logo: new Config(2 * 1024 * 1024, ['image/jpeg', 'image/png']),
-//   smallLogo: new Config(1 * 1024 * 1024, ['image/jpeg', 'image/png']),
-//   favIcon: new Config(512 * 1024, ['image/x-icon', 'image/png', 'image/svg+xml'])
-// };
+Config.prototype.getRecommendedSizeString = function () {
+  if (this.width && this.height) {
+    return `${this.width} x ${this.height} px`;
+  }
+  return 'No size recommendation';
+};
 
 // Configuration object using size functions
 const CONFIG = {
-  logo: new Config(sizeInMB(2), ['image/jpeg', 'image/png']),
-  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png']),
-  favIcon: new Config(sizeInKB(512), ['image/x-icon', 'image/png', 'image/svg+xml'])
+  logo: new Config(sizeInMB(2), ['image/jpeg', 'image/png'], MAX_LOGO_WIDTH, MAX_LOGO_HEIGHT),
+  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png'], MAX_SMALL_LOGO_WIDTH, MAX_SMALL_LOGO_HEIGHT),
+  favIcon: new Config(sizeInKB(512), ['image/x-icon', 'image/png', 'image/svg+xml'], MAX_FAV_ICON_WIDTH, MAX_FAV_ICON_HEIGHT)
 };
+
+// const validationSchema = Yup.object().shape({
+//   name: Yup.string().required('Name is required'),
+//   title: Yup.string().required('Title is required'),
+//   logo: Yup.mixed()
+//     .nullable()
+//     .test('fileSize', 'The file is too large', (value) => {
+//       if (value) {
+//         return value.size <= CONFIG.logo.fileSize; // 1MB max size
+//       }
+//       return true; // If no file is selected, validation passes
+//     })
+//     .test('fileFormat', 'Unsupported Format', (value) => {
+//       if (value) {
+//         return CONFIG.logo.fileFormat.includes(value.type);
+//       }
+//       return true; // If no file is selected, validation passes
+//     }),
+
+//   smallLogo: Yup.mixed()
+//     .nullable()
+//     .test('fileSize', 'The file is too large', (value) => {
+//       if (value) {
+//         return value.size <= CONFIG.smallLogo.fileSize; // 1MB max size
+//       }
+//       return true; // If no file is selected, validation passes
+//     })
+//     .test('fileFormat', 'Unsupported Format', (value) => {
+//       if (value) {
+//         return CONFIG.smallLogo.fileFormat.includes(value.type);
+//       }
+//       return true; // If no file is selected, validation passes
+//     }),
+
+//   favIcon: Yup.mixed()
+//     .nullable()
+//     .test('fileSize', 'The favicon file is too large', (value) => {
+//       if (value) {
+//         return value.size <= CONFIG.favIcon.fileSize;
+//       }
+//       return true;
+//     })
+//     .test('fileFormat', 'Unsupported favicon format', (value) => {
+//       if (value) {
+//         return CONFIG.favIcon.fileFormat.includes(value.type);
+//       }
+//       return true;
+//     })
+// });
+
+// Dynamic error messages
+function createFileValidation(config, fileType) {
+  return Yup.mixed()
+    .nullable()
+    .test('fileSize', `${fileType} file is too large`, (value) => {
+      if (value) {
+        return value.size <= config.fileSize;
+      }
+      return true; // If no file is selected, validation passes
+    })
+    .test('fileFormat', `Unsupported ${fileType} format`, (value) => {
+      if (value) {
+        return config.fileFormat.includes(value.type);
+      }
+      return true;
+    });
+}
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   title: Yup.string().required('Title is required'),
-  logo: Yup.mixed()
-    .nullable()
-    .test('fileSize', 'The file is too large', (value) => {
-      if (value) {
-        return value.size <= CONFIG.logo.fileSize; // 1MB max size
-      }
-      return true; // If no file is selected, validation passes
-    })
-    .test('fileFormat', 'Unsupported Format', (value) => {
-      if (value) {
-        return CONFIG.logo.fileFormat.includes(value.type);
-      }
-      return true; // If no file is selected, validation passes
-    }),
-
-  smallLogo: Yup.mixed()
-    .nullable()
-    .test('fileSize', 'The file is too large', (value) => {
-      if (value) {
-        return value.size <= CONFIG.smallLogo.fileSize; // 1MB max size
-      }
-      return true; // If no file is selected, validation passes
-    })
-    .test('fileFormat', 'Unsupported Format', (value) => {
-      if (value) {
-        return CONFIG.smallLogo.fileFormat.includes(value.type);
-      }
-      return true; // If no file is selected, validation passes
-    }),
-
-  favIcon: Yup.mixed()
-    .nullable()
-    .test('fileSize', 'The favicon file is too large', (value) => {
-      if (value) {
-        return value.size <= CONFIG.favIcon.fileSize;
-      }
-      return true;
-    })
-    .test('fileFormat', 'Unsupported favicon format', (value) => {
-      if (value) {
-        return CONFIG.favIcon.fileFormat.includes(value.type);
-      }
-      return true;
-    })
+  logo: createFileValidation(CONFIG.logo, 'Logo'),
+  smallLogo: createFileValidation(CONFIG.smallLogo, 'Small logo'),
+  favIcon: createFileValidation(CONFIG.favIcon, 'Favicon')
 });
 
 const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
@@ -133,80 +155,9 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
   console.log(initialValues);
 
   const navigate = useNavigate();
-  const [logoPreview, setLogoPreview] = useState('');
-  //   const [logoPreview, setLogoPreview] = useState(
-  //     'https://upload.wikimedia.org/wikipedia/commons/6/6e/Kim_Jong-un_April_2019_%28cropped%29.jpg'
-  //   );
-
-  const [smallLogoPreview, setSmallLogoPreview] = useState('');
-
   const fileInputRef = useRef(null); // Create a ref for the file input
-
-  const [faviconPreview, setFaviconPreview] = useState('');
   const fileSmallInputRef = useRef(null);
-
-  //   const [faviconPreview, setFaviconPreview] = useState(
-  //     'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
-  //   );
   const faviconInputRef = useRef(null);
-
-  const handleLogoChange = (event) => {
-    const file = event.target.files[0];
-    console.log(file.size);
-    if (file) {
-      if (file.size > CONFIG.logo.fileSize) {
-        // 1MB max size
-        formik.setFieldValue('logo', null); // Clear the logo field
-        setLogoPreview(''); // Clear the preview
-
-        if (formik.values.logo) {
-          formik.setFieldTouched('logo', '');
-        }
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: `The file is too large. Please upload a file smaller than ${CONFIG.logo.getSizeString()}.`,
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
-
-      if (!CONFIG.logo.fileFormat.includes(file.type)) {
-        // Validate file format
-        formik.setFieldValue('logo', null); // Clear the logo field
-        setLogoPreview(''); // Clear the preview
-
-        if (formik.values.logo) {
-          formik.setFieldTouched('logo', '');
-        }
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Unsupported format. Please upload a JPEG or PNG image.',
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        setLogoPreview(reader.result);
-        formik.setFieldValue('logo', file);
-        formik.setFieldTouched('logo', true); // Mark the field as touched
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleButtonClick = () => {
     // Trigger the hidden file input click
@@ -215,19 +166,30 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
     }
   };
 
-  useEffect(() => {
-    if (!isFirstTime) {
-      if (initialValues.logo) setLogoPreview(initialValues.logo);
-
-      if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
-
-      if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
+  const handleFaviconButtonClick = () => {
+    if (faviconInputRef.current) {
+      faviconInputRef.current.click();
     }
-  }, [initialValues, isFirstTime]);
+  };
+
+  const handleSmallLogoButtonClick = () => {
+    if (fileSmallInputRef.current) {
+      fileSmallInputRef.current.click();
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
-      name: initialValues?.name || '',
+      /*************  ✨ Codeium Command ⭐  *************/
+      /**
+       * Called when the image is loaded. Checks the dimensions of the image
+       * and validates them. If the dimensions are too large, it clears the
+       * logo field, sets the logoPreview to an empty string, marks the
+       * field as touched, and shows a snackbar with an error message.
+       * @function
+       * @param {Object} e - The event object
+       */
+      /******  3dcc8e55-3cb1-4c10-a174-fed6d5af0418  *******/ name: initialValues?.name || '',
       title: initialValues?.title || '',
       logo: null,
       smallLogo: null,
@@ -297,115 +259,31 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
     }
   });
 
-  const handleFaviconChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > CONFIG.favIcon.fileSize) {
-        formik.setFieldValue('favIcon', null);
-        setFaviconPreview('');
-        formik.setFieldTouched('favIcon', true);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: `The favicon file is too large. Please upload a file smaller than ${CONFIG.favIcon.getSizeString()}.`,
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
+  const {
+    preview: logoPreview,
+    handleFileChange: handleLogoChange,
+    handlePreviewChange: setLogoPreview
+  } = useFilePreview(CONFIG.logo, 'logo', formik, '');
+  const {
+    preview: faviconPreview,
+    handleFileChange: handleFaviconChange,
+    handlePreviewChange: setFaviconPreview
+  } = useFilePreview(CONFIG.favIcon, 'favIcon', formik, '');
+  const {
+    preview: smallLogoPreview,
+    handleFileChange: handleSmallLogoChange,
+    handlePreviewChange: setSmallLogoPreview
+  } = useFilePreview(CONFIG.smallLogo, 'smallLogo', formik, '');
 
-      if (!CONFIG.favIcon.fileFormat.includes(file.type)) {
-        formik.setFieldValue('favIcon', null);
-        setFaviconPreview('');
-        formik.setFieldTouched('favIcon', true);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Unsupported favicon format. Please upload an .ico, .png, or .svg file.',
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
+  useEffect(() => {
+    if (!isFirstTime) {
+      if (initialValues.logo) setLogoPreview(initialValues.logo);
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFaviconPreview(reader.result);
-        formik.setFieldValue('favIcon', file);
-        formik.setFieldTouched('favIcon', true);
-      };
-      reader.readAsDataURL(file);
+      if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+
+      if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
     }
-  };
-
-  const handleFaviconButtonClick = () => {
-    if (faviconInputRef.current) {
-      faviconInputRef.current.click();
-    }
-  };
-
-  const handleSmallLogoButtonClick = () => {
-    if (fileSmallInputRef.current) {
-      fileSmallInputRef.current.click();
-    }
-  };
-
-  const handleSmallLogoChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > CONFIG.smallLogo.fileSize) {
-        formik.setFieldValue('smallLogo', null);
-        setSmallLogoPreview('');
-        formik.setFieldTouched('smallLogo', true);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: `The small logo file is too large. Please upload a file smaller than ${CONFIG.smallLogo.getSizeString()}.`,
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
-
-      if (!CONFIG.smallLogo.fileFormat.includes(file.type)) {
-        formik.setFieldValue('smallLogo', null);
-        setSmallLogoPreview('');
-        formik.setFieldTouched('smallLogo', true);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Unsupported small logo format. Please upload a JPEG or PNG file.',
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSmallLogoPreview(reader.result);
-        formik.setFieldValue('smallLogo', file);
-        formik.setFieldTouched('smallLogo', true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  }, [initialValues, isFirstTime]);
 
   return (
     <>
@@ -470,9 +348,14 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                               {formik.errors.logo}
                             </Typography>
                           ) : (
-                            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                              * Accepts JPEG/PNG formats up to {CONFIG.logo.getSizeString()}.
-                            </Typography>
+                            <Stack gap={1}>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Accepts JPEG/PNG formats up to {CONFIG.logo.getSizeString()}.
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Recommended image size: {CONFIG.logo.getRecommendedSizeString()}.
+                              </Typography>
+                            </Stack>
                           )}
                         </Stack>
                       </Grid>
@@ -492,7 +375,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                             onDrop={(e) => {
                               e.preventDefault();
                               const file = e.dataTransfer.files[0];
-                              handleLogoChange({ target: { files: [file] } });
+                              handleSmallLogoChange({ target: { files: [file] } });
                             }}
                             style={{
                               width: 150,
@@ -522,9 +405,14 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                               {formik.errors.smallLogo}
                             </Typography>
                           ) : (
-                            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                              * Accepts JPEG/PNG formats up to {CONFIG.smallLogo.getSizeString()}.
-                            </Typography>
+                            <Stack gap={1}>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Accepts JPEG/PNG formats up to {CONFIG.smallLogo.getSizeString()}.
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Recommended image size: {CONFIG.smallLogo.getRecommendedSizeString()}.
+                              </Typography>
+                            </Stack>
                           )}
                         </Stack>
                       </Grid>
@@ -566,9 +454,18 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       />
                       <FormControl fullWidth sx={{ alignItems: 'center' }}>
                         <FormHelperText sx={{ fontStyle: 'italic', color: formik.errors.favIcon ? 'error.main' : 'textSecondary' }}>
-                          {formik.touched.favIcon && formik.errors.favIcon
-                            ? formik.errors.favIcon
-                            : `Upload a favicon file (.ico, .png, .svg, max ${CONFIG.favIcon.getSizeString()}).`}
+                          {formik.touched.favIcon && formik.errors.favIcon ? (
+                            formik.errors.favIcon
+                          ) : (
+                            <Stack gap={1}>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Upload a favicon file (.ico, .png, .svg, max {CONFIG.favIcon.getSizeString()}).
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                * Recommended image size: {CONFIG.favIcon.getRecommendedSizeString()}.
+                              </Typography>
+                            </Stack>
+                          )}
                         </FormHelperText>
                       </FormControl>
                     </Stack>
