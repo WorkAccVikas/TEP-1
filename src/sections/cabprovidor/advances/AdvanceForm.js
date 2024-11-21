@@ -38,6 +38,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
   const theme = useTheme();
 
   console.log('advanceData', advanceData);
+  console.log('key', key);
 
   const handleReject = async () => {
     try {
@@ -45,10 +46,6 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
         data: {
           _id: advanceData._id, // Assuming `_id` is part of row data
           isApproved: 2,
-          approvedAmount: values.approvedAmount,
-          finalAmount: values.finalPayableAmount,
-          approvedRemark: values.approvedRemark,
-          transactionId: values.transactionId
         }
       });
 
@@ -127,6 +124,8 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
               }
             })
           );
+          setKey(key + 1);
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error updating status:', error);
@@ -168,9 +167,9 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
       // Calculate the final payable amount
       const approvedAmount = parseFloat(formik.values.approvedAmount);
       const interestRate = advanceData?.advanceTypeId?.interestRate;
-  
+
       if (!isNaN(approvedAmount) && !isNaN(interestRate)) {
-        const finalPayableAmount = approvedAmount - (approvedAmount * (interestRate / 100));
+        const finalPayableAmount = approvedAmount - approvedAmount * (interestRate / 100);
         formik.setFieldValue('finalPayableAmount', finalPayableAmount.toFixed(2)); // Set the calculated final payable amount
       }
     }
@@ -233,7 +232,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
                       id="approvedAmount"
                       name="approvedAmount"
                       value={formik.values.approvedAmount}
-                      type='number'
+                      type="number"
                       onChange={formik.handleChange}
                       placeholder="Enter Approved Amount"
                       error={Boolean(formik.touched.approvedAmount && formik.errors.approvedAmount)}

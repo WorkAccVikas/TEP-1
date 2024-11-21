@@ -1,17 +1,40 @@
 import PropTypes from 'prop-types';
-import { Stack, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from '@mui/material';
+import { Dialog, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
 import { renderFilterTypes } from 'utils/react-table';
+import { Edit, Trash } from 'iconsax-react';
+import { ThemeMode } from 'config';
+import { PopupTransition } from 'components/@extended/Transitions';
+import VendorEditForm from './VendorEditForm';
 
-const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading }) => {
+const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpdateKey,updateKey }) => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+  const [add, setAdd] = useState(false);
+  const [vendorData, setVendorData] = useState(null);
+  const [vendorEdit, setVendorEdit] = useState(null);
+
+  const handleAdd = () => {
+    setAdd(!add);
+    if (vendorData && !add) setVendorData(null);
+  };
+  
   const columns = useMemo(
     () => [
+      {
+        Header: '_id',
+        accessor: '_id'
+      },
+      {
+        Header: 'Vehicle Type Id',
+        accessor: 'VehicleTypeName._id'
+      },
       {
         Header: 'Company Name',
         accessor: 'companyID.company_name'
@@ -37,7 +60,7 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading }) => {
         Header: 'Dual Trip Amount',
         accessor: 'dualTripAmount.amount',
         dataType: 'text',
-        Cell: ({ value }) => value ?? 'None'
+        Cell: ({ value }) => value ?? 0
       },
       {
         Header: 'Guard Price',
@@ -46,6 +69,68 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading }) => {
         Cell: ({ row }) => {
           const guardValue = row.original.guard;
           return guardValue === 0 ? '0' : row.original.guardPrice;
+        }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          // const driverID = row.original._id;
+          // const isCabProviderDriver = row.original.isCabProviderDriver;
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+             
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAdd('edit'); // Open the dialog for editing
+                    setVendorEdit(row.original);
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Delete"
+              >
+                <IconButton
+                  color="error"
+                  onClick={(e) => {
+                    // e.stopPropagation();
+                    // console.log(`🚀 ~ row.values.id:`, row.values);
+                    // dispatch(handleOpen(ACTION.DELETE));
+                    // dispatch(setDeletedName(row.values['userName']));
+                    // dispatch(setSelectedID(row.values._id)); //setDeletedName
+                  }}
+                >
+                  <Trash />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
         }
       }
     ],
@@ -67,6 +152,18 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading }) => {
           </ScrollX>
         </MainCard>
       </Stack>
+      <Dialog
+          maxWidth="sm"
+          TransitionComponent={PopupTransition}
+          keepMounted
+          fullWidth
+          onClose={handleAdd}
+          open={add}
+          sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <VendorEditForm vendorEdit={vendorEdit} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
+        </Dialog>
     </>
   );
 };
@@ -112,7 +209,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
       initialState: {
         pageIndex: 0,
         pageSize: 10,
-        hiddenColumns: ['_id', 'zoneDescription'],
+        hiddenColumns: ['_id', 'VehicleTypeName._id'],
         sortBy: [sortBy]
       }
     },

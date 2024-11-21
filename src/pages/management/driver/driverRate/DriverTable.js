@@ -1,17 +1,97 @@
 import PropTypes from 'prop-types';
-import { Stack, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from '@mui/material';
+import { alpha, Dialog, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
 import { renderFilterTypes } from 'utils/react-table';
+import { Edit, Trash } from 'iconsax-react';
+import { ThemeMode } from 'config';
+import { PopupTransition } from 'components/@extended/Transitions';
+import DriverEditForm from './DriverEditForm';
+import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
+import axiosServices from 'utils/axios';
+import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 
-const DriverTable = ({ data, page, setPage, limit, setLimit, loading }) => {
+const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKey,updateKey }) => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+  const [add, setAdd] = useState(false);
+  const [driverData, setDriverData] = useState(null);
+  const [driverEdit, setDriverEdit] = useState(null);
+  const [alertopen, setAlertOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [vehicleTypeId, setVehicleTypeId] = useState(null);
+
+  const handleAdd = () => {
+    setAdd(!add);
+    if (driverData && !add) setDriverData(null);
+  };
+
+  const handleClose = () => {
+    setAlertOpen(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+
+      const response = await axiosServices.delete(
+        `/cabRateMasterDriver/single/delete`,{
+          data: {
+            _id: deleteId,
+            vehicleTypeId: vehicleTypeId
+        }
+        });
+
+        console.log("response",response);
+        
+
+      if (response.status === 200) {
+        setUpdateKey(updateKey + 1);
+        setAlertOpen(false);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: response.data.data || 'Deleted successfully',
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false
+          })
+        );
+      } 
+    } catch (error) {
+      console.log('error', error);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Failed to delete item',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: false
+        })
+      );
+    }
+  };
+  
   const columns = useMemo(
     () => [
+      {
+        Header: '_id',
+        accessor: '_id'
+      },
+      {
+        Header: 'Vehicle Type Id',
+        accessor: 'VehicleTypeName._id',
+      },
       {
         Header: 'Company Name',
         accessor: 'companyID.company_name'
@@ -37,8 +117,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading }) => {
         Header: 'Dual Trip Amount',
         accessor: 'dualTripAmount.amount',
         dataType: 'text',
-        Cell: ({ value }) => value ?? 'None'
-      },
+        Cell: ({ value }) => value ?? 0      },
       {
         Header: 'Guard Price',
         accessor: 'guardPrice',
@@ -46,6 +125,68 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading }) => {
         Cell: ({ row }) => {
           const guardValue = row.original.guard;
           return guardValue === 0 ? '0' : row.original.guardPrice;
+        }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          const vehicleTypeID = row.original.VehicleTypeName._id;
+          console.log("row",row.original);
+          
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+             
+
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAdd('edit'); // Open the dialog for editing
+                    setDriverEdit(row.original);
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+
+              {/* <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="Delete"
+              >
+                <IconButton
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteId(row.original._id);
+                    setAlertOpen(true);
+                    setVehicleTypeId(vehicleTypeID);
+                  }}
+                >
+                  <Trash />
+                </IconButton>
+              </Tooltip> */}
+            </Stack>
+          );
         }
       }
     ],
@@ -67,6 +208,25 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading }) => {
           </ScrollX>
         </MainCard>
       </Stack>
+      <Dialog
+          maxWidth="sm"
+          TransitionComponent={PopupTransition}
+          keepMounted
+          fullWidth
+          onClose={handleAdd}
+          open={add}
+          sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DriverEditForm driverEdit={driverEdit} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
+        </Dialog>
+
+        <CustomAlertDelete
+        title={'This action is irreversible. Please check before deleting.'}
+        open={alertopen}
+        handleClose={handleClose}
+        handleDelete={handleDelete}
+      />
     </>
   );
 };
@@ -112,7 +272,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
       initialState: {
         pageIndex: 0,
         pageSize: 10,
-        hiddenColumns: ['_id', 'zoneDescription'],
+        hiddenColumns: ['_id', 'VehicleTypeName._id'],
         sortBy: [sortBy]
       }
     },
