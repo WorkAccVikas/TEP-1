@@ -3,6 +3,7 @@ import axios from 'utils/axios'; // Adjust the import path according to your pro
 
 const initialState = {
   cabs: [], // Empty array initially
+  cabs1: [],
   getSingleDetails: null,
   metaData: {
     totalCount: 0,
@@ -12,7 +13,7 @@ const initialState = {
   },
   loading: false,
   error: null,
-  errorDetails: null,
+  errorDetails: null
 };
 
 export const fetchCabs = createAsyncThunk('cabs/fetchCabs', async ({ page = 1, limit = 10, vendorID = null }, { rejectWithValue }) => {
@@ -61,6 +62,15 @@ export const fetchCabDetails = createAsyncThunk('cabs/fetchCabDetails', async (i
   try {
     const response = await axios.get(`/vehicle/by?vehicleId=${id}`);
     return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+export const fetchCab1 = createAsyncThunk('cabs/fetchCab1', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/vehicle/all/linked/drivers`);
+    return response.data.data; // This should match the shape of the data you expect
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
@@ -116,6 +126,17 @@ const cabSlice = createSlice({
         state.loading = false;
         state.errorDetails = action.payload;
       })
+      .addCase(fetchCab1.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCab1.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cabs1 = action.payload;
+      })
+      .addCase(fetchCab1.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   }
 });
 

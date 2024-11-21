@@ -121,7 +121,7 @@ function AddCompany() {
       .string()
       .trim()
       .min(YupValidationConfig.company_name.min, ({ min }) => `Company Name must be at least ${min} characters`)
-      .max(YupValidationConfig.company_name.max, ({ max }) => `Company Name must be at most ${max} characters`)
+      // .max(YupValidationConfig.company_name.max, ({ max }) => `Company Name must be at most ${max} characters`)
       .test('no-leading-digit', 'Company Name cannot start with a number', (value) => {
         return /^[^0-9]/.test(value);
       })
@@ -152,7 +152,7 @@ function AddCompany() {
     //   .required('Landline Number is required'),
     PAN: yup
       .string()
-      .required('PAN is required')
+      // .required('PAN is required')
       .matches(/^([A-Z]){5}([0-9]){4}([A-Z]){1}$/, 'Enter a valid PAN'),
 
     GSTIN: yup
@@ -200,6 +200,7 @@ function AddCompany() {
     //   .required('State Amount is required'),
     files: yup
       .mixed()
+      .nullable()
       .test('fileSize', 'File size is too large', (value) => {
         if (value && value[0]) {
           // Check if file size is within acceptable range (e.g., 5MB)
@@ -207,10 +208,10 @@ function AddCompany() {
         }
         return true; // Allow empty
       })
-      .test('single-file', 'You can only upload one file', (value) => {
-        return Array.isArray(value) && value.length === 1 && value[0] instanceof File;
-      })
-      .required('Company Contract is required')
+      // .test('single-file', 'You can only upload one file', (value) => {
+      //   return Array.isArray(value) && value.length === 1 && value[0] instanceof File;
+      // })
+      // .required('Company Contract is required')
     // companyContract: yup.mixed().required('Company Contract is required')
   });
 
