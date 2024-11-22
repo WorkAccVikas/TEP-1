@@ -17,7 +17,7 @@ import axiosServices from 'utils/axios';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 
-const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKey,updateKey }) => {
+const DriverTable = ({ data, page, setPage, limit, setLimit, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const [add, setAdd] = useState(false);
@@ -38,17 +38,12 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
 
   const handleDelete = async () => {
     try {
+      const response = await axiosServices.put(`/cabRateMasterDriver/single/delete`, {
+        _id: deleteId,
+        vehicleTypeId: vehicleTypeId
+      });
 
-      const response = await axiosServices.delete(
-        `/cabRateMasterDriver/single/delete`,{
-          data: {
-            _id: deleteId,
-            vehicleTypeId: vehicleTypeId
-        }
-        });
-
-        console.log("response",response);
-        
+      console.log('response', response);
 
       if (response.status === 200) {
         setUpdateKey(updateKey + 1);
@@ -64,7 +59,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
             close: false
           })
         );
-      } 
+      }
     } catch (error) {
       console.log('error', error);
 
@@ -81,7 +76,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
       );
     }
   };
-  
+
   const columns = useMemo(
     () => [
       {
@@ -90,7 +85,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
       },
       {
         Header: 'Vehicle Type Id',
-        accessor: 'VehicleTypeName._id',
+        accessor: 'VehicleTypeName._id'
       },
       {
         Header: 'Company Name',
@@ -117,7 +112,8 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
         Header: 'Dual Trip Amount',
         accessor: 'dualTripAmount.amount',
         dataType: 'text',
-        Cell: ({ value }) => value ?? 0      },
+        Cell: ({ value }) => value ?? 0
+      },
       {
         Header: 'Guard Price',
         accessor: 'guardPrice',
@@ -133,12 +129,9 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
         disableSortBy: true,
         Cell: ({ row }) => {
           const vehicleTypeID = row.original.VehicleTypeName._id;
-          console.log("row",row.original);
-          
+
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-             
-
               <Tooltip
                 componentsProps={{
                   tooltip: {
@@ -162,7 +155,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
                 </IconButton>
               </Tooltip>
 
-              {/* <Tooltip
+              <Tooltip
                 componentsProps={{
                   tooltip: {
                     sx: {
@@ -184,7 +177,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
                 >
                   <Trash />
                 </IconButton>
-              </Tooltip> */}
+              </Tooltip>
             </Stack>
           );
         }
@@ -209,19 +202,19 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading,setUpdateKe
         </MainCard>
       </Stack>
       <Dialog
-          maxWidth="sm"
-          TransitionComponent={PopupTransition}
-          keepMounted
-          fullWidth
-          onClose={handleAdd}
-          open={add}
-          sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DriverEditForm driverEdit={driverEdit} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
-        </Dialog>
+        maxWidth="sm"
+        TransitionComponent={PopupTransition}
+        keepMounted
+        fullWidth
+        onClose={handleAdd}
+        open={add}
+        sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DriverEditForm driverEdit={driverEdit} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
+      </Dialog>
 
-        <CustomAlertDelete
+      <CustomAlertDelete
         title={'This action is irreversible. Please check before deleting.'}
         open={alertopen}
         handleClose={handleClose}

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import PropTypes from 'prop-types';
-import { Button, Stack, Table, TableBody, TableCell, TableHead, TableRow, useMediaQuery } from '@mui/material';
+import { Button, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from '@mui/material';
 import { Fragment, useMemo } from 'react';
 import { renderFilterTypes, GlobalFilter } from 'utils/react-table';
 import { useFilters, useExpanded, useGlobalFilter, useRowSelect, useSortBy, useTable, usePagination } from 'react-table';
@@ -85,7 +85,7 @@ function ReactTable({
               />
             )} */}
 
-              {location.pathname !== '/advance' && location.pathname !== '/advanceTypeList' && location.pathname !== '/roster-data' && (
+              {location.pathname !== '/apps/invoices/advance-type' && (
                 <Button variant="contained" onClick={handleAdd} fullWidth size="small">
                   {buttonTitle}
                 </Button>
