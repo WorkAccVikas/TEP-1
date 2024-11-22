@@ -163,7 +163,9 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               >
                 {formattedValue}
                 {isCabProviderDriver && (
-                  <span style={{ color: 'green', fontSize: '0.9rem' }}>✔</span> // Tick sign
+                  <Tooltip title="Cabprovider" arrow>
+                    <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
+                  </Tooltip>
                 )}
               </Link>
             </Typography>
@@ -231,7 +233,20 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return (
+            <Typography
+              sx={{
+                width: 'fit-content', // Dynamically adjusts to the content
+                minWidth: '60px', // Ensures enough space for minimum display
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap' // Prevents text from wrapping
+              }}
+            >
+              {' '}
+              {time ? formattedDate(time, 'DD/MM/YYYY') : ''}
+            </Typography>
+          );
         }
       },
       {

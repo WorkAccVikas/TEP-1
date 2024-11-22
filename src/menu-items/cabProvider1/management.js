@@ -131,31 +131,31 @@ const management = {
     {
       id: 'driver',
       title: <FormattedMessage id="driver" />,
-      type: 'collapse',
+      type: 'item',
       url: '/management/driver/view',
       icon: icons.driver,
-      children: [
-        // {
-        //   id: 'view',
-        //   title: <FormattedMessage id="view" />,
-        //   type: 'item',
-        //   url: '/management/driver/view',
-        //   // icon: icons.view
-        // },
-        // {
-        //   id: 'create-driver-rate',
-        //   title: <FormattedMessage id="add driver rate" />,
-        //   type: 'item',
-        //   url: '/management/driver/add-driver-rate',
-        //   // icon: icons.add
-        // },
-        {
-          id: 'view-driver-rate',
-          title: <FormattedMessage id="view-driver-rate" />,
-          type: 'item',
-          url: '/management/driver/view-driver-rate'
-        }
-      ]
+      // children: [
+      //   {
+      //     id: 'view',
+      //     title: <FormattedMessage id="view" />,
+      //     type: 'item',
+      //     url: '/management/driver/view',
+      //     // icon: icons.view
+      //   },
+      //   {
+      //     id: 'create-driver-rate',
+      //     title: <FormattedMessage id="add driver rate" />,
+      //     type: 'item',
+      //     url: '/management/driver/add-driver-rate',
+      //     // icon: icons.add
+      //   },
+      //   {
+      //     id: 'view-driver-rate',
+      //     title: <FormattedMessage id="view-driver-rate" />,
+      //     type: 'item',
+      //     url: '/management/driver/view-driver-rate'
+      //   }
+      // ]
     },
 
     // Cab

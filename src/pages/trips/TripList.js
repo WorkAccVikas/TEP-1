@@ -941,6 +941,7 @@ const TripList = () => {
 
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Roster', to: '/apps/roster/all-roster' },
     { title: 'Trips', to: '/apps/trips/list' }
   ];
 

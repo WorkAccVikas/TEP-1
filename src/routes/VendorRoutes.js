@@ -12,6 +12,7 @@ import Create from 'pages/invoice/create/Create2';
 import { element } from 'prop-types';
 import AllRosters from 'pages/Roster/AllRosters';
 import AdvancesVendorTable from 'sections/cabprovidor/advances/advancesVendor/AdvancesVendorTable';
+import AdvanceVendorType from 'sections/cabprovidor/advances/advancesVendor/AdvanceVendorType';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -174,7 +175,7 @@ const VendorRoutes = {
                 },
                 {
                   path: 'advance-type',
-                  element: <AdvanceType />
+                  element: <AdvanceVendorType />
                   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
                 }
               ]

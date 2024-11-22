@@ -27,10 +27,11 @@ import { useFormik, FormikProvider } from 'formik';
 // project-imports
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import axiosServices from 'utils/axios';
 
 const CustomerSchema = Yup.object().shape({
-  amount: Yup.number().required('Amount is required').positive('Amount must be a positive number'),
-  remarks: Yup.string().required('Remarks are required').max(250, 'Remarks should not exceed 250 characters')
+  // amount: Yup.number().required('Amount is required').positive('Amount must be a positive number'),
+  // remarks: Yup.string().required('Remarks are required').max(250, 'Remarks should not exceed 250 characters')
 });
 
 // ==============================|| CUSTOMER - ADD / EDIT ||============================== //
@@ -39,8 +40,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
   const isCreating = !customer;
   const token = localStorage.getItem('serviceToken');
   const [loading, setLoading] = useState(true);
-
-  console.log('customer', customer);
 
   const [fetchAllAdvance, setFetchAllAdvance] = useState(null);
   const [advanceProvider, setAdvanceProvider] = useState(null);
@@ -57,7 +56,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
       if (response.status === 200) {
         setLoading(false);
       }
-      console.log('response', response.data.cabProviderId);
       localStorage.setItem('providerId', JSON.stringify(response.data.cabProviderId));
       setAdvanceProvider(response.data.cabProviderId);
     };
@@ -68,8 +66,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
       setAdvanceProvider(JSON.parse(providerId));
     }
   }, []);
-
-  console.log('advanceProvider', advanceProvider);
 
   useEffect(() => {
     const providerId1 = JSON.parse(localStorage.getItem('providerId'));
@@ -88,8 +84,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
     fetchdata();
   }, []);
 
-  console.log('fetchAllAdvance', fetchAllAdvance);
-
   const formik = useFormik({
     initialValues: {
       amount: customer?.amount || '',
@@ -100,7 +94,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
     validationSchema: CustomerSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      console.log('values', values);
 
       try {
         if (isCreating) {
@@ -121,7 +114,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
               }
             }
           );
-          console.log('res', response);
           if (response.status === 201) {
             setKey(key + 1);
           }
@@ -156,7 +148,6 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
               }
             }
           );
-          console.log('resEdit', response);
           if (response.status === 200) {
             setKey(key + 1);
           }
@@ -211,6 +202,17 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
                     type="number"
                     error={Boolean(formik.touched.amount && formik.errors.amount)}
                     helperText={formik.touched.amount && formik.errors.amount}
+                    InputProps={{
+                      // readOnly: true,
+  
+                      inputProps: {
+                        sx: {
+                          '::-webkit-outer-spin-button': { display: 'none' },
+                          '::-webkit-inner-spin-button': { display: 'none' },
+                          '-moz-appearance': 'textfield' // Firefox
+                        }
+                      }
+                    }}
                   />
                 </Stack>
                 <Stack spacing={1}>

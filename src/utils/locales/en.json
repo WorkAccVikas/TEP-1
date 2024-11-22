@@ -6,6 +6,7 @@
   "roster": "Roster",
   "management": "Management",
   "invoice": "Invoice",
+  "report": "Report",
   "reports": "Reports",
   "master": "Master",
   "company": "Companies",
@@ -51,5 +52,6 @@
   "files": "Files",
   "user-setting": "User Setting",
   "create template": "Create Template",
-  "advance-type":"Advance Type"
+  "advance-type":"Advance Type",
+  "test":"test"
 }
