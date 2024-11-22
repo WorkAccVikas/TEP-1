@@ -87,7 +87,7 @@ const TripChart = ({ color, data }) => {
       },
       y: {
         formatter(val) {
-          return `$ ${val}`;
+          return `₹ ${val}`;
         }
       }
     }
@@ -114,7 +114,7 @@ const TripChart = ({ color, data }) => {
 
   const [series] = useState([
     {
-      name: 'Sales',
+      name: 'Amount',
       data: data
     }
   ]);

@@ -259,7 +259,7 @@ const AllRosters = () => {
         accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : '')
       },
       {
-        Header: 'Total Entries',
+        Header: 'Entries',
         accessor: 'totalCount',
         Cell: ({ row }) => {
           return <Typography>{row.original.totalCount}</Typography>;

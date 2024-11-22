@@ -8,18 +8,16 @@ import { ArrowDown3, ArrowUp3 } from 'iconsax-react';
 
 // ==============================|| INVOICE - CARD  ||============================== //
 
-const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, invoice }) => {
+const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, trips }) => {
   return (
     <Grid container direction="row" spacing={2} justifyContent="space-between">
       <Grid item xs={12} md={5}>
-        <Stack direction="column" spacing={2}>
+        <Stack direction="column" spacing={1}>
           <Typography variant="subtitle1">{title}</Typography>
           <Stack direction="column" spacing={1}>
-            <Typography variant="h4" color="inherit">
-              {count}
-            </Typography>
+            
             <Stack direction="row" spacing={1}>
-              <Typography variant="subtitle1">{invoice}</Typography>
+              <Typography variant="subtitle1">{trips}</Typography>
               <Typography color="secondary">trips</Typography>
             </Stack>
           </Stack>
@@ -36,6 +34,9 @@ const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, in
               </Stack>
             )}
             {children}
+            <Typography variant="h4" color="inherit">
+              {count}
+            </Typography>
           </Stack>
         </Box>
       </Grid>
