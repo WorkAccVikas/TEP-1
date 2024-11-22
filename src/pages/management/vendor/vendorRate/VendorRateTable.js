@@ -71,68 +71,68 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpd
           return guardValue === 0 ? '0' : row.original.guardPrice;
         }
       },
-      {
-        Header: 'Actions',
-        className: 'cell-center',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          // const driverID = row.original._id;
-          // const isCabProviderDriver = row.original.isCabProviderDriver;
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+      // {
+      //   Header: 'Actions',
+      //   className: 'cell-center',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     // const driverID = row.original._id;
+      //     // const isCabProviderDriver = row.original.isCabProviderDriver;
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
              
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAdd('edit'); // Open the dialog for editing
-                    setVendorEdit(row.original);
-                  }}
-                >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+      //         <Tooltip
+      //           componentsProps={{
+      //             tooltip: {
+      //               sx: {
+      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                 opacity: 0.9
+      //               }
+      //             }
+      //           }}
+      //           title="Edit"
+      //         >
+      //           <IconButton
+      //             color="primary"
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               handleAdd('edit'); // Open the dialog for editing
+      //               setVendorEdit(row.original);
+      //             }}
+      //           >
+      //             <Edit />
+      //           </IconButton>
+      //         </Tooltip>
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="Delete"
-              >
-                <IconButton
-                  color="error"
-                  onClick={(e) => {
-                    // e.stopPropagation();
-                    // console.log(`🚀 ~ row.values.id:`, row.values);
-                    // dispatch(handleOpen(ACTION.DELETE));
-                    // dispatch(setDeletedName(row.values['userName']));
-                    // dispatch(setSelectedID(row.values._id)); //setDeletedName
-                  }}
-                >
-                  <Trash />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          );
-        }
-      }
+      //         <Tooltip
+      //           componentsProps={{
+      //             tooltip: {
+      //               sx: {
+      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                 opacity: 0.9
+      //               }
+      //             }
+      //           }}
+      //           title="Delete"
+      //         >
+      //           <IconButton
+      //             color="error"
+      //             onClick={(e) => {
+      //               // e.stopPropagation();
+      //               // console.log(`🚀 ~ row.values.id:`, row.values);
+      //               // dispatch(handleOpen(ACTION.DELETE));
+      //               // dispatch(setDeletedName(row.values['userName']));
+      //               // dispatch(setSelectedID(row.values._id)); //setDeletedName
+      //             }}
+      //           >
+      //             <Trash />
+      //           </IconButton>
+      //         </Tooltip>
+      //       </Stack>
+      //     );
+      //   }
+      // }
     ],
     []
   );
