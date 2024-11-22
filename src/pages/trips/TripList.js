@@ -410,8 +410,66 @@ const TripList = () => {
   const [drivers, setDrivers] = useState([]);
   const [cabOptions, setCabOptions] = useState([]);
 
+  const [tripStats, setTripStats] = useState({
+    completedTripsCount: 0,
+    completedTripsAmount: 0,
+    assignedTripsCount: 0,
+    assignedTripsAmount: 0,
+    canceledTripsCount: 0,
+    canceledTripsAmount: 0
+  });
+
+  useEffect(() => {
+    const calculateTripStats = (tripArray) => {
+      const stats = {
+        completedTripsCount: 0,
+        completedTripsAmount: 0,
+        assignedTripsCount: 0,
+        assignedTripsAmount: 0,
+        canceledTripsCount: 0,
+        canceledTripsAmount: 0
+      };
+
+      data &&
+        data.reduce((acc, trip) => {
+          const { assignedStatus, companyGuardPrice, companyRate, companyPenalty, tollCharge, mcdCharge, addOnRate } = trip;
+
+          const tripAmount = companyGuardPrice + companyRate - companyPenalty + tollCharge + mcdCharge + addOnRate;
+
+          // Calculate for completed trips (assignedStatus === 2)
+          if (assignedStatus === 2) {
+            acc.completedTripsCount += 1;
+            acc.completedTripsAmount += tripAmount;
+          }
+
+          // Calculate for assigned trips (assignedStatus === 1)
+          if (assignedStatus === 1) {
+            acc.assignedTripsCount += 1;
+            acc.assignedTripsAmount += tripAmount;
+          }
+
+          // Calculate for canceled trips (assignedStatus === 3)
+          if (assignedStatus === 3) {
+            acc.canceledTripsCount += 1;
+            acc.canceledTripsAmount += tripAmount;
+          }
+
+          return acc;
+        }, stats);
+
+      return stats;
+    };
+
+    // Calculate stats and update state
+    const updatedStats = calculateTripStats(data);
+    setTripStats(updatedStats);
+  }, [data]);
+
+  console.log({ tripStats });
+
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
 
+  console.log({ data });
   useEffect(() => {
     // dispatch(getInvoiceList()).then(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -439,88 +497,8 @@ const TripList = () => {
   const [invoiceId, setInvoiceId] = useState(0);
   const [getInvoiceId, setGetInvoiceId] = useState(0);
 
-  const dummyData = [
-    {
-      id: 1,
-      customer_name: 'John Doe',
-      email: 'john.doe@example.com',
-      date: '2024-09-01',
-      due_date: '2024-10-01',
-      quantity: 10,
-      status: 'Completed',
-      avatar: 1,
-      rate: 100, // Rate for the trip
-      driver: 'Mike Johnson', // Driver for the trip
-      remarks: 'On time delivery' // Remarks for the trip
-    },
-    {
-      id: 2,
-      customer_name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      date: '2024-09-05',
-      due_date: '2024-10-05',
-      quantity: 5,
-      status: 'Pending',
-      avatar: 2,
-      rate: 50, // Rate for the trip
-      driver: 'Sara Wilson', // Driver for the trip
-      remarks: 'Waiting for confirmation' // Remarks for the trip
-    },
-    {
-      id: 3,
-      customer_name: 'Bob Johnson',
-      email: 'bob.johnson@example.com',
-      date: '2024-09-10',
-      due_date: '2024-10-10',
-      quantity: 20,
-      status: 'Cancelled',
-      avatar: 3,
-      rate: 200, // Rate for the trip
-      driver: 'Chris Lee', // Driver for the trip
-      remarks: 'Cancelled by customer' // Remarks for the trip
-    },
-    {
-      id: 4,
-      customer_name: 'Alice Williams',
-      email: 'alice.williams@example.com',
-      date: '2024-09-12',
-      due_date: '2024-10-12',
-      quantity: 8,
-      status: 'Completed',
-      avatar: 4,
-      rate: 80, // Rate for the trip
-      driver: 'Laura Green', // Driver for the trip
-      remarks: 'Successful trip' // Remarks for the trip
-    },
-    {
-      id: 5,
-      customer_name: 'Steve Brown',
-      email: 'steve.brown@example.com',
-      date: '2024-09-15',
-      due_date: '2024-10-15',
-      quantity: 12,
-      status: 'Pending',
-      avatar: 5,
-      rate: 120, // Rate for the trip
-      driver: 'James White', // Driver for the trip
-      remarks: 'Awaiting pickup' // Remarks for the trip
-    },
-    {
-      id: 6,
-      customer_name: 'Alice Brown',
-      email: 'steve.brown@example.com',
-      date: '2024-09-15',
-      due_date: '2024-10-15',
-      quantity: 12,
-      status: 'Pending',
-      avatar: 5,
-      rate: 120, // Rate for the trip
-      driver: 'James White', // Driver for the trip
-      remarks: 'Awaiting pickup' // Remarks for the trip
-    }
-  ];
-
   const navigate = useNavigate();
+
   const handleClose = (status) => {
     if (status) {
       dispatch(getInvoiceDelete(invoiceId));
@@ -928,7 +906,21 @@ const TripList = () => {
 
   return (
     <>
-      {/* <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Breadcrumbs custom links={breadcrumbLinks} />
+
+        <DateRangeSelect
+          startDate={startDate}
+          endDate={endDate}
+          selectedRange={range}
+          prevRange={prevRange}
+          setSelectedRange={setRange}
+          onRangeChange={handleRangeChange}
+          showSelectedRangeLabel
+        />
+      </Stack>
+
+      <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
         <Grid item md={8}>
           <Grid container direction="row" spacing={2}>
             {widgetsData.map((widget, index) => (
@@ -989,30 +981,16 @@ const TripList = () => {
               </Stack>
             </Stack>
             <Typography variant="h4" color="white" sx={{ pt: 2, pb: 1, zIndex: 1 }}>
-            ₹43,078
+              ₹43,078
             </Typography>
             <Box sx={{ maxWidth: '100%' }}>
               <LinearWithLabel value={90} />
             </Box>
           </Box>
         </Grid>
-      </Grid> */}
-      <Breadcrumbs custom heading="Trips" links={breadcrumbLinks} />
+      </Grid>
 
       <Stack gap={2}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4"></Typography>
-          <DateRangeSelect
-            startDate={startDate}
-            endDate={endDate}
-            selectedRange={range}
-            prevRange={prevRange}
-            setSelectedRange={setRange}
-            onRangeChange={handleRangeChange}
-            showSelectedRangeLabel
-          />
-        </Stack>
-
         <MainCard content={false}>
           {/* <ScrollX> */}
           {/* <ReactTable columns={columns} data={dummyData} /> */}

@@ -256,11 +256,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                   _id: item.cabOptionsArray[0]?._id || null,
                   vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A'
                 }
-              : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
-          _zoneName_options: zoneInfo || [],
-          _vehicleType_options: vehicleTypeInfo || [],
-          _drivers_options: drivers || [],
-          _cab_options: cabOptions || []
+              : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' }
         }));
 
       // Filter mapped data where all required `_id` fields are present
@@ -281,28 +277,30 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   console.log({ data });
 
   const handleChange = (rowIndex, key, value) => {
-    const updatedData = [...data];
-    updatedData[rowIndex][key] = value; // Update the specific field
-    const { _zoneName, _zoneType, _vehicleType, _driver, _cab } = updatedData[rowIndex];
+    setData((prevData) => {
+      // Update only the specific row
+      const updatedRow = { ...prevData[rowIndex], [key]: value };
+      const { _zoneName, _zoneType, _vehicleType, _driver, _cab } = updatedRow;
 
-    if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
-      setPayload1((prevPayload) => {
-        // Check if the current `_id` already exists in `prevPayload`
-        const existingIndex = prevPayload.findIndex((item) => item._id === updatedData[rowIndex]._id);
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
+        setPayload1((prevPayload) => {
+          const existingIndex = prevPayload.findIndex((item) => item._id === updatedRow._id);
 
-        if (existingIndex !== -1) {
-          // If it exists, replace the existing entry
-          const updatedPayload = [...prevPayload];
-          updatedPayload[existingIndex] = updatedData[rowIndex];
-          return updatedPayload;
-        } else {
-          // If it doesn't exist, add it to the array
-          return [...prevPayload, updatedData[rowIndex]];
-        }
-      });
-    }
+          if (existingIndex !== -1) {
+            // Update the existing entry in the payload
+            const updatedPayload = [...prevPayload];
+            updatedPayload[existingIndex] = updatedRow;
+            return updatedPayload;
+          } else {
+            // Add the new row to the payload
+            return [...prevPayload, updatedRow];
+          }
+        });
+      }
 
-    setData(updatedData);
+      // Return the updated data array with only the specific row modified
+      return prevData.map((row, index) => (index === rowIndex ? updatedRow : row));
+    });
   };
 
   const bulkSync = () => {
@@ -311,7 +309,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     payload1.forEach(async (trip) => {
       console.log({ trip });
       const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
-      console.log({ companyID });
       if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
         console.log(companyID._id);
         const payload = {
@@ -332,9 +329,9 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           updatedData.forEach((row) => {
             if (row._id === _id) {
               if (row._isDualTrip > 0) {
-                row['_companyRate'] = amounts.companyDualAmount;
-                row['_vendorRate'] = amounts.vendorDualAmount;
-                row['_driverRate'] = amounts.driverDualAmount;
+                row['_companyRate'] = amounts.companyDualAmount !== 0 ? amounts.companyDualAmount / 2 : 0;
+                row['_vendorRate'] = amounts.vendorDualAmount !== 0 ? amounts.vendorDualAmount / 2 : 0;
+                row['_driverRate'] = amounts.driverDualAmount !== 0 ? amounts.driverDualAmount / 2 : 0;
               } else {
                 row['_companyRate'] = amounts.companyAmount;
                 row['_vendorRate'] = amounts.vendorAmount;
@@ -599,7 +596,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 )}
 
                 {/* Map over all zones */}
-                {zoneInfo.map((zone) => (
+                {zoneInfo?.map((zone) => (
                   <MenuItem key={zone._id} value={JSON.stringify(zone)}>
                     {zone.zoneName}
                   </MenuItem>
@@ -637,7 +634,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 )}
 
                 {/* Map over all zoneTypes, excluding the selected one */}
-                {row._zoneName.zoneType
+                {row._zoneName?.zoneType
                   .filter((zone) => zone._id !== value._id) // Exclude selected value if needed
                   .map((zone) => (
                     <MenuItem key={zone._id} value={JSON.stringify(zone)}>
@@ -677,7 +674,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over all cab options */}
-              {row._cab_options.map((cab) => (
+              {cabOptions?.map((cab) => (
                 <MenuItem key={cab._id} value={JSON.stringify(cab)}>
                   {cab.vehicleNumber}
                 </MenuItem>
@@ -714,7 +711,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over all cab options */}
-              {row._vehicleType_options.map((cab) => (
+              {vehicleTypeInfo.map((cab) => (
                 <MenuItem key={cab._id} value={JSON.stringify(cab)}>
                   {cab.vehicleTypeName}
                 </MenuItem>
@@ -748,7 +745,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over driverOptionsArray or _drivers_options */}
-              {row._drivers_options.map((driver) => (
+              {drivers.map((driver) => (
                 <MenuItem key={driver._id} value={JSON.stringify(driver)}>
                   {driver.userName}
                 </MenuItem>
