@@ -2,15 +2,18 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
+  Fab,
   Grid,
   IconButton,
   InputLabel,
   Stack,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import { Form, Formik, FormikProvider, useFormik } from 'formik';
@@ -28,6 +31,13 @@ import GenericSelect from 'components/select/GenericSelect';
 import { useSelector } from 'store';
 import FormikAutocomplete from 'components/autocomplete/AutoComplete';
 import NumericInput from 'components/textfield/NumericInput';
+import axiosServices from 'utils/axios';
+import CustomCircularLoader from 'components/CustomCircularLoader';
+import { addNewTrip, updateTrip } from 'store/slice/cabProvidor/tripSlice';
+import { formatDateUsingMoment } from 'utils/helper';
+import { FaSyncAlt } from 'react-icons/fa';
+import { alpha, useTheme } from '@mui/material/styles';
+import { ThemeMode } from 'config';
 
 const NUMERIC_INPUT_FIELD = {
   // guardPrice: {
@@ -126,8 +136,51 @@ const optionsForTripType = [
   { value: TRIP_TYPE.DROP, label: 'Drop' }
 ];
 
+const getInitialValues = (data) => {
+  console.log('data', data);
+  return {
+    tripId: data?.tripId || null,
+
+    companyID: data?.companyID || null,
+    tripDate: data?.tripDate ? new Date(data?.tripDate) : null,
+    tripTime: '',
+    tripType: data?.tripType || 0,
+
+    zoneNameID: data?.zoneNameID?._id || '',
+    zoneTypeID: data?.zoneTypeID?._id || null,
+    vehicleTypeID: data?.vehicleTypeID?._id || '',
+    vehicleNumber: data?.vehicleNumber?._id || '',
+    driverId: data?.driverId?._id || '',
+    location: data?.location || '',
+
+    guard: data?.guard || 0,
+
+    companyGuardPrice: data?.companyGuardPrice || 0,
+    companyRate: data?.companyRate || 0,
+    companyPenalty: data?.companyPenalty || 0,
+
+    vendorGuardPrice: data?.vendorGuardPrice || 0,
+    vendorRate: data?.vendorRate || 0,
+    vendorPenalty: data?.vendorPenalty || 0,
+
+    driverGuardPrice: data?.driverGuardPrice || 0,
+    driverRate: data?.driverRate || 0,
+    driverPenalty: data?.driverPenalty || 0,
+
+    addOnRate: data?.addOnRate || 0,
+
+    mcdCharge: data?.mcdCharge || 0,
+
+    tollCharge: data?.tollCharge || 0,
+    remarks: data?.remarks || ''
+  };
+};
+
 const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
   const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true); // Track loading state
 
   const zoneList = useSelector((state) => state.zoneName.zoneNames);
   const zoneTypeList = useSelector((state) => state.zoneType.zoneTypes);
@@ -138,10 +191,18 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   useEffect(() => {
     console.log('id', id);
 
-    function fetchDetails() {
+    async function fetchDetails() {
       try {
         // TODO : API call FOR GETTING DETAILS
         console.log('Api call for get details (At Trip Updating)');
+        // await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const response = await axiosServices.get(`/assignTrip/details/by?tripId=${id}`);
+        console.log(`🚀 ~ fetchDetails ~ response:`, response);
+
+        const data = response.data.data;
+        console.log('data = ', data);
+        setDetails(data);
       } catch (error) {
         console.log('Error :: fetchDetails =', error);
         dispatch(
@@ -155,11 +216,15 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
             close: true
           })
         );
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
       }
     }
 
     if (id) {
       fetchDetails();
+    } else {
+      setLoading(false); // Set loading to false after data is fetched
     }
   }, [id]);
 
@@ -167,11 +232,82 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
     try {
       alert('Form submitted');
 
+      if (id) {
+        // TODO : API call FOR UPDATING
+        const payload = {
+          data: {
+            companyID: values.companyID._id,
+            tripDate: formatDateUsingMoment(values.tripDate),
+            tripTime: values.tripTime,
+            tripType: values.tripType,
+            zoneNameID: values.zoneNameID._id,
+            zoneTypeID: values.zoneTypeID._id,
+            vehicleTypeID: values.vehicleTypeID._id,
+            vehicleNumber: values.vehicleNumber._id,
+            driverId: values.driverId._id,
+            location: values.location,
+            guard: values.guard,
+            companyGuardPrice: values.companyGuardPrice,
+            companyRate: values.companyRate,
+            companyPenalty: values.companyPenalty,
+            vendorGuardPrice: values.vendorGuardPrice,
+            vendorRate: values.vendorRate,
+            vendorPenalty: values.vendorPenalty,
+            driverGuardPrice: values.driverGuardPrice,
+            driverRate: values.driverRate,
+            driverPenalty: values.driverPenalty,
+            addOnRate: values.addOnRate,
+            mcdCharge: values.mcdCharge,
+            tollCharge: values.tollCharge,
+            remarks: values.remarks
+          }
+        };
+        await dispatch(updateTrip(payload)).unwrap();
+      } else {
+        // TODO : API call FOR ADDING
+        const payload = {
+          data: {
+            companyID: values.companyID._id,
+            tripDate: formatDateUsingMoment(values.tripDate),
+            tripTime: values.tripTime,
+            tripType: values.tripType,
+
+            zoneNameID: values.zoneNameID._id,
+            zoneTypeID: values.zoneTypeID?._id || null,
+            vehicleTypeID: values.vehicleTypeID._id,
+            vehicleNumber: values.vehicleNumber._id,
+            driverId: values.driverId._id,
+            location: values.location,
+
+            guard: values.guard,
+
+            companyGuardPrice: values.companyGuardPrice,
+            companyRate: values.companyRate,
+            companyPenalty: values.companyPenalty,
+
+            vendorGuardPrice: values.vendorGuardPrice,
+            vendorRate: values.vendorRate,
+            vendorPenalty: values.vendorPenalty,
+
+            driverGuardPrice: values.driverGuardPrice,
+            driverRate: values.driverRate,
+            driverPenalty: values.driverPenalty,
+
+            addOnRate: values.addOnRate,
+            mcdCharge: values.mcdCharge,
+            tollCharge: values.tollCharge,
+
+            remarks: values.remarks
+          }
+        };
+        await dispatch(addNewTrip(payload)).unwrap();
+      }
+
       resetForm();
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Trip added successfully',
+          message: `Trip ${id ? 'updated' : 'added'} successfully`,
           variant: 'alert',
           alert: {
             color: 'success'
@@ -188,83 +324,86 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   };
 
   const formik = useFormik({
-    initialValues: {
-      companyID: null,
-      // companyID: {
-      //   _id: '673747f2625e65ed39170463',
-      //   effectiveDate: '2024-09-05T00:00:00.000Z',
-      //   company_name: '12NovNewCompany69',
-      //   billingCycle: '15 days'
-      // },
+    // initialValues: {
+    //   companyID: null,
+    //   // companyID: {
+    //   //   _id: '673747f2625e65ed39170463',
+    //   //   effectiveDate: '2024-09-05T00:00:00.000Z',
+    //   //   company_name: '12NovNewCompany69',
+    //   //   billingCycle: '15 days'
+    //   // },
 
-      // companyID: {
-      //   companyContract: '',
-      //   _id: '665868063d44db9cf1622592',
-      //   company_name: 'IN TECHNOLOGIES'
-      // },
-      tripDate: null,
-      // tripDate: new Date("2023-01-01"),
-      tripTime: '',
-      // tripTime: '18:29',
-      tripType: 0,
-      // tripType: TRIP_TYPE.DROP,
+    //   // companyID: {
+    //   //   companyContract: '',
+    //   //   _id: '665868063d44db9cf1622592',
+    //   //   company_name: 'IN TECHNOLOGIES'
+    //   // },
+    //   tripDate: null,
+    //   // tripDate: new Date("2023-01-01"),
+    //   tripTime: '',
+    //   // tripTime: '18:29',
+    //   tripType: 0,
+    //   // tripType: TRIP_TYPE.DROP,
 
-      zoneNameID: '',
-      // zoneNameID: '6683a39f6b40c6fd23bdf10e',
+    //   zoneNameID: '',
+    //   // zoneNameID: '6683a39f6b40c6fd23bdf10e',
 
-      zoneTypeID: '',
-      // zoneTypeID: '67064e03b01e45d7dc31577f',
+    //   zoneTypeID: '',
+    //   // zoneTypeID: '67064e03b01e45d7dc31577f',
 
-      vehicleTypeID: '',
-      // vehicleTypeID: '66ea730fd326be54846fe25d',
+    //   vehicleTypeID: '',
+    //   // vehicleTypeID: '66ea730fd326be54846fe25d',
 
-      vehicleNumber: '',
-      // vehicleNumber: '66c5e12165a3fdb07835b284',
+    //   vehicleNumber: '',
+    //   // vehicleNumber: '66c5e12165a3fdb07835b284',
 
-      driverId: '',
-      // driverId: '66cd81f8fd138969b5fe2e78',
+    //   driverId: '',
+    //   // driverId: '66cd81f8fd138969b5fe2e78',
 
-      location: '',
-      // location: 'NSP',
+    //   location: '',
+    //   // location: 'NSP',
 
-      guard: 0,
-      // guardPrice: 0,
-      // guardPrice: 90,
+    //   guard: 0,
+    //   // guardPrice: 0,
+    //   // guardPrice: 90,
 
-      companyGuardPrice: 0,
-      // companyGuardPrice: 45,
-      companyRate: 0,
-      // companyRate: 136,
-      companyPenalty: 0,
-      // companyPenalty: 352,
+    //   companyGuardPrice: 0,
+    //   // companyGuardPrice: 45,
+    //   companyRate: 0,
+    //   // companyRate: 136,
+    //   companyPenalty: 0,
+    //   // companyPenalty: 352,
 
-      vendorGuardPrice: 0,
-      // vendorGuardPrice: 70,
-      vendorRate: 0,
-      // vendorRate: 86,
-      vendorPenalty: 0,
-      // vendorPenalty: 452,
+    //   vendorGuardPrice: 0,
+    //   // vendorGuardPrice: 70,
+    //   vendorRate: 0,
+    //   // vendorRate: 86,
+    //   vendorPenalty: 0,
+    //   // vendorPenalty: 452,
 
-      driverGuardPrice: 0,
-      // driverGuardPrice: 650,
-      driverRate: 0,
-      // driverRate: 40,
-      driverPenalty: 0,
-      // driverPenalty: 452,
+    //   driverGuardPrice: 0,
+    //   // driverGuardPrice: 650,
+    //   driverRate: 0,
+    //   // driverRate: 40,
+    //   driverPenalty: 0,
+    //   // driverPenalty: 452,
 
-      addOnRate: 0,
-      // addOnRate: 30,
+    //   addOnRate: 0,
+    //   // addOnRate: 30,
 
-      // penalty: 0,
-      // penalty: 115,
+    //   // penalty: 0,
+    //   // penalty: 115,
 
-      mcdCharge: 0,
-      // mcdCharge: 11,
+    //   mcdCharge: 0,
+    //   // mcdCharge: 11,
 
-      tollCharge: 0,
-      // tollCharge : 22,
-      remarks: ''
-    },
+    //   tollCharge: 0,
+    //   // tollCharge : 22,
+    //   remarks: ''
+    // },
+
+    initialValues: getInitialValues(details),
+    enableReinitialize: true,
     validationSchema,
     onSubmit
   });
@@ -301,6 +440,8 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
     formik.setFieldValue(fieldName, value === '' ? '' : Number(value));
   };
 
+  if (loading) return <CustomCircularLoader />;
+
   return (
     <>
       <FormikProvider value={formik}>
@@ -308,7 +449,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
           <Form onSubmit={formik.handleSubmit} noValidate style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <DialogTitle id="alert-dialog-title">
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h3">Add New Trip</Typography>
+                <Typography variant="h4">{id ? 'Edit' : 'Add'} New Trip</Typography>
                 <IconButton color="secondary" onClick={handleClose}>
                   <Add style={{ transform: 'rotate(45deg)', color: 'red' }} />
                 </IconButton>
@@ -332,25 +473,18 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           Company Name
                         </InputLabel>
 
-                        {/* <ConfigurableAutocomplete
-                          id="companyID"
-                          apiUrl="/company/getCompanyByName" // Replace with your actual API URL
-                          onChange={handleCompanySelection} // Handle selected item
-                          label="Search Company" // Input field label
-                          maxItems={3} // Limit the results to 3 items
-                          optionLabelKey="company_name" // Key to display from API response
-                          searchParam="filter"
-                          noOptionsText="No Company Found"
-                          placeHolderText="Type to search for company" // Pass placeholder text
-                          autoHighlight // Enable auto highlight
-                        /> */}
+                        {id ? (
+                          <Chip label={formik.values.companyID?.company_name} color="primary" />
+                        ) : (
+                          <>
+                            <SearchComponent setSelectedCompany={handleCompanySelection} value={formik.values.companyID} />
 
-                        <SearchComponent setSelectedCompany={handleCompanySelection} value={formik.values.companyID} />
-
-                        {formik.touched.companyID && formik.errors.companyID && (
-                          <Typography variant="caption" color="error">
-                            {formik.errors.companyID}
-                          </Typography>
+                            {formik.touched.companyID && formik.errors.companyID && (
+                              <Typography variant="caption" color="error">
+                                {formik.errors.companyID}
+                              </Typography>
+                            )}
+                          </>
                         )}
                       </Stack>
                     </Grid>
@@ -618,9 +752,25 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
 
                 {/* Company/Vendor/Driver Guard Price/Rate/Penalty */}
                 <Grid item xs={12}>
-                  <Typography variant="h5" gutterBottom>
-                    Rates, Penalties & Charges
-                  </Typography>
+                  <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 1 }}>
+                    <Typography variant="h5">Rates, Penalties & Charges</Typography>
+
+                    <Tooltip
+                      componentsProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                            opacity: 0.9
+                          }
+                        }
+                      }}
+                      title="Sync Rates"
+                    >
+                      <IconButton variant="contained" color="secondary">
+                        <FaSyncAlt />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
 
                   <Grid container spacing={1}>
                     {/* Company Guard Price */}

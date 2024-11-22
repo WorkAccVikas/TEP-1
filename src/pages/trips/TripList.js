@@ -66,6 +66,7 @@ import { fetchAllZoneTypes } from 'store/slice/cabProvidor/zoneTypeSlice';
 import { fetchAllVehicleTypesForAll } from 'store/slice/cabProvidor/vehicleTypeSlice';
 import { fetchAllDrivers, fetchDrivers1 } from 'store/slice/cabProvidor/driverSlice';
 import { fetchCab1 } from 'store/slice/cabProvidor/cabSlice';
+import { ThemeMode } from 'config';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -395,6 +396,9 @@ ReactTable.propTypes = {
 // ==============================|| TRIP - LIST ||============================== //
 
 const TripList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -672,7 +676,7 @@ const TripList = () => {
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          // console.log('row', row);
+          console.log('row', row);
 
           const [anchorEl, setAnchorEl] = useState(null);
           const [status, setStatus] = useState(null);
@@ -723,10 +727,36 @@ const TripList = () => {
           const openMenu = Boolean(anchorEl);
 
           return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
               <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
                 <More style={{ fontSize: '1.15rem' }} />
               </IconButton>
+
+              {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Edit"
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true); // Open the dialog for editing
+                      setId(row.original.tripId);
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              )}
+
               <Menu
                 id="fade-menu"
                 MenuListProps={{
@@ -877,7 +907,6 @@ const TripList = () => {
     []
   );
 
-  const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
   const widgetsData = [
