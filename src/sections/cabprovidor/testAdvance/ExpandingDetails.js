@@ -249,31 +249,81 @@ const ExpandingDetails = () => {
       //     );
       //   }
       // }
+      // {
+      //   Header: 'Actions',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     const handleToggle = () => {
+      //       // Only open the dialog if the status is not approved or rejected
+      //       if (row.original.isApproved !== 1 && row.original.isApproved !== 2) {
+      //         setAdvanceData(row.original);
+      //         handleAdd();
+      //       }
+      //     };
+
+      //     const getSwitchColor = () => {
+      //       if (row.original.isApproved === 1) return 'success'; // Green when approved
+      //       if (row.original.isApproved === 2) return 'error'; // Red when rejected
+      //       return 'default'; // Default color for pending
+      //     };
+
+      //     const getTooltipTitle = () => {
+      //       // Only show "Approve" if it's not already approved or rejected
+      //       if (row.original.isApproved === 1) return 'Approved'; // No action for already approved
+      //       if (row.original.isApproved === 2) return 'Rejected'; // No action for rejected
+      //       return 'Approve'; // Default for pending state
+      //     };
+
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
+      //         <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
+      //           <Tooltip
+      //             componentsProps={{
+      //               tooltip: {
+      //                 sx: {
+      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                   opacity: 0.9
+      //                 }
+      //               }
+      //             }}
+      //             title={getTooltipTitle()} // Conditional tooltip title
+      //           >
+      //             <Switch
+      //               checked={row.original.isApproved === 1 || row.original.isApproved === 2}
+      //               onChange={handleToggle}
+      //               color={getSwitchColor()}
+      //               disabled={row.original.isApproved === 1 || row.original.isApproved === 2} // Disable switch for approved/rejected
+      //             />
+      //           </Tooltip>
+      //         </WrapperButton>
+      //       </Stack>
+      //     );
+      //   }
+      // }
       {
         Header: 'Actions',
         disableSortBy: true,
         Cell: ({ row }) => {
           const handleToggle = () => {
-            // Only open the dialog if the status is not approved or rejected
-            if (row.original.isApproved !== 1 && row.original.isApproved !== 2) {
+            // Open the dialog only for pending or rejected statuses
+            if (row.original.isApproved === 0 || row.original.isApproved === 2) {
               setAdvanceData(row.original);
               handleAdd();
             }
           };
-
+      
           const getSwitchColor = () => {
             if (row.original.isApproved === 1) return 'success'; // Green when approved
-            if (row.original.isApproved === 2) return 'error'; // Red when rejected
-            return 'default'; // Default color for pending
+            if (row.original.isApproved === 2) return 'error';   // Red when rejected
+            return 'default';                                    // Default color for pending
           };
-
+      
           const getTooltipTitle = () => {
-            // Only show "Approve" if it's not already approved or rejected
-            if (row.original.isApproved === 1) return 'Approved'; // No action for already approved
-            if (row.original.isApproved === 2) return 'Rejected'; // No action for rejected
-            return 'Approve'; // Default for pending state
+            if (row.original.isApproved === 1) return 'Approved'; // Approved status
+            if (row.original.isApproved === 2) return 'Rejected'; // Rejected status
+            return 'Approve';                                     // Default for pending state
           };
-
+      
           return (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
               <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
@@ -281,7 +331,9 @@ const ExpandingDetails = () => {
                   componentsProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        backgroundColor: mode === ThemeMode.DARK
+                          ? theme.palette.grey[50]
+                          : theme.palette.grey[700],
                         opacity: 0.9
                       }
                     }
@@ -292,14 +344,14 @@ const ExpandingDetails = () => {
                     checked={row.original.isApproved === 1 || row.original.isApproved === 2}
                     onChange={handleToggle}
                     color={getSwitchColor()}
-                    disabled={row.original.isApproved === 1 || row.original.isApproved === 2} // Disable switch for approved/rejected
+                    disabled={row.original.isApproved === 1} // Disable switch for approved
                   />
                 </Tooltip>
               </WrapperButton>
             </Stack>
           );
         }
-      }
+      }      
     ],
     []
   );

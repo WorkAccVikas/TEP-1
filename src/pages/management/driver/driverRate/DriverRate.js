@@ -168,6 +168,7 @@ const DriverRate = () => {
   const handleSelectedDriverName = (vendorName) => {
     setSelectedDriverName(vendorName);
   };
+  
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -185,7 +186,7 @@ const DriverRate = () => {
     if (!selectedCompany || !driverID1) return;
 
     fetchdata();
-  }, [selectedCompany, driverID1]);
+  }, [selectedCompany, driverID1, updateKey]);
 
   //   console.log('driverList', driverList);
 

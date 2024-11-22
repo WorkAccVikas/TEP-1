@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Stack, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from '@mui/material';
+import { alpha, Stack, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo } from 'react';

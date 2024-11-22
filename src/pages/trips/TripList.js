@@ -52,7 +52,7 @@ import TripChart from 'components/cards/trips/TripChart';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
 import FormDialog from 'components/alertDialog/FormDialog';
-import { convertToDateUsingMoment, formatDateForApi, formattedDate } from 'utils/helper';
+import { convertToDateUsingMoment, formatDateForApi, formatDateUsingMoment, formattedDate } from 'utils/helper';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
 import { Link } from 'react-router-dom';
@@ -550,8 +550,8 @@ const TripList = () => {
       try {
         const response = await axiosServices.get('/assignTrip/all/trips/cabProvider', {
           params: {
-            startDate: formatDateForApi(startDate),
-            endDate: formatDateForApi(endDate)
+            startDate: formatDateUsingMoment(startDate),
+            endDate: formatDateUsingMoment(endDate)
           }
         });
         setData(response.data.data);
@@ -890,6 +890,7 @@ const TripList = () => {
 
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Roster', to: '/apps/roster/all-roster' },
     { title: 'Trips', to: '/apps/trips/list' }
   ];
 
