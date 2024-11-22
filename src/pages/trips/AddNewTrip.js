@@ -2,12 +2,15 @@ import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   Chip,
+  CircularProgress,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   Fab,
+  FormControlLabel,
   Grid,
   IconButton,
   InputLabel,
@@ -110,8 +113,18 @@ const validationSchema = Yup.object().shape({
     .required('Company is required'), // If required is mandatory.,
   tripDate: Yup.date().required('Trip date is required'),
   tripTime: Yup.string().required('Trip time is required'),
+  returnTripTime: Yup.string().when('dualTrip', (val, schema) => {
+    console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
+    if (val[0]) {
+      return Yup.string().required('Return trip time is required');
+    } else {
+      return Yup.string().notRequired();
+    }
+  }),
+
   tripType: Yup.number().required('Trip type is required'),
   zoneNameID: Yup.string().required('Zone name is required'),
+  zoneTypeID: Yup.string().required('Zone type is required'),
   vehicleTypeID: Yup.string().required('Vehicle type is required'),
   vehicleNumber: Yup.string().required('Vehicle number is required'),
   driverId: Yup.string().required('Driver is required'),
@@ -131,10 +144,20 @@ const TRIP_TYPE = {
   DROP: 2
 };
 
+const DUAL_TRIP = {
+  NO: 0,
+  YES: 1
+};
+
 const optionsForTripType = [
   { value: TRIP_TYPE.PICKUP, label: 'Pickup' },
   { value: TRIP_TYPE.DROP, label: 'Drop' }
 ];
+
+const DRIVER_TYPE = {
+  VENDOR_DRIVER: 1,
+  CAB_PROVIDER: 2
+};
 
 const getInitialValues = (data) => {
   console.log('data', data);
@@ -144,6 +167,7 @@ const getInitialValues = (data) => {
     companyID: data?.companyID || null,
     tripDate: data?.tripDate ? new Date(data?.tripDate) : null,
     tripTime: '',
+    returnTripTime: '',
     tripType: data?.tripType || 0,
 
     zoneNameID: data?.zoneNameID?._id || '',
@@ -154,6 +178,7 @@ const getInitialValues = (data) => {
     location: data?.location || '',
 
     guard: data?.guard || 0,
+    dualTrip: 0,
 
     companyGuardPrice: data?.companyGuardPrice || 0,
     companyRate: data?.companyRate || 0,
@@ -181,6 +206,9 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   const mode = theme.palette.mode;
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true); // Track loading state
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [driverType, setDriverType] = useState(0);
+  const [rateDetails, setRateDetails] = useState(null);
 
   const zoneList = useSelector((state) => state.zoneName.zoneNames);
   const zoneTypeList = useSelector((state) => state.zoneType.zoneTypes);
@@ -320,6 +348,17 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       handleRefetch();
     } catch (error) {
       console.log('Error :: onSubmit =', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
     }
   };
 
@@ -440,6 +479,119 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
     formik.setFieldValue(fieldName, value === '' ? '' : Number(value));
   };
 
+  const isSyncing =
+    !formik.values.companyID ||
+    !formik.values.zoneNameID ||
+    !formik.values.zoneTypeID ||
+    !formik.values.vehicleTypeID ||
+    !formik.values.driverId;
+  console.log('isSyncing = ', isSyncing);
+
+  const handleSyncRates = useCallback(async () => {
+    try {
+      // const payload = {
+      //   data: {
+      //     companyID: formik.values.companyID?._id,
+      //     vehicleTypeID: formik.values.vehicleTypeID,
+      //     zoneNameID: formik.values.zoneNameID,
+      //     zoneTypeID: formik.values.zoneTypeID,
+      //     driverId: formik.values.driverId
+      //   }
+      // };
+
+      // const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+      // const data = response.data.data;
+      // console.log(`🚀 ~ handleSyncRates ~ response:`, response);
+
+      console.log('API call for fetch Rates .........');
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      setSyncLoading(true);
+      const data = {
+        driverGuardPrice: 150,
+        driverAmount: 600,
+        driverDualAmount: 900,
+
+        vendorGuardPrice: null,
+        vendorAmount: null,
+        vendorDualAmount: null,
+
+        companyGuardPrice: 200,
+        companyAmount: 700,
+        companyDualAmount: null
+      };
+
+      setRateDetails(data);
+
+      if (typeof data.vendorGuardPrice !== 'object' && typeof data.vendorAmount !== 'object' && typeof data.vendorDualAmount !== 'object') {
+        console.log('Vendor Driver');
+        formik.setFieldValue('vendorGuardPrice', data.vendorGuardPrice);
+        formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount); // data.driverAmount);
+
+        setDriverType(DRIVER_TYPE.VENDOR_DRIVER); // Vendor Driver
+      } else {
+        console.log('Cab Provider Driver');
+        formik.setFieldValue('driverGuardPrice', data.driverGuardPrice);
+        formik.setFieldValue('driverRate', formik.values.dualTrip ? (data.driverDualAmount || 0) / 2 : data.driverAmount); // data.driverAmount);
+
+        setDriverType(DRIVER_TYPE.CAB_PROVIDER); // Cab Provider Driver
+      }
+    } catch (error) {
+      console.log('Error :: handleSyncRates = ', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setSyncLoading(false);
+    }
+  }, [formik]);
+
+  const handleGuardChange = (event) => {
+    const val = event.target.checked;
+    console.log('🚀 ~ handleGuardChange ~ val:', val);
+    formik.setFieldValue('guard', val ? 1 : 0);
+
+    if (!rateDetails) return;
+
+    if (!val) {
+      formik.setFieldValue('companyGuardPrice', 0);
+      formik.setFieldValue('vendorGuardPrice', 0);
+      formik.setFieldValue('driverGuardPrice', 0);
+    } else {
+      formik.setFieldValue('companyGuardPrice', rateDetails.companyGuardPrice || 0);
+      formik.setFieldValue('vendorGuardPrice', rateDetails.vendorGuardPrice || 0);
+      formik.setFieldValue('driverGuardPrice', rateDetails.driverGuardPrice || 0);
+    }
+  };
+
+  const handleDualTripChange = (event) => {
+    const val = event.target.checked;
+    console.log('🚀 ~ handleGuardChange ~ val:', val);
+    formik.setFieldValue('dualTrip', val ? 1 : 0);
+
+    if (!rateDetails) return;
+
+    if (!val) {
+      console.log('rateDeals = ', rateDetails);
+      formik.setFieldValue('driverRate', rateDetails.driverAmount);
+      formik.setFieldValue('vendorRate', rateDetails.vendorAmount);
+      formik.setFieldValue('companyRate', rateDetails.companyAmount);
+    } else {
+      formik.setFieldValue('driverRate', (rateDetails.driverDualAmount || 0) / 2);
+      formik.setFieldValue('vendorRate', (rateDetails.vendorDualAmount || 0) / 2);
+      formik.setFieldValue('companyRate', (rateDetails.companyDualAmount || 0) / 2);
+    }
+  };
+
   if (loading) return <CustomCircularLoader />;
 
   return (
@@ -536,6 +688,31 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </Stack>
                     </Grid>
 
+                    {formik.values.dualTrip === DUAL_TRIP.YES && (
+                      <>
+                        {/* Trip Time */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="tripTime" required>
+                              Dual Trip Time
+                            </InputLabel>
+
+                            <TextField
+                              id="returnTripTime"
+                              name="returnTripTime"
+                              type="time"
+                              value={formik.values.returnTripTime}
+                              onChange={formik.handleChange}
+                              error={formik.touched.returnTripTime && Boolean(formik.errors.returnTripTime)}
+                              helperText={formik.touched.returnTripTime && formik.errors.returnTripTime}
+                              fullWidth
+                              autoComplete="returnTripTime"
+                            />
+                          </Stack>
+                        </Grid>
+                      </>
+                    )}
+
                     {/* Trip Type */}
                     <Grid item xs={2}>
                       <Stack gap={1}>
@@ -562,6 +739,39 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                         <InputLabel htmlFor="location">Location</InputLabel>
 
                         <TextField id="location" name="location" type="text" placeholder="Location" {...formik.getFieldProps('location')} />
+                      </Stack>
+                    </Grid>
+
+                    {/* Guard & Dual Trip */}
+                    <Grid item xs={2}>
+                      <Stack gap={1} direction="row">
+                        {/* Guard */}
+                        <FormControlLabel
+                          value="bottom"
+                          control={
+                            <Checkbox
+                              name="guard"
+                              checked={formik.values.guard} // Bind to Formik state
+                              onChange={handleGuardChange} // Update Formik state
+                            />
+                          }
+                          label="Guard"
+                          labelPlacement="top"
+                        />
+
+                        {/* Dual Trip */}
+                        <FormControlLabel
+                          value="bottom"
+                          control={
+                            <Checkbox
+                              name="guard"
+                              checked={formik.values.dualTrip} // Bind to Formik state
+                              onChange={handleDualTripChange} // Update Formik state
+                            />
+                          }
+                          label="Dual Trip"
+                          labelPlacement="top"
+                        />
                       </Stack>
                     </Grid>
                   </Grid>
@@ -630,6 +840,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                             .sort((a, b) => a.zoneTypeName.localeCompare(b.zoneTypeName))}
                           getOptionLabel={(option) => option.zoneTypeName}
                           isOptionEqualToValue={(option, value) => option._id === value._id} // Ensures proper matching
+                          disableClearable
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -765,10 +976,17 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                         }
                       }}
                       title="Sync Rates"
+                      // disableFocusListener
                     >
-                      <IconButton variant="contained" color="secondary">
-                        <FaSyncAlt />
-                      </IconButton>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        endIcon={syncLoading ? <CircularProgress /> : <FaSyncAlt />}
+                        disabled={isSyncing}
+                        onClick={handleSyncRates}
+                      >
+                        Sync Rates
+                      </Button>
                     </Tooltip>
                   </Stack>
 
@@ -786,6 +1004,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           onBlur={handleBlurField('companyGuardPrice')}
                           error={formik.touched.companyGuardPrice && Boolean(formik.errors.companyGuardPrice)}
                           helperText={formik.touched.companyGuardPrice && formik.errors.companyGuardPrice}
+                          disabled
                         />
                       </Stack>
                     </Grid>
@@ -803,6 +1022,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           onBlur={handleBlurField('companyRate')}
                           error={formik.touched.companyRate && Boolean(formik.errors.companyRate)}
                           helperText={formik.touched.companyRate && formik.errors.companyRate}
+                          disabled
                         />
                       </Stack>
                     </Grid>
@@ -824,107 +1044,119 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </Stack>
                     </Grid>
 
-                    {/* Vendor Guard Price */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="vendorGuardPrice">Vendor Guard Price</InputLabel>
+                    {driverType === DRIVER_TYPE.VENDOR_DRIVER && (
+                      <>
+                        {/* Vendor Guard Price */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="vendorGuardPrice">Vendor Guard Price</InputLabel>
 
-                        <NumericInput
-                          id="vendorGuardPrice"
-                          fieldName="vendorGuardPrice"
-                          value={formik.values.vendorGuardPrice}
-                          onChange={handleChangeNumeric('vendorGuardPrice')}
-                          onBlur={handleBlurField('vendorGuardPrice')}
-                          error={formik.touched.vendorGuardPrice && Boolean(formik.errors.vendorGuardPrice)}
-                          helperText={formik.touched.vendorGuardPrice && formik.errors.vendorGuardPrice}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="vendorGuardPrice"
+                              fieldName="vendorGuardPrice"
+                              value={formik.values.vendorGuardPrice}
+                              onChange={handleChangeNumeric('vendorGuardPrice')}
+                              onBlur={handleBlurField('vendorGuardPrice')}
+                              error={formik.touched.vendorGuardPrice && Boolean(formik.errors.vendorGuardPrice)}
+                              helperText={formik.touched.vendorGuardPrice && formik.errors.vendorGuardPrice}
+                              disabled
+                            />
+                          </Stack>
+                        </Grid>
 
-                    {/* Vendor Rate */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="vendorRate">Vendor Rate</InputLabel>
+                        {/* Vendor Rate */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="vendorRate">Vendor Rate</InputLabel>
 
-                        <NumericInput
-                          id="vendorRate"
-                          fieldName="vendorRate"
-                          value={formik.values.vendorRate}
-                          onChange={handleChangeNumeric('vendorRate')}
-                          onBlur={handleBlurField('vendorRate')}
-                          error={formik.touched.vendorRate && Boolean(formik.errors.vendorRate)}
-                          helperText={formik.touched.vendorRate && formik.errors.vendorRate}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="vendorRate"
+                              fieldName="vendorRate"
+                              value={formik.values.vendorRate}
+                              onChange={handleChangeNumeric('vendorRate')}
+                              onBlur={handleBlurField('vendorRate')}
+                              error={formik.touched.vendorRate && Boolean(formik.errors.vendorRate)}
+                              helperText={formik.touched.vendorRate && formik.errors.vendorRate}
+                              disabled
+                            />
+                          </Stack>
+                        </Grid>
 
-                    {/* Vendor Penalty */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="vendorPenalty">Vendor Penalty</InputLabel>
+                        {/* Vendor Penalty */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="vendorPenalty">Vendor Penalty</InputLabel>
 
-                        <NumericInput
-                          id="vendorPenalty"
-                          fieldName="vendorPenalty"
-                          value={formik.values.vendorPenalty}
-                          onChange={handleChangeNumeric('vendorPenalty')}
-                          onBlur={handleBlurField('vendorPenalty')}
-                          error={formik.touched.vendorPenalty && Boolean(formik.errors.vendorPenalty)}
-                          helperText={formik.touched.vendorPenalty && formik.errors.vendorPenalty}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="vendorPenalty"
+                              fieldName="vendorPenalty"
+                              value={formik.values.vendorPenalty}
+                              onChange={handleChangeNumeric('vendorPenalty')}
+                              onBlur={handleBlurField('vendorPenalty')}
+                              error={formik.touched.vendorPenalty && Boolean(formik.errors.vendorPenalty)}
+                              helperText={formik.touched.vendorPenalty && formik.errors.vendorPenalty}
+                            />
+                          </Stack>
+                        </Grid>
+                      </>
+                    )}
 
-                    {/* Driver Guard Price */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="driverGuardPrice">Driver Guard Price</InputLabel>
+                    {driverType === DRIVER_TYPE.CAB_PROVIDER && (
+                      <>
+                        {/* Driver Guard Price */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="driverGuardPrice">Driver Guard Price</InputLabel>
 
-                        <NumericInput
-                          id="driverGuardPrice"
-                          fieldName="driverGuardPrice"
-                          value={formik.values.driverGuardPrice}
-                          onChange={handleChangeNumeric('driverGuardPrice')}
-                          onBlur={handleBlurField('driverGuardPrice')}
-                          error={formik.touched.driverGuardPrice && Boolean(formik.errors.driverGuardPrice)}
-                          helperText={formik.touched.driverGuardPrice && formik.errors.driverGuardPrice}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="driverGuardPrice"
+                              fieldName="driverGuardPrice"
+                              value={formik.values.driverGuardPrice}
+                              onChange={handleChangeNumeric('driverGuardPrice')}
+                              onBlur={handleBlurField('driverGuardPrice')}
+                              error={formik.touched.driverGuardPrice && Boolean(formik.errors.driverGuardPrice)}
+                              helperText={formik.touched.driverGuardPrice && formik.errors.driverGuardPrice}
+                              disabled
+                            />
+                          </Stack>
+                        </Grid>
 
-                    {/* Driver Rate */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="driverRate">Driver Rate</InputLabel>
+                        {/* Driver Rate */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="driverRate">Driver Rate</InputLabel>
 
-                        <NumericInput
-                          id="driverRate"
-                          fieldName="driverRate"
-                          value={formik.values.driverRate}
-                          onChange={handleChangeNumeric('driverRate')}
-                          onBlur={handleBlurField('driverRate')}
-                          error={formik.touched.driverRate && Boolean(formik.errors.driverRate)}
-                          helperText={formik.touched.driverRate && formik.errors.driverRate}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="driverRate"
+                              fieldName="driverRate"
+                              value={formik.values.driverRate}
+                              onChange={handleChangeNumeric('driverRate')}
+                              onBlur={handleBlurField('driverRate')}
+                              error={formik.touched.driverRate && Boolean(formik.errors.driverRate)}
+                              helperText={formik.touched.driverRate && formik.errors.driverRate}
+                              disabled
+                            />
+                          </Stack>
+                        </Grid>
 
-                    {/* Driver Penalty */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="driverPenalty">Driver Penalty</InputLabel>
+                        {/* Driver Penalty */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="driverPenalty">Driver Penalty</InputLabel>
 
-                        <NumericInput
-                          id="driverPenalty"
-                          fieldName="driverPenalty"
-                          value={formik.values.driverPenalty}
-                          onChange={handleChangeNumeric('driverPenalty')}
-                          onBlur={handleBlurField('driverPenalty')}
-                          error={formik.touched.driverPenalty && Boolean(formik.errors.driverPenalty)}
-                          helperText={formik.touched.driverPenalty && formik.errors.driverPenalty}
-                        />
-                      </Stack>
-                    </Grid>
+                            <NumericInput
+                              id="driverPenalty"
+                              fieldName="driverPenalty"
+                              value={formik.values.driverPenalty}
+                              onChange={handleChangeNumeric('driverPenalty')}
+                              onBlur={handleBlurField('driverPenalty')}
+                              error={formik.touched.driverPenalty && Boolean(formik.errors.driverPenalty)}
+                              helperText={formik.touched.driverPenalty && formik.errors.driverPenalty}
+                            />
+                          </Stack>
+                        </Grid>
+                      </>
+                    )}
                   </Grid>
                 </Grid>
 
