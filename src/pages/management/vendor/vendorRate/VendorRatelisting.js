@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,9 +14,6 @@ import {
   Stack,
   TextField
 } from '@mui/material';
-import Header from 'components/tables/genericTable/Header';
-import WrapperButton from 'components/common/guards/WrapperButton';
-import { Add } from 'iconsax-react';
 import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import VendorRateTable from './VendorRateTable';
@@ -25,8 +21,6 @@ import { useLocation, useNavigate } from 'react-router';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
-import { color } from 'framer-motion';
-import { bgcolor } from '@mui/system';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
 
@@ -183,7 +177,7 @@ const VendorRatelisting = () => {
     if (!selectedCompany || !selectedVendorID) return;
 
     fetchdata();
-  }, [selectedCompany, selectedVendorID]);
+  }, [selectedCompany, selectedVendorID, updateKey]);
 
   const handleAddRate = () => {
     navigate('/management/vendor/add-vendor-rate');
