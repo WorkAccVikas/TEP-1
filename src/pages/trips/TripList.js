@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback, forwardRef } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -24,7 +24,8 @@ import {
   Button,
   CircularProgress,
   Dialog,
-  Tooltip
+  Tooltip,
+  Slide
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -65,6 +66,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import CustomAlert from './alerts/TripStatusChange';
 import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
+
+const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
+
 
 const TRIP_STATUS = {
   PENDING: 1,
@@ -365,7 +369,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 
   const handleTripGeneration = () => {
     console.log({ selected });
-    // navigate('/apps/invoices/test', { state: { tripData: selected } });
+    navigate('/apps/invoices/test', { state: { tripData: selected } });
   };
 
   const handleCloseForRemove = useCallback(() => {
@@ -1364,6 +1368,7 @@ const TripList = () => {
           fullWidth
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          TransitionComponent={Transition}
         >
           <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
         </Dialog>

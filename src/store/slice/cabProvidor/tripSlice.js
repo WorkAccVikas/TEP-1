@@ -16,7 +16,7 @@ const initialState = {
 export const addNewTrip = createAsyncThunk('trips/addNewTrip', async (payload, { rejectWithValue }) => {
   try {
     console.log(`🚀 ~ addNewTrip ~ payload:`, payload);
-    const response = await axios.post('/trip/add', payload);
+    const response = await axios.post('/assignTrip/single/trip', payload);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
