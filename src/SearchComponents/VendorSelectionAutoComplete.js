@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Grid } from '@mui/material';
+import { Autocomplete, Checkbox, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
-import { SearchNormal1 } from 'iconsax-react';
 
-const VendorFilter = ({ setFilterOptions, sx, value }) => {
+const VendorSelection = ({ sx, value, setSelectedOptions }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
@@ -44,8 +42,7 @@ const VendorFilter = ({ setFilterOptions, sx, value }) => {
     if (!query) return;
 
     if (cache[query]) {
-      // Use cached results if available
-      setOptions(cache[query]);
+      setOptions(cache[query]); // Use cached results if available
       return;
     }
 
@@ -65,51 +62,47 @@ const VendorFilter = ({ setFilterOptions, sx, value }) => {
     };
 
     const debounceFetch = setTimeout(fetchOptions, 300); // Debounce API call
-
     return () => clearTimeout(debounceFetch); // Cleanup debounce timer
   }, [query, cache]);
 
   return (
     <Grid item xs={12}>
       <Autocomplete
-        id="vendor-filter"
+        multiple
+        id="checkboxes-tags-demo"
+        options={options}
+        disableCloseOnSelect
         open={open}
-        value={value}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
-        isOptionEqualToValue={(option, value) => option.vendorCompanyName === value.vendorCompanyName}
-        getOptionLabel={(option) => option.vendorCompanyName || ''}
-        options={options}
-        loading={loading}
-        // onInputChange={(event, newInputValue) => setQuery(newInputValue)} // Update query state
-        sx={sx}
+        getOptionLabel={(option) => option.vendorCompanyName}
+        onInputChange={(event, newInputValue) => setQuery(newInputValue)}
         onChange={(event, newValue) => {
-          setFilterOptions((prevState) => ({
-            ...prevState,
-            selectedVendor: newValue || {} // Reset to empty object if cleared
-          }));
+          setSelectedOptions(newValue || []); // Set the selected options
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder="Filter Vendor"
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <SearchNormal1 size={14} />
-            ),
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
-            }}
-          />
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox style={{ marginRight: 8 }} checked={selected} />
+            {option.vendorCompanyName}
+          </li>
         )}
+        renderInput={(params) => <TextField {...params} placeholder="Select Vendor/Vendors" />}
+        sx={{
+          '& .MuiOutlinedInput-root': { p: 1 },
+          '& .MuiAutocomplete-tag': {
+            bgcolor: 'primary.lighter',
+            border: '1px solid',
+            borderColor: 'primary.light',
+            '& .MuiSvgIcon-root': {
+              color: 'primary.main',
+              '&:hover': { color: 'primary.dark' }
+            }
+          },
+          ...sx // Allow custom styles via props
+        }}
       />
     </Grid>
   );
 };
 
-export default VendorFilter;
+export default VendorSelection;

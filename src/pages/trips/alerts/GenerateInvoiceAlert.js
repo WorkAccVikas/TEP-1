@@ -16,14 +16,16 @@ import { useEffect, useState } from 'react';
 export default function GenerateInvoiceAlert({ title, open, handleClose, handleTripGeneration, tripData }) {
   console.log({ tripData });
   const [isEligible, setIsEligible] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (Array.isArray(tripData) && tripData.length > 0) {
       const firstCompanyId = tripData[0].companyID?._id;
       const allSame = tripData.every((item) => item.companyID?._id === firstCompanyId);
       setIsEligible(allSame);
+      setLoading(false);
     } else {
       setIsEligible(false);
+      setLoading(false);
     }
   }, [tripData]);
 
@@ -38,50 +40,52 @@ export default function GenerateInvoiceAlert({ title, open, handleClose, handleT
       aria-labelledby="column-delete-title"
       aria-describedby="column-delete-description"
     >
-      <DialogContent sx={{ mt: 2, my: 1 }}>
-        {isEligible ? (
-          <Stack alignItems="center" spacing={1.5}>
-            <Avatar color="primary" sx={{ width: 72, height: 72, fontSize: '1.75rem' }}>
-              <Receipt21 variant="Bold" />
-            </Avatar>
-            <Stack spacing={2}>
-              <Typography variant="h4" align="center">
-                Generate Invoice for {tripData.length} trip/trips for <br />
-                {tripData[0]?.companyID?.company_name}
-              </Typography>
+      {!loading && (
+        <DialogContent sx={{ mt: 2, my: 1 }}>
+          {isEligible ? (
+            <Stack alignItems="center" spacing={1.5}>
+              <Avatar color="primary" sx={{ width: 72, height: 72, fontSize: '1.75rem' }}>
+                <Receipt21 variant="Bold" />
+              </Avatar>
+              <Stack spacing={2}>
+                <Typography variant="h4" align="center">
+                  Generate Invoice for {tripData.length} trip/trips for <br />
+                  {tripData[0]?.companyID?.company_name}
+                </Typography>
 
-              <Typography align="center">{"You will be redirected to Invoice"}</Typography>
-            </Stack>
+                <Typography align="center">{'You will be redirected to Invoice'}</Typography>
+              </Stack>
 
-            <Stack direction="row" spacing={2} sx={{ width: 1 }}>
-              <Button fullWidth onClick={(e) => handleClose(e, false)} color="secondary" variant="outlined">
-                Cancel
-              </Button>
-              <Button fullWidth color="primary" variant="contained" onClick={handleTripGeneration} autoFocus>
-                Proceed
-              </Button>
+              <Stack direction="row" spacing={2} sx={{ width: 1 }}>
+                <Button fullWidth onClick={(e) => handleClose(e, false)} color="secondary" variant="outlined">
+                  Cancel
+                </Button>
+                <Button fullWidth color="primary" variant="contained" onClick={handleTripGeneration} autoFocus>
+                  Proceed
+                </Button>
+              </Stack>
             </Stack>
-          </Stack>
-        ) : (
-          <Stack alignItems="center" spacing={1.5}>
-            <Avatar color="warning" sx={{ width: 72, height: 72, fontSize: '1.75rem' }}>
-              <Forbidden2 variant="Bold" />
-            </Avatar>
-            <Stack spacing={2}>
-              <Typography variant="h4" align="center">
-                Trips with multiple companies selected
-              </Typography>
-              <Typography align="center">{'Please select trips with same companies for Inovice Generation'}</Typography>
-            </Stack>
+          ) : (
+            <Stack alignItems="center" spacing={1.5}>
+              <Avatar color="warning" sx={{ width: 72, height: 72, fontSize: '1.75rem' }}>
+                <Forbidden2 variant="Bold" />
+              </Avatar>
+              <Stack spacing={2}>
+                <Typography variant="h4" align="center">
+                  Trips with multiple companies selected
+                </Typography>
+                <Typography align="center">{'Please select trips with same companies for Inovice Generation'}</Typography>
+              </Stack>
 
-            <Stack direction="row" spacing={2} sx={{ width: 1 }}>
-              <Button fullWidth onClick={(e) => handleClose(e, false)} color="secondary" variant="outlined">
-                Dismiss
-              </Button>
+              <Stack direction="row" spacing={2} sx={{ width: 1 }}>
+                <Button fullWidth onClick={(e) => handleClose(e, false)} color="secondary" variant="outlined">
+                  Dismiss
+                </Button>
+              </Stack>
             </Stack>
-          </Stack>
-        )}
-      </DialogContent>
+          )}
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

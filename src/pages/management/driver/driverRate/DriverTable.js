@@ -39,8 +39,10 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, loading, setUpdateK
   const handleDelete = async () => {
     try {
       const response = await axiosServices.put(`/cabRateMasterDriver/single/delete`, {
-        _id: deleteId,
-        vehicleTypeId: vehicleTypeId
+        data: {
+          _id: deleteId,
+          vehicleTypeId: vehicleTypeId
+        }
       });
 
       console.log('response', response);

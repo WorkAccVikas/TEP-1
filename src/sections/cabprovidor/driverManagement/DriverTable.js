@@ -335,7 +335,6 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         accessor: 'progress',
         Cell: ({ row, value }) => {
           const progessValue = Math.floor(Math.random() * 101);
-          console.log(row);
           return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
       },

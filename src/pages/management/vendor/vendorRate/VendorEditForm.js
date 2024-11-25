@@ -6,9 +6,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { openSnackbar } from 'store/reducers/snackbar';
 import * as yup from 'yup';
+import axiosServices from 'utils/axios';
 
 const VendorEditForm = ({ vendorEdit, onCancel, updateKey, setUpdateKey }) => {
-
   function restructureObject(obj) {
     return Object.entries(obj).reduce((acc, [key, value]) => {
       acc[key] = value === 0 ? null : value;
@@ -17,12 +17,12 @@ const VendorEditForm = ({ vendorEdit, onCancel, updateKey, setUpdateKey }) => {
   }
 
   const CustomerSchema = yup.object().shape({
-    zoneName: yup
-      .string()
-      .required('Zone Name is required') // Required field validation
-      .min(3, 'Zone Name must be at least 3 characters') // Minimum length validation
-      .max(50, 'Zone Name cannot exceed 50 characters') // Maximum length validation
-    // zoneDescription: yup
+    // zoneName: yup
+    //   .string()
+    //   .required('Zone Name is required') // Required field validation
+    //   .min(3, 'Zone Name must be at least 3 characters') // Minimum length validation
+    //   .max(50, 'Zone Name cannot exceed 50 characters') // Maximum length validation
+    // // zoneDescription: yup
     //   .string()
     //   .required('Zone Description is required') // Required field validation
     //   .min(5, 'Zone Description must be at least 5 characters') // Minimum length validation
@@ -40,55 +40,45 @@ const VendorEditForm = ({ vendorEdit, onCancel, updateKey, setUpdateKey }) => {
     },
     validationSchema: CustomerSchema,
     enableReinitialize: true,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { resetForm }) => {
       try {
-        // const resultAction = await dispatch(
-        //   updateZoneName({
-        //     data: {
-        //       _id: _id,
-        //       vehicleTypeId: vehicleTypeId,
-        //       rate: values.amount,
-        //       dualTripRate: values.dualTripAmount,
-        //       guardPrice: values.guardPrice
-        //     }
-        //   })
-        // );
+        const response = await axiosServices.put('/cabRateMaster/single/edit', {
+          data: {
+            _id: vendorEdit._id,
+            vehicleTypeId: vendorEdit.VehicleTypeName._id,
+            rate: values.amount,
+            dualTripRate: values.dualTripAmount,
+            guardPrice: values.guardPrice
+          }
+        });
 
-        // if (updateZoneName.fulfilled.match(resultAction)) {
-        //   setUpdateKey(updateKey + 1);
-        //   dispatch(
-        //     openSnackbar({
-        //       open: true,
-        //       message: resultAction.payload?.message || 'Driver Rates updated successfully.',
-        //       variant: 'alert',
-        //       alert: {
-        //         color: 'success'
-        //       },
-        //       close: false
-        //     })
-        //   );
-        //   onCancel();
-        // } else {
-        //   dispatch(
-        //     openSnackbar({
-        //       open: true,
-        //       message: resultAction.payload?.message || 'Error updating Driver Rates',
-        //       variant: 'alert',
-        //       alert: {
-        //         color: 'error'
-        //       },
-        //       close: true
-        //     })
-        //   );
-        // }
+        console.log('response', response);
 
-        console.log('formik.values', restructureObject(formik.values));
+        if (response.status === 200) {
+          setUpdateKey(updateKey + 1);
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: response?.data?.message || 'Vendor Rates updated successfully.',
+              variant: 'alert',
+              alert: {
+                color: 'success'
+              },
+              close: false
+            })
+          );
+          // Reset the form to initial values
+          resetForm();
+          onCancel();
+        }
+
+        // console.log('formik.values', restructureObject(formik.values));
       } catch (error) {
         console.error(error);
         dispatch(
           openSnackbar({
             open: true,
-            message: 'An error occurred. Please try again.',
+            message: error?.response?.data?.message || 'An error occurred. Please try again.',
             variant: 'alert',
             alert: {
               color: 'error'

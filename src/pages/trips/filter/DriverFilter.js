@@ -3,6 +3,7 @@ import { Autocomplete, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
+import { SearchNormal1 } from 'iconsax-react';
 
 const DriverFilter = ({ setFilterOptions, sx, value }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
@@ -10,7 +11,6 @@ const DriverFilter = ({ setFilterOptions, sx, value }) => {
   const [open, setOpen] = useState(false); // Tracks dropdown open state
   const [query, setQuery] = useState(''); // Tracks input query
   const [cache, setCache] = useState({}); // Cache for query results
-
   // Fetch default options when the dropdown is opened
   useEffect(() => {
     const fetchDefaultOptions = async () => {
@@ -81,7 +81,7 @@ const DriverFilter = ({ setFilterOptions, sx, value }) => {
         getOptionLabel={(option) => option.userName || ''}
         options={options}
         loading={loading}
-        onInputChange={(event, newInputValue) => setQuery(newInputValue)} // Update query state
+        // onInputChange={(event, newInputValue) => setQuery(newInputValue)} // Update query state
         sx={sx}
         onChange={(event, newValue) => {
           setFilterOptions((prevState) => ({
@@ -95,6 +95,9 @@ const DriverFilter = ({ setFilterOptions, sx, value }) => {
             placeholder="Filter Driver"
             InputProps={{
               ...params.InputProps,
+              startAdornment: (
+                <SearchNormal1 size={14} />
+            ),
               endAdornment: (
                 <>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}

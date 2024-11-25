@@ -3,6 +3,7 @@ import { Autocomplete, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
+import { SearchNormal1 } from 'iconsax-react';
 
 const CompanyFilter = ({ setFilterOptions, sx, value }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
@@ -100,6 +101,9 @@ const CompanyFilter = ({ setFilterOptions, sx, value }) => {
             placeholder="Filter Company"
             InputProps={{
               ...params.InputProps,
+              startAdornment: (
+                  <SearchNormal1 size={14} />
+              ),
               endAdornment: (
                 <>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}

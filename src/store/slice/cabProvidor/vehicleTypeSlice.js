@@ -25,7 +25,7 @@ const API = {
 
 export const fetchAllVehicleTypesForAll = createAsyncThunk('vehicleTypes/fetchAll1', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get('/vehicleType/for/adding/vehicles');
+    const response = await axios.get('/vehicleType');
     return response?.data?.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);

@@ -72,6 +72,12 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         SubCell: () => null
       },
       {
+        Header: '#',
+        accessor: 'id',
+        className: 'cell-center',
+        Cell: ({ row }) => <span>{row.index + 1}</span> // Use row.index to display incremental number
+      },
+      {
         Header: 'Company Name',
         accessor: 'company_name',
         Cell: ({ row, value }) => {
@@ -170,7 +176,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
                   })
                 );
               }
-              dispatch(fetchCompanies({page, limit}));
+              dispatch(fetchCompanies({ page, limit }));
               setStatus(newStatus);
               setOpenDialog(false);
             } catch (error) {

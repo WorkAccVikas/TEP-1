@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect, memo, useRef } from 'react';
-import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, Box, TextField } from '@mui/material';
 import moment from 'moment';
 import { Calendar } from 'iconsax-react';
 import DateRangePickerDialog from 'components/DateRange/DateRangePickerDialog';
@@ -32,7 +32,6 @@ const DateRangeSelect = memo(
     prevRange,
     availableRanges
   }) => {
-
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     const predefinedDateRanges = {
@@ -67,12 +66,12 @@ const DateRangeSelect = memo(
         end: moment().subtract(1, 'month').endOf('month')
       },
       [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-        label: 'This Month',
+        label: 'Current Month',
         start: moment().startOf('month'),
         end: moment()
       },
-      
-      [DATE_RANGE_OPTIONS.CUSTOM]: { label1: 'Custom Range' }
+
+      [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Select Dates' }
     };
 
     // Helper to determine which range the current start and end dates fall into
@@ -100,7 +99,7 @@ const DateRangeSelect = memo(
 
     const handleRangeSelection = (event) => {
       const range = event.target.value;
-      console.log({range})
+      console.log({ range });
       setSelectedRange(range);
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
@@ -126,10 +125,12 @@ const DateRangeSelect = memo(
       setSelectedRange(!flag ? prevRange : DATE_RANGE_OPTIONS.CUSTOM);
     };
 
-
-    const selectedRangeLabel = predefinedDateRanges[selectedRange]?.label || `(${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(
-      FORMAT_DATE
-    )})`;
+    const selectedRangeLabel =
+      predefinedDateRanges[selectedRange]?.label === 'Select Dates'
+        ? `${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(FORMAT_DATE)}`
+        : predefinedDateRanges[selectedRange]?.label
+        ? predefinedDateRanges[selectedRange]?.label
+        : `${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(FORMAT_DATE)}`;
     return (
       <>
         <FormControl variant="outlined">
@@ -150,12 +151,12 @@ const DateRangeSelect = memo(
               '& .MuiSelect-icon': {
                 color: '#fff'
               },
-              mb:1,
-              width: '220px',
+              mb: 1,
+              width: '220px'
             }}
             renderValue={() => (
               <Box display="flex" alignItems="center">
-                <Calendar fontSize="small" style={{ marginRight: 8 }} color="#fff" />
+                <Calendar size={14} style={{ marginRight: 8 }} color="#fff" />
                 {selectedRangeLabel}
               </Box>
             )}

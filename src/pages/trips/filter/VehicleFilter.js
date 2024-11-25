@@ -3,6 +3,7 @@ import { Autocomplete, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
+import { SearchNormal1 } from 'iconsax-react';
 
 const VehicleFilter = ({ setFilterOptions, sx, value }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
@@ -81,7 +82,7 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
         getOptionLabel={(option) => option.vehicleNumber || ''}
         options={options}
         loading={loading}
-        onInputChange={(event, newInputValue) => setQuery(newInputValue)} // Update query state
+        // onInputChange={(event, newInputValue) => setQuery(newInputValue)} // Update query state
         sx={sx}
         onChange={(event, newValue) => {
           setFilterOptions((prevState) => ({
@@ -95,6 +96,9 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
             placeholder="Filter Vehicle"
             InputProps={{
               ...params.InputProps,
+              startAdornment: (
+                <SearchNormal1 size={14} />
+            ),
               endAdornment: (
                 <>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}

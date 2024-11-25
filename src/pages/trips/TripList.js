@@ -23,7 +23,8 @@ import {
   Fade,
   Button,
   CircularProgress,
-  Dialog
+  Dialog,
+  Tooltip
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -45,20 +46,7 @@ import { alertPopupToggle, getInvoiceDelete } from 'store/reducers/invoice';
 import { renderFilterTypes, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import {
-  Add,
-  ArrowCircleDown2,
-  Command,
-  Drop,
-  Money2,
-  Money3,
-  Money4,
-  More,
-  NotificationBing,
-  Routing,
-  Routing2,
-  Trash
-} from 'iconsax-react';
+import { Add, ArrowCircleDown2, Edit, Money4, More, NotificationBing, Routing2, Trash } from 'iconsax-react';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
 import FormDialog from 'components/alertDialog/FormDialog';
@@ -330,7 +318,6 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
   const handleCloseForRemove = useCallback(() => {
     setRemove(false);
   }, []);
-  console.log(remarks);
   return (
     <>
       {visible && selected && selected.length > 0 && (
@@ -350,7 +337,7 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
           {remove && (
             <CustomAlert
               title={'Change Trip Status?'}
-              subtitle={'Please Select the Status from below'}
+              subtitle={'Select the Status from below'}
               open={remove}
               handleClose={handleCloseForRemove}
               handleCancel={handleStatusCancel}
@@ -374,9 +361,11 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
 const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
   const [remove, setRemove] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleTripGeneration = () => {
     console.log({ selected });
+    // navigate('/apps/invoices/test', { state: { tripData: selected } });
   };
 
   const handleCloseForRemove = useCallback(() => {
@@ -422,7 +411,6 @@ function ReactTable({
   deleteURL,
   handleRefetch,
   handleOpen,
-  handleClose,
   handleTripSelectedData,
   tripSelectedData,
   otherSelectedData,
@@ -614,6 +602,10 @@ ReactTable.propTypes = {
 // ==============================|| TRIP - LIST ||============================== //
 
 const TripList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -630,13 +622,9 @@ const TripList = () => {
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {},
     selectedVendor: {},
-    selectedDiver: {},
+    selectedDriver: {},
     selectedVehicle: {}
   });
-  const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
-
-  console.log({ tripSelectedData });
 
   const [tripStats, setTripStats] = useState({
     completedTripsCount: 0,
@@ -822,7 +810,7 @@ const TripList = () => {
             endDate: formatDateUsingMoment(endDate),
             companyID: filterOptions.selectedCompany._id,
             vehicleId: filterOptions.selectedVehicle._id,
-            driverId: filterOptions.selectedDiver._id,
+            driverId: filterOptions.selectedDriver._id,
             vendorId: filterOptions.selectedVendor._id
           }
         });
@@ -917,87 +905,115 @@ const TripList = () => {
           );
         }
       },
-      {
-        Header: 'Actions',
-        className: 'cell-center',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          const [anchorEl, setAnchorEl] = useState(null);
-          const [status, setStatus] = useState(null);
+      // {
+      //   Header: 'Actions',
+      //   className: 'cell-center',
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => {
+      //     // console.log('row', row);
 
-          const handleMenuClick = (event) => {
-            setAnchorEl(event.currentTarget);
-          };
+      //     const [anchorEl, setAnchorEl] = useState(null);
+      //     const [status, setStatus] = useState(null);
 
-          const handleMenuClose = () => {
-            setAnchorEl(null);
-          };
+      //     const handleMenuClick = (event) => {
+      //       setAnchorEl(event.currentTarget);
+      //     };
 
-          const handleCompleted = () => {
-            // alert('Completed');
-            row.original.status = 'Completed'; // Update the row's status
-            setSelectedRow(row.original);
+      //     const handleMenuClose = () => {
+      //       setAnchorEl(null);
+      //     };
 
-            setUpdatedStatus(TRIP_STATUS.COMPLETED);
-            setPopup(POPUP_TYPE.ALERT_DIALOG);
-            setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
+      //     const handleCompleted = () => {
+      //       // alert('Completed');
+      //       row.original.status = 'Completed'; // Update the row's status
+      //       setSelectedRow(row.original);
 
-          const handlePending = () => {
-            // alert('Pending');
-            row.original.status = 'Pending'; // Update the row's status
-            setSelectedRow(row.original);
-            // setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
+      //       setUpdatedStatus(TRIP_STATUS.COMPLETED);
+      //       setPopup(POPUP_TYPE.ALERT_DIALOG);
+      //       setAlertOpen(true);
+      //       handleMenuClose(); // Close the menu after selecting an option
+      //     };
 
-          const handleCancelled = () => {
-            // alert('Cancelled');
-            row.original.status = 'Cancelled'; // Update the row's status
-            setSelectedRow(row.original);
-            setUpdatedStatus(TRIP_STATUS.CANCELLED);
-            // setAlertCancelOpen(true);
-            setPopup(POPUP_TYPE.FORM_DIALOG);
+      //     const handlePending = () => {
+      //       // alert('Pending');
+      //       row.original.status = 'Pending'; // Update the row's status
+      //       setSelectedRow(row.original);
+      //       // setAlertOpen(true);
+      //       handleMenuClose(); // Close the menu after selecting an option
+      //     };
 
-            setAlertOpen(true);
+      //     const handleCancelled = () => {
+      //       // alert('Cancelled');
+      //       row.original.status = 'Cancelled'; // Update the row's status
+      //       setSelectedRow(row.original);
+      //       setUpdatedStatus(TRIP_STATUS.CANCELLED);
+      //       // setAlertCancelOpen(true);
+      //       setPopup(POPUP_TYPE.FORM_DIALOG);
 
-            handleMenuClose(); // Close the menu after selecting an option
-          };
+      //       setAlertOpen(true);
 
-          const openMenu = Boolean(anchorEl);
+      //       handleMenuClose(); // Close the menu after selecting an option
+      //     };
 
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                <More style={{ fontSize: '1.15rem' }} />
-              </IconButton>
-              <Menu
-                id="fade-menu"
-                MenuListProps={{
-                  'aria-labelledby': 'fade-button'
-                }}
-                anchorEl={anchorEl}
-                open={openMenu}
-                onClose={handleMenuClose}
-                TransitionComponent={Fade}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
-                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
-                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
-              </Menu>
-            </Stack>
-          );
-        }
-      },
+      //     const openMenu = Boolean(anchorEl);
+
+      //     return (
+      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+      //         <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
+      //           <More style={{ fontSize: '1.15rem' }} />
+      //         </IconButton>
+
+      //         {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
+      //           <Tooltip
+      //             componentsProps={{
+      //               tooltip: {
+      //                 sx: {
+      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+      //                   opacity: 0.9
+      //                 }
+      //               }
+      //             }}
+      //             title="Edit"
+      //           >
+      //             <IconButton
+      //               color="primary"
+      //               onClick={(e) => {
+      //                 e.stopPropagation();
+      //                 setIsOpen(true); // Open the dialog for editing
+      //                 setId(row.original.tripId);
+      //               }}
+      //             >
+      //               <Edit />
+      //             </IconButton>
+      //           </Tooltip>
+      //         )}
+
+      //         <Menu
+      //           id="fade-menu"
+      //           MenuListProps={{
+      //             'aria-labelledby': 'fade-button'
+      //           }}
+      //           anchorEl={anchorEl}
+      //           open={openMenu}
+      //           onClose={handleMenuClose}
+      //           TransitionComponent={Fade}
+      //           anchorOrigin={{
+      //             vertical: 'bottom',
+      //             horizontal: 'right'
+      //           }}
+      //           transformOrigin={{
+      //             vertical: 'top',
+      //             horizontal: 'right'
+      //           }}
+      //         >
+      //           {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
+      //           {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
+      //           {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
+      //         </Menu>
+      //       </Stack>
+      //     );
+      //   }
+      // },
       {
         Header: 'Status',
         accessor: 'assignedStatus',
@@ -1184,6 +1200,7 @@ const TripList = () => {
                 </Typography>
               </Stack>
             </Stack>
+
             <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
               <Typography variant="body2" color="white">
                 Profit/Loss
@@ -1257,7 +1274,7 @@ const TripList = () => {
             width: '200px',
             pb: 1
           }}
-          value={filterOptions.selectedDiver}
+          value={filterOptions.selectedDriver}
         />
         <VehicleFilter
           setFilterOptions={setFilterOptions}
