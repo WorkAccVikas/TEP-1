@@ -66,9 +66,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import CustomAlert from './alerts/TripStatusChange';
 import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
+import { ThemeMode } from 'config';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
-
 
 const TRIP_STATUS = {
   PENDING: 1,
@@ -909,115 +909,6 @@ const TripList = () => {
           );
         }
       },
-      // {
-      //   Header: 'Actions',
-      //   className: 'cell-center',
-      //   disableSortBy: true,
-      //   Cell: ({ row }) => {
-      //     // console.log('row', row);
-
-      //     const [anchorEl, setAnchorEl] = useState(null);
-      //     const [status, setStatus] = useState(null);
-
-      //     const handleMenuClick = (event) => {
-      //       setAnchorEl(event.currentTarget);
-      //     };
-
-      //     const handleMenuClose = () => {
-      //       setAnchorEl(null);
-      //     };
-
-      //     const handleCompleted = () => {
-      //       // alert('Completed');
-      //       row.original.status = 'Completed'; // Update the row's status
-      //       setSelectedRow(row.original);
-
-      //       setUpdatedStatus(TRIP_STATUS.COMPLETED);
-      //       setPopup(POPUP_TYPE.ALERT_DIALOG);
-      //       setAlertOpen(true);
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const handlePending = () => {
-      //       // alert('Pending');
-      //       row.original.status = 'Pending'; // Update the row's status
-      //       setSelectedRow(row.original);
-      //       // setAlertOpen(true);
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const handleCancelled = () => {
-      //       // alert('Cancelled');
-      //       row.original.status = 'Cancelled'; // Update the row's status
-      //       setSelectedRow(row.original);
-      //       setUpdatedStatus(TRIP_STATUS.CANCELLED);
-      //       // setAlertCancelOpen(true);
-      //       setPopup(POPUP_TYPE.FORM_DIALOG);
-
-      //       setAlertOpen(true);
-
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const openMenu = Boolean(anchorEl);
-
-      //     return (
-      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-      //         <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-      //           <More style={{ fontSize: '1.15rem' }} />
-      //         </IconButton>
-
-      //         {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Edit"
-      //           >
-      //             <IconButton
-      //               color="primary"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 setIsOpen(true); // Open the dialog for editing
-      //                 setId(row.original.tripId);
-      //               }}
-      //             >
-      //               <Edit />
-      //             </IconButton>
-      //           </Tooltip>
-      //         )}
-
-      //         <Menu
-      //           id="fade-menu"
-      //           MenuListProps={{
-      //             'aria-labelledby': 'fade-button'
-      //           }}
-      //           anchorEl={anchorEl}
-      //           open={openMenu}
-      //           onClose={handleMenuClose}
-      //           TransitionComponent={Fade}
-      //           anchorOrigin={{
-      //             vertical: 'bottom',
-      //             horizontal: 'right'
-      //           }}
-      //           transformOrigin={{
-      //             vertical: 'top',
-      //             horizontal: 'right'
-      //           }}
-      //         >
-      //           {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
-      //           {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
-      //           {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
-      //         </Menu>
-      //       </Stack>
-      //     );
-      //   }
-      // },
       {
         Header: 'Status',
         accessor: 'assignedStatus',
@@ -1039,6 +930,118 @@ const TripList = () => {
               return <Chip label="Not Defined" color="error" variant="light" />;
             }
           }
+        }
+      },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          console.log('row', row);
+
+          const [anchorEl, setAnchorEl] = useState(null);
+          const [status, setStatus] = useState(null);
+
+          const handleMenuClick = (event) => {
+            setAnchorEl(event.currentTarget);
+          };
+
+          const handleMenuClose = () => {
+            setAnchorEl(null);
+          };
+
+          const handleCompleted = () => {
+            // alert('Completed');
+            console.log('row', row.original);
+            row.original.status = 'Completed'; // Update the row's status
+            setSelectedRow(row.original);
+
+            setUpdatedStatus(TRIP_STATUS.COMPLETED);
+            setPopup(POPUP_TYPE.ALERT_DIALOG);
+            setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handlePending = () => {
+            // alert('Pending');
+            console.log('row', row.original);
+            row.original.status = 'Pending'; // Update the row's status
+            setSelectedRow(row.original);
+            // setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handleCancelled = () => {
+            // alert('Cancelled');
+            console.log('row', row.original);
+            row.original.status = 'Cancelled'; // Update the row's status
+            setSelectedRow(row.original);
+            setUpdatedStatus(TRIP_STATUS.CANCELLED);
+            // setAlertCancelOpen(true);
+            setPopup(POPUP_TYPE.FORM_DIALOG);
+
+            setAlertOpen(true);
+
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const openMenu = Boolean(anchorEl);
+
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
+                <More style={{ fontSize: '1.15rem' }} />
+              </IconButton>
+
+              {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Edit"
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true); // Open the dialog for editing
+                      setId(row.original._id);
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              <Menu
+                id="fade-menu"
+                MenuListProps={{
+                  'aria-labelledby': 'fade-button'
+                }}
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleMenuClose}
+                TransitionComponent={Fade}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
+                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
+                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
+              </Menu>
+            </Stack>
+          );
         }
       },
 

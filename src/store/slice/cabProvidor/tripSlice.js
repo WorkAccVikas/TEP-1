@@ -32,6 +32,15 @@ export const updateTrip = createAsyncThunk('trips/updateTrip', async (payload, {
   }
 });
 
+export const fetchTripDetails = createAsyncThunk('trips/fetchTripDetails', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/assignTrip/getTripById?assignTripID=${id}`);
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 const tripSlice = createSlice({
   name: 'trips',
   initialState,
