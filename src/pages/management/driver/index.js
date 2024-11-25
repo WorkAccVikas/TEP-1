@@ -15,6 +15,7 @@ import { ACTION, MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import DriverRegister from 'sections/cabprovidor/driverManagement/DriverRegister';
 import * as Yup from 'yup';
 import WrapperButton from 'components/common/guards/WrapperButton';
+import BulkUploadDialog from './bulkUpload/Dialog';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -58,6 +59,7 @@ const Driver = () => {
   const [updateKey, setUpdateKey] = useState(0);
   const [driverType, setDriverType] = useState(1);
   const lastPageIndex = metaData.lastPageNo;
+  const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
 
   useEffect(() => {
     dispatch(fetchDrivers({ page, limit, driverType }));
@@ -107,6 +109,12 @@ const Driver = () => {
   //     : Yup.string()
   // });
 
+  const handleDriverBulkUploadOpen = () => {
+    setOpenBulkUploadDialog(true);
+  };
+  const handleDriverBulkUploadClose = () => {
+    setOpenBulkUploadDialog(false);
+  };
   const formikHandleSubmit = async (values, isCreating) => {
     // eslint-disable-next-line no-useless-catch
     try {
@@ -147,16 +155,19 @@ const Driver = () => {
     }
   };
 
-  // if (loading) return <TableSkeleton rows={10} columns={5} />;
   if (error) return <Error500 />;
-  // if (drivers.length === 0) return <EmptyTableDemo />;
 
   return (
     <>
       <Stack gap={1} spacing={1}>
         <Header
           OtherComp={({ loading }) => (
-            <ButtonComponent driverType={driverType} handleDriverTypeChange={handleDriverTypeChange} loading={loading} />
+            <ButtonComponent
+              driverType={driverType}
+              handleDriverTypeChange={handleDriverTypeChange}
+              loading={loading}
+              handleDriverBulkUploadOpen={handleDriverBulkUploadOpen}
+            />
           )}
         />
         <DriverTable
@@ -180,19 +191,16 @@ const Driver = () => {
           title={{ ADD: 'Add Driver', EDIT: 'Edit Driver' }}
           initialValuesFun={getInitialValues}
           onSubmit={formikHandleSubmit}
-          // fetchAllData={() => dispatch(fetchDrivers({ page: 1, limit: 10, driverType: 1 }))}
-          // fetchAllData={() => dispatch(fetchDrivers())}
-          // fetchSingleDetails={() => dispatch(fetchDriverDetails())}
-          // yupSchema={yupSchema}
         />
       )}
+      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
     </>
   );
 };
 
 export default Driver;
 
-const ButtonComponent = ({ driverType, handleDriverTypeChange, loading }) => {
+const ButtonComponent = ({ driverType, handleDriverTypeChange, loading, handleDriverBulkUploadOpen }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleAdd = useCallback(() => {
@@ -201,41 +209,6 @@ const ButtonComponent = ({ driverType, handleDriverTypeChange, loading }) => {
   return (
     <>
       <Stack direction="row" spacing={1} alignItems="center">
-        {/* <Autocomplete
-          id="autocomplete-based-on-driverType"
-          fullWidth
-          options={Object.entries(OPTION_SET_1)}
-          autoHighlight
-          getOptionLabel={(option) => option[0]} 
-          value={Object.entries(OPTION_SET_1).find((item) => item[1].value === driverType)}
-          isOptionEqualToValue={(option, value) => option[1].value === value}
-          onChange={(event, newValue) => {
-            console.log('newValue', newValue);
-            const { value } = newValue[1];
-            handleDriverTypeChange(value);
-          }}
-          renderOption={(props, option) => (
-            <Box component="li" {...props}>
-              {option[0]}
-            </Box>
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              fullWidth
-              placeholder="Select Driver Type"
-              inputProps={{
-                ...params.inputProps,
-                autoComplete: 'off'
-              }}
-            />
-          )}
-          disableClearable
-          getOptionDisabled={(option) => !!option[1].disabled}
-        /> */}
-
-        {/* <Button variant="contained" startIcon={<Add />} onClick={() => navigate('add-driver')}> */}
-
         <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
           <Button
             variant="contained"
@@ -253,10 +226,15 @@ const ButtonComponent = ({ driverType, handleDriverTypeChange, loading }) => {
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
             onClick={() => navigate('/management/driver/add-driver-rate')}
             size="small"
-             color="success"
+            color="success"
             disabled={loading} // Disable button while loading
           >
             {loading ? 'Loading...' : 'Add Driver Rate'}
+          </Button>
+        </WrapperButton>
+        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
+            Upload Driver List
           </Button>
         </WrapperButton>
       </Stack>

@@ -124,7 +124,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
 
   return (
     <>
-      <Box sx={{ p: 3, pb: 0, width: '100%' }}>
+      <Box sx={{ p: 1, pb: 0, width: '100%' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           {/* Tabs Section */}
           <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ flexGrow: 1 }}>
@@ -156,24 +156,21 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
             ))}
           </Tabs>
 
-          {/* Button Section */}
-          {selectedData.length > 0 && (
+         
+        </Stack>
+      </Box>
+      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 1, pb: 1 }}>
+          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
+           {/* Button Section */}
+           {selectedData.length > 0 && (
             <Button
               variant="contained"
               color="primary"
               onClick={handleAssignDialogOpen} // Replace this with your actual onClick function
             >
-              Assign Trips
+              Assign Trips ({selectedData.filter((data) => data.status !== 3).length})
             </Button>
           )}
-        </Stack>
-      </Box>
-      <TableRowSelection selected={Object.keys(selectedRowIds).length} />
-      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
-        <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
-        </Stack>
-       
       </Stack>
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
@@ -481,7 +478,7 @@ const ViewRosterTest1 = () => {
 
   return (
     <>
-      <Breadcrumbs custom links={breadcrumbLinks} />
+      <Breadcrumbs custom links={breadcrumbLinks} sx={{ mb: 0 }} />
       <MainCard content={false}>
         <ScrollX>
           {rosterData && (

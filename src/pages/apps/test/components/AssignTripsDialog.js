@@ -15,6 +15,9 @@ import IconButton from 'components/@extended/IconButton';
 import { Add } from 'iconsax-react';
 import axiosServices from 'utils/axios';
 import { Autocomplete, Box, Checkbox, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
+import ScrollX from 'components/ScrollX';
+import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -26,7 +29,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [cabOptions, setCabOptions] = useState([]);
-
+  const [tripPayload, setTripPayload] = useState([]);
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0]; // This will return the date in yyyy-mm-dd format
@@ -69,7 +72,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       };
     });
 
-    console.log({ assignedTripsArray });
     const rosterUploadArray = payload1.map((item) => {
       return {
         vehicleTypeArray: item._vehicleType ? [{ _id: item._vehicleType._id, vehicleTypeName: item._vehicleType.vehicleTypeName }] : [],
@@ -131,6 +133,19 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         const response1 = await axiosServices.put('/tripData/map/roster/update', _mappedRosterDataPayload);
         if (response1.data.success) {
           alert(`${payload1.length} Trips Created`);
+          openSnackbar({
+            open: true,
+            message: `${payload1.length} trips successfully Generated!`,
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false,
+            anchorOrigin: {
+              vertical: 'bottom',
+              horizontal: 'right'
+            }
+          });
           handleClose();
           setPayload1([]);
           setInitateRender((prev) => prev + 1);
@@ -256,11 +271,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                   _id: item.cabOptionsArray[0]?._id || null,
                   vehicleNumber: item.cabOptionsArray[0]?.vehicleNumber || 'N/A'
                 }
-              : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' },
-          _zoneName_options: zoneInfo || [],
-          _vehicleType_options: vehicleTypeInfo || [],
-          _drivers_options: drivers || [],
-          _cab_options: cabOptions || []
+              : { _id: null, vehicleNumber: item.vehicleNumber || 'N/A' }
         }));
 
       // Filter mapped data where all required `_id` fields are present
@@ -281,39 +292,40 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   console.log({ data });
 
   const handleChange = (rowIndex, key, value) => {
-    const updatedData = [...data];
-    updatedData[rowIndex][key] = value; // Update the specific field
-    const { _zoneName, _zoneType, _vehicleType, _driver, _cab } = updatedData[rowIndex];
+    setData((prevData) => {
+      // Update only the specific row
+      const updatedRow = { ...prevData[rowIndex], [key]: value };
+      const { _zoneName, _zoneType, _vehicleType, _driver, _cab } = updatedRow;
 
-    if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
-      setPayload1((prevPayload) => {
-        // Check if the current `_id` already exists in `prevPayload`
-        const existingIndex = prevPayload.findIndex((item) => item._id === updatedData[rowIndex]._id);
+      if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
+        setPayload1((prevPayload) => {
+          const existingIndex = prevPayload.findIndex((item) => item._id === updatedRow._id);
 
-        if (existingIndex !== -1) {
-          // If it exists, replace the existing entry
-          const updatedPayload = [...prevPayload];
-          updatedPayload[existingIndex] = updatedData[rowIndex];
-          return updatedPayload;
-        } else {
-          // If it doesn't exist, add it to the array
-          return [...prevPayload, updatedData[rowIndex]];
-        }
-      });
-    }
+          if (existingIndex !== -1) {
+            // Update the existing entry in the payload
+            const updatedPayload = [...prevPayload];
+            updatedPayload[existingIndex] = updatedRow;
+            return updatedPayload;
+          } else {
+            // Add the new row to the payload
+            return [...prevPayload, updatedRow];
+          }
+        });
+      }
 
-    setData(updatedData);
+      // Return the updated data array with only the specific row modified
+      return prevData.map((row, index) => (index === rowIndex ? updatedRow : row));
+    });
   };
 
-  const bulkSync = () => {
+  const bulkSync = async () => {
     const updatedData = [...data];
+    const successTrips = [];
 
-    payload1.forEach(async (trip) => {
-      console.log({ trip });
+    for (const trip of payload1) {
       const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
-      console.log({ companyID });
+
       if (_zoneName._id && _zoneType._id && _vehicleType._id && _driver._id && _cab._id) {
-        console.log(companyID._id);
         const payload = {
           data: {
             companyID: companyID._id,
@@ -326,15 +338,15 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
 
         try {
           const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
-          console.log(response.data);
           const amounts = response.data.data;
+
           // Update all rows in updatedData with the same _id
           updatedData.forEach((row) => {
             if (row._id === _id) {
               if (row._isDualTrip > 0) {
-                row['_companyRate'] = amounts.companyDualAmount;
-                row['_vendorRate'] = amounts.vendorDualAmount;
-                row['_driverRate'] = amounts.driverDualAmount;
+                row['_companyRate'] = amounts.companyDualAmount ? amounts.companyDualAmount / 2 : 0;
+                row['_vendorRate'] = amounts.vendorDualAmount ? amounts.vendorDualAmount / 2 : 0;
+                row['_driverRate'] = amounts.driverDualAmount ? amounts.driverDualAmount / 2 : 0;
               } else {
                 row['_companyRate'] = amounts.companyAmount;
                 row['_vendorRate'] = amounts.vendorAmount;
@@ -356,23 +368,55 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               row['_companyDualRate'] = amounts.companyDualAmount;
               row['_vendorDualRate'] = amounts.vendorDualAmount;
               row['_driverDualRate'] = amounts.driverDualAmount;
-
               row['_driverRate_or_vendorRate'] = amounts.driverAmount || amounts.vendorAmount;
-
               row['_driverDualRate_or_vendorDualRate'] = amounts.driverDualAmount || amounts.vendorDualAmount;
             }
           });
 
-          console.log({ updatedData });
-          // Update state after all async operations
-          setData([...updatedData]);
+          successTrips.push(trip);
         } catch (error) {
-          console.error('Error syncing data:', error);
+          console.error(`Error syncing trip with _id ${_id}:`, error);
         }
       } else {
-        alert('Error found');
+        console.error(`Validation error for trip with _id ${_id}`);
       }
-    });
+    }
+
+    // Update state after all operations
+    setData([...updatedData]);
+
+    // Show alert based on success count
+    if (successTrips.length > 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: `${successTrips.length} trips successfully synced!`,
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: false,
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        })
+      );
+    } else {
+      openSnackbar({
+        open: true,
+        message: `${successTrips.length} trips synced! failed`,
+        variant: 'alert',
+        alert: {
+          color: 'error'
+        },
+        close: false,
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'right'
+        }
+      });
+    }
   };
 
   const [currentGroup, setCurrentGroup] = useState(1); // Track the next group number
@@ -599,7 +643,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 )}
 
                 {/* Map over all zones */}
-                {zoneInfo.map((zone) => (
+                {zoneInfo?.map((zone) => (
                   <MenuItem key={zone._id} value={JSON.stringify(zone)}>
                     {zone.zoneName}
                   </MenuItem>
@@ -637,7 +681,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 )}
 
                 {/* Map over all zoneTypes, excluding the selected one */}
-                {row._zoneName.zoneType
+                {row._zoneName?.zoneType
                   .filter((zone) => zone._id !== value._id) // Exclude selected value if needed
                   .map((zone) => (
                     <MenuItem key={zone._id} value={JSON.stringify(zone)}>
@@ -677,7 +721,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over all cab options */}
-              {row._cab_options.map((cab) => (
+              {cabOptions?.map((cab) => (
                 <MenuItem key={cab._id} value={JSON.stringify(cab)}>
                   {cab.vehicleNumber}
                 </MenuItem>
@@ -714,7 +758,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over all cab options */}
-              {row._vehicleType_options.map((cab) => (
+              {vehicleTypeInfo.map((cab) => (
                 <MenuItem key={cab._id} value={JSON.stringify(cab)}>
                   {cab.vehicleTypeName}
                 </MenuItem>
@@ -748,7 +792,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               )}
 
               {/* Map over driverOptionsArray or _drivers_options */}
-              {row._drivers_options.map((driver) => (
+              {drivers.map((driver) => (
                 <MenuItem key={driver._id} value={JSON.stringify(driver)}>
                   {driver.userName}
                 </MenuItem>
@@ -861,12 +905,13 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
 
   const displayKeys = [
     'rosterTripId',
-    'tripDate',
-    'tripTime',
-    'tripType',
     '_zoneName',
     '_zoneType',
     'location',
+    'tripDate',
+    'tripTime',
+    'tripType',
+
     '_vehicleType',
     '_cab',
     '_driver',
@@ -919,9 +964,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
               Assign New Trips
             </Typography>
-            {/* <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
-              {`Trips Ready: ${payload1.length}`}
-            </Typography> */}
             <Button sx={{ ml: 2, flex: 0.2 }} color="secondary" variant="contained" onClick={bulkSync}>
               {`Sync ${payload1.length} Trips`}
             </Button>
@@ -932,67 +974,69 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           </Toolbar>
         </AppBar>
 
-        {data.length > 0 && (
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    border: '1px solid black',
-                    padding: '8px',
-                    textAlign: 'left'
-                  }}
-                >
-                  Sr No
-                </th>
-                {displayKeys.map((key) => (
+        <ScrollX>
+          {data.length > 0 && (
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr>
                   <th
-                    key={key}
                     style={{
                       border: '1px solid black',
                       padding: '8px',
                       textAlign: 'left'
                     }}
                   >
-                    {headerMap[key] || key} {/* Use the mapped header or fallback to key */}
+                    Sr No
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, rowIndex) => (
-                <tr
-                  key={rowIndex}
-                  style={{
-                    backgroundColor: rowIndex % 2 === 1 ? '#fff' : '#f0f9f9' // Alternate row colors
-                  }}
-                >
-                  <td
-                    style={{
-                      border: '1px solid black',
-                      padding: '8px',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {rowIndex + 1} {/* Serial Number */}
-                  </td>
                   {displayKeys.map((key) => (
-                    <td
+                    <th
                       key={key}
                       style={{
                         border: '1px solid black',
-                        padding: '0px',
-                        height: '50px'
+                        padding: '8px',
+                        textAlign: 'left'
                       }}
                     >
-                      {renderInputField(key, row[key], rowIndex, row)} {/* Pass the entire row */}
-                    </td>
+                      {headerMap[key] || key} {/* Use the mapped header or fallback to key */}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {data.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    style={{
+                      backgroundColor: rowIndex % 2 === 1 ? '#fff' : '#f0f9f9' // Alternate row colors
+                    }}
+                  >
+                    <td
+                      style={{
+                        border: '1px solid black',
+                        padding: '8px',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {rowIndex + 1} {/* Serial Number */}
+                    </td>
+                    {displayKeys.map((key) => (
+                      <td
+                        key={key}
+                        style={{
+                          border: '1px solid black',
+                          padding: '0px',
+                          height: '50px'
+                        }}
+                      >
+                        {renderInputField(key, row[key], rowIndex, row)} {/* Pass the entire row */}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </ScrollX>
       </Dialog>
     </>
   );

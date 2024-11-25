@@ -52,12 +52,19 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
-import axios from 'axios';
+import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
 import { formattedDate } from 'utils/helper';
 import FormDialog from 'components/alertDialog/FormDialog';
 import axiosServices from 'utils/axios';
 import { USERTYPE } from 'constant';
+import CompanyFilter from 'pages/trips/filter/CompanyFilter';
+import VendorFilter from 'pages/trips/filter/VendorFilter';
+import DriverFilter from 'pages/trips/filter/DriverFilter';
+import VehicleFilter from 'pages/trips/filter/VehicleFilter';
+import DateRangeSelect from 'pages/trips/filter/DateFilter';
+import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -123,12 +130,34 @@ function ReactTable({ columns, data }) {
     1: { label: 'Unpaid', color: 'warning' }
   };
 
+  const INOVICE_STATUS = {
+    UNPAID: 1,
+    PAID: 2,
+    CANCELLED: 3
+  };
+
+  const getTabName = (status) => {
+    switch (status) {
+      case INOVICE_STATUS.PAID:
+        return 'Paid';
+      case INOVICE_STATUS.UNPAID:
+        return 'Unpaid';
+      case INOVICE_STATUS.CANCELLED:
+        return 'Cancelled';
+      default:
+        return 'All';
+    }
+  };
   // Create groups and counts
-  const groups = ['All', ...new Set(data.map((item) => item.status))];
-  const counts = data.reduce((acc, item) => {
-    acc[item.status] = (acc[item.status] || 0) + 1;
-    return acc;
-  }, {});
+  const groups = ['All', INOVICE_STATUS.PAID, INOVICE_STATUS.UNPAID, INOVICE_STATUS.CANCELLED];
+
+  const countGroup = data.map((item) => item.status);
+
+  const counts = {
+    Paid: countGroup.filter((status) => status === INOVICE_STATUS.PAID).length,
+    Unpaid: countGroup.filter((status) => status === INOVICE_STATUS.UNPAID).length,
+    Cancelled: countGroup.filter((status) => status === INOVICE_STATUS.CANCELLED).length
+  };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
@@ -136,55 +165,63 @@ function ReactTable({ columns, data }) {
     setFilter('status', activeTab === 'All' ? '' : activeTab);
   }, [activeTab]);
 
+  useEffect(() => {
+    setFilter('status', activeTab === 'All' ? '' : activeTab === INOVICE_STATUS.UNPAID ? 1 : activeTab === INOVICE_STATUS.PAID ? 2 : 3);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
   return (
     <>
-      <Box sx={{ p: 3, pb: 0, width: '100%' }}>
-        <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          {groups.map((status, index) => (
-            <Tab
-              key={index}
-              label={status === 'All' ? 'All' : statusMap[status]?.label}
-              value={status}
-              icon={
-                <Chip
-                  label={status === 'All' ? data.length : counts[status] || 0}
-                  color={status === 'All' ? 'primary' : statusMap[status]?.color || 'default'}
-                  variant="light"
-                  size="small"
-                />
-              }
-              iconPosition="end"
-            />
-          ))}
-        </Tabs>
-      </Box>
-      <TableRowSelection selected={Object.keys(selectedRowIds).length} />
-      <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
-        <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
-        </Stack>
-        <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
-          {/* <>
-            {headerGroups.map((group) => (
-              <Stack key={group} direction={matchDownSM ? 'column' : 'row'} spacing={2} {...group.getHeaderGroupProps()}>
-                {group.headers.map(
-                  (column) =>
-                    column.canFilter && (
-                      <Box key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                        {column.render('Filter')}
-                      </Box>
-                    )
-                )}
-              </Stack>
+      <Box sx={{ p: 1, pb: 0, width: '100%' }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            {groups.map((status, index) => (
+              <Tab
+                key={index}
+                label={getTabName(status)}
+                value={status}
+                icon={
+                  <Chip
+                    label={
+                      status === 'All'
+                        ? data.length
+                        : status === INOVICE_STATUS.PAID
+                        ? counts.Paid
+                        : status === INOVICE_STATUS.UNPAID
+                        ? counts.Unpaid
+                        : counts.Cancelled
+                    }
+                    color={
+                      status === 'All'
+                        ? 'primary'
+                        : status === INOVICE_STATUS.PAID
+                        ? 'success'
+                        : status === INOVICE_STATUS.UNPAID
+                        ? 'warning'
+                        : 'error'
+                    }
+                    variant="light"
+                    size="small"
+                  />
+                }
+                iconPosition="end"
+              />
             ))}
-          </> */}
-
-          <Button variant="contained" color="primary" onClick={() => navigate('/apps/invoices/create')}>
-            Create Invoice
-          </Button>
-          <CSVExport data={data} filename={'invoice-list.csv'} />
+          </Tabs>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              color="secondary"
+              startIcon={<Add />}
+              onClick={() => navigate('/apps/invoices/create')}
+            >
+              Create Invoice
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
+      </Box>
+
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
           <TableHead>
@@ -301,6 +338,19 @@ const List = () => {
         disableFilters: true
       },
       {
+        Header: '#',
+        accessor: '',
+        disableFilters: true,
+        Cell: ({ row }) => {
+          const serialNo = row.index + 1; // The serial number will be the row index + 1
+          return (
+            <>
+              <Typography>{serialNo}</Typography>
+            </>
+          );
+        }
+      },
+      {
         Header: 'Invoice Id',
         accessor: 'invoiceNumber',
         disableFilters: true
@@ -339,8 +389,11 @@ const List = () => {
         }
       },
       {
-        Header: 'Total Amount',
-        accessor: 'grandTotal'
+        Header: 'Amount',
+        accessor: 'grandTotal',
+        Cell: ({ value }) => {
+          return <Typography>₹ {value}</Typography>;
+        }
       },
       {
         Header: 'Status',
@@ -586,7 +639,14 @@ const List = () => {
     }
   ];
 
-  if (loading) return <Loader />;
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {},
+    selectedVendor: {},
+    selectedDiver: {},
+    selectedVehicle: {}
+  });
+
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   return (
     <>
@@ -604,9 +664,7 @@ const List = () => {
                     isLoss={widget.isLoss}
                     invoice={widget.invoice}
                     color={widget.color.main}
-                  >
-                    <InvoiceChart color={widget.color} data={widget.chartData} />
-                  </InvoiceCard>
+                  ></InvoiceCard>
                 </MainCard>
               </Grid>
             ))}
@@ -622,48 +680,140 @@ const List = () => {
           >
             <Stack direction="row" alignItems="flex-end" justifyContent="space-between" spacing={1}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Avatar alt="Natacha" variant="rounded" type="filled">
-                  <ProfileTick style={{ fontSize: '20px' }} />
-                </Avatar>
-                <Box>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body1" color="white">
-                      Total Recievables
-                    </Typography>
-                    <InfoCircle color={theme.palette.background.paper} />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <Typography variant="body2" color="white">
-                      Current
-                    </Typography>
-                    <Typography variant="body1" color="white">
-                      109.1k
-                    </Typography>
-                  </Stack>
-                </Box>
+                <Stack direction="row" spacing={1}>
+                  <Typography variant="body2" color="white">
+                    Total
+                  </Typography>
+                  <Typography variant="body1" color="white">
+                    ₹{' '}
+                    {parseFloat(
+                      (
+                        (metadata?.paid?.paidAmount || 0) +
+                        (metadata?.unpaid?.unpaidAmount || 0) +
+                        (metadata?.overDue?.overDueAmount || 0)
+                      ).toFixed(2)
+                    )}
+                  </Typography>
+                </Stack>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="white">
-                  Cancelled
+                  Pending
                 </Typography>
                 <Typography variant="body1" color="white">
-                  62k
+                  ₹ {parseFloat(((metadata?.unpaid?.unpaidAmount || 0) + (metadata?.overDue?.overDueAmount || 0)).toFixed(2))}
                 </Typography>
               </Stack>
             </Stack>
-            <Typography variant="h4" color="white" sx={{ pt: 2, pb: 1, zIndex: 1 }}>
-              ₹43,078
-            </Typography>
+
+            <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
+              <Typography variant="body2" color="white">
+                Recieved
+              </Typography>
+              <Typography variant="body1" color="white">
+                ₹ {parseFloat((metadata?.paid?.paidAmount || 0).toFixed(2))}
+              </Typography>
+            </Stack>
+
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={90} />
+              <LinearWithLabel
+                value={
+                  ((metadata?.paid?.paidAmount || 0) /
+                    ((metadata?.paid?.paidAmount || 0) + (metadata?.unpaid?.unpaidAmount || 0) + (metadata?.overDue?.overDueAmount || 0))) *
+                    100 || 0
+                }
+              />
             </Box>
           </Box>
         </Grid>
       </Grid>
 
+      {/* filter */}
+      <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
+        <CompanyFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedCompany}
+        />
+        {/* <VendorFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVendor}
+        />
+        <DriverFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedDiver}
+        />
+        <VehicleFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '220px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVehicle}
+        /> */}
+
+        <DateRangeSelect
+          startDate={startDate}
+          endDate={endDate}
+          selectedRange={range}
+          prevRange={prevRange}
+          setSelectedRange={setRange}
+          onRangeChange={handleRangeChange}
+          showSelectedRangeLabel
+        />
+      </Stack>
       <MainCard content={false}>
         <ScrollX>
-          <ReactTable columns={columns} data={data} />
+          {loading ? (
+            <TableSkeleton rows={10} columns={6} />
+          ) : data?.length > 0 ? (
+            <ReactTable columns={columns} data={data} />
+          ) : (
+            <EmptyTableDemo />
+          )}
         </ScrollX>
       </MainCard>
       {/* <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} handleClose={handleClose} /> */}

@@ -21,6 +21,7 @@ import ExpandingFile from 'sections/cabprovidor/testAdvance/ExpandingFile';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
 import Reports from 'pages/reports/Reports';
 import ReportDriver from 'pages/reports/ReportDriver';
+import Create from 'pages/invoice/create/Create3';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -208,6 +209,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'list',
                   element: <InvoiceList />
+                },
+                {
+                  path: 'test',
+                  element: <Create />
                 },
                 {
                   path: 'create',

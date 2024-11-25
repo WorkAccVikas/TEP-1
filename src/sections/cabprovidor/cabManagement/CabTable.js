@@ -118,7 +118,6 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Header: 'Status',
         accessor: 'isActive',
         Cell: ({ row, value }) => {
-          console.log('row', row.original);
           const [status, setStatus] = useState(value);
           const [openDialog, setOpenDialog] = useState(false); // To control the visibility of the dialog
           const [newStatus, setNewStatus] = useState(null); // To store the status to be toggled
@@ -201,7 +200,6 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         accessor: 'progress',
         Cell: ({ row, value }) => {
           const progessValue = Math.floor(Math.random() * 101);
-          console.log(row);
           return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
         }
       },
@@ -227,7 +225,6 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
                   color="primary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Id = ', row.values._id);
                     navigate(`/management/cab/edit/${row.values._id}`);
                     // dispatch(handleOpen(ACTION.EDIT));
                     // dispatch(setSelectedID(row.values._id));

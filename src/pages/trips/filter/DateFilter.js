@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect, memo, useRef } from 'react';
-import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, Box, TextField } from '@mui/material';
 import moment from 'moment';
 import { Calendar } from 'iconsax-react';
 import DateRangePickerDialog from 'components/DateRange/DateRangePickerDialog';
@@ -18,7 +18,7 @@ export const DATE_RANGE_OPTIONS = Object.freeze({
   CUSTOM: 'custom'
 });
 
-const FORMAT_DATE = 'MMM DD, YY';
+const FORMAT_DATE = 'MM/DD/YY';
 
 const DateRangeSelect = memo(
   ({
@@ -32,24 +32,17 @@ const DateRangeSelect = memo(
     prevRange,
     availableRanges
   }) => {
-    console.log('DateRangeSelect render');
-
-    // console.log('range', selectedRange);
-    // console.log('prevRange', prevRange);
     const [isDialogOpen, setDialogOpen] = useState(false);
 
-    // Predefined date range objects based on the above enum
     const predefinedDateRanges = {
       [DATE_RANGE_OPTIONS.ALL_TIME]: {
         label: 'All Time',
-        start: moment(0),
-        // end: moment().endOf('day')
-        end: moment()
+        start: moment('2024-01-01').startOf('day'), // Set start date to Jan 1, 2024
+        end: moment() // Current date and time
       },
       [DATE_RANGE_OPTIONS.TODAY]: {
         label: 'Today',
         start: moment().startOf('day'),
-        // end: moment().endOf('day')
         end: moment()
       },
       [DATE_RANGE_OPTIONS.YESTERDAY]: {
@@ -60,18 +53,11 @@ const DateRangeSelect = memo(
       [DATE_RANGE_OPTIONS.LAST_7_DAYS]: {
         label: 'Last 7 Days',
         start: moment().subtract(7, 'days').startOf('day'),
-        // end: moment().endOf('day')
         end: moment()
       },
       [DATE_RANGE_OPTIONS.LAST_30_DAYS]: {
         label: 'Last 30 Days',
         start: moment().subtract(30, 'days').startOf('day'),
-        // end: moment().endOf('day')
-        end: moment()
-      },
-      [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-        label: 'Current Month',
-        start: moment().startOf('month'),
         end: moment()
       },
       [DATE_RANGE_OPTIONS.LAST_MONTH]: {
@@ -79,7 +65,13 @@ const DateRangeSelect = memo(
         start: moment().subtract(1, 'month').startOf('month'),
         end: moment().subtract(1, 'month').endOf('month')
       },
-      [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Custom Range' }
+      [DATE_RANGE_OPTIONS.THIS_MONTH]: {
+        label: 'Current Month',
+        start: moment().startOf('month'),
+        end: moment()
+      },
+
+      [DATE_RANGE_OPTIONS.CUSTOM]: { label: 'Select Dates' }
     };
 
     // Helper to determine which range the current start and end dates fall into
@@ -97,7 +89,6 @@ const DateRangeSelect = memo(
       // Automatically set the range based on the initial dates
       if (startDate && endDate && !selectedRange) {
         const initialRange = determineRange(startDate, endDate);
-        console.log(`🚀 ~ useEffect ~ initialRange:`, initialRange);
         setSelectedRange(initialRange);
       }
     }, [startDate, endDate, selectedRange, setSelectedRange]);
@@ -108,6 +99,7 @@ const DateRangeSelect = memo(
 
     const handleRangeSelection = (event) => {
       const range = event.target.value;
+      console.log({ range });
       setSelectedRange(range);
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
@@ -134,12 +126,11 @@ const DateRangeSelect = memo(
     };
 
     const selectedRangeLabel =
-      selectedRange && startDate && endDate
-        ? `${predefinedDateRanges[selectedRange]?.label} (${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(
-            FORMAT_DATE
-          )})`
-        : predefinedDateRanges[selectedRange]?.label || 'Select Date Range';
-
+      predefinedDateRanges[selectedRange]?.label === 'Select Dates'
+        ? `${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(FORMAT_DATE)}`
+        : predefinedDateRanges[selectedRange]?.label
+        ? predefinedDateRanges[selectedRange]?.label
+        : `${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(FORMAT_DATE)}`;
     return (
       <>
         <FormControl variant="outlined">
@@ -158,28 +149,17 @@ const DateRangeSelect = memo(
                 pr: '2rem'
               },
               '& .MuiSelect-icon': {
-                color: '#fff' // Set the down arrow color to white
-              }
+                color: '#fff'
+              },
+              mb: 1,
+              width: '220px'
             }}
-            // renderValue={() => (
-            //   <Box display="flex" alignItems="center">
-            //     <Calendar fontSize="small" style={{ marginRight: 8 }} />
-            //     {selectedRangeLabel}
-            //   </Box>
-            // )}
-            renderValue={() =>
-              showSelectedRangeLabel ? (
-                <Box display="flex" alignItems="center">
-                  <Calendar fontSize="small" style={{ marginRight: 8 }} color="#fff" />
-                  {selectedRangeLabel}
-                </Box>
-              ) : (
-                <Box display="flex" alignItems="center">
-                  <Calendar fontSize="small" style={{ marginRight: 8 }} color="#fff" />
-                  {predefinedDateRanges[selectedRange]?.label || 'Select Date Range'}
-                </Box>
-              )
-            }
+            renderValue={() => (
+              <Box display="flex" alignItems="center">
+                <Calendar size={14} style={{ marginRight: 8 }} color="#fff" />
+                {selectedRangeLabel}
+              </Box>
+            )}
           >
             {filteredDateRanges.map(([key, { label }]) => (
               <MenuItem key={key} value={key}>
@@ -191,23 +171,11 @@ const DateRangeSelect = memo(
           </Select>
         </FormControl>
 
-        {/* <DateRangePickerDialog
-          isOpen={isDialogOpen}
-          onClose={handleDialogClose}
-          onDateRangeChange={(newRange) => {
-            onRangeChange(newRange);
-            handleDialogClose();
-          }}
-          initialStartDate={startDate}
-          initialEndDate={endDate}
-        /> */}
-
         {isDialogOpen && (
           <CustomDateRangePickerDialog
             isOpen={isDialogOpen}
             onClose={handleDialogClose}
             onDateRangeChange={(newRange, flag) => {
-              // console.log('f = ', flag);
               onRangeChange(newRange);
               handleDialogClose(null, flag);
             }}
