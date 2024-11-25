@@ -1,4 +1,5 @@
 import {
+  AppBar,
   Autocomplete,
   Box,
   Button,
@@ -13,8 +14,10 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
+  InputAdornment,
   InputLabel,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography
@@ -36,11 +39,18 @@ import FormikAutocomplete from 'components/autocomplete/AutoComplete';
 import NumericInput from 'components/textfield/NumericInput';
 import axiosServices from 'utils/axios';
 import CustomCircularLoader from 'components/CustomCircularLoader';
-import { addNewTrip, updateTrip } from 'store/slice/cabProvidor/tripSlice';
+import { addNewTrip, fetchTripDetails, updateTrip } from 'store/slice/cabProvidor/tripSlice';
 import { formatDateUsingMoment } from 'utils/helper';
 import { FaSyncAlt } from 'react-icons/fa';
 import { alpha, useTheme } from '@mui/material/styles';
 import { ThemeMode } from 'config';
+import { AiOutlineClockCircle } from 'react-icons/ai';
+import { fetchZoneNames } from 'store/slice/cabProvidor/ZoneNameSlice';
+import { fetchAllZoneTypes } from 'store/slice/cabProvidor/zoneTypeSlice';
+import { fetchAllVehicleTypesForAll } from 'store/slice/cabProvidor/vehicleTypeSlice';
+import { fetchDrivers1 } from 'store/slice/cabProvidor/driverSlice';
+import { fetchCab1 } from 'store/slice/cabProvidor/cabSlice';
+import moment from 'moment';
 
 const NUMERIC_INPUT_FIELD = {
   // guardPrice: {
@@ -116,12 +126,22 @@ const validationSchema = Yup.object().shape({
   returnTripTime: Yup.string().when('dualTrip', (val, schema) => {
     console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
     if (val[0]) {
-      return Yup.string().required('Return trip time is required');
+      return Yup.string()
+        .test('is-less-than-tripTime', 'Return trip time must be later than the trip time', function (value) {
+          console.log(`🚀 ~ returnTripTime:Yup.string ~ value:`, value);
+          const { tripTime } = this.parent;
+          const returnTime = value;
+
+          const time1 = moment(tripTime, 'HH:mm');
+          const time2 = moment(returnTime, 'HH:mm');
+          console.log(`🚀 ~ tripTime:`, tripTime);
+          return time2.isAfter(time1);
+        })
+        .required('Return trip time is required');
     } else {
       return Yup.string().notRequired();
     }
   }),
-
   tripType: Yup.number().required('Trip type is required'),
   zoneNameID: Yup.string().required('Zone name is required'),
   zoneTypeID: Yup.string().required('Zone type is required'),
@@ -166,7 +186,7 @@ const getInitialValues = (data) => {
 
     companyID: data?.companyID || null,
     tripDate: data?.tripDate ? new Date(data?.tripDate) : null,
-    tripTime: '',
+    tripTime: data?.tripTime || '',
     returnTripTime: '',
     tripType: data?.tripType || 0,
 
@@ -178,7 +198,7 @@ const getInitialValues = (data) => {
     location: data?.location || '',
 
     guard: data?.guard || 0,
-    dualTrip: 0,
+    dualTrip: data?.isDualTrip || 0,
 
     companyGuardPrice: data?.companyGuardPrice || 0,
     companyRate: data?.companyRate || 0,
@@ -201,6 +221,45 @@ const getInitialValues = (data) => {
   };
 };
 
+const createPayload = (values, item, driverType) => {
+  return {
+    data: {
+      companyID: values.companyID._id,
+      tripDate: formatDateUsingMoment(values.tripDate),
+      tripTime: item,
+      tripType: values.tripType,
+
+      zoneNameID: values.zoneNameID,
+      zoneTypeID: values.zoneTypeID || null,
+      vehicleTypeID: values.vehicleTypeID,
+      vehicleNumber: values.vehicleNumber,
+      driverId: values.driverId,
+      location: values.location,
+
+      guard: values.guard,
+      isDualTrip: values.dualTrip,
+
+      companyGuardPrice: values.companyGuardPrice,
+      companyRate: values.companyRate,
+      companyPenalty: values.companyPenalty,
+
+      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : -1,
+      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : -1,
+      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : -1,
+
+      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : -1,
+      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : -1,
+      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : -1,
+
+      addOnRate: values.addOnRate,
+      mcdCharge: values.mcdCharge,
+      tollCharge: values.tollCharge,
+
+      remarks: values.remarks
+    }
+  };
+};
+
 const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
@@ -209,12 +268,21 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
   const [syncLoading, setSyncLoading] = useState(false);
   const [driverType, setDriverType] = useState(0);
   const [rateDetails, setRateDetails] = useState(null);
+  const [syncRate, setSyncRate] = useState(false);
 
   const zoneList = useSelector((state) => state.zoneName.zoneNames);
   const zoneTypeList = useSelector((state) => state.zoneType.zoneTypes);
   const vehicleTypeList = useSelector((state) => state.vehicleTypes.vehicleTypes);
   const vehicleNumberList = useSelector((state) => state.cabs.cabs1);
   const driverList = useSelector((state) => state.drivers.drivers1);
+
+  useEffect(() => {
+    dispatch(fetchZoneNames());
+    dispatch(fetchAllZoneTypes());
+    dispatch(fetchAllVehicleTypesForAll());
+    dispatch(fetchDrivers1());
+    dispatch(fetchCab1());
+  }, []);
 
   useEffect(() => {
     console.log('id', id);
@@ -225,12 +293,19 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
         console.log('Api call for get details (At Trip Updating)');
         // await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        const response = await axiosServices.get(`/assignTrip/details/by?tripId=${id}`);
+        // const response = await axiosServices.get(`/assignTrip/getTripById?assignTripID=${id}`);
+        // const data = response.data.data;
+        // console.log('data = ', data);
+        // setDetails(data);
+        const response = await dispatch(fetchTripDetails(id)).unwrap();
         console.log(`🚀 ~ fetchDetails ~ response:`, response);
 
-        const data = response.data.data;
-        console.log('data = ', data);
-        setDetails(data);
+        if (response.vendorGuardPrice === -1 && response.vendorRate === -1 && response.vendorPenalty === -1) {
+          setDriverType(DRIVER_TYPE.CAB_PROVIDER); // Cab Provider Driver
+        } else {
+          setDriverType(DRIVER_TYPE.VENDOR_DRIVER); // Vendor Driver
+        }
+        setDetails(response);
       } catch (error) {
         console.log('Error :: fetchDetails =', error);
         dispatch(
@@ -258,7 +333,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
 
   const onSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
-      alert('Form submitted');
+      // alert('Form submitted');
 
       if (id) {
         // TODO : API call FOR UPDATING
@@ -266,15 +341,21 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
           data: {
             companyID: values.companyID._id,
             tripDate: formatDateUsingMoment(values.tripDate),
+
             tripTime: values.tripTime,
             tripType: values.tripType,
+
             zoneNameID: values.zoneNameID._id,
             zoneTypeID: values.zoneTypeID._id,
             vehicleTypeID: values.vehicleTypeID._id,
             vehicleNumber: values.vehicleNumber._id,
             driverId: values.driverId._id,
+
             location: values.location,
+
             guard: values.guard,
+            dualTrip: values.dualTrip,
+
             companyGuardPrice: values.companyGuardPrice,
             companyRate: values.companyRate,
             companyPenalty: values.companyPenalty,
@@ -284,14 +365,31 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
             driverGuardPrice: values.driverGuardPrice,
             driverRate: values.driverRate,
             driverPenalty: values.driverPenalty,
+
             addOnRate: values.addOnRate,
             mcdCharge: values.mcdCharge,
             tollCharge: values.tollCharge,
+
             remarks: values.remarks
           }
         };
         await dispatch(updateTrip(payload)).unwrap();
       } else {
+        if (!syncRate) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Please sync rates first',
+              variant: 'alert',
+              alert: {
+                color: 'error'
+              },
+              close: true
+            })
+          );
+          return;
+        }
+
         // TODO : API call FOR ADDING
         const payload = {
           data: {
@@ -328,7 +426,19 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
             remarks: values.remarks
           }
         };
-        await dispatch(addNewTrip(payload)).unwrap();
+
+        const x = [values.tripTime];
+
+        if (values.dualTrip === DUAL_TRIP.YES) x.push(values.returnTripTime);
+        console.log('x = ', x);
+
+        x.forEach((x) => console.log('kki = ', createPayload(values, x)));
+
+        // await dispatch(addNewTrip(payload)).unwrap();
+        await dispatch(addNewTrip(createPayload(values, x[0], driverType))).unwrap();
+        if (values.dualTrip === DUAL_TRIP.YES) {
+          await dispatch(addNewTrip(createPayload(values, x[1], driverType))).unwrap();
+        }
       }
 
       resetForm();
@@ -489,51 +599,85 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
 
   const handleSyncRates = useCallback(async () => {
     try {
-      // const payload = {
-      //   data: {
-      //     companyID: formik.values.companyID?._id,
-      //     vehicleTypeID: formik.values.vehicleTypeID,
-      //     zoneNameID: formik.values.zoneNameID,
-      //     zoneTypeID: formik.values.zoneTypeID,
-      //     driverId: formik.values.driverId
-      //   }
+      console.log('API call for fetch Rates .........');
+      const payload = {
+        data: {
+          companyID: formik.values.companyID?._id,
+          vehicleTypeID: formik.values.vehicleTypeID,
+          zoneNameID: formik.values.zoneNameID,
+          zoneTypeID: formik.values.zoneTypeID,
+          driverId: formik.values.driverId
+        }
+      };
+      setSyncLoading(true);
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+      const data = response.data.data;
+      console.log(`🚀 ~ handleSyncRates ~ response:`, response);
+      console.log('data = ', data);
+
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // setSyncLoading(true);
+      // // Cab Provider Driver
+      // const data = {
+      //   driverGuardPrice: 100,
+      //   driverAmount: 600,
+      //   driverDualAmount: 900,
+
+      //   vendorGuardPrice: null,
+      //   vendorAmount: null,
+      //   vendorDualAmount: null,
+
+      //   companyGuardPrice: 200,
+      //   companyAmount: 700,
+      //   companyDualAmount: 5000
       // };
 
-      // const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
-      // const data = response.data.data;
-      // console.log(`🚀 ~ handleSyncRates ~ response:`, response);
+      // // Vendor Driver
+      // const data = {
+      //   driverGuardPrice: null,
+      //   driverAmount: null,
+      //   driverDualAmount: null,
 
-      console.log('API call for fetch Rates .........');
+      //   vendorGuardPrice: 25,
+      //   vendorAmount: 500,
+      //   vendorDualAmount: 4000,
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      setSyncLoading(true);
-      const data = {
-        driverGuardPrice: 150,
-        driverAmount: 600,
-        driverDualAmount: 900,
-
-        vendorGuardPrice: null,
-        vendorAmount: null,
-        vendorDualAmount: null,
-
-        companyGuardPrice: 200,
-        companyAmount: 700,
-        companyDualAmount: null
-      };
+      //   companyGuardPrice: 200,
+      //   companyAmount: 700,
+      //   companyDualAmount: 1000
+      // };
 
       setRateDetails(data);
+      setSyncRate(true);
 
       if (typeof data.vendorGuardPrice !== 'object' && typeof data.vendorAmount !== 'object' && typeof data.vendorDualAmount !== 'object') {
         console.log('Vendor Driver');
-        formik.setFieldValue('vendorGuardPrice', data.vendorGuardPrice);
-        formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount); // data.driverAmount);
+        formik.setFieldValue('vendorGuardPrice', formik.values.guard ? data.vendorGuardPrice || 0 : 0);
+        formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount || 0); // data.driverAmount);
+        formik.setFieldValue('companyGuardPrice', formik.values.guard ? data.companyGuardPrice || 0 : 0);
+        formik.setFieldValue('companyRate', formik.values.dualTrip ? (data.companyDualAmount || 0) / 2 : data.companyAmount || 0);
+        // formik.setFieldValue('vendorPenalty', formik.values.vendorPenalty || 0);
+
+        // formik.setFieldValue('driverGuardPrice', -1);
+        // formik.setFieldValue('driverRate', -1);
+        // formik.setFieldValue('driverPenalty', -1);
 
         setDriverType(DRIVER_TYPE.VENDOR_DRIVER); // Vendor Driver
       } else {
         console.log('Cab Provider Driver');
-        formik.setFieldValue('driverGuardPrice', data.driverGuardPrice);
-        formik.setFieldValue('driverRate', formik.values.dualTrip ? (data.driverDualAmount || 0) / 2 : data.driverAmount); // data.driverAmount);
+        formik.setFieldValue('driverGuardPrice', formik.values.guard ? data.driverGuardPrice || 0 : 0);
+        formik.setFieldValue('driverRate', formik.values.dualTrip ? (data.driverDualAmount || 0) / 2 : data.driverAmount || 0); // data.driverAmount);
+        formik.setFieldValue('companyGuardPrice', formik.values.guard ? data.companyGuardPrice || 0 : 0);
+        formik.setFieldValue('companyRate', formik.values.dualTrip ? (data.companyDualAmount || 0) / 2 : data.companyAmount || 0);
+
+        // formik.setFieldValue('driverPenalty', formik.values.driverPenalty || 0);
+
+        // formik.setFieldValue('vendorGuardPrice', -1);
+        // formik.setFieldValue('vendorRate', -1);
+        // formik.setFieldValue('vendorPenalty', -1);
 
         setDriverType(DRIVER_TYPE.CAB_PROVIDER); // Cab Provider Driver
       }
@@ -578,6 +722,8 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
     console.log('🚀 ~ handleGuardChange ~ val:', val);
     formik.setFieldValue('dualTrip', val ? 1 : 0);
 
+    console.log('🚀 ~ handleDualTripChange ~ rateDetails:', rateDetails);
+
     if (!rateDetails) return;
 
     if (!val) {
@@ -599,22 +745,44 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       <FormikProvider value={formik}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Form onSubmit={formik.handleSubmit} noValidate style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <DialogTitle id="alert-dialog-title">
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h4">{id ? 'Edit' : 'Add'} New Trip</Typography>
-                <IconButton color="secondary" onClick={handleClose}>
-                  <Add style={{ transform: 'rotate(45deg)', color: 'red' }} />
-                </IconButton>
-              </Stack>
-            </DialogTitle>
+            <AppBar sx={{ position: 'relative', boxShadow: 'none' }}>
+              <DialogTitle id="alert-dialog-title">
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h6">{id ? 'Edit' : 'Add'} New Trip</Typography>
+                  <IconButton onClick={handleClose} color="inherit" aria-label="close">
+                    <Add style={{ transform: 'rotate(45deg)' }} />
+                  </IconButton>
+                </Stack>
+              </DialogTitle>
+            </AppBar>
             <Divider />
             <DialogContent>
               <Grid container spacing={1} rowGap={1}>
                 {/* Trip Details */}
                 <Grid item xs={12}>
-                  <Typography variant="h5" gutterBottom>
-                    Trip Details
-                  </Typography>
+                  <Stack direction={'row'} justifyContent="space-between" alignItems="center">
+                    <Typography variant="h5" gutterBottom>
+                      Trip Details
+                    </Typography>
+
+                    {/* Guard & Dual Trip */}
+                    <Stack direction="row" spacing={1}>
+                      {/* Guard */}
+                      <FormControlLabel
+                        control={
+                          <Switch name="guard" checked={Boolean(formik.values.guard)} onChange={handleGuardChange} color="secondary" />
+                        }
+                        label="Guard"
+                      />
+
+                      {/* Dual Trip */}
+                      <FormControlLabel
+                        control={<Switch name="dualTrip" checked={Boolean(formik.values.dualTrip)} onChange={handleDualTripChange} />}
+                        disabled={!!id}
+                        label="Dual Trip"
+                      />
+                    </Stack>
+                  </Stack>
 
                   <Grid container spacing={1}>
                     {/* Company Name */}
@@ -629,7 +797,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           <Chip label={formik.values.companyID?.company_name} color="primary" />
                         ) : (
                           <>
-                            <SearchComponent setSelectedCompany={handleCompanySelection} value={formik.values.companyID} />
+                            <SearchComponent setSelectedCompany={handleCompanySelection} value={formik.values.companyID} disableClearable />
 
                             {formik.touched.companyID && formik.errors.companyID && (
                               <Typography variant="caption" color="error">
@@ -667,52 +835,6 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </Stack>
                     </Grid>
 
-                    {/* Trip Time */}
-                    <Grid item xs={2}>
-                      <Stack gap={1}>
-                        <InputLabel htmlFor="tripTime" required>
-                          Trip Time
-                        </InputLabel>
-
-                        <TextField
-                          id="tripTime"
-                          name="tripTime"
-                          type="time"
-                          value={formik.values.tripTime}
-                          onChange={formik.handleChange}
-                          error={formik.touched.tripTime && Boolean(formik.errors.tripTime)}
-                          helperText={formik.touched.tripTime && formik.errors.tripTime}
-                          fullWidth
-                          autoComplete="tripTime"
-                        />
-                      </Stack>
-                    </Grid>
-
-                    {formik.values.dualTrip === DUAL_TRIP.YES && (
-                      <>
-                        {/* Trip Time */}
-                        <Grid item xs={2}>
-                          <Stack gap={1}>
-                            <InputLabel htmlFor="tripTime" required>
-                              Dual Trip Time
-                            </InputLabel>
-
-                            <TextField
-                              id="returnTripTime"
-                              name="returnTripTime"
-                              type="time"
-                              value={formik.values.returnTripTime}
-                              onChange={formik.handleChange}
-                              error={formik.touched.returnTripTime && Boolean(formik.errors.returnTripTime)}
-                              helperText={formik.touched.returnTripTime && formik.errors.returnTripTime}
-                              fullWidth
-                              autoComplete="returnTripTime"
-                            />
-                          </Stack>
-                        </Grid>
-                      </>
-                    )}
-
                     {/* Trip Type */}
                     <Grid item xs={2}>
                       <Stack gap={1}>
@@ -742,38 +864,55 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </Stack>
                     </Grid>
 
-                    {/* Guard & Dual Trip */}
+                    {/* Trip Time */}
                     <Grid item xs={2}>
-                      <Stack gap={1} direction="row">
-                        {/* Guard */}
-                        <FormControlLabel
-                          value="bottom"
-                          control={
-                            <Checkbox
-                              name="guard"
-                              checked={formik.values.guard} // Bind to Formik state
-                              onChange={handleGuardChange} // Update Formik state
-                            />
-                          }
-                          label="Guard"
-                          labelPlacement="top"
-                        />
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="tripTime" required>
+                          Trip Time
+                        </InputLabel>
 
-                        {/* Dual Trip */}
-                        <FormControlLabel
-                          value="bottom"
-                          control={
-                            <Checkbox
-                              name="guard"
-                              checked={formik.values.dualTrip} // Bind to Formik state
-                              onChange={handleDualTripChange} // Update Formik state
-                            />
-                          }
-                          label="Dual Trip"
-                          labelPlacement="top"
-                        />
+                        <Tooltip title="Select the time of the trip">
+                          <TextField
+                            id="tripTime"
+                            name="tripTime"
+                            type="time"
+                            value={formik.values.tripTime}
+                            onChange={formik.handleChange}
+                            error={formik.touched.tripTime && Boolean(formik.errors.tripTime)}
+                            helperText={formik.touched.tripTime && formik.errors.tripTime}
+                            fullWidth
+                            autoComplete="tripTime"
+                          />
+                        </Tooltip>
                       </Stack>
                     </Grid>
+
+                    {!id && formik.values.dualTrip === DUAL_TRIP.YES && (
+                      <>
+                        {/* Trip Time */}
+                        <Grid item xs={2}>
+                          <Stack gap={1}>
+                            <InputLabel htmlFor="tripTime" required>
+                              Return Trip Time
+                            </InputLabel>
+
+                            <Tooltip title="Select the return trip time">
+                              <TextField
+                                id="returnTripTime"
+                                name="returnTripTime"
+                                type="time"
+                                value={formik.values.returnTripTime}
+                                onChange={formik.handleChange}
+                                error={formik.touched.returnTripTime && Boolean(formik.errors.returnTripTime)}
+                                helperText={formik.touched.returnTripTime && formik.errors.returnTripTime}
+                                fullWidth
+                                autoComplete="returnTripTime"
+                              />
+                            </Tooltip>
+                          </Stack>
+                        </Grid>
+                      </>
+                    )}
                   </Grid>
                 </Grid>
 
@@ -825,7 +964,9 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                     {/* Zone Type */}
                     <Grid item xs={2}>
                       <Stack gap={1}>
-                        <InputLabel htmlFor="zoneTypeID">Zone Type</InputLabel>
+                        <InputLabel htmlFor="zoneTypeID" required>
+                          Zone Type
+                        </InputLabel>
 
                         <Autocomplete
                           id="zoneTypeID"
@@ -975,18 +1116,36 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                           }
                         }
                       }}
-                      title="Sync Rates"
+                      // title="Sync Rates"
+                      title={
+                        isSyncing
+                          ? 'Please select company, zone, zone type, vehicle type, vehicle number & driver.'
+                          : syncLoading
+                          ? 'Please wait...'
+                          : 'Click to sync rates.'
+                      }
                       // disableFocusListener
                     >
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        endIcon={syncLoading ? <CircularProgress /> : <FaSyncAlt />}
-                        disabled={isSyncing}
-                        onClick={handleSyncRates}
-                      >
-                        Sync Rates
-                      </Button>
+                      <span>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          endIcon={
+                            syncLoading ? (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <CircularProgress color="info" size={16} />
+                              </Box>
+                            ) : (
+                              <FaSyncAlt />
+                            )
+                          }
+                          disabled={isSyncing || syncLoading}
+                          onClick={handleSyncRates}
+                        >
+                          Sync Rates
+                        </Button>
+                      </span>
                     </Tooltip>
                   </Stack>
 
@@ -1044,6 +1203,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </Stack>
                     </Grid>
 
+                    {/* {((!id && driverType === DRIVER_TYPE.VENDOR_DRIVER) || (id && formik.values.vendorGuardPrice !== -1)) && ( */}
                     {driverType === DRIVER_TYPE.VENDOR_DRIVER && (
                       <>
                         {/* Vendor Guard Price */}
@@ -1101,6 +1261,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                       </>
                     )}
 
+                    {/* {((!id && driverType === DRIVER_TYPE.CAB_PROVIDER) || (id && formik.values.driverGuardPrice !== -1)) && ( */}
                     {driverType === DRIVER_TYPE.CAB_PROVIDER && (
                       <>
                         {/* Driver Guard Price */}
@@ -1168,7 +1329,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
 
                   <Grid container spacing={1}>
                     {/* Add On Rate */}
-                    <Grid item xs={2}>
+                    <Grid item xs={4}>
                       <Stack gap={1}>
                         <InputLabel htmlFor="addOnRate">Add On Rate</InputLabel>
 
@@ -1185,7 +1346,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                     </Grid>
 
                     {/* MCD Charge */}
-                    <Grid item xs={2}>
+                    <Grid item xs={4}>
                       <Stack gap={1}>
                         <InputLabel htmlFor="mcdCharge">MCD Charge</InputLabel>
 
@@ -1202,7 +1363,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                     </Grid>
 
                     {/* Toll Charge */}
-                    <Grid item xs={2}>
+                    <Grid item xs={4}>
                       <Stack gap={1}>
                         <InputLabel htmlFor="tollCharge">Toll Charge</InputLabel>
 
