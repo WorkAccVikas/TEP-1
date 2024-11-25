@@ -112,52 +112,122 @@ const NUMERIC_INPUT_FIELD = {
   // }
 };
 
-const validationSchema = Yup.object().shape({
-  // companyID: Yup.string().required('Company is required'),
-  companyID: Yup.mixed()
-    .test(
-      'is-null-or-object',
-      'Field must be null or a valid object',
-      (value) => value === null || (typeof value === 'object' && !Array.isArray(value))
-    )
-    .required('Company is required'), // If required is mandatory.,
-  tripDate: Yup.date().required('Trip date is required'),
-  tripTime: Yup.string().required('Trip time is required'),
-  returnTripTime: Yup.string().when('dualTrip', (val, schema) => {
-    console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
-    if (val[0]) {
-      return Yup.string()
-        .test('is-less-than-tripTime', 'Return trip time must be later than the trip time', function (value) {
-          console.log(`🚀 ~ returnTripTime:Yup.string ~ value:`, value);
-          const { tripTime } = this.parent;
-          const returnTime = value;
+// const validationSchema = Yup.object().shape({
+//   // companyID: Yup.string().required('Company is required'),
+//   companyID: Yup.mixed()
+//     .test(
+//       'is-null-or-object',
+//       'Field must be null or a valid object',
+//       (value) => value === null || (typeof value === 'object' && !Array.isArray(value))
+//     )
+//     .required('Company is required'), // If required is mandatory.,
+//   tripDate: Yup.date().required('Trip date is required'),
+//   tripTime: Yup.string().required('Trip time is required'),
+//   returnTripTime: Yup.string().when('dualTrip', (val, schema) => {
+//     console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
+//     if (val[0]) {
+//       return Yup.string()
+//         .test('is-less-than-tripTime', 'Return trip time must be later than the trip time', function (value) {
+//           console.log(`🚀 ~ returnTripTime:Yup.string ~ value:`, value);
+//           const { tripTime } = this.parent;
+//           const returnTime = value;
 
-          const time1 = moment(tripTime, 'HH:mm');
-          const time2 = moment(returnTime, 'HH:mm');
-          console.log(`🚀 ~ tripTime:`, tripTime);
-          return time2.isAfter(time1);
-        })
-        .required('Return trip time is required');
-    } else {
-      return Yup.string().notRequired();
-    }
-  }),
-  tripType: Yup.number().required('Trip type is required'),
-  zoneNameID: Yup.string().required('Zone name is required'),
-  zoneTypeID: Yup.string().required('Zone type is required'),
-  vehicleTypeID: Yup.string().required('Vehicle type is required'),
-  vehicleNumber: Yup.string().required('Vehicle number is required'),
-  driverId: Yup.string().required('Driver is required'),
+//           const time1 = moment(tripTime, 'HH:mm');
+//           const time2 = moment(returnTime, 'HH:mm');
+//           console.log(`🚀 ~ tripTime:`, tripTime);
+//           return time2.isAfter(time1);
+//         })
+//         .required('Return trip time is required');
+//     } else {
+//       return Yup.string().notRequired();
+//     }
+//   }),
+//   tripType: Yup.number().required('Trip type is required'),
+//   zoneNameID: Yup.string().required('Zone name is required'),
+//   zoneTypeID: Yup.string().required('Zone type is required'),
+//   vehicleTypeID: Yup.string().required('Vehicle type is required'),
+//   vehicleNumber: Yup.string().required('Vehicle number is required'),
+//   driverId: Yup.string().required('Driver is required'),
 
-  // guardPrice: Yup.number()
-  //   .typeError('Must be a number')
-  //   .min(NUMERIC_INPUT_FIELD.guardPrice.defaultValue, 'Guard Price must be at least ₹0'),
+//   // guardPrice: Yup.number()
+//   //   .typeError('Must be a number')
+//   //   .min(NUMERIC_INPUT_FIELD.guardPrice.defaultValue, 'Guard Price must be at least ₹0'),
 
-  companyRate: Yup.number()
-    .typeError('Must be a number')
-    .min(NUMERIC_INPUT_FIELD.companyRate.min, `Company Rate must be at least ₹${NUMERIC_INPUT_FIELD.companyRate.min}`)
-    .required('Company Rate is required')
-});
+//   companyRate: Yup.number()
+//     .typeError('Must be a number')
+//     .min(NUMERIC_INPUT_FIELD.companyRate.min, `Company Rate must be at least ₹${NUMERIC_INPUT_FIELD.companyRate.min}`)
+//     .required('Company Rate is required')
+// });
+
+const generateValidationSchema = (id) => {
+  return Yup.object().shape({
+    // companyID: Yup.string().required('Company is required'),
+    companyID: Yup.mixed()
+      .test(
+        'is-null-or-object',
+        'Field must be null or a valid object',
+        (value) => value === null || (typeof value === 'object' && !Array.isArray(value))
+      )
+      .required('Company is required'), // If required is mandatory.,
+    tripDate: Yup.date().required('Trip date is required'),
+    tripTime: Yup.string().required('Trip time is required'),
+    // returnTripTime: Yup.string().when('dualTrip', (val, schema) => {
+    //   console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
+    //   if (val[0]) {
+    //     return Yup.string()
+    //       .test('is-less-than-tripTime', 'Return trip time must be later than the trip time', function (value) {
+    //         console.log(`🚀 ~ returnTripTime:Yup.string ~ value:`, value);
+    //         const { tripTime } = this.parent;
+    //         const returnTime = value;
+
+    //         const time1 = moment(tripTime, 'HH:mm');
+    //         const time2 = moment(returnTime, 'HH:mm');
+    //         console.log(`🚀 ~ tripTime:`, tripTime);
+    //         return time2.isAfter(time1);
+    //       })
+    //       .required('Return trip time is required');
+    //   } else {
+    //     return Yup.string().notRequired();
+    //   }
+    // }),
+    returnTripTime: id
+      ? Yup.string().notRequired()
+      : Yup.string().when('dualTrip', (val, schema) => {
+          console.log(`🚀 ~ returnTripTime:Yup.string ~ val:`, val);
+          if (val[0]) {
+            return Yup.string()
+              .test('is-less-than-tripTime', 'Return trip time must be later than the trip time', function (value) {
+                console.log(`🚀 ~ returnTripTime:Yup.string ~ value:`, value);
+                const { tripTime } = this.parent;
+                const returnTime = value;
+
+                const time1 = moment(tripTime, 'HH:mm');
+                const time2 = moment(returnTime, 'HH:mm');
+                console.log(`🚀 ~ tripTime:`, tripTime);
+                return time2.isAfter(time1);
+              })
+              .required('Return trip time is required');
+          } else {
+            return Yup.string().notRequired();
+          }
+        }),
+    tripType: Yup.number().required('Trip type is required'),
+    zoneNameID: Yup.string().required('Zone name is required'),
+    zoneTypeID: Yup.string().required('Zone type is required'),
+    vehicleTypeID: Yup.string().required('Vehicle type is required'),
+    vehicleNumber: Yup.string().required('Vehicle number is required'),
+    driverId: Yup.string().required('Driver is required'),
+
+    // guardPrice: Yup.number()
+    //   .typeError('Must be a number')
+    //   .min(NUMERIC_INPUT_FIELD.guardPrice.defaultValue, 'Guard Price must be at least ₹0'),
+
+    companyRate: Yup.number()
+      .typeError('Must be a number')
+      .min(NUMERIC_INPUT_FIELD.companyRate.min, `Company Rate must be at least ₹${NUMERIC_INPUT_FIELD.companyRate.min}`)
+      .required('Company Rate is required')
+  });
+};
 
 const TRIP_TYPE = {
   PICKUP: 1,
@@ -182,7 +252,7 @@ const DRIVER_TYPE = {
 const getInitialValues = (data) => {
   console.log('data', data);
   return {
-    tripId: data?.tripId || null,
+    tripId: data?._id || null,
 
     companyID: data?.companyID || null,
     tripDate: data?.tripDate ? new Date(data?.tripDate) : null,
@@ -221,6 +291,46 @@ const getInitialValues = (data) => {
   };
 };
 
+const updatePayload = (values, driverType) => {
+  return {
+    data: {
+      tripId: values.tripId || null,
+      companyID: values.companyID._id,
+      tripDate: formatDateUsingMoment(values.tripDate),
+      tripTime: values.tripTime,
+
+      tripType: values.tripType,
+
+      zoneNameID: values.zoneNameID,
+      zoneTypeID: values.zoneTypeID || null,
+      vehicleTypeID: values.vehicleTypeID,
+      vehicleNumber: values.vehicleNumber,
+      driverId: values.driverId,
+      location: values.location,
+
+      guard: values.guard,
+      isDualTrip: values.dualTrip,
+
+      companyGuardPrice: values.companyGuardPrice,
+      companyRate: values.companyRate,
+      companyPenalty: values.companyPenalty,
+
+      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : -1,
+      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : -1,
+      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : -1,
+
+      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : -1,
+      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : -1,
+      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : -1,
+
+      addOnRate: values.addOnRate,
+      mcdCharge: values.mcdCharge,
+      tollCharge: values.tollCharge,
+
+      remarks: values.remarks
+    }
+  };
+};
 const createPayload = (values, item, driverType) => {
   return {
     data: {
@@ -373,7 +483,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
             remarks: values.remarks
           }
         };
-        await dispatch(updateTrip(payload)).unwrap();
+        await dispatch(updateTrip(updatePayload(values, driverType))).unwrap();
       } else {
         if (!syncRate) {
           dispatch(
@@ -553,7 +663,8 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
 
     initialValues: getInitialValues(details),
     enableReinitialize: true,
-    validationSchema,
+    // validationSchema,
+    validationSchema: generateValidationSchema(id),
     onSubmit
   });
 
@@ -698,6 +809,84 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       setSyncLoading(false);
     }
   }, [formik]);
+
+  useEffect(() => {
+    const handleSyncRates = async () => {
+      try {
+        const payload = {
+          data: {
+            companyID: formik.values.companyID?._id,
+            vehicleTypeID: formik.values.vehicleTypeID,
+            zoneNameID: formik.values.zoneNameID,
+            zoneTypeID: formik.values.zoneTypeID,
+            driverId: formik.values.driverId
+          }
+        };
+        console.log('PPP = ', payload);
+
+        if (
+          formik.values.companyID &&
+          formik.values.vehicleTypeID &&
+          formik.values.zoneNameID &&
+          formik.values.zoneTypeID &&
+          formik.values.driverId
+        ) {
+          console.log('API Call .................');
+          const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+          const data = response.data.data;
+
+          setRateDetails(data);
+          setSyncRate(true);
+
+          if (
+            typeof data.vendorGuardPrice !== 'object' &&
+            typeof data.vendorAmount !== 'object' &&
+            typeof data.vendorDualAmount !== 'object'
+          ) {
+            console.log('Vendor Driver');
+            formik.setFieldValue('vendorGuardPrice', formik.values.guard ? data.vendorGuardPrice || 0 : 0);
+            formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount || 0); // data.driverAmount);
+            formik.setFieldValue('companyGuardPrice', formik.values.guard ? data.companyGuardPrice || 0 : 0);
+            formik.setFieldValue('companyRate', formik.values.dualTrip ? (data.companyDualAmount || 0) / 2 : data.companyAmount || 0);
+
+            setDriverType(DRIVER_TYPE.VENDOR_DRIVER); // Vendor Driver
+          } else {
+            console.log('Cab Provider Driver');
+            formik.setFieldValue('driverGuardPrice', formik.values.guard ? data.driverGuardPrice || 0 : 0);
+            formik.setFieldValue('driverRate', formik.values.dualTrip ? (data.driverDualAmount || 0) / 2 : data.driverAmount || 0); // data.driverAmount);
+            formik.setFieldValue('companyGuardPrice', formik.values.guard ? data.companyGuardPrice || 0 : 0);
+            formik.setFieldValue('companyRate', formik.values.dualTrip ? (data.companyDualAmount || 0) / 2 : data.companyAmount || 0);
+
+            setDriverType(DRIVER_TYPE.CAB_PROVIDER); // Cab Provider Driver
+          }
+        }
+      } catch (error) {
+        console.log('Error :: handleSyncRates = ', error);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: error?.message || 'Something went wrong',
+            variant: 'alert',
+            alert: {
+              color: 'error'
+            },
+            close: true
+          })
+        );
+      }
+    };
+
+    if (id) {
+      handleSyncRates();
+    }
+  }, [
+    formik.values.companyID,
+    formik.values.vehicleTypeID,
+    formik.values.zoneNameID,
+    formik.values.zoneTypeID,
+    formik.values.driverId,
+    id
+  ]);
 
   const handleGuardChange = (event) => {
     const val = event.target.checked;
@@ -1400,13 +1589,15 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                 </Grid>
               </Grid>
             </DialogContent>
+
             <Divider />
+
             <DialogActions>
               <Button color="error" onClick={handleClose}>
                 Cancel
               </Button>
               <Button variant="contained" type="submit" disabled={formik.isSubmitting || !formik.dirty}>
-                Add
+                {id ? 'Save' : 'Add'}
               </Button>
             </DialogActions>
           </Form>
