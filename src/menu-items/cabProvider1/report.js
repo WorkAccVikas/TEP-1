@@ -32,11 +32,10 @@ const report = {
         icon: icons.samplePage,
         children: [
           {
-            id: 'test',
-            title: <FormattedMessage id="test" />,
+            id: 'rosterreports',
+            title: <FormattedMessage id="rosterreports" />,
             type: 'item',
-            // url: '/apps/invoices/advance-type',
-            // icon: icons.upload
+            url: '/reports',
           },
         ]
       },
@@ -48,11 +47,22 @@ const report = {
         icon: icons.samplePage,
         children: [
           {
-            id: 'test',
-            title: <FormattedMessage id="test" />,
+            id: 'cabreports',
+            title: <FormattedMessage id="cabreports" />,
             type: 'item',
-            // url: '/apps/invoices/advance-type',
-            // icon: icons.upload
+            url: '/reports',
+          },
+          {
+            id: 'invoicereports',
+            title: <FormattedMessage id="invoicereports" />,
+            type: 'item',
+            url: '/reports',
+          },
+          {
+            id: 'mcdreports',
+            title: <FormattedMessage id="mcdreports" />,
+            type: 'item',
+            url: '/reports',
           },
         ]
       },
@@ -64,11 +74,22 @@ const report = {
         icon: icons.samplePage,
         children: [
           {
-            id: 'test',
-            title: <FormattedMessage id="test" />,
+            id: 'cabreports',
+            title: <FormattedMessage id="cabreports" />,
             type: 'item',
-            // url: '/apps/invoices/advance-type',
-            // icon: icons.upload
+            url: 'reports-driver'
+          },
+          {
+            id: 'invoicereports',
+            title: <FormattedMessage id="invoicereports" />,
+            type: 'item',
+            url: 'reports-driver'
+          },
+          {
+            id: 'mcdreports',
+            title: <FormattedMessage id="mcdreports" />,
+            type: 'item',
+            url: 'reports-driver'
           },
         ]
       }
