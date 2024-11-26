@@ -16,7 +16,7 @@ const initialState = {
 export const addNewTrip = createAsyncThunk('trips/addNewTrip', async (payload, { rejectWithValue }) => {
   try {
     console.log(`🚀 ~ addNewTrip ~ payload:`, payload);
-    const response = await axios.post('/trip/add', payload);
+    const response = await axios.post('/assignTrip/single/trip', payload);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
@@ -25,7 +25,16 @@ export const addNewTrip = createAsyncThunk('trips/addNewTrip', async (payload, {
 
 export const updateTrip = createAsyncThunk('trips/updateTrip', async (payload, { rejectWithValue }) => {
   try {
-    const response = await axios.put('/trip/update', payload);
+    const response = await axios.put('/assignTrip/single/trip/edit', payload);
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+export const fetchTripDetails = createAsyncThunk('trips/fetchTripDetails', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/assignTrip/getTripById?assignTripID=${id}`);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);

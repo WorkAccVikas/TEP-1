@@ -119,6 +119,7 @@ const Create = () => {
       fetchCompanyDetails(companyID._id);
     }
   }, [companyID]);
+  
 
   console.log({ company });
 
