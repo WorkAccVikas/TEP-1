@@ -59,6 +59,7 @@ import { customerPopup, selectCountry, getInvoiceInsert, reviewInvoicePopup, get
 import { Add, Edit, Setting, Trash } from 'iconsax-react';
 import { useEffect, useState } from 'react';
 import axiosServices from 'utils/axios';
+import _ from 'lodash';
 
 const validationSchema = yup.object({
   date: yup.date().required('Invoice date is required'),
@@ -94,6 +95,166 @@ const validationSchema = yup.object({
     .min(1, 'Invoice must have at least 1 items')
 });
 
+const dummyData = [
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '11',
+      zoneTypeName: 'Mum-A'
+    },
+    vehicleTypeID: {
+      _id: '10',
+      vehicleTypeName: 'Sedan'
+    },
+    companyRate: 200
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '11',
+      zoneTypeName: 'Mum-A'
+    },
+    vehicleTypeID: {
+      _id: '102',
+      vehicleTypeName: 'Suv'
+    },
+    companyRate: 300
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '11',
+      zoneTypeName: 'Mum-A'
+    },
+    vehicleTypeID: {
+      _id: '103',
+      vehicleTypeName: 'Nano'
+    },
+    companyRate: 400
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '11',
+      zoneTypeName: 'Mum-A'
+    },
+    vehicleTypeID: {
+      _id: '101',
+      vehicleTypeName: 'Sedan'
+    },
+    companyRate: 200
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '11',
+      zoneTypeName: 'Mum-A'
+    },
+    vehicleTypeID: {
+      _id: '101',
+      vehicleTypeName: 'Sedan'
+    },
+    companyRate: 200
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    zoneTypeID: {
+      _id: '12',
+      zoneTypeName: 'Mum-B'
+    },
+    vehicleTypeID: {
+      _id: '103',
+      vehicleTypeName: 'Nano'
+    },
+    companyRate: 200
+  },
+  {
+    zoneNameID: {
+      _id: '2',
+      zoneName: 'Goa'
+    },
+    zoneTypeID: {
+      _id: '21',
+      zoneTypeName: 'Goa-A'
+    },
+    vehicleTypeID: {
+      _id: '101',
+      vehicleTypeName: 'Sedan'
+    },
+    companyRate: 500
+  },
+  {
+    zoneNameID: {
+      _id: '2',
+      zoneName: 'Goa'
+    },
+    zoneTypeID: {
+      _id: '21',
+      zoneTypeName: 'Goa-A'
+    },
+    vehicleTypeID: {
+      _id: '102',
+      vehicleTypeName: 'Suv'
+    },
+    companyRate: 400
+  },
+  {
+    zoneNameID: {
+      _id: '2',
+      zoneName: 'Goa'
+    },
+    zoneTypeID: {
+      _id: '21',
+      zoneTypeName: 'Goa-A'
+    },
+    vehicleTypeID: {
+      _id: '101',
+      vehicleTypeName: 'Sedan'
+    },
+    companyRate: 500
+  },
+  {
+    zoneNameID: {
+      _id: '2',
+      zoneName: 'Goa'
+    },
+    vehicleTypeID: {
+      _id: '102',
+      vehicleTypeName: 'Suv'
+    },
+    companyRate: 200
+  },
+  {
+    zoneNameID: {
+      _id: '1',
+      zoneName: 'Mumbai'
+    },
+    vehicleTypeID: {
+      _id: '103',
+      vehicleTypeName: 'Nano'
+    },
+    companyRate: 300
+  }
+];
+
 const Create = () => {
   const theme = useTheme();
   const navigation = useNavigate();
@@ -101,7 +262,82 @@ const Create = () => {
   const tripData = location.state?.tripData;
   const [company, setCompany] = useState(null);
   console.log({ tripData });
+  const [groupBy, setGroupBy] = useState('vehicleTypeID');
+  const [number, setNumber] = useState(1);
 
+  // Helper function to extract the correct grouping key
+  const getGroupKey = (item, key) => {
+    if (key === 'zoneNameID') {
+      return item[key]?.zoneName || 'Unknown'; // Access the name inside the object
+    }
+    if (key === 'zoneTypeID') {
+      return item[key]?.zoneTypeName || 'Unknown'; // Access the name inside the object
+    }
+    if (key === 'vehicleTypeID') {
+      return item[key]?.vehicleTypeName || 'Unknown'; // Access the name inside the object
+    }
+    return item[key];
+  };
+
+  // Group and map data into unique objects
+  // const groupData = (data, groupByKey) => {
+  //   // Define additional grouping based on combination logic
+  //   const extraGroupKey = groupByKey === 'companyRate' ? null : 'companyRate';
+
+  //   const grouped = _.groupBy(data, (item) => {
+  //     const primaryKey = getGroupKey(item, groupByKey);
+  //     const secondaryKey = extraGroupKey ? item[extraGroupKey] : '';
+  //     return `${primaryKey}||${secondaryKey}`;
+  //   });
+
+  //   // Convert grouped data into unique objects
+  //   return Object.entries(grouped).map(([key, items]) => {
+  //     const [primaryKey, secondaryKey] = key.split('||');
+
+  //     return {
+  //       itemName: `${primaryKey}`,
+  //       rate: secondaryKey || items[0]?.companyRate || 'Unknown',
+  //       qty: items.length
+  //     };
+  //   });
+  // };
+
+  // const mappedData = groupData(tripData, groupBy);
+
+  const groupDataWithSuffix = (data, groupByKey) => {
+    // Group the data
+    const grouped = _.groupBy(data, (item) => {
+      const primaryKey = getGroupKey(item, groupByKey);
+      const secondaryKey = groupByKey !== 'companyRate' ? item.companyRate : '';
+      return `${primaryKey}||${secondaryKey}`;
+    });
+
+    // Convert grouped data into unique objects with a suffix for duplicates
+    const result = [];
+    let suffixCounts = {}; // Tracks suffix for each unique group key
+
+    Object.entries(grouped).forEach(([key, items], i) => {
+      const [primaryKey, secondaryKey] = key.split('||');
+
+      // Increment the suffix count for this primaryKey
+      suffixCounts[primaryKey] = (suffixCounts[primaryKey] || 0) + 1;
+      const suffix = `(${suffixCounts[primaryKey]})`;
+
+      // Add the formatted object to the result
+      result.push({
+        itemName: groupByKey === 'companyRate' ? `Trip (${i + 1})` : `${primaryKey} ${suffix}`,
+        rate: secondaryKey || items[0].companyRate || 'Unknown',
+        qty: items.length
+      });
+    });
+
+    return result;
+  };
+
+  // const mappedData = groupDataWithSuffix(tripData, groupBy);
+  const mappedData = groupDataWithSuffix(dummyData, groupBy);
+
+  console.log({ mappedData });
   const { companyID } = tripData.length > 0 ? tripData[0] : {};
 
   useEffect(() => {
@@ -119,7 +355,6 @@ const Create = () => {
       fetchCompanyDetails(companyID._id);
     }
   }, [companyID]);
-  
 
   console.log({ company });
 
