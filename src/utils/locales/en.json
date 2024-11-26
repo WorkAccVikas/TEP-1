@@ -53,5 +53,9 @@
   "user-setting": "User Setting",
   "create template": "Create Template",
   "advance-type":"Advance Type",
-  "test":"test"
+  "test":"test",
+  "cabreports":"Cab Reports",
+  "invoicereports":"Invoice Reports",
+  "mcdreports":"MCD Reports",
+  "rosterreports":"Roster Reports"
 }

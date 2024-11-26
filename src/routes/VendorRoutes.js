@@ -60,7 +60,7 @@ const AddBranch = Loadable(lazy(() => import('pages/management/company/AddBranch
 const CompanyOverview = Loadable(lazy(() => import('pages/overview/CompanyOverview')));
 
 // reports
-const Reports = Loadable(lazy(() => import('pages/Reports')));
+const Reports = Loadable(lazy(() => import('pages/reports/Reports')));
 // Invoice
 // const Invoice = Loadable(lazy(() => import('pages/invoices/Invoice')));
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
