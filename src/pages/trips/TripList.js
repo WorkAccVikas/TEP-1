@@ -990,7 +990,7 @@ const TripList = () => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
               <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                <More style={{ fontSize: '1.15rem' }} />
+                <More style={{ fontSize: '1.15rem', transform: 'rotate(90deg)' }} />
               </IconButton>
 
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
