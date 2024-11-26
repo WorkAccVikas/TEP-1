@@ -208,7 +208,7 @@ function ReactTable({ columns, data }) {
               />
             ))}
           </Tabs>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+          {/* <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
             <Button
               variant="contained"
               size="small"
@@ -218,7 +218,7 @@ function ReactTable({ columns, data }) {
             >
               Create Invoice
             </Button>
-          </Stack>
+          </Stack> */}
         </Stack>
       </Box>
 
@@ -276,6 +276,8 @@ ReactTable.propTypes = {
 // ==============================|| INVOICE - LIST ||============================== //
 
 const List = () => {
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const { alertPopup } = useSelector((state) => state.invoice);
   const userType = useSelector((state) => state.auth.userType);
@@ -729,24 +731,25 @@ const List = () => {
       </Grid>
 
       {/* filter */}
-      <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
-        <CompanyFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedCompany}
-        />
-        {/* <VendorFilter
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
+          <CompanyFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedCompany}
+          />
+          {/* <VendorFilter
           setFilterOptions={setFilterOptions}
           sx={{
             color: '#fff',
@@ -795,15 +798,20 @@ const List = () => {
           value={filterOptions.selectedVehicle}
         /> */}
 
-        <DateRangeSelect
-          startDate={startDate}
-          endDate={endDate}
-          selectedRange={range}
-          prevRange={prevRange}
-          setSelectedRange={setRange}
-          onRangeChange={handleRangeChange}
-          showSelectedRangeLabel
-        />
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            prevRange={prevRange}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+          />
+        </Stack>
+
+        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
+          Create Invoice
+        </Button>
       </Stack>
       <MainCard content={false}>
         <ScrollX>

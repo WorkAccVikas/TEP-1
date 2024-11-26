@@ -353,13 +353,13 @@ const createPayload = (values, item, driverType) => {
       companyRate: values.companyRate,
       companyPenalty: values.companyPenalty,
 
-      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : -1,
-      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : -1,
-      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : -1,
+      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : null,
+      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : null,
+      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : null,
 
-      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : -1,
-      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : -1,
-      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : -1,
+      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : null,
+      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : null,
+      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : null,
 
       addOnRate: values.addOnRate,
       mcdCharge: values.mcdCharge,
@@ -723,14 +723,14 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       setSyncLoading(true);
       // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
-      const data = response.data.data;
-      console.log(`🚀 ~ handleSyncRates ~ response:`, response);
-      console.log('data = ', data);
+      // const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+      // const data = response.data.data;
+      // console.log(`🚀 ~ handleSyncRates ~ response:`, response);
+      // console.log('data = ', data);
 
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      // setSyncLoading(true);
+      setSyncLoading(true);
       // // Cab Provider Driver
       // const data = {
       //   driverGuardPrice: 100,
@@ -746,20 +746,20 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       //   companyDualAmount: 5000
       // };
 
-      // // Vendor Driver
-      // const data = {
-      //   driverGuardPrice: null,
-      //   driverAmount: null,
-      //   driverDualAmount: null,
+      // Vendor Driver
+      const data = {
+        driverGuardPrice: null,
+        driverAmount: null,
+        driverDualAmount: null,
 
-      //   vendorGuardPrice: 25,
-      //   vendorAmount: 500,
-      //   vendorDualAmount: 4000,
+        vendorGuardPrice: 25,
+        vendorAmount: 500,
+        vendorDualAmount: 4000,
 
-      //   companyGuardPrice: 200,
-      //   companyAmount: 700,
-      //   companyDualAmount: 1000
-      // };
+        companyGuardPrice: 200,
+        companyAmount: 700,
+        companyDualAmount: 1000
+      };
 
       setRateDetails(data);
       setSyncRate(true);
@@ -838,11 +838,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
           setRateDetails(data);
           setSyncRate(true);
 
-          if (
-            typeof data.vendorGuardPrice !== 'object' &&
-            typeof data.vendorAmount !== 'object' &&
-            typeof data.vendorDualAmount !== 'object'
-          ) {
+          if (data.vendorGuardPrice !== 0 && data.vendorAmount !== 0 && data.vendorDualAmount !== 0) {
             console.log('Vendor Driver');
             formik.setFieldValue('vendorGuardPrice', formik.values.guard ? data.vendorGuardPrice || 0 : 0);
             formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount || 0); // data.driverAmount);
