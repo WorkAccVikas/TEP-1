@@ -8,7 +8,12 @@ export const fetchCompaniesRosterFile = createAsyncThunk(
   async ({ page, limit, startDate, endDate, companyId }, { rejectWithValue }) => {
     try {
       // const response = await axios.get(`/cabProvider/roster/data/by?companyId=${id}`);
-      const response = await axios.get(`/cabProvider/roster/data/by?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+      let response;
+      if (!startDate || !endDate) {
+        response = await axios.get(`/cabProvider/roster/data/by?page=${page}&limit=${limit}`);
+      } else {
+        response = await axios.get(`/cabProvider/roster/data/by?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : error.message);
