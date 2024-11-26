@@ -1044,7 +1044,6 @@ const TripList = () => {
           );
         }
       },
-
       {
         title: '_id',
         Header: '_id'
@@ -1101,24 +1100,20 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
-        Header: 'Guard',
-        accessor: 'guard'
+        Header: 'Vehicle Guard Price',
+        accessor: 'guardPrice', // This can be any key; we won't directly use it.
+        Cell: ({ row }) => {
+          const { driverGuardPrice, vendorGuardPrice } = row.original;
+          return driverGuardPrice || vendorGuardPrice || 'Null';
+        }
       },
       {
-        Header: 'Guard Price',
-        accessor: 'guardPrice'
-      },
-      {
-        Header: 'Company Rate',
-        accessor: 'companyRate'
-      },
-      {
-        Header: 'Vendor Rate',
-        accessor: 'vendorRate'
-      },
-      {
-        Header: 'Driver Rate',
-        accessor: 'driverRate'
+        Header: 'Vehicle Rates',
+        accessor: (row) => row.vendorRate ?? row.driverRate,
+        Cell: ({ row }) => {
+          const { vendorRate, driverRate } = row.original;
+          return vendorRate ?? driverRate ?? 'Null';
+        }
       },
       {
         Header: 'Additional Rate',
@@ -1126,7 +1121,8 @@ const TripList = () => {
       },
       {
         Header: 'Penalty',
-        accessor: 'penalty'
+        accessor: 'penalty',
+        Cell: ({ value }) => value || 'Null'
       },
       {
         Header: 'Location',
@@ -1134,8 +1130,21 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
+        Header: 'Trip Type',
+        accessor: 'tripType',
+        Cell: ({ value }) => {
+          switch (value) {
+            case 1: // For Pick Up
+              return <Chip label="Pick Up" color="warning" variant="light" />;
+            case 2: // For Pick Drop
+              return <Chip label="Pick Drop" color="success" variant="light" />;
+          }
+        }
+      },
+      {
         Header: 'Remarks',
-        accessor: 'remarks'
+        accessor: 'remarks',
+        Cell: ({ value }) => value || 'None'
       }
     ],
     []

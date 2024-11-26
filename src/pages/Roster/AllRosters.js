@@ -61,6 +61,7 @@ import VehicleFilter from 'pages/trips/filter/VehicleFilter';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import { formatDateUsingMoment } from 'utils/helper';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -174,7 +175,15 @@ const AllRosters = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
-
+  
+  
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {},
+    selectedVendor: {},
+    selectedDiver: {},
+    selectedVehicle: {}
+  });
+  
   const handleCloseForRemove = useCallback(() => {
     setRemove(false);
     setDeleteID(null);
@@ -184,12 +193,22 @@ const AllRosters = () => {
     setRefetch((prev) => !prev);
   }, []);
 
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  
+
   useEffect(() => {
-    dispatch(fetchCompaniesRosterFile({ page: page, limit: limit }));
-  }, [dispatch, page, limit, refetch]);
+    dispatch(
+      fetchCompaniesRosterFile({
+        page: page,
+        limit: limit,
+        startDate: formatDateUsingMoment(startDate),
+        endDate: formatDateUsingMoment(endDate),
+        companyID: filterOptions.selectedCompany._id,
+      })
+    );
+  }, [dispatch, page, limit, refetch, startDate, endDate]);
 
   const handleLimitChange = useCallback((event) => {
-    console.log(event.target.value);
     setLimit(+event.target.value);
     setPage(1);
   }, []);
@@ -197,11 +216,9 @@ const AllRosters = () => {
   const filteredData = useMemo(() => {
     return rosterFiles.filter((row) => row.isVisited === 1); // Filter where isVisited is 1
   }, [rosterFiles]);
-  console.log({ filteredData });
 
   const handleDelete = useCallback(async () => {
     try {
-      console.log('Id = ', deleteID);
 
       if (!deleteID) return;
 
@@ -294,7 +311,7 @@ const AllRosters = () => {
         Header: 'Status',
         accessor: 'vendorDetails',
         Cell: ({ row }) => {
-          console.log({ row });
+          // console.log({ row });
 
           return (
             <>
@@ -404,19 +421,10 @@ const AllRosters = () => {
     }
   ];
 
-  const [filterOptions, setFilterOptions] = useState({
-    selectedCompany: {},
-    selectedVendor: {},
-    selectedDiver: {},
-    selectedVehicle: {}
-  });
-
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
     { title: 'Roster', to: '/apps/roster/all-roster' }
   ];
-
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   if (error) return <Error500 />;
 

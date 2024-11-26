@@ -33,12 +33,9 @@ const CustomerSchema = Yup.object().shape({});
 // ==============================|| CUSTOMER - ADD / EDIT ||============================== //
 
 const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
-  const token = localStorage.getItem('serviceToken');
+  // const token = localStorage.getItem('serviceToken');
   const dispatch = useDispatch();
   const theme = useTheme();
-
-  console.log('advanceData', advanceData);
-  console.log('key', key);
 
   const handleReject = async () => {
     try {
@@ -156,7 +153,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
       const interestRate = advanceData?.advanceTypeId?.interestRate;
 
       if (!isNaN(requestedAmount) && !isNaN(interestRate)) {
-        const payableAmount = requestedAmount - requestedAmount * (interestRate / 100);
+        const payableAmount = requestedAmount + requestedAmount * (interestRate / 100);
         formik.setFieldValue('payableAmount', payableAmount.toFixed(2)); // Set the calculated payable amount
       }
     }
@@ -169,7 +166,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
       const interestRate = advanceData?.advanceTypeId?.interestRate;
 
       if (!isNaN(approvedAmount) && !isNaN(interestRate)) {
-        const finalPayableAmount = approvedAmount - approvedAmount * (interestRate / 100);
+        const finalPayableAmount = approvedAmount + approvedAmount * (interestRate / 100);
         formik.setFieldValue('finalPayableAmount', finalPayableAmount.toFixed(2)); // Set the calculated final payable amount
       }
     }
