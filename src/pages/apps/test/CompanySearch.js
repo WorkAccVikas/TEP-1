@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 
-const SearchComponent = ({ setSelectedCompany, sx, value }) => {
+const SearchComponent = ({ setSelectedCompany, sx, value, defaultValue = null, ...rest }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -74,11 +74,15 @@ const SearchComponent = ({ setSelectedCompany, sx, value }) => {
         }}
         sx={sx}
         onChange={(event, newValue) => {
+          console.log(`🚀 ~ SearchComponent ~ newValue:`, newValue);
           // Call setSelectedCompany with the selected company
           if (newValue) {
             setSelectedCompany(newValue); // Pass the selected company to the parent component
+          } else {
+            setSelectedCompany(defaultValue);
           }
         }}
+        {...rest}
         renderInput={(params) => (
           <TextField
             {...params}

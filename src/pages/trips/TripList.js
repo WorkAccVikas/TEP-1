@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback, forwardRef } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -24,7 +24,8 @@ import {
   Button,
   CircularProgress,
   Dialog,
-  Tooltip
+  Tooltip,
+  Slide
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -65,6 +66,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import CustomAlert from './alerts/TripStatusChange';
 import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
+import { ThemeMode } from 'config';
+
+const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 const TRIP_STATUS = {
   PENDING: 1,
@@ -365,7 +369,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 
   const handleTripGeneration = () => {
     console.log({ selected });
-    // navigate('/apps/invoices/test', { state: { tripData: selected } });
+    navigate('/apps/invoices/test', { state: { tripData: selected } });
   };
 
   const handleCloseForRemove = useCallback(() => {
@@ -905,115 +909,6 @@ const TripList = () => {
           );
         }
       },
-      // {
-      //   Header: 'Actions',
-      //   className: 'cell-center',
-      //   disableSortBy: true,
-      //   Cell: ({ row }) => {
-      //     // console.log('row', row);
-
-      //     const [anchorEl, setAnchorEl] = useState(null);
-      //     const [status, setStatus] = useState(null);
-
-      //     const handleMenuClick = (event) => {
-      //       setAnchorEl(event.currentTarget);
-      //     };
-
-      //     const handleMenuClose = () => {
-      //       setAnchorEl(null);
-      //     };
-
-      //     const handleCompleted = () => {
-      //       // alert('Completed');
-      //       row.original.status = 'Completed'; // Update the row's status
-      //       setSelectedRow(row.original);
-
-      //       setUpdatedStatus(TRIP_STATUS.COMPLETED);
-      //       setPopup(POPUP_TYPE.ALERT_DIALOG);
-      //       setAlertOpen(true);
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const handlePending = () => {
-      //       // alert('Pending');
-      //       row.original.status = 'Pending'; // Update the row's status
-      //       setSelectedRow(row.original);
-      //       // setAlertOpen(true);
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const handleCancelled = () => {
-      //       // alert('Cancelled');
-      //       row.original.status = 'Cancelled'; // Update the row's status
-      //       setSelectedRow(row.original);
-      //       setUpdatedStatus(TRIP_STATUS.CANCELLED);
-      //       // setAlertCancelOpen(true);
-      //       setPopup(POPUP_TYPE.FORM_DIALOG);
-
-      //       setAlertOpen(true);
-
-      //       handleMenuClose(); // Close the menu after selecting an option
-      //     };
-
-      //     const openMenu = Boolean(anchorEl);
-
-      //     return (
-      //       <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-      //         <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-      //           <More style={{ fontSize: '1.15rem' }} />
-      //         </IconButton>
-
-      //         {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title="Edit"
-      //           >
-      //             <IconButton
-      //               color="primary"
-      //               onClick={(e) => {
-      //                 e.stopPropagation();
-      //                 setIsOpen(true); // Open the dialog for editing
-      //                 setId(row.original.tripId);
-      //               }}
-      //             >
-      //               <Edit />
-      //             </IconButton>
-      //           </Tooltip>
-      //         )}
-
-      //         <Menu
-      //           id="fade-menu"
-      //           MenuListProps={{
-      //             'aria-labelledby': 'fade-button'
-      //           }}
-      //           anchorEl={anchorEl}
-      //           open={openMenu}
-      //           onClose={handleMenuClose}
-      //           TransitionComponent={Fade}
-      //           anchorOrigin={{
-      //             vertical: 'bottom',
-      //             horizontal: 'right'
-      //           }}
-      //           transformOrigin={{
-      //             vertical: 'top',
-      //             horizontal: 'right'
-      //           }}
-      //         >
-      //           {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
-      //           {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
-      //           {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
-      //         </Menu>
-      //       </Stack>
-      //     );
-      //   }
-      // },
       {
         Header: 'Status',
         accessor: 'assignedStatus',
@@ -1037,7 +932,118 @@ const TripList = () => {
           }
         }
       },
+      {
+        Header: 'Actions',
+        className: 'cell-center',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          console.log('row', row);
 
+          const [anchorEl, setAnchorEl] = useState(null);
+          const [status, setStatus] = useState(null);
+
+          const handleMenuClick = (event) => {
+            setAnchorEl(event.currentTarget);
+          };
+
+          const handleMenuClose = () => {
+            setAnchorEl(null);
+          };
+
+          const handleCompleted = () => {
+            // alert('Completed');
+            console.log('row', row.original);
+            row.original.status = 'Completed'; // Update the row's status
+            setSelectedRow(row.original);
+
+            setUpdatedStatus(TRIP_STATUS.COMPLETED);
+            setPopup(POPUP_TYPE.ALERT_DIALOG);
+            setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handlePending = () => {
+            // alert('Pending');
+            console.log('row', row.original);
+            row.original.status = 'Pending'; // Update the row's status
+            setSelectedRow(row.original);
+            // setAlertOpen(true);
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const handleCancelled = () => {
+            // alert('Cancelled');
+            console.log('row', row.original);
+            row.original.status = 'Cancelled'; // Update the row's status
+            setSelectedRow(row.original);
+            setUpdatedStatus(TRIP_STATUS.CANCELLED);
+            // setAlertCancelOpen(true);
+            setPopup(POPUP_TYPE.FORM_DIALOG);
+
+            setAlertOpen(true);
+
+            handleMenuClose(); // Close the menu after selecting an option
+          };
+
+          const openMenu = Boolean(anchorEl);
+
+          return (
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
+                <More style={{ fontSize: '1.15rem', transform: 'rotate(90deg)' }} />
+              </IconButton>
+
+              {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Edit"
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true); // Open the dialog for editing
+                      setId(row.original._id);
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              <Menu
+                id="fade-menu"
+                MenuListProps={{
+                  'aria-labelledby': 'fade-button'
+                }}
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleMenuClose}
+                TransitionComponent={Fade}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
+                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
+                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
+              </Menu>
+            </Stack>
+          );
+        }
+      },
       {
         title: '_id',
         Header: '_id'
@@ -1094,24 +1100,20 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
-        Header: 'Guard',
-        accessor: 'guard'
+        Header: 'Vehicle Guard Price',
+        accessor: 'guardPrice', // This can be any key; we won't directly use it.
+        Cell: ({ row }) => {
+          const { driverGuardPrice, vendorGuardPrice } = row.original;
+          return driverGuardPrice || vendorGuardPrice || 'Null';
+        }
       },
       {
-        Header: 'Guard Price',
-        accessor: 'guardPrice'
-      },
-      {
-        Header: 'Company Rate',
-        accessor: 'companyRate'
-      },
-      {
-        Header: 'Vendor Rate',
-        accessor: 'vendorRate'
-      },
-      {
-        Header: 'Driver Rate',
-        accessor: 'driverRate'
+        Header: 'Vehicle Rates',
+        accessor: (row) => row.vendorRate ?? row.driverRate,
+        Cell: ({ row }) => {
+          const { vendorRate, driverRate } = row.original;
+          return vendorRate ?? driverRate ?? 'Null';
+        }
       },
       {
         Header: 'Additional Rate',
@@ -1119,7 +1121,8 @@ const TripList = () => {
       },
       {
         Header: 'Penalty',
-        accessor: 'penalty'
+        accessor: 'penalty',
+        Cell: ({ value }) => value || 'Null'
       },
       {
         Header: 'Location',
@@ -1127,8 +1130,21 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
+        Header: 'Trip Type',
+        accessor: 'tripType',
+        Cell: ({ value }) => {
+          switch (value) {
+            case 1: // For Pick Up
+              return <Chip label="Pick Up" color="warning" variant="light" />;
+            case 2: // For Pick Drop
+              return <Chip label="Pick Drop" color="success" variant="light" />;
+          }
+        }
+      },
+      {
         Header: 'Remarks',
-        accessor: 'remarks'
+        accessor: 'remarks',
+        Cell: ({ value }) => value || 'None'
       }
     ],
     []
@@ -1364,6 +1380,7 @@ const TripList = () => {
           fullWidth
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          TransitionComponent={Transition}
         >
           <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
         </Dialog>

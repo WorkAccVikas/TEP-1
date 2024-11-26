@@ -30,7 +30,8 @@ const DateRangeSelect = memo(
     selectedRange,
     setSelectedRange,
     prevRange,
-    availableRanges
+    availableRanges,
+    sx
   }) => {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
@@ -85,7 +86,7 @@ const DateRangeSelect = memo(
     };
 
     useEffect(() => {
-      console.table({ startDate, endDate, selectedRange });
+      // console.table({ startDate, endDate, selectedRange });
       // Automatically set the range based on the initial dates
       if (startDate && endDate && !selectedRange) {
         const initialRange = determineRange(startDate, endDate);
@@ -99,7 +100,7 @@ const DateRangeSelect = memo(
 
     const handleRangeSelection = (event) => {
       const range = event.target.value;
-      console.log({ range });
+      // console.log({ range });
       setSelectedRange(range);
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
@@ -151,8 +152,9 @@ const DateRangeSelect = memo(
               '& .MuiSelect-icon': {
                 color: '#fff'
               },
-              mb: 1,
-              width: '220px'
+              mb: sx?.mb || 1,
+              width: sx?.width || '220px', 
+              height: sx?.height 
             }}
             renderValue={() => (
               <Box display="flex" alignItems="center">

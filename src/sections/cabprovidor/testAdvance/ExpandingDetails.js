@@ -27,9 +27,8 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 
 // assets
-import { Add, ArrowDown2, ArrowRight2 } from 'iconsax-react';
+import { ArrowDown2, ArrowRight2, Eye } from 'iconsax-react';
 import ExpandingUserDetail from './ExpandingUserDetail';
-import CSVExport from 'components/third-party/CSVExport';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
 import { ThemeMode } from 'config';
@@ -39,23 +38,27 @@ import { dispatch } from 'store';
 import { fetchAdvances } from 'store/slice/cabProvidor/advanceSlice';
 import { PopupTransition } from 'components/@extended/Transitions';
 import AdvanceForm from '../advances/AdvanceForm';
-import { TablePagination } from 'components/third-party/ReactTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import PaginationBox from 'components/tables/Pagination';
+import DateRangeSelect from 'pages/trips/filter/DateFilter';
+import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
+import { height, width } from '@mui/system';
+import { formatDateUsingMoment } from 'utils/helper';
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
+function ReactTable({ columns: userColumns, data, renderRowSubComponent, page, setPage, limit, setLimit, lastPageNo }) {
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-    visibleColumns,
-    gotoPage,
-    setPageSize,
-    state: { pageIndex, pageSize }
+    visibleColumns
+    // gotoPage,
+    // setPageSize,
+    // state: { pageIndex, pageSize }
   } = useTable(
     {
       columns: userColumns,
@@ -102,7 +105,7 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
         })}
         <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
           <TableCell sx={{ p: 2, py: 3 }} colSpan={12}>
-            <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+            <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
           </TableCell>
         </TableRow>
       </TableBody>
@@ -126,6 +129,11 @@ const ExpandingDetails = () => {
   const [advanceData, setAdvanceData] = useState(null);
   const [add, setAdd] = useState(false);
   const [key, setKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const lastPageIndex = metaData.lastPageNo;
+
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
@@ -137,8 +145,20 @@ const ExpandingDetails = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchAdvances());
-  }, [dispatch]);
+    dispatch(
+      fetchAdvances({
+        page: page,
+        limit: limit,
+        startDate: formatDateUsingMoment(startDate),
+        endDate: formatDateUsingMoment(endDate)
+      })
+    );
+  }, [dispatch, page, limit, startDate, endDate]);
+
+  const handleLimitChange = useCallback((event) => {
+    setLimit(+event.target.value);
+    setPage(1);
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -188,7 +208,8 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Remarks',
-        accessor: 'remarks'
+        accessor: 'remarks',
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
       },
       {
         Header: 'Status',
@@ -197,7 +218,7 @@ const ExpandingDetails = () => {
           const isApproved = row.original.isApproved;
 
           if (isApproved == 1) {
-            return <Chip color="success" label="Approved" size="small" variant="light" />;
+            return <Chip color="success" label="Transferred" size="small" variant="light" />;
           } else if (isApproved == 2) {
             return <Chip color="error" label="Rejected" size="small" variant="light" />;
           } else {
@@ -311,19 +332,19 @@ const ExpandingDetails = () => {
               handleAdd();
             }
           };
-      
+
           const getSwitchColor = () => {
             if (row.original.isApproved === 1) return 'success'; // Green when approved
-            if (row.original.isApproved === 2) return 'error';   // Red when rejected
-            return 'default';                                    // Default color for pending
+            if (row.original.isApproved === 2) return 'error'; // Red when rejected
+            return 'default'; // Default color for pending
           };
-      
+
           const getTooltipTitle = () => {
             if (row.original.isApproved === 1) return 'Approved'; // Approved status
             if (row.original.isApproved === 2) return 'Rejected'; // Rejected status
-            return 'Approve';                                     // Default for pending state
+            return 'Approve'; // Default for pending state
           };
-      
+
           return (
             <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
               <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
@@ -331,9 +352,7 @@ const ExpandingDetails = () => {
                   componentsProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: mode === ThemeMode.DARK
-                          ? theme.palette.grey[50]
-                          : theme.palette.grey[700],
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
                         opacity: 0.9
                       }
                     }
@@ -351,7 +370,7 @@ const ExpandingDetails = () => {
             </Stack>
           );
         }
-      }      
+      }
     ],
     []
   );
@@ -370,21 +389,33 @@ const ExpandingDetails = () => {
 
   return (
     <>
-      <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
+      <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 2 }}>
         <Stack direction={'row'} alignItems="center" spacing={2}>
           <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ}>
             <Button
               variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Eye />}
               onClick={handleAdvanceType}
               size="small"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
+              sx={{ height: '36px' }} 
             >
-              {loading ? 'Loading...' : ' View Advance Type'}
+              {loading ? 'Loading...' : 'View Advance Type'}
             </Button>
           </WrapperButton>
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            prevRange={prevRange}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+            sx={{ height: '36px', width: '180px', mb: '0px' }} 
+          />
         </Stack>
       </Stack>
+
       <MainCard content={false}>
         <ScrollX>
           {loading ? (
@@ -392,7 +423,16 @@ const ExpandingDetails = () => {
           ) : advances?.length === 0 ? (
             <EmptyTableDemo />
           ) : (
-            <ReactTable columns={columns} data={advances} renderRowSubComponent={renderRowSubComponent} />
+            <ReactTable
+              columns={columns}
+              data={advances}
+              renderRowSubComponent={renderRowSubComponent}
+              page={page}
+              setPage={setPage}
+              limit={limit}
+              setLimit={handleLimitChange}
+              lastPageNo={lastPageIndex}
+            />
           )}
         </ScrollX>
       </MainCard>
