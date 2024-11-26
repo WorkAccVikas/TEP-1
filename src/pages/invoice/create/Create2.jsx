@@ -247,6 +247,7 @@ const Create2 = () => {
   const [particularType, setParticularType] = useState(0);
   const [groupTax, setGroupTax] = useState(0);
   const [groupDiscount, setGroupDiscount] = useState(0);
+  const [linkedTripIds, setLinkedTripIds] = useState([]);
 
   const userType = useSelector((state) => state.auth.userType);
 
@@ -283,6 +284,7 @@ const Create2 = () => {
           dueDate: formatDateUsingMoment(values?.due_date, format),
           servicePeriod:
             formatDateUsingMoment(values?.start_date, 'DD-MM-YYYY') + ' to ' + formatDateUsingMoment(values?.end_date, 'DD-MM-YYYY'),
+          linkedTripIds,
           invoiceData: values?.invoiceData || [],
           // subTotal: values?.subTotal,
           // totalAmount: values?.grandTotal,
@@ -525,6 +527,7 @@ const Create2 = () => {
         console.log('Data = ', response.data.data);
 
         const apiData = response.data.data;
+        const linkedTripIds = response.data.linkedTripIds;
 
         if (apiData.length > 0) {
           const initialItem = item;
@@ -542,6 +545,7 @@ const Create2 = () => {
           console.log(`🚀 ~ newItems ~ newItems:`, newItems);
 
           formik.setFieldValue('invoiceData', newItems);
+          setLinkedTripIds(linkedTripIds);
         }
       }
     } catch (error) {
