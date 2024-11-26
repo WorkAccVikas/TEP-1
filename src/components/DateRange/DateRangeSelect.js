@@ -70,7 +70,7 @@ const DateRangeSelect = memo(
         end: moment()
       },
       [DATE_RANGE_OPTIONS.THIS_MONTH]: {
-        label: 'This Month',
+        label: 'Current Month',
         start: moment().startOf('month'),
         end: moment()
       },

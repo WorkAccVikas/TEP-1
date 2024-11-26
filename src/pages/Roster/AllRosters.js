@@ -32,7 +32,6 @@ import ScrollX from 'components/ScrollX';
 import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import IconButton from 'components/@extended/IconButton';
-import InvoiceCard from 'components/cards/invoice/InvoiceCard';
 import InvoiceChart from 'components/cards/invoice/InvoiceChart';
 import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
 import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
@@ -54,6 +53,15 @@ import { APP_DEFAULT_PATH } from 'config';
 import { ThemeMode } from 'config';
 import axiosServices from 'utils/axios';
 import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
+import TableWidgetCard from './components/RosterCard';
+import CompanyFilter from 'pages/trips/filter/CompanyFilter';
+import VendorFilter from 'pages/trips/filter/VendorFilter';
+import DriverFilter from 'pages/trips/filter/DriverFilter';
+import VehicleFilter from 'pages/trips/filter/VehicleFilter';
+import DateRangeSelect from 'pages/trips/filter/DateFilter';
+import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
+import EmptyTableDemo from 'components/tables/EmptyTable';
+import { formatDateUsingMoment } from 'utils/helper';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -167,7 +175,15 @@ const AllRosters = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
-
+  
+  
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {},
+    selectedVendor: {},
+    selectedDiver: {},
+    selectedVehicle: {}
+  });
+  
   const handleCloseForRemove = useCallback(() => {
     setRemove(false);
     setDeleteID(null);
@@ -177,12 +193,22 @@ const AllRosters = () => {
     setRefetch((prev) => !prev);
   }, []);
 
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  
+
   useEffect(() => {
-    dispatch(fetchCompaniesRosterFile({ page: page, limit: limit }));
-  }, [dispatch, page, limit, refetch]);
+    dispatch(
+      fetchCompaniesRosterFile({
+        page: page,
+        limit: limit,
+        startDate: formatDateUsingMoment(startDate),
+        endDate: formatDateUsingMoment(endDate),
+        companyID: filterOptions.selectedCompany._id,
+      })
+    );
+  }, [dispatch, page, limit, refetch, startDate, endDate]);
 
   const handleLimitChange = useCallback((event) => {
-    console.log(event.target.value);
     setLimit(+event.target.value);
     setPage(1);
   }, []);
@@ -190,11 +216,9 @@ const AllRosters = () => {
   const filteredData = useMemo(() => {
     return rosterFiles.filter((row) => row.isVisited === 1); // Filter where isVisited is 1
   }, [rosterFiles]);
-  console.log({ filteredData });
 
   const handleDelete = useCallback(async () => {
     try {
-      console.log('Id = ', deleteID);
 
       if (!deleteID) return;
 
@@ -259,7 +283,7 @@ const AllRosters = () => {
         accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : '')
       },
       {
-        Header: 'Total Entries',
+        Header: 'Entries',
         accessor: 'totalCount',
         Cell: ({ row }) => {
           return <Typography>{row.original.totalCount}</Typography>;
@@ -287,7 +311,7 @@ const AllRosters = () => {
         Header: 'Status',
         accessor: 'vendorDetails',
         Cell: ({ row }) => {
-          console.log({ row });
+          // console.log({ row });
 
           return (
             <>
@@ -366,30 +390,33 @@ const AllRosters = () => {
 
   const widgetsData = [
     {
-      title: 'Paid',
-      count: '0',
+      title: 'Roster',
+      count: '131',
       percentage: 70.5,
       isLoss: false,
-      invoice: '0',
+      even: true,
+      entries: '620',
+      color: theme.palette.primary,
+      chartData: [0, 0, 0, 0, 0, 0, 0]
+    },
+    {
+      title: 'Completed',
+      count: '10',
+      percentage: 27.4,
+      isLoss: false,
+      even: false,
+      entries: '500',
       color: theme.palette.success,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
-      title: 'Unpaid',
-      count: '0',
+      title: 'Pending',
+      count: '121',
       percentage: 27.4,
       isLoss: true,
-      invoice: '0',
+      even: false,
+      entries: '120',
       color: theme.palette.warning,
-      chartData: [0, 0, 0, 0, 0, 0, 0]
-    },
-    {
-      title: 'Overdue',
-      count: '0',
-      percentage: 27.4,
-      isLoss: true,
-      invoice: '0',
-      color: theme.palette.error,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     }
   ];
@@ -399,12 +426,11 @@ const AllRosters = () => {
     { title: 'Roster', to: '/apps/roster/all-roster' }
   ];
 
-  if (loading) return <TableSkeleton rows={10} columns={9} />;
   if (error) return <Error500 />;
 
   return (
     <>
-      <Breadcrumbs custom heading="Roster" links={breadcrumbLinks} />
+      <Breadcrumbs custom links={breadcrumbLinks} sx={{ pb: 0, mb: 0 }} />
 
       <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
         <Grid item md={8}>
@@ -412,16 +438,15 @@ const AllRosters = () => {
             {widgetsData.map((widget, index) => (
               <Grid item sm={4} xs={12} key={index}>
                 <MainCard>
-                  <InvoiceCard
+                  <TableWidgetCard
                     title={widget.title}
                     count={widget.count}
                     percentage={widget.percentage}
                     isLoss={widget.isLoss}
-                    invoice={widget.invoice}
+                    entries={widget.entries}
                     color={widget.color.main}
-                  >
-                    <InvoiceChart color={widget.color} data={widget.chartData} />
-                  </InvoiceCard>
+                    even={widget.even}
+                  ></TableWidgetCard>
                 </MainCard>
               </Grid>
             ))}
@@ -437,38 +462,34 @@ const AllRosters = () => {
           >
             <Stack direction="row" alignItems="flex-end" justifyContent="space-between" spacing={1}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Avatar alt="Natacha" variant="rounded" type="filled">
-                  <ProfileTick style={{ fontSize: '20px' }} />
-                </Avatar>
-                <Box>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body1" color="white">
-                      Total Recievables
-                    </Typography>
-                    <InfoCircle color={theme.palette.background.paper} />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <Typography variant="body2" color="white">
-                      Current
-                    </Typography>
-                    <Typography variant="body1" color="white">
-                      0
-                    </Typography>
-                  </Stack>
-                </Box>
+                <Stack direction="row" spacing={1}>
+                  <Typography variant="body2" color="white">
+                    Total Entries
+                  </Typography>
+                  <Typography variant="body1" color="white">
+                    0
+                  </Typography>
+                </Stack>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="white">
-                  Overdue
+                  Trips Assigned
                 </Typography>
                 <Typography variant="body1" color="white">
                   0
                 </Typography>
               </Stack>
             </Stack>
-            <Typography variant="h4" color="white" sx={{ pt: 2, pb: 1, zIndex: 1 }}>
-              ₹0
-            </Typography>
+
+            <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
+              <Typography variant="body2" color="white">
+                Pending
+              </Typography>
+              <Typography variant="body1" color="white">
+                0
+              </Typography>
+            </Stack>
+
             <Box sx={{ maxWidth: '100%' }}>
               <LinearWithLabel value={0} />
             </Box>
@@ -476,17 +497,101 @@ const AllRosters = () => {
         </Grid>
       </Grid>
 
+      {/* filter */}
+      <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
+        <CompanyFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedCompany}
+        />
+        {/* <VendorFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVendor}
+        />
+        <DriverFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedDiver}
+        />
+        <VehicleFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '220px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVehicle}
+        /> */}
+
+        <DateRangeSelect
+          startDate={startDate}
+          endDate={endDate}
+          selectedRange={range}
+          prevRange={prevRange}
+          setSelectedRange={setRange}
+          onRangeChange={handleRangeChange}
+          showSelectedRangeLabel
+        />
+      </Stack>
+
       <MainCard content={false}>
         <ScrollX>
-          <ReactTable
-            columns={columns}
-            data={filteredData}
-            page={page}
-            setPage={setPage}
-            limit={limit}
-            setLimit={handleLimitChange}
-            lastPageNo={lastPageIndex}
-          />
+          {loading ? (
+            <TableSkeleton rows={10} columns={6} />
+          ) : filteredData?.length > 0 ? (
+            <ReactTable
+              columns={columns}
+              data={filteredData}
+              page={page}
+              setPage={setPage}
+              limit={limit}
+              setLimit={handleLimitChange}
+              lastPageNo={lastPageIndex}
+            />
+          ) : (
+            <EmptyTableDemo />
+          )}
         </ScrollX>
       </MainCard>
 

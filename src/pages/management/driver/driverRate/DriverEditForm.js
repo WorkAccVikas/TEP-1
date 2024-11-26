@@ -74,7 +74,7 @@ const DriverEditForm = ({ driverEdit, onCancel, updateKey, setUpdateKey }) => {
           onCancel();
         }
 
-        console.log('formik.values', restructureObject(formik.values));
+        // console.log('formik.values', restructureObject(formik.values));
       } catch (error) {
         console.error(error);
         dispatch(

@@ -19,6 +19,9 @@ import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelist
 import TripView from 'pages/trips/TripView';
 import ExpandingFile from 'sections/cabprovidor/testAdvance/ExpandingFile';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
+import Reports from 'pages/reports/Reports';
+import ReportDriver from 'pages/reports/ReportDriver';
+import Create from 'pages/invoice/create/Create3';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -76,7 +79,7 @@ const CompanyRateListing = Loadable(lazy(() => import('pages/management/company/
 const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCompany')));
 
 // reports
-const Reports = Loadable(lazy(() => import('pages/Reports')));
+// const Reports = Loadable(lazy(() => import('pages/reports/Reports')));
 // Invoice
 // const Invoice = Loadable(lazy(() => import('pages/invoices/Invoice')));
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
@@ -206,6 +209,10 @@ const CabProvidorRoutes = {
                 {
                   path: 'list',
                   element: <InvoiceList />
+                },
+                {
+                  path: 'test',
+                  element: <Create />
                 },
                 {
                   path: 'create',
@@ -423,6 +430,11 @@ const CabProvidorRoutes = {
         {
           path: 'reports',
           element: <Reports />
+        },
+
+        {
+          path: 'reports-driver',
+          element: <ReportDriver />
         },
 
         // Master

@@ -8,23 +8,25 @@ import { ArrowDown3, ArrowUp3 } from 'iconsax-react';
 
 // ==============================|| INVOICE - CARD  ||============================== //
 
-const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, invoice }) => {
+const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, trips }) => {
   return (
     <Grid container direction="row" spacing={2} justifyContent="space-between">
       <Grid item xs={12} md={5}>
-        <Stack direction="column" spacing={2}>
+
+        <Stack direction="column" spacing={1}>
+
           <Typography variant="subtitle1">{title}</Typography>
+
           <Stack direction="column" spacing={1}>
-            <Typography variant="h4" color="inherit">
-              {count}
-            </Typography>
+            
             <Stack direction="row" spacing={1}>
-              <Typography variant="subtitle1">{invoice}</Typography>
+              <Typography variant="subtitle1">{trips}</Typography>
               <Typography color="secondary">trips</Typography>
             </Stack>
           </Stack>
         </Stack>
       </Grid>
+
       <Grid item xs={12} md={7}>
         <Box>
           <Stack direction="column" alignItems="flex-end" justifyContent="space-evenly">
@@ -35,7 +37,9 @@ const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, in
                 <Typography color="secondary">{percentage}%</Typography>
               </Stack>
             )}
-            {children}
+            <Typography variant="h5" color="inherit" sx={{mt:0.5}}>
+              {count}
+            </Typography>
           </Stack>
         </Box>
       </Grid>
@@ -43,7 +47,7 @@ const TableWidgetCard = ({ color, title, count, percentage, isLoss, children, in
   );
 };
 
-TableWidgetCard.propTypes = {
+TableWidgetCard.propTypes = { 
   color: PropTypes.string,
   title: PropTypes.string,
   count: PropTypes.string,

@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import CabTable from 'sections/cabprovidor/cabManagement/CabTable';
 import { fetchCabs } from 'store/slice/cabProvidor/cabSlice';
+import BulkUploadDialog from './bulkUpload/Dialog';
 
 const Cab = () => {
   const dispatch = useDispatch();
@@ -17,6 +18,14 @@ const Cab = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
+  const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
+
+  const handleVehicleBulkUploadOpen = () => {
+    setOpenBulkUploadDialog(true);
+  };
+  const handleVehicleBulkUploadClose = () => {
+    setOpenBulkUploadDialog(false);
+  };
 
   useEffect(() => {
     dispatch(fetchCabs({ page, limit }));
@@ -34,16 +43,28 @@ const Cab = () => {
   return (
     <>
       <Stack gap={1} spacing={1}>
-        <Header OtherComp={({loading}) => <ButtonComponent loading={loading}/>} />
-        <CabTable data={cabs} page={page} setPage={setPage} limit={limit} setLimit={handleLimitChange} lastPageNo={lastPageIndex} loading={loading}/>
+        <Header
+          OtherComp={({ loading }) => <ButtonComponent loading={loading} handleVehicleBulkUploadOpen={handleVehicleBulkUploadOpen} />}
+        />
+        <CabTable
+          data={cabs}
+          page={page}
+          setPage={setPage}
+          limit={limit}
+          setLimit={handleLimitChange}
+          lastPageNo={lastPageIndex}
+          loading={loading}
+        />
       </Stack>
+
+      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleVehicleBulkUploadOpen} handleClose={handleVehicleBulkUploadClose} />
     </>
   );
 };
 
 export default Cab;
 
-const ButtonComponent = ({loading}) => {
+const ButtonComponent = ({ loading, handleVehicleBulkUploadOpen }) => {
   const navigate = useNavigate();
   return (
     <>
@@ -57,6 +78,11 @@ const ButtonComponent = ({loading}) => {
             disabled={loading} // Disable button while loading
           >
             {loading ? 'Loading...' : 'Add Cab'}
+          </Button>
+        </WrapperButton>
+        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleVehicleBulkUploadOpen}>
+            Upload Vehicle List
           </Button>
         </WrapperButton>
       </Stack>

@@ -12,6 +12,10 @@ import { Edit, Trash } from 'iconsax-react';
 import { ThemeMode } from 'config';
 import { PopupTransition } from 'components/@extended/Transitions';
 import VendorEditForm from './VendorEditForm';
+import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
+import axiosServices from 'utils/axios';
+import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpdateKey,updateKey }) => {
   const theme = useTheme();
@@ -19,10 +23,60 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpd
   const [add, setAdd] = useState(false);
   const [vendorData, setVendorData] = useState(null);
   const [vendorEdit, setVendorEdit] = useState(null);
+  const [alertopen, setAlertOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [vehicleTypeId, setVehicleTypeId] = useState(null);
 
   const handleAdd = () => {
     setAdd(!add);
     if (vendorData && !add) setVendorData(null);
+  };
+
+  const handleClose = () => {
+    setAlertOpen(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await axiosServices.put(`/cabRateMaster/single/delete`, {
+        data: {
+          _id: deleteId,
+          vehicleTypeId: vehicleTypeId
+        }
+      });
+
+      console.log('response', response);
+
+      if (response.status === 200) {
+        setUpdateKey(updateKey + 1);
+        setAlertOpen(false);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: response.data.data || 'Deleted successfully',
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false
+          })
+        );
+      }
+    } catch (error) {
+      console.log('error', error);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Failed to delete item',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: false
+        })
+      );
+    }
   };
   
   const columns = useMemo(
@@ -76,8 +130,7 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpd
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          // const driverID = row.original._id;
-          // const isCabProviderDriver = row.original.isCabProviderDriver;
+          const vehicleTypeID = row.original.VehicleTypeName._id;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
              
@@ -119,11 +172,10 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpd
                 <IconButton
                   color="error"
                   onClick={(e) => {
-                    // e.stopPropagation();
-                    // console.log(`🚀 ~ row.values.id:`, row.values);
-                    // dispatch(handleOpen(ACTION.DELETE));
-                    // dispatch(setDeletedName(row.values['userName']));
-                    // dispatch(setSelectedID(row.values._id)); //setDeletedName
+                    e.stopPropagation();
+                    setDeleteId(row.original._id);
+                    setAlertOpen(true);
+                    setVehicleTypeId(vehicleTypeID);
                   }}
                 >
                   <Trash />
@@ -164,6 +216,12 @@ const VendorRateTable = ({ data, page, setPage, limit, setLimit, loading ,setUpd
         >
           <VendorEditForm vendorEdit={vendorEdit} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
         </Dialog>
+        <CustomAlertDelete
+        title={'This action is irreversible. Please check before deleting.'}
+        open={alertopen}
+        handleClose={handleClose}
+        handleDelete={handleDelete}
+      />
     </>
   );
 };

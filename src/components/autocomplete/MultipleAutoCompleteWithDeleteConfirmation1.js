@@ -87,7 +87,7 @@ const MultipleAutoCompleteWithDeleteConfirmation1 = ({
         renderInput={(params) => <TextField {...params} placeholder={placeholder} />}
         sx={{
           '& .MuiOutlinedInput-root': {
-            p: 1
+            p: 0.5
           },
           '& .MuiAutocomplete-tag': {
             bgcolor: 'primary.lighter',

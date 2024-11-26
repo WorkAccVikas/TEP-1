@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback, forwardRef } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -18,13 +18,14 @@ import {
   TableHead,
   TableRow,
   useMediaQuery,
-  Tooltip,
   Menu,
   MenuItem,
   Fade,
   Button,
   CircularProgress,
-  Dialog
+  Dialog,
+  Tooltip,
+  Slide
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -35,39 +36,39 @@ import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, 
 import Loader from 'components/Loader';
 import ScrollX from 'components/ScrollX';
 import MainCard from 'components/MainCard';
-import Avatar from 'components/@extended/Avatar';
 import IconButton from 'components/@extended/IconButton';
 import TripCard from 'components/cards/trips/TripCard';
-import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
+import { HeaderSort, IndeterminateCheckbox, TablePagination } from 'components/third-party/ReactTable';
 import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
 
 import { dispatch, useSelector } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reducers/invoice';
-import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
+import { alertPopupToggle, getInvoiceDelete } from 'store/reducers/invoice';
+import { renderFilterTypes, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
-import TripChart from 'components/cards/trips/TripChart';
+import { Add, ArrowCircleDown2, Edit, Money4, More, NotificationBing, Routing2, Trash } from 'iconsax-react';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
 import FormDialog from 'components/alertDialog/FormDialog';
-import { convertToDateUsingMoment, formatDateForApi, formatDateUsingMoment, formattedDate } from 'utils/helper';
-import Breadcrumbs from 'components/@extended/Breadcrumbs';
-import { APP_DEFAULT_PATH } from 'config';
+import { formatDateUsingMoment, formattedDate } from 'utils/helper';
 import { Link } from 'react-router-dom';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
-import DateRangeSelect from 'components/DateRange/DateRangeSelect';
-import LoadingButton from 'themes/overrides/LoadingButton';
 import CustomAlertDelete from 'sections/cabprovidor/advances/CustomAlertDelete';
 import AddNewTrip from './AddNewTrip';
-import { fetchZoneNames } from 'store/slice/cabProvidor/ZoneNameSlice';
-import { fetchAllZoneTypes } from 'store/slice/cabProvidor/zoneTypeSlice';
-import { fetchAllVehicleTypesForAll } from 'store/slice/cabProvidor/vehicleTypeSlice';
-import { fetchAllDrivers, fetchDrivers1 } from 'store/slice/cabProvidor/driverSlice';
-import { fetchCab1 } from 'store/slice/cabProvidor/cabSlice';
+import CompanyFilter from './filter/CompanyFilter';
+import VendorFilter from './filter/VendorFilter';
+import DriverFilter from './filter/DriverFilter';
+import VehicleFilter from './filter/VehicleFilter';
+import DateRangeSelect from './filter/DateFilter';
+import EmptyTableDemo from 'components/tables/EmptyTable';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import CustomAlert from './alerts/TripStatusChange';
+import Avatar from 'components/@extended/Avatar';
+import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
+import { ThemeMode } from 'config';
 
-const avatarImage = require.context('assets/images/users', true);
+const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 const TRIP_STATUS = {
   PENDING: 1,
@@ -98,7 +99,6 @@ const getTabName = (status) => {
 
 const changeStatusFromAPI = async (tripId, updatedStatus, remarks) => {
   try {
-    console.log('Api calling ...........');
     const response = await axiosServices.put('/assignTrip/update/status', {
       data: {
         tripId: tripId,
@@ -115,8 +115,6 @@ const changeStatusFromAPI = async (tripId, updatedStatus, remarks) => {
 };
 
 const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
-  console.log('selected', selected);
-  console.log('DataURL', deleteURL);
   const [remove, setRemove] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -169,20 +167,13 @@ const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
 
   return (
     <>
-      {visible && selected.length > 0 && (
+      {visible && selected && selected.length > 0 && (
         <>
           <Button
             variant="contained"
             color="error"
-            size="medium"
+            size="small"
             startIcon={loading ? <CircularProgress size="20" /> : <Trash />}
-            sx={{
-              position: 'absolute',
-              right: -1,
-              top: -1,
-              borderRadius: '0 4px 0 4px'
-            }}
-            // onClick={handleDelete}
             onClick={() => setRemove(true)}
             disabled={loading}
           >
@@ -202,10 +193,233 @@ const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
     </>
   );
 };
+const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
+  const [remove, setRemove] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [remarks, setRemarks] = useState('');
+
+  const handleStatusCancel = async () => {
+    setLoading(true);
+    try {
+      // Map over selected items to create an array of promises
+      const promises = selected.map((item) => changeStatusFromAPI(item, 3, remarks));
+
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+
+      // Trigger an alert once all API calls are completed
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Trips Status changed successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+      handleRefetch();
+    } catch (error) {
+      // Handle any errors during the process
+      console.log('Error while changing status = ', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleStatusPending = async () => {
+    setLoading(true);
+    try {
+      // Map over selected items to create an array of promises
+      const promises = selected.map((item) => changeStatusFromAPI(item, 1, remarks));
+
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+
+      // Trigger an alert once all API calls are completed
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Trips Status changed successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+      handleRefetch();
+    } catch (error) {
+      // Handle any errors during the process
+      console.log('Error while changing status = ', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleStatusCompleted = async () => {
+    setLoading(true);
+    try {
+      // Map over selected items to create an array of promises
+      const promises = selected.map((item) => changeStatusFromAPI(item, 2, remarks));
+
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+
+      // Trigger an alert once all API calls are completed
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Trips Status changed successfully',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true
+        })
+      );
+      handleRefetch();
+    } catch (error) {
+      // Handle any errors during the process
+      console.log('Error while changing status = ', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseForRemove = useCallback(() => {
+    setRemove(false);
+  }, []);
+  return (
+    <>
+      {visible && selected && selected.length > 0 && (
+        <>
+          <Button
+            variant="contained"
+            color="success"
+            size="small"
+            startIcon={loading ? <CircularProgress size="20" /> : <Routing2 />}
+            endIcon={<ArrowCircleDown2 />}
+            onClick={() => setRemove(true)}
+            disabled={loading}
+          >
+            Change Trip Status ({selected.length})
+          </Button>
+
+          {remove && (
+            <CustomAlert
+              title={'Change Trip Status?'}
+              subtitle={'Select the Status from below'}
+              open={remove}
+              handleClose={handleCloseForRemove}
+              handleCancel={handleStatusCancel}
+              handleStatusPending={handleStatusPending}
+              handleStatusCompleted={handleStatusCompleted}
+              setRemarks={setRemarks}
+              icon={
+                <Avatar color="warning" sx={{ width: 72, height: 72, fontSize: '1.75rem' }}>
+                  <NotificationBing variant="Bold" />
+                </Avatar>
+              }
+              loading={loading}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
+const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
+  const [remove, setRemove] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleTripGeneration = () => {
+    console.log({ selected });
+    navigate('/apps/invoices/test', { state: { tripData: selected } });
+  };
+
+  const handleCloseForRemove = useCallback(() => {
+    setRemove(false);
+  }, []);
+
+  return (
+    <>
+      {visible && selected && selected.length > 0 && (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={loading ? <CircularProgress size="20" /> : <Money4 />}
+            onClick={() => setRemove(true)}
+            disabled={loading}
+          >
+            Generate Invoice ({selected.length})
+          </Button>
+
+          {remove && (
+            <GenerateInvoiceAlert
+              title={'This action is irreversible. Please check before deleting.'}
+              open={remove}
+              handleClose={handleCloseForRemove}
+              handleTripGeneration={handleTripGeneration}
+              tripData={selected}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+};
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefetch, handleOpen, handleClose }) {
+function ReactTable({
+  columns,
+  data,
+  deleteButton = false,
+  deleteURL,
+  handleRefetch,
+  handleOpen,
+  handleTripSelectedData,
+  tripSelectedData,
+  otherSelectedData,
+  handleOtherSelectedData
+}) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
@@ -228,10 +442,9 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
     page,
     gotoPage,
     setPageSize,
-    state: { globalFilter, selectedRowIds, pageIndex, pageSize },
-    preGlobalFilteredRows,
-    setGlobalFilter,
-    setFilter
+    state: { pageIndex, pageSize },
+    setFilter,
+    selectedFlatRows
   } = useTable(
     {
       columns,
@@ -248,23 +461,30 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
     useRowSelect
   );
 
-  console.log('selectedRowIds = ', selectedRowIds);
+  useEffect(() => {
+    const selectedTripRowsData = [];
+    const selectedOtherRowsData = [];
 
-  const selectedRowIdsArray = Object.keys(selectedRowIds); // Get keys of selected rows
-  const selectedRows = selectedRowIdsArray.map((id) => rows[id]?.original?._id).filter(Boolean);
-  // .filter((item) => item.assignedStatus === TRIP_STATUS.COMPLETED); // Map to _id of rows
-  console.log('selectedRows = ', selectedRows);
+    if (selectedFlatRows.length > 0) {
+      selectedFlatRows.forEach((row) => {
+        if (row.original.assignedStatus === 2) {
+          selectedTripRowsData.push(row.original); // Add to trip data
+        } else {
+          selectedOtherRowsData.push(row.original._id); // Add to other data
+        }
+      });
+    }
 
-  console.log('rows', rows);
+    handleTripSelectedData(selectedTripRowsData); // Pass filtered trip rows data
+    handleOtherSelectedData(selectedOtherRowsData); // Pass filtered other rows data
+  }, [selectedFlatRows, handleTripSelectedData, handleOtherSelectedData]);
 
   const componentRef = useRef(null);
 
   // ================ Tab ================
 
-  const groups = ['All', ...new Set(data.map((item) => item.assignedStatus))];
+  const groups = ['All', TRIP_STATUS.COMPLETED, TRIP_STATUS.PENDING, TRIP_STATUS.CANCELLED];
   // const groups = ['All', 'Pending', 'Completed', 'Cancelled'];
-
-  console.log('Data = ', data);
 
   const countGroup = data.map((item) => item.assignedStatus);
   const counts = {
@@ -276,17 +496,14 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
-  console.log({ groups, countGroup, counts, activeTab });
-
   useEffect(() => {
-    console.log('Tab = ', activeTab);
     setFilter('status', activeTab === 'All' ? '' : activeTab === TRIP_STATUS.PENDING ? 1 : activeTab === TRIP_STATUS.COMPLETED ? 2 : 3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   return (
     <>
-      <Box sx={{ p: 3, pb: 0, width: '100%' }}>
+      <Box sx={{ p: 1, pb: 0, width: '100%' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
             {groups.map((status, index) => (
@@ -323,23 +540,17 @@ function ReactTable({ columns, data, deleteButton = false, deleteURL, handleRefe
             ))}
           </Tabs>
 
-          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
-            Add Trip
-          </Button>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+            <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <ChangeStatusButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
+              Add Trip
+            </Button>
+          </Stack>
         </Stack>
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
-
-      <DeleteButton selected={selectedRows} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-
-      {/* <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 3, pb: 3 }}>
-        <Stack direction={matchDownSM ? 'column' : 'row'} spacing={2}>
-          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
-        </Stack>
-        <Stack direction={matchDownSM ? 'column' : 'row'} alignItems="center" spacing={matchDownSM ? 1 : 2}>
-          <CSVExport data={data} filename={'invoice-list.csv'} />
-        </Stack>
-      </Stack> */}
       <Box ref={componentRef} sx={{ mt: 2 }}>
         <ScrollX>
           <Table {...getTableProps()}>
@@ -395,10 +606,15 @@ ReactTable.propTypes = {
 // ==============================|| TRIP - LIST ||============================== //
 
 const TripList = () => {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [alertCancelOpen, setAlertCancelOpen] = useState(false);
+  const [tripSelectedData, setTripSelectedData] = useState(null);
+  const [otherSelectedData, setOtherSelectedData] = useState(null);
   const [popup, setPopup] = useState('');
   const [updatedStatus, setUpdatedStatus] = useState(-1);
   const { alertPopup } = useSelector((state) => state.invoice);
@@ -407,120 +623,144 @@ const TripList = () => {
   const [refetch, setRefetch] = useState(false);
   const [id, setId] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [drivers, setDrivers] = useState([]);
-  const [cabOptions, setCabOptions] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {},
+    selectedVendor: {},
+    selectedDriver: {},
+    selectedVehicle: {}
+  });
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.ALL_TIME);
+  const [tripStats, setTripStats] = useState({
+    completedTripsCount: 0,
+    completedTripsAmount: 0,
+    assignedTripsCount: 0,
+    assignedTripsAmount: 0,
+    canceledTripsCount: 0,
+    canceledTripsAmount: 0,
+    completedTripsPercentage: 0,
+    assignedTripsPercentage: 0,
+    canceledTripsPercentage: 0,
+    outgoingRate: 0
+  });
 
   useEffect(() => {
-    // dispatch(getInvoiceList()).then(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const calculateTripStats = (data) => {
+      const stats = {
+        completedTripsCount: 0,
+        completedTripsAmount: 0,
+        assignedTripsCount: 0,
+        assignedTripsAmount: 0,
+        canceledTripsCount: 0,
+        canceledTripsAmount: 0,
+        completedTripsPercentage: 0,
+        assignedTripsPercentage: 0,
+        canceledTripsPercentage: 0,
+        outgoingRate: 0
+      };
 
-    dispatch(fetchZoneNames());
-    dispatch(fetchAllZoneTypes());
-    dispatch(fetchAllVehicleTypesForAll());
-    dispatch(fetchDrivers1());
-    dispatch(fetchCab1());
+      if (data && data.length > 0) {
+        const totalTrips = data.length;
 
-    // const fetchDrivers = async () => {
-    //   const response = await axiosServices.get('/driver/all?drivertype=1');
-    //   setDrivers(response.data.data.result);
-    // };
+        data.forEach((trip) => {
+          const {
+            assignedStatus,
+            companyGuardPrice,
+            companyRate,
+            companyPenalty,
+            tollCharge,
+            mcdCharge,
+            addOnRate,
+            vendorRate,
+            driverRate,
+            vendorGuardPrice,
+            vendorPenalty,
+            driverGuardPrice,
+            driverPenalty
+          } = trip;
 
-    // const fetchCabs = async () => {
-    //   const response = await axiosServices.get('/vehicle/all/linked/drivers');
-    //   setCabOptions(response.data.data);
-    // };
+          const tripAmount = companyGuardPrice + companyRate - companyPenalty;
+          const vendorRate1 = vendorRate + vendorGuardPrice - vendorPenalty;
+          const driverRate1 = driverRate + driverGuardPrice - driverPenalty;
 
-    // fetchDrivers();
-    // fetchCabs();
-  }, []);
+          const outGoingRateForTrip = vendorRate !== 0 ? vendorRate1 : driverRate1;
+
+          stats.outgoingRate += outGoingRateForTrip;
+          const rateData = {
+            companyGuardPrice,
+            companyRate,
+            companyPenalty,
+            tollCharge,
+            mcdCharge,
+            addOnRate,
+            total: tripAmount
+          };
+
+          // Completed trips
+          if (assignedStatus === 2) {
+            stats.completedTripsCount += 1;
+            stats.completedTripsAmount += tripAmount;
+          }
+
+          // Assigned trips
+          if (assignedStatus === 1) {
+            stats.assignedTripsCount += 1;
+            stats.assignedTripsAmount += tripAmount;
+          }
+
+          // Canceled trips
+          if (assignedStatus === 3) {
+            stats.canceledTripsCount += 1;
+            stats.canceledTripsAmount += tripAmount;
+          }
+        });
+
+        // Calculate percentages
+        stats.completedTripsPercentage = ((stats.completedTripsCount / totalTrips) * 100).toFixed(2);
+        stats.assignedTripsPercentage = ((stats.assignedTripsCount / totalTrips) * 100).toFixed(2);
+        stats.canceledTripsPercentage = ((stats.canceledTripsCount / totalTrips) * 100).toFixed(2);
+      }
+
+      return stats;
+    };
+
+    const updatedStats = calculateTripStats(data);
+    setTripStats(updatedStats);
+  }, [data]);
+
+  const widgetsData = [
+    {
+      title: 'Completed',
+      count: `₹${tripStats.completedTripsAmount}`,
+      percentage: tripStats.completedTripsPercentage,
+      isLoss: false,
+      trips: `${tripStats.completedTripsCount}`,
+      color: theme.palette.success
+    },
+    {
+      title: 'Pending',
+      count: `₹${tripStats.assignedTripsAmount}`,
+      percentage: tripStats.assignedTripsPercentage,
+      isLoss: true,
+      trips: tripStats.assignedTripsCount,
+      color: theme.palette.warning
+    },
+    {
+      title: 'Cancelled',
+      count: `₹${tripStats.canceledTripsAmount}`,
+      percentage: tripStats.canceledTripsPercentage,
+      isLoss: true,
+      trips: tripStats.canceledTripsCount,
+      color: theme.palette.error
+    }
+  ];
+
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   const [invoiceId, setInvoiceId] = useState(0);
   const [getInvoiceId, setGetInvoiceId] = useState(0);
 
-  const dummyData = [
-    {
-      id: 1,
-      customer_name: 'John Doe',
-      email: 'john.doe@example.com',
-      date: '2024-09-01',
-      due_date: '2024-10-01',
-      quantity: 10,
-      status: 'Completed',
-      avatar: 1,
-      rate: 100, // Rate for the trip
-      driver: 'Mike Johnson', // Driver for the trip
-      remarks: 'On time delivery' // Remarks for the trip
-    },
-    {
-      id: 2,
-      customer_name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      date: '2024-09-05',
-      due_date: '2024-10-05',
-      quantity: 5,
-      status: 'Pending',
-      avatar: 2,
-      rate: 50, // Rate for the trip
-      driver: 'Sara Wilson', // Driver for the trip
-      remarks: 'Waiting for confirmation' // Remarks for the trip
-    },
-    {
-      id: 3,
-      customer_name: 'Bob Johnson',
-      email: 'bob.johnson@example.com',
-      date: '2024-09-10',
-      due_date: '2024-10-10',
-      quantity: 20,
-      status: 'Cancelled',
-      avatar: 3,
-      rate: 200, // Rate for the trip
-      driver: 'Chris Lee', // Driver for the trip
-      remarks: 'Cancelled by customer' // Remarks for the trip
-    },
-    {
-      id: 4,
-      customer_name: 'Alice Williams',
-      email: 'alice.williams@example.com',
-      date: '2024-09-12',
-      due_date: '2024-10-12',
-      quantity: 8,
-      status: 'Completed',
-      avatar: 4,
-      rate: 80, // Rate for the trip
-      driver: 'Laura Green', // Driver for the trip
-      remarks: 'Successful trip' // Remarks for the trip
-    },
-    {
-      id: 5,
-      customer_name: 'Steve Brown',
-      email: 'steve.brown@example.com',
-      date: '2024-09-15',
-      due_date: '2024-10-15',
-      quantity: 12,
-      status: 'Pending',
-      avatar: 5,
-      rate: 120, // Rate for the trip
-      driver: 'James White', // Driver for the trip
-      remarks: 'Awaiting pickup' // Remarks for the trip
-    },
-    {
-      id: 6,
-      customer_name: 'Alice Brown',
-      email: 'steve.brown@example.com',
-      date: '2024-09-15',
-      due_date: '2024-10-15',
-      quantity: 12,
-      status: 'Pending',
-      avatar: 5,
-      rate: 120, // Rate for the trip
-      driver: 'James White', // Driver for the trip
-      remarks: 'Awaiting pickup' // Remarks for the trip
-    }
-  ];
-
   const navigate = useNavigate();
+
   const handleClose = (status) => {
     if (status) {
       dispatch(getInvoiceDelete(invoiceId));
@@ -545,7 +785,6 @@ const TripList = () => {
   };
 
   const handleCloseAlert = () => {
-    console.log('handleCloseAlert');
     setSelectedRow(null);
     setPopup('');
     setUpdatedStatus(-1);
@@ -553,13 +792,11 @@ const TripList = () => {
   };
 
   const handleConfirmAlert = () => {
-    console.log('handleConfirmAlert , ', selectedRow);
     setAlertOpen(false);
     // setPopup('');
   };
 
   const handleTextChange = (event) => {
-    console.log('handleTextChange', event.target.value);
     setCancelText(event.target.value);
   };
 
@@ -569,57 +806,49 @@ const TripList = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await axiosServices.get('/assignTrip/all/trips/cabProvider', {
           params: {
             startDate: formatDateUsingMoment(startDate),
-            endDate: formatDateUsingMoment(endDate)
+            endDate: formatDateUsingMoment(endDate),
+            companyID: filterOptions.selectedCompany._id,
+            vehicleId: filterOptions.selectedVehicle._id,
+            driverId: filterOptions.selectedDriver._id,
+            vendorId: filterOptions.selectedVendor._id
           }
         });
         setData(response.data.data);
       } catch (error) {
         console.log('Error at fetching trips = ', error);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: error?.message || 'Something went wrong',
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
+        if (error.response.status === 500) {
+          setData([]);
+        } else {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: error?.message || 'Something went wrong',
+              variant: 'alert',
+              alert: {
+                color: 'error'
+              },
+              close: true
+            })
+          );
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [refetch, startDate, endDate]);
+  }, [refetch, startDate, endDate, filterOptions]);
 
   useEffect(() => {
-    console.log('UseEffect1 running ......... ');
-    console.log({
-      selectedRow,
-      updatedStatus,
-      alertOpen
-    });
-
     if (selectedRow && !alertOpen && updatedStatus !== -1) {
       // TODO : Change Api status
-      console.log('Row Selected', selectedRow);
-      console.log('UseEffect1 running ......... ');
-
       const changeStatus = async () => {
         try {
-          // const response = await axiosServices.put('/assignTrip/update/status', {
-          //   data: {
-          //     tripId: selectedRow.id,
-          //     assignedStatus: updatedStatus
-          //   }
-          // });
-
-          console.log('Api calling for complete');
-
           await changeStatusFromAPI(selectedRow._id, updatedStatus, cancelText);
 
           dispatch(
@@ -668,11 +897,47 @@ const TripList = () => {
         disableFilters: true
       },
       {
+        Header: '#',
+        accessor: '',
+        disableFilters: true,
+        Cell: ({ row }) => {
+          const serialNo = row.index + 1; // The serial number will be the row index + 1
+          return (
+            <>
+              <Typography>{serialNo}</Typography>
+            </>
+          );
+        }
+      },
+      {
+        Header: 'Status',
+        accessor: 'assignedStatus',
+        id: 'status', // Explicitly set id to 'status' for clarity
+        disableFilters: true,
+        // filter: 'includes',
+        Cell: ({ value }) => {
+          switch (value) {
+            case TRIP_STATUS.PENDING: {
+              return <Chip label="Pending" color="warning" variant="light" />;
+            }
+            case TRIP_STATUS.COMPLETED: {
+              return <Chip label="Completed" color="success" variant="light" />;
+            }
+            case TRIP_STATUS.CANCELLED: {
+              return <Chip label="Cancelled" color="error" variant="light" />;
+            }
+            default: {
+              return <Chip label="Not Defined" color="error" variant="light" />;
+            }
+          }
+        }
+      },
+      {
         Header: 'Actions',
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          // console.log('row', row);
+          console.log('row', row);
 
           const [anchorEl, setAnchorEl] = useState(null);
           const [status, setStatus] = useState(null);
@@ -723,10 +988,36 @@ const TripList = () => {
           const openMenu = Boolean(anchorEl);
 
           return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
               <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                <More style={{ fontSize: '1.15rem' }} />
+                <More style={{ fontSize: '1.15rem', transform: 'rotate(90deg)' }} />
               </IconButton>
+
+              {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
+                    }
+                  }}
+                  title="Edit"
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true); // Open the dialog for editing
+                      setId(row.original._id);
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              )}
+
               <Menu
                 id="fade-menu"
                 MenuListProps={{
@@ -754,30 +1045,6 @@ const TripList = () => {
         }
       },
       {
-        Header: 'Status',
-        accessor: 'assignedStatus',
-        id: 'status', // Explicitly set id to 'status' for clarity
-        disableFilters: true,
-        // filter: 'includes',
-        Cell: ({ value }) => {
-          switch (value) {
-            case TRIP_STATUS.PENDING: {
-              return <Chip label="Pending" color="warning" variant="light" />;
-            }
-            case TRIP_STATUS.COMPLETED: {
-              return <Chip label="Completed" color="success" variant="light" />;
-            }
-            case TRIP_STATUS.CANCELLED: {
-              return <Chip label="Cancelled" color="error" variant="light" />;
-            }
-            default: {
-              return <Chip label="Not Defined" color="error" variant="light" />;
-            }
-          }
-        }
-      },
-
-      {
         title: '_id',
         Header: '_id'
       },
@@ -786,9 +1053,6 @@ const TripList = () => {
         accessor: 'companyID.company_name',
         disableFilters: true,
         Cell: ({ row, value }) => {
-          console.log('row', row.original);
-          console.log('row', row.original._id);
-
           return (
             <Typography>
               <Link
@@ -807,7 +1071,6 @@ const TripList = () => {
         accessor: 'tripDate',
         disableFilters: true,
         Cell: ({ value }) => {
-          // console.log(`🚀 ~ TripList ~ value:`, value);
           return formattedDate(value, 'DD/MM/YYYY');
         }
       },
@@ -837,24 +1100,20 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
-        Header: 'Guard',
-        accessor: 'guard'
+        Header: 'Vehicle Guard Price',
+        accessor: 'guardPrice', // This can be any key; we won't directly use it.
+        Cell: ({ row }) => {
+          const { driverGuardPrice, vendorGuardPrice } = row.original;
+          return driverGuardPrice || vendorGuardPrice || 'Null';
+        }
       },
       {
-        Header: 'Guard Price',
-        accessor: 'guardPrice'
-      },
-      {
-        Header: 'Company Rate',
-        accessor: 'companyRate'
-      },
-      {
-        Header: 'Vendor Rate',
-        accessor: 'vendorRate'
-      },
-      {
-        Header: 'Driver Rate',
-        accessor: 'driverRate'
+        Header: 'Vehicle Rates',
+        accessor: (row) => row.vendorRate ?? row.driverRate,
+        Cell: ({ row }) => {
+          const { vendorRate, driverRate } = row.original;
+          return vendorRate ?? driverRate ?? 'Null';
+        }
       },
       {
         Header: 'Additional Rate',
@@ -862,7 +1121,8 @@ const TripList = () => {
       },
       {
         Header: 'Penalty',
-        accessor: 'penalty'
+        accessor: 'penalty',
+        Cell: ({ value }) => value || 'Null'
       },
       {
         Header: 'Location',
@@ -870,50 +1130,25 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       },
       {
+        Header: 'Trip Type',
+        accessor: 'tripType',
+        Cell: ({ value }) => {
+          switch (value) {
+            case 1: // For Pick Up
+              return <Chip label="Pick Up" color="warning" variant="light" />;
+            case 2: // For Pick Drop
+              return <Chip label="Pick Drop" color="success" variant="light" />;
+          }
+        }
+      },
+      {
         Header: 'Remarks',
-        accessor: 'remarks'
+        accessor: 'remarks',
+        Cell: ({ value }) => value || 'None'
       }
     ],
     []
   );
-
-  const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const widgetsData = [
-    {
-      title: 'Completed',
-      count: '₹7,825',
-      percentage: 70.5,
-      isLoss: false,
-      invoice: '9',
-      color: theme.palette.success,
-      chartData: [200, 600, 100, 400, 300, 400, 50]
-    },
-    {
-      title: 'Pending',
-      count: '₹1,880',
-      percentage: 27.4,
-      isLoss: true,
-      invoice: '6',
-      color: theme.palette.warning,
-      chartData: [100, 550, 300, 350, 200, 100, 300]
-    },
-    {
-      title: 'Overdue',
-      count: '₹3,507',
-      percentage: 27.4,
-      isLoss: true,
-      invoice: '4',
-      color: theme.palette.error,
-      chartData: [100, 550, 200, 300, 100, 200, 300]
-    }
-  ];
-
-  let breadcrumbLinks = [
-    { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Trips', to: '/apps/trips/list' }
-  ];
 
   const handleCloseModal = useCallback(() => {
     setIsOpen(false);
@@ -922,13 +1157,19 @@ const TripList = () => {
 
   const handleModalOpen = useCallback(() => setIsOpen(true), []);
 
-  // console.log('Data = ', data);
+  // if (loading) return <Loader />;
 
-  if (loading) return <Loader />;
+  const handleTripSelectedData = useCallback((selectedRows) => {
+    setTripSelectedData(selectedRows);
+  }, []);
+  const handleOtherSelectedData = useCallback((selectedRows) => {
+    setOtherSelectedData(selectedRows);
+  }, []);
 
   return (
     <>
-      {/* <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
+      {/* stats */}
+      <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 1 }}>
         <Grid item md={8}>
           <Grid container direction="row" spacing={2}>
             {widgetsData.map((widget, index) => (
@@ -939,11 +1180,9 @@ const TripList = () => {
                     count={widget.count}
                     percentage={widget.percentage}
                     isLoss={widget.isLoss}
-                    invoice={widget.invoice}
+                    trips={widget.trips}
                     color={widget.color.main}
-                  >
-                    <TripChart color={widget.color} data={widget.chartData} />
-                  </TripCard>
+                  ></TripCard>
                 </MainCard>
               </Grid>
             ))}
@@ -959,64 +1198,135 @@ const TripList = () => {
           >
             <Stack direction="row" alignItems="flex-end" justifyContent="space-between" spacing={1}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Avatar alt="Natacha" variant="rounded" type="filled">
-                  <ProfileTick style={{ fontSize: '20px' }} />
-                </Avatar>
-                <Box>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body1" color="white">
-                      Total Recievables
-                    </Typography>
-                    <InfoCircle color={theme.palette.background.paper} />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <Typography variant="body2" color="white">
-                      Current
-                    </Typography>
-                    <Typography variant="body1" color="white">
-                      109.1k
-                    </Typography>
-                  </Stack>
-                </Box>
+                <Stack direction="row" spacing={1}>
+                  <Typography variant="body2" color="white">
+                    Incoming
+                  </Typography>
+                  <Typography variant="body1" color="white">
+                    ₹ {tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount}
+                  </Typography>
+                </Stack>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="white">
-                  Overdue
+                  Outgoing
                 </Typography>
                 <Typography variant="body1" color="white">
-                  62k
+                  ₹ {tripStats.outgoingRate}
                 </Typography>
               </Stack>
             </Stack>
-            <Typography variant="h4" color="white" sx={{ pt: 2, pb: 1, zIndex: 1 }}>
-            ₹43,078
-            </Typography>
+
+            <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
+              <Typography variant="body2" color="white">
+                Profit/Loss
+              </Typography>
+
+              <Typography variant="body1" color="white">
+                ₹ {tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount - tripStats.outgoingRate}
+              </Typography>
+            </Stack>
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={90} />
+              <LinearWithLabel
+                value={
+                  ((tripStats.assignedTripsAmount +
+                    tripStats.completedTripsAmount -
+                    tripStats.canceledTripsAmount -
+                    tripStats.outgoingRate) /
+                    (tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount)) *
+                  100
+                }
+              />
             </Box>
           </Box>
         </Grid>
-      </Grid> */}
-      <Breadcrumbs custom heading="Trips" links={breadcrumbLinks} />
+      </Grid>
+
+      {/* filter */}
+      <Stack direction="row" alignItems="center" justifyContent="space-evenly">
+        <CompanyFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedCompany}
+        />
+        <VendorFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVendor}
+        />
+        <DriverFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '200px',
+            pb: 1
+          }}
+          value={filterOptions.selectedDriver}
+        />
+        <VehicleFilter
+          setFilterOptions={setFilterOptions}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '220px',
+            pb: 1
+          }}
+          value={filterOptions.selectedVehicle}
+        />
+
+        <DateRangeSelect
+          startDate={startDate}
+          endDate={endDate}
+          selectedRange={range}
+          prevRange={prevRange}
+          setSelectedRange={setRange}
+          onRangeChange={handleRangeChange}
+          showSelectedRangeLabel
+        />
+      </Stack>
 
       <Stack gap={2}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4"></Typography>
-          <DateRangeSelect
-            startDate={startDate}
-            endDate={endDate}
-            selectedRange={range}
-            prevRange={prevRange}
-            setSelectedRange={setRange}
-            onRangeChange={handleRangeChange}
-            showSelectedRangeLabel
-          />
-        </Stack>
-
         <MainCard content={false}>
           {/* <ScrollX> */}
           {/* <ReactTable columns={columns} data={dummyData} /> */}
-          {data?.length > 0 && (
+          {loading ? (
+            <TableSkeleton rows={10} columns={6} />
+          ) : data?.length > 0 ? (
             <ReactTable
               columns={columns}
               data={data}
@@ -1025,7 +1335,13 @@ const TripList = () => {
               handleRefetch={handleRefetch}
               handleClose={handleCloseModal}
               handleOpen={handleModalOpen}
+              tripSelectedData={tripSelectedData}
+              handleTripSelectedData={handleTripSelectedData}
+              otherSelectedData={otherSelectedData}
+              handleOtherSelectedData={handleOtherSelectedData}
             />
+          ) : (
+            <EmptyTableDemo />
           )}
           {/* </ScrollX> */}
         </MainCard>
@@ -1064,6 +1380,7 @@ const TripList = () => {
           fullWidth
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          TransitionComponent={Transition}
         >
           <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
         </Dialog>
