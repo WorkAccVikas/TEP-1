@@ -723,14 +723,14 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       setSyncLoading(true);
       // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      // const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
-      // const data = response.data.data;
-      // console.log(`🚀 ~ handleSyncRates ~ response:`, response);
-      // console.log('data = ', data);
+      const response = await axiosServices.post('/tripData/amount/by/driver/id', payload);
+      const data = response.data.data;
+      console.log(`🚀 ~ handleSyncRates ~ response:`, response);
+      console.log('data = ', data);
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      setSyncLoading(true);
+      // setSyncLoading(true);
       // // Cab Provider Driver
       // const data = {
       //   driverGuardPrice: 100,
@@ -746,20 +746,20 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
       //   companyDualAmount: 5000
       // };
 
-      // Vendor Driver
-      const data = {
-        driverGuardPrice: null,
-        driverAmount: null,
-        driverDualAmount: null,
+      // // Vendor Driver
+      // const data = {
+      //   driverGuardPrice: null,
+      //   driverAmount: null,
+      //   driverDualAmount: null,
 
-        vendorGuardPrice: 25,
-        vendorAmount: 500,
-        vendorDualAmount: 4000,
+      //   vendorGuardPrice: 25,
+      //   vendorAmount: 500,
+      //   vendorDualAmount: 4000,
 
-        companyGuardPrice: 200,
-        companyAmount: 700,
-        companyDualAmount: 1000
-      };
+      //   companyGuardPrice: 200,
+      //   companyAmount: 700,
+      //   companyDualAmount: 1000
+      // };
 
       setRateDetails(data);
       setSyncRate(true);
