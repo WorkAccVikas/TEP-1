@@ -284,9 +284,12 @@ const Create2 = () => {
           servicePeriod:
             formatDateUsingMoment(values?.start_date, 'DD-MM-YYYY') + ' to ' + formatDateUsingMoment(values?.end_date, 'DD-MM-YYYY'),
           invoiceData: values?.invoiceData || [],
-          subTotal: values?.subTotal,
-          totalAmount: values?.grandTotal,
-          grandTotal: values?.grandTotal,
+          // subTotal: values?.subTotal,
+          // totalAmount: values?.grandTotal,
+          // grandTotal: values?.grandTotal,
+          subTotal: subTotal,
+          totalAmount: grandTotal,
+          grandTotal: grandTotal,
           CGST: values?.CGST,
           SGST: values?.SGST,
           IGST: values?.IGST,
@@ -558,57 +561,64 @@ const Create2 = () => {
     [setFieldValue]
   );
 
-  useEffect(() => {
-    const updatedItems = values.invoiceData.map((item) => {
-      const amount = item.rate * item.quantity;
+  // useEffect(() => {
+  //   const updatedItems = values.invoiceData.map((item) => {
+  //     const amount = item.rate * item.quantity;
 
-      // Calculate tax based on group or individual settings
-      const itemTaxAmount = settings?.tax?.apply === 'Individual' ? (amount * item.itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+  //     // Calculate tax based on group or individual settings
+  //     const itemTaxAmount = settings?.tax?.apply === 'Individual' ? (amount * item.itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
 
-      // Calculate item discount
-      let itemDiscountAmount = 0;
+  //     // Calculate item discount
+  //     let itemDiscountAmount = 0;
 
-      if (settings?.discount?.apply === 'Individual') {
-        if (settings?.discount?.by === 'Percentage') {
-          itemDiscountAmount = (amount * item.itemDiscount) / 100;
-        } else if (settings?.discount?.by === 'Amount') {
-          itemDiscountAmount = item.itemDiscount;
-        }
-      } else if (settings?.discount?.apply === 'Group') {
-        if (settings?.discount?.by === 'Percentage') {
-          itemDiscountAmount = (amount * groupDiscount) / 100;
-        } else if (settings?.discount?.by === 'Amount') {
-          itemDiscountAmount = groupDiscount;
-          item.itemDiscount = groupDiscount;
-        }
-      }
+  //     if (settings?.discount?.apply === 'Individual') {
+  //       if (settings?.discount?.by === 'Percentage') {
+  //         itemDiscountAmount = (amount * item.itemDiscount) / 100;
+  //       } else if (settings?.discount?.by === 'Amount') {
+  //         itemDiscountAmount = item.itemDiscount;
+  //       }
+  //     } else if (settings?.discount?.apply === 'Group') {
+  //       if (settings?.discount?.by === 'Percentage') {
+  //         itemDiscountAmount = (amount * groupDiscount) / 100;
+  //       } else if (settings?.discount?.by === 'Amount') {
+  //         itemDiscountAmount = groupDiscount;
+  //         item.itemDiscount = groupDiscount;
+  //       }
+  //     }
 
-      return {
-        ...item,
-        amount,
-        Tax_amount: itemTaxAmount, // Now using groupTax for group settings
-        discount: itemDiscountAmount,
-        itemTax: settings?.tax?.apply === 'Group' ? groupTax : item.itemTax,
-        itemDiscount: settings?.discount?.apply === 'Group' ? groupDiscount : item.itemDiscount
-      };
-    });
+  //     return {
+  //       ...item,
+  //       amount,
+  //       Tax_amount: itemTaxAmount, // Now using groupTax for group settings
+  //       discount: itemDiscountAmount,
+  //       itemTax: settings?.tax?.apply === 'Group' ? groupTax : item.itemTax,
+  //       itemDiscount: settings?.discount?.apply === 'Group' ? groupDiscount : item.itemDiscount
+  //     };
+  //   });
 
-    const subTotal = updatedItems.reduce((acc, item) => acc + item.amount, 0);
+  //   const subTotal = updatedItems.reduce((acc, item) => acc + item.amount, 0);
 
-    const totalTax =
-      settings?.tax?.apply === 'Group'
-        ? (subTotal * groupTax) / 100 // Calculate totalTax based on groupTax
-        : updatedItems.reduce((acc, item) => acc + item.Tax_amount, 0);
+  //   const totalTax =
+  //     settings?.tax?.apply === 'Group'
+  //       ? (subTotal * groupTax) / 100 // Calculate totalTax based on groupTax
+  //       : updatedItems.reduce((acc, item) => acc + item.Tax_amount, 0);
 
-    const totalDiscount =
-      settings?.discount?.apply === 'Group' && settings?.discount?.by === 'Percentage'
-        ? (subTotal * groupDiscount) / 100
-        : updatedItems.reduce((acc, item) => acc + item.discount, 0);
+  //   const totalDiscount =
+  //     settings?.discount?.apply === 'Group' && settings?.discount?.by === 'Percentage'
+  //       ? (subTotal * groupDiscount) / 100
+  //       : updatedItems.reduce((acc, item) => acc + item.discount, 0);
 
-    const grandTotal = subTotal + totalTax - totalDiscount;
+  //   const grandTotal = subTotal + totalTax - totalDiscount;
 
-    debouncedSetValues(updatedItems, subTotal, totalTax, totalDiscount, grandTotal);
-  }, [values.invoiceData, groupTax, groupDiscount, debouncedSetValues]);
+  //   console.log('updatedItems', updatedItems);
+
+  //   // debouncedSetValues(updatedItems, subTotal, totalTax, totalDiscount, grandTotal);
+  //   // setFieldValue('invoiceData', updatedItems);
+  //   // setFieldValue('subTotal', subTotal);
+  //   // setFieldValue('totalTax', totalTax);
+  //   // setFieldValue('totalDiscount', totalDiscount);
+  //   // setFieldValue('grandTotal', grandTotal);
+  // }, [values.invoiceData, groupTax, groupDiscount]);
 
   useEffect(() => {
     async function fetchCabProviderDetails() {
@@ -637,6 +647,17 @@ const Create2 = () => {
       fetchCabProviderDetails();
     }
   }, [userType]);
+
+  const calculateTotals = (invoiceData) => {
+    const subTotal = invoiceData.reduce((sum, item) => sum + item.amount, 0);
+    const totalTaxAmount = invoiceData.reduce((sum, item) => sum + item.Tax_amount, 0);
+    const totalDiscountAmount = invoiceData.reduce((sum, item) => sum + item.discount, 0);
+    const grandTotal = subTotal + totalTaxAmount - totalDiscountAmount;
+
+    return { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal };
+  };
+
+  const { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal } = calculateTotals(formik.values.invoiceData);
 
   if (loading) return <CustomCircularLoader />;
 
@@ -1202,6 +1223,7 @@ const Create2 = () => {
                               <TableBody>
                                 {values.invoiceData.map((item, index) => (
                                   <TableRow key={index}>
+                                    {/* Item Name */}
                                     <TableCell>
                                       <TextField
                                         label="Item Name"
@@ -1211,26 +1233,94 @@ const Create2 = () => {
                                         fullWidth
                                       />
                                     </TableCell>
+
+                                    {/* Rate */}
                                     <TableCell>
                                       <TextField
                                         label="Rate"
                                         type="number"
                                         name={`invoiceData[${index}].rate`}
                                         value={item.rate}
-                                        onChange={handleChange}
+                                        // onChange={handleChange}
+                                        onChange={(e) => {
+                                          const rateValue = e.target.value;
+                                          const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
+                                          const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
+                                          const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
+                                          const amount = rateValue * qty;
+
+                                          const taxAmount =
+                                            settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+
+                                          setFieldValue(`invoiceData[${index}].rate`, Number(rateValue));
+                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                          setFieldValue(`invoiceData[${index}].amount`, Number(amount));
+
+                                          let itemDiscountAmount = 0;
+                                          if (settings?.discount?.apply === 'Individual') {
+                                            if (settings?.discount?.by === 'Percentage') {
+                                              itemDiscountAmount = (amount * itemDiscount) / 100;
+                                            } else if (settings?.discount?.by === 'Amount') {
+                                              itemDiscountAmount = itemDiscount;
+                                            }
+                                          } else if (settings?.discount?.apply === 'Group') {
+                                            if (settings?.discount?.by === 'Percentage') {
+                                              itemDiscountAmount = (amount * itemDiscount) / 100;
+                                            } else if (settings?.discount?.by === 'Amount') {
+                                              itemDiscountAmount = itemDiscount;
+                                            }
+                                          }
+
+                                          setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
+                                        }}
                                         fullWidth
                                       />
                                     </TableCell>
+
+                                    {/* Quantity */}
                                     <TableCell>
                                       <TextField
                                         label="Quantity"
                                         type="number"
                                         name={`invoiceData[${index}].quantity`}
                                         value={item.quantity}
-                                        onChange={handleChange}
+                                        // onChange={handleChange}
+                                        onChange={(e) => {
+                                          const qtyValue = e.target.value;
+                                          const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                          const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
+                                          const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
+
+                                          const amount = rate * qtyValue;
+                                          const taxAmount =
+                                            settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+
+                                          setFieldValue(`invoiceData[${index}].quantity`, Number(qtyValue));
+                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                          setFieldValue(`invoiceData[${index}].amount`, Number(amount));
+
+                                          let itemDiscountAmount = 0;
+                                          if (settings?.discount?.apply === 'Individual') {
+                                            if (settings?.discount?.by === 'Percentage') {
+                                              itemDiscountAmount = (amount * itemDiscount) / 100;
+                                            } else if (settings?.discount?.by === 'Amount') {
+                                              itemDiscountAmount = itemDiscount;
+                                            }
+                                          } else if (settings?.discount?.apply === 'Group') {
+                                            if (settings?.discount?.by === 'Percentage') {
+                                              itemDiscountAmount = (amount * itemDiscount) / 100;
+                                            } else if (settings?.discount?.by === 'Amount') {
+                                              itemDiscountAmount = itemDiscount;
+                                            }
+                                          }
+
+                                          setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
+                                        }}
                                         fullWidth
                                       />
                                     </TableCell>
+
+                                    {/* Code */}
                                     <TableCell>
                                       <TextField
                                         label="HSN/SAC Code"
@@ -1240,18 +1330,32 @@ const Create2 = () => {
                                         fullWidth
                                       />
                                     </TableCell>
+
+                                    {/* Item Tax */}
                                     <TableCell>
                                       <TextField
                                         label="Tax (%)"
                                         type="number"
                                         name={`invoiceData[${index}].itemTax`} // Tax for individual items
                                         value={item.itemTax}
-                                        onChange={handleChange}
+                                        // onChange={handleChange}
+                                        onChange={(e) => {
+                                          const taxValue = e.target.value;
+                                          console.log('taxValue', taxValue);
+                                          const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                          const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
+                                          const amount = rate * qty;
+                                          const taxAmount =
+                                            settings?.tax?.apply === 'Individual' ? (amount * taxValue) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+                                          setFieldValue(`invoiceData[${index}].itemTax`, Number(taxValue));
+                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                        }}
                                         fullWidth
                                         disabled={settings?.tax?.apply === 'Group'} // Disable if tax applies at group level
                                       />
                                     </TableCell>
 
+                                    {/* Item Discount */}
                                     {settings?.discount?.apply !== DISCOUNT_TYPE.NO && (
                                       <TableCell>
                                         <TextField
@@ -1260,7 +1364,32 @@ const Create2 = () => {
                                           type="number"
                                           name={`invoiceData[${index}].itemDiscount`} // Discount for individual items
                                           value={item.itemDiscount}
-                                          onChange={handleChange}
+                                          // onChange={handleChange}
+                                          onChange={(e) => {
+                                            const discountValue = e.target.value;
+                                            let itemDiscountAmount = 0;
+
+                                            const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                            const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
+                                            const amount = rate * qty;
+
+                                            if (settings?.discount?.apply === 'Individual') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * discountValue) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = discountValue;
+                                              }
+                                            } else if (settings?.discount?.apply === 'Group') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * discountValue) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = discountValue;
+                                              }
+                                            }
+
+                                            setFieldValue(`invoiceData[${index}].itemDiscount`, Number(discountValue));
+                                            setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
+                                          }}
                                           fullWidth
                                           disabled={settings?.discount?.apply === 'Group'} // Disable if discount applies at group level
                                         />
@@ -1300,7 +1429,28 @@ const Create2 = () => {
                                 <Button
                                   color="primary"
                                   startIcon={<Add />}
-                                  onClick={() => arrayHelpers.push(item)}
+                                  onClick={() =>
+                                    arrayHelpers.push({
+                                      ...item,
+                                      ...(settings?.tax?.apply === TAX_TYPE.GROUP
+                                        ? {
+                                            itemTax: groupTax
+                                          }
+                                        : {}),
+                                      ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP &&
+                                      settings?.discount?.by === DISCOUNT_BY.PERCENTAGE
+                                        ? {
+                                            itemDiscount: groupDiscount
+                                          }
+                                        : {}),
+                                      ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP && settings?.discount?.by === DISCOUNT_BY.AMOUNT
+                                        ? {
+                                            itemDiscount: groupDiscount,
+                                            discount: groupDiscount
+                                          }
+                                        : {})
+                                    })
+                                  }
                                   variant="dashed"
                                   sx={{ bgcolor: 'transparent !important' }}
                                 >
@@ -1348,7 +1498,21 @@ const Create2 = () => {
                                         label="Group Tax (%)"
                                         type="number"
                                         value={groupTax}
-                                        onChange={(e) => setGroupTax(Number(e.target.value))}
+                                        onChange={(e) => {
+                                          const val = Number(e.target.value);
+                                          const data = formik.getFieldProps('invoiceData').value;
+                                          console.log(`🚀 ~ Create2 ~ data:`, data);
+                                          const updatedData = data.map((item) => {
+                                            return {
+                                              ...item,
+                                              amount: item.rate * item.quantity,
+                                              itemTax: val,
+                                              Tax_amount: (item.rate * item.quantity * val) / 100
+                                            };
+                                          });
+                                          formik.setFieldValue('invoiceData', updatedData);
+                                          setGroupTax(val);
+                                        }}
                                         fullWidth
                                       />
                                     </Grid>
@@ -1364,7 +1528,41 @@ const Create2 = () => {
                                         label={getDiscountLabel(settings?.discount)}
                                         type="number"
                                         value={groupDiscount}
-                                        onChange={(e) => setGroupDiscount(Number(e.target.value))}
+                                        // onChange={(e) => setGroupDiscount(Number(e.target.value))}
+                                        onChange={(e) => {
+                                          const val = Number(e.target.value);
+
+                                          const data = formik.getFieldProps('invoiceData').value;
+
+                                          const updatedData = data.map((item) => {
+                                            const rate = item.rate;
+                                            const qty = item.quantity;
+                                            const amount = rate * qty;
+                                            let itemDiscountAmount = 0;
+
+                                            if (settings?.discount?.apply === 'Individual') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * val) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = val;
+                                              }
+                                            } else if (settings?.discount?.apply === 'Group') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * val) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = val;
+                                              }
+                                            }
+                                            return {
+                                              ...item,
+                                              // amount: item.rate * item.quantity,
+                                              itemDiscount: val,
+                                              discount: itemDiscountAmount
+                                            };
+                                          });
+                                          formik.setFieldValue('invoiceData', updatedData);
+                                          setGroupDiscount(val);
+                                        }}
                                         fullWidth
                                       />
                                     </Grid>
@@ -1376,7 +1574,8 @@ const Create2 = () => {
                                     <Stack direction="row" justifyContent="space-between">
                                       <Typography color={theme.palette.secondary.main}>Sub Total:</Typography>
                                       <GenericPriceDisplay
-                                        total={formik.values?.subTotal}
+                                        // total={formik.values?.subTotal}
+                                        total={subTotal}
                                         roundOff={settings.roundOff}
                                         prefix={country?.prefix}
                                       />
@@ -1385,7 +1584,8 @@ const Create2 = () => {
                                     <Stack direction="row" justifyContent="space-between">
                                       <Typography color={theme.palette.secondary.main}>Tax:</Typography>
                                       <GenericPriceDisplay
-                                        total={formik.values?.totalTax}
+                                        // total={formik.values?.totalTax}
+                                        total={totalTaxAmount}
                                         roundOff={settings.roundOff}
                                         prefix={country?.prefix}
                                       />
@@ -1394,7 +1594,8 @@ const Create2 = () => {
                                     <Stack direction="row" justifyContent="space-between">
                                       <Typography color={theme.palette.secondary.main}>Discount:</Typography>
                                       <GenericPriceDisplay
-                                        total={formik.values?.totalDiscount}
+                                        // total={formik.values?.totalDiscount}
+                                        total={totalDiscountAmount}
                                         roundOff={settings.roundOff}
                                         prefix={country?.prefix}
                                       />
@@ -1403,7 +1604,8 @@ const Create2 = () => {
                                     <Stack direction="row" justifyContent="space-between">
                                       <Typography variant="subtitle1">Grand Total:</Typography>
                                       <GenericPriceDisplay
-                                        total={formik.values?.grandTotal}
+                                        // total={formik.values?.grandTotal}
+                                        total={grandTotal}
                                         roundOff={settings.roundOff}
                                         prefix={country?.prefix}
                                         variant="subtitle1" // Optional

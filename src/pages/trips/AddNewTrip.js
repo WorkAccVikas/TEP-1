@@ -353,13 +353,13 @@ const createPayload = (values, item, driverType) => {
       companyRate: values.companyRate,
       companyPenalty: values.companyPenalty,
 
-      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : -1,
-      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : -1,
-      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : -1,
+      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : null,
+      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : null,
+      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : null,
 
-      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : -1,
-      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : -1,
-      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : -1,
+      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : null,
+      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : null,
+      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : null,
 
       addOnRate: values.addOnRate,
       mcdCharge: values.mcdCharge,
@@ -838,11 +838,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
           setRateDetails(data);
           setSyncRate(true);
 
-          if (
-            typeof data.vendorGuardPrice !== 'object' &&
-            typeof data.vendorAmount !== 'object' &&
-            typeof data.vendorDualAmount !== 'object'
-          ) {
+          if (data.vendorGuardPrice !== 0 && data.vendorAmount !== 0 && data.vendorDualAmount !== 0) {
             console.log('Vendor Driver');
             formik.setFieldValue('vendorGuardPrice', formik.values.guard ? data.vendorGuardPrice || 0 : 0);
             formik.setFieldValue('vendorRate', formik.values.dualTrip ? (data.vendorDualAmount || 0) / 2 : data.vendorAmount || 0); // data.driverAmount);
