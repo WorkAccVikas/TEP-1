@@ -16,6 +16,8 @@ import Overview from 'sections/cabprovidor/vendorManagement/vendorOverview/overv
 import Loan from 'sections/cabprovidor/vendorManagement/vendorOverview/loan';
 import AttachedCompany from 'sections/cabprovidor/vendorManagement/vendorOverview/AttachedCompany';
 import axiosServices from 'utils/axios';
+import { APP_DEFAULT_PATH } from 'config';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
 
 const VendorOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -24,8 +26,12 @@ const VendorOverview = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [vendorDetail, setVendorDetail] = useState(null);
   const [vendorSpecificDetail, setVendorSpecificDetail] = useState(null);
-  const [vendorData, setVendorData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  console.log("vendorDetail",vendorDetail);
+  
+
+  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Vendor', to: '/management/vendor/view' }, { title: `${vendorDetail.userName}` }];
 
   //  useEffect: Get vendor's details by vendorId
 
@@ -54,28 +60,27 @@ const VendorOverview = () => {
 
   //  useEffect: Fetch assigned companies to a vendor by vendor Id
 
-  useEffect(() => {
-    if (vendorId) {
-      const fetchCompanyData = async () => {
-        const token = localStorage.getItem('serviceToken');
-        try {
-          const response = await axiosServices.get(`/vendor/companies?vendorId=${vendorId}`);
+  // useEffect(() => {
+  //   if (vendorId) {
+  //     const fetchCompanyData = async () => {
+  //       try {
+  //         const response = await axiosServices.get(`/vendor/companies?vendorId=${vendorId}`);
 
 
-          if (response.status === 200) {
-            setVendorData(response.data.data);
-            setLoading(false);
-          }
+  //         if (response.status === 200) {
+  //           setVendorData(response.data.data);
+  //           setLoading(false);
+  //         }
 
-          // Handle the response as needed
-        } catch (error) {
-          console.error('Error fetching company data:', error);
-        }
-      };
+  //         // Handle the response as needed
+  //       } catch (error) {
+  //         console.error('Error fetching company data:', error);
+  //       }
+  //     };
 
-      fetchCompanyData();
-    }
-  }, [vendorId]);
+  //     fetchCompanyData();
+  //   }
+  // }, [vendorId]);
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -165,6 +170,7 @@ const VendorOverview = () => {
 
   return (
     <>
+     <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <Box
           sx={{
@@ -182,10 +188,10 @@ const VendorOverview = () => {
           <Box>
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" />
-              <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" />
-              <Tab label="Loan" icon={<EmptyWallet />} iconPosition="start" />
+              <Tab label="Trips" icon={<WalletMoney />} iconPosition="start" />
+              <Tab label="Advance" icon={<TableDocument />} iconPosition="start" />
+              <Tab label="Invoice" icon={<DocumentText />} iconPosition="start" />
+              <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" />
               <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
               {/* <Tab label="Vehicle List" icon={<Car />} iconPosition="start" />
               <Tab label="Driver List" icon={<Profile2User />} iconPosition="start" /> */}
@@ -194,10 +200,12 @@ const VendorOverview = () => {
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview data={vendorDetail} data1={vendorSpecificDetail} />}
               {activeTab === 1 && <Transaction data={data} />}
-              {activeTab === 2 && <Mails />}
-              {activeTab === 3 && <Statement />}
-              {activeTab === 4 && <Loan data={data}/>}
-              {activeTab === 5 && <AttachedCompany data={vendorData} loading={loading} />}
+              {activeTab === 2 && <Transaction data={data} />}
+              {activeTab === 3 && <Transaction data={data} />}
+              {/* {activeTab === 2 && <Mails />} */}
+              {activeTab === 4 && <Statement />}
+              {/* {activeTab === 4 && <Loan data={data}/>} */}
+              {activeTab === 5 && <AttachedCompany vendorId={vendorId}/>}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>

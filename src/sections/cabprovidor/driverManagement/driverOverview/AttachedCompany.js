@@ -196,14 +196,14 @@ SubRowAsync.propTypes = {
 
 // ==============================|| REACT TABLE - EXPANDING SUB TABLE ||============================== //
 
-const AttachedCompany = ({ vendorId }) => {
+const AttachedCompany = ({ driverId }) => {
   const [open, setOpen] = useState(false); // State to manage popup
   const [companyId, setCompanyId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState('');
-  const [vendorList, setVendorList] = useState([]);
+  const [driverList, setDriverList] = useState([]);
   const [updateKey, setUpdateKey] = useState(0);
-  const [vendorData, setVendorData] = useState(null);
+  const [driverData, setDriverData] = useState(null);
 
   const handleOpen = useCallback(() => {
     setOpen(true);
@@ -213,16 +213,20 @@ const AttachedCompany = ({ vendorId }) => {
     setOpen(false);
   }, []);
 
-  //  useEffect: Fetch assigned companies to a vendor by vendor Id
+  console.log("driverData",driverData);
+  console.log("companyId",companyId);
+  
+
+  //  useEffect: Fetch assigned companies to a driver by driverId
 
   useEffect(() => {
-    if (vendorId) {
+    if (driverId) {
       const fetchCompanyData = async () => {
         try {
-          const response = await axiosServices.get(`/vendor/companies?vendorId=${vendorId}`);
+          const response = await axiosServices.get(`/driver/companies?driverId=${driverId}`);
 
           if (response.status === 200) {
-            setVendorData(response.data.data);
+            setDriverData(response.data.data);
             setLoading(false);
           }
 
@@ -234,7 +238,7 @@ const AttachedCompany = ({ vendorId }) => {
 
       fetchCompanyData();
     }
-  }, [vendorId]);
+  }, [driverId]);
 
   //  useEffect: Fetch companies rate between vendor and company through companyId and vendorId
 
@@ -242,8 +246,8 @@ const AttachedCompany = ({ vendorId }) => {
     const fetchdata = async () => {
       setLoading(true); // Start loading
       try {
-        const response = await axiosServices.get(`/cabRateMaster/unwind/rate/vendorId?vendorId=${vendorId}&companyID=${companyId}`);
-        setVendorList(response.data.data);
+        const response = await axiosServices.get(`/driver/unwind/driver/rate?companyId=${companyId}&driverId=${driverId}`);
+        setDriverList(response.data.data);
       } catch (error) {
         console.error('Error fetching data', error);
       } finally {
@@ -251,10 +255,10 @@ const AttachedCompany = ({ vendorId }) => {
       }
     };
 
-    if (!companyId || !vendorId) return;
+    if (!companyId || !driverId) return;
 
     fetchdata();
-  }, [vendorId, companyId, updateKey]);
+  }, [driverId, companyId, updateKey]);
 
   const columns = useMemo(
     () => [
@@ -343,8 +347,8 @@ const AttachedCompany = ({ vendorId }) => {
             >
               <CircularProgress />
             </Box>
-          ) : vendorData.length > 0 ? (
-            <ReactTable columns={columns} data={vendorData} hideHeader />
+          ) : driverData.length > 0 ? (
+            <ReactTable columns={columns} data={driverData} hideHeader />
           ) : (
             <TableNoDataMessage text="No Company Found" />
           )}
@@ -365,7 +369,7 @@ const AttachedCompany = ({ vendorId }) => {
           <AppBar sx={{ position: 'relative', boxShadow: 'none' }}>
             <DialogTitle id="alert-dialog-title">
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h6">Vendor Rates with {companyName}</Typography>
+                <Typography variant="h6">Driver Rates with {companyName}</Typography>
                 <IconButton onClick={handleClose} color="inherit" aria-label="close">
                   <Add style={{ transform: 'rotate(45deg)' }} />
                 </IconButton>
@@ -373,7 +377,7 @@ const AttachedCompany = ({ vendorId }) => {
             </DialogTitle>
           </AppBar>
 
-          <VendorRateTable data={vendorList} updateKey={updateKey} setUpdateKey={setUpdateKey} loading={loading} />
+          <VendorRateTable data={driverList} updateKey={updateKey} setUpdateKey={setUpdateKey} loading={loading} />
         </Dialog>
       )}
     </>

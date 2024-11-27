@@ -31,6 +31,7 @@ import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { dispatch } from 'store';
 import { format } from 'date-fns';
+import ScrollX from 'components/ScrollX';
 
 // ==============================|| EXPANDING TABLE - USER DETAILS ||============================== //
 
@@ -55,10 +56,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   console.log('vehicleData', vehicleData);
   console.log('transactionData', transactionData);
 
-  const totalApprovedAmount = (transactionData || []).reduce(
-    (sum, transaction) => sum + transaction.approvedAmount,
-    0 
-  );
+  const totalApprovedAmount = (transactionData || []).reduce((sum, transaction) => sum + transaction.approvedAmount, 0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -440,14 +438,14 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
           <Grid item xs={12} sm={8} md={7} lg={7}>
             <Stack spacing={0} sx={{ width: '100%' }}>
               <MainCard title="Payment History" sx={{ width: '100%' }}>
-                <div style={{ height: 'auto' }}>
+                <ScrollX>
                   <ReactTable columns={personalDetailsColumns} data={transactionData} defaultPageSize={5} hideHeader />
-                </div>
+                </ScrollX>
               </MainCard>
               <MainCard title="Vehicle Details" sx={{ width: '100%' }}>
-                <div style={{ height: 'auto' }}>
+                <ScrollX>
                   <ReactTable columns={aboutMeColumns} data={vehicleData} showPagination={false} defaultPageSize={5} hideHeader />
-                </div>
+                </ScrollX>
               </MainCard>
             </Stack>
           </Grid>
