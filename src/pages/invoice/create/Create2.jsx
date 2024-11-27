@@ -1190,7 +1190,7 @@ const Create2 = () => {
 
                 {/* Details */}
                 <Grid item xs={12}>
-                  <Typography variant="h5">Detail</Typography>
+                  <Typography variant="h5">Details</Typography>
                 </Grid>
 
                 {/* Particular Table (Invoice) */}

@@ -1448,8 +1448,16 @@ const Create3 = () => {
 
                 {/* Details */}
                 <Grid item xs={12}>
-                  <Stack direction="row" spacing={2} gap={2} alignItems={'center'}>
+                  <Stack direction="row" spacing={2} justifyContent={'space-between'} alignItems={'center'}>
                     <Typography variant="h5">Details</Typography>
+                    <Typography variant="caption" sx={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'text.secondary' }}>
+                      Invoices have been generated for{' '}
+                      <Typography component="span" sx={{ fontWeight: 'bold', fontStyle: 'normal', color: 'primary.main' }}>
+                        {tripData?.length} trips
+                      </Typography>
+                      .
+                    </Typography>
+
                     <Box sx={{ width: '20%' }}>
                       <GenericSelect
                         label="Group By"
