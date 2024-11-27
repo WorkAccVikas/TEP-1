@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Car, Card, DocumentText, Profile2User, TableDocument, WalletMoney } from 'iconsax-react';
+import { Book, Car, Card, DocumentText, Profile2User, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import {
   fetchCompanies,
   fetchCompaniesAssignedDrivers,
@@ -24,6 +24,7 @@ import Statement from 'sections/cabprovidor/companyManagement/companyOverview/St
 import Transaction from 'sections/cabprovidor/companyManagement/companyOverview/Transaction';
 import ViewRoster from 'sections/cabprovidor/companyManagement/companyOverview/ViewRoster';
 import CompanyRateListing from 'sections/cabprovidor/companyManagement/companyOverview/CompanyRate1/CompanyRateListing';
+import TripDetail from 'sections/cabprovidor/companyManagement/companyOverview/TripDetails';
 
 const CompanyOverview = () => {
   const { id } = useParams();
@@ -119,9 +120,10 @@ const CompanyOverview = () => {
               allowScrollButtonsMobile
             >
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" />
-              <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" />
+              {/* <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" /> */}
+              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
+              {/* <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
+              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
               <Tab label="Attached Vendors" icon={<Profile2User />} iconPosition="start" />
               <Tab label="Attached Drivers" icon={<Car />} iconPosition="start" />
               <Tab label="View Roster" icon={<Card />} iconPosition="start" />
@@ -130,13 +132,14 @@ const CompanyOverview = () => {
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview data={companyDetails} />}
-              {activeTab === 1 && <Transaction data={data} />}
-              {activeTab === 2 && <Mails />}
-              {activeTab === 3 && <Statement />}
-              {activeTab === 4 && <AttachedVendor data={companiesVendor} loading={loading} />}
-              {activeTab === 5 && <AttachedDriver data={companiesDriver} loading={loading} />}
-              {activeTab === 6 && <ViewRoster id={companyId} />}
-              {activeTab === 7 && <CompanyRateListing id={companyId} companyName={companyName} />}
+              {/* {activeTab === 1 && <Transaction data={data} />} */}
+              {activeTab === 1 && <TripDetail companyId={companyId}/>}
+              {/* {activeTab === 2 && <Mails />}
+              {activeTab === 3 && <Statement />} */}
+              {activeTab === 2 && <AttachedVendor data={companiesVendor} loading={loading} />}
+              {activeTab === 3 && <AttachedDriver data={companiesDriver} loading={loading} />}
+              {activeTab === 4 && <ViewRoster id={companyId} />}
+              {activeTab === 5 && <CompanyRateListing id={companyId} companyName={companyName} />}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>
