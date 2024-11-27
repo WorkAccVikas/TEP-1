@@ -25,6 +25,9 @@ import Transaction from 'sections/cabprovidor/companyManagement/companyOverview/
 import ViewRoster from 'sections/cabprovidor/companyManagement/companyOverview/ViewRoster';
 import CompanyRateListing from 'sections/cabprovidor/companyManagement/companyOverview/CompanyRate1/CompanyRateListing';
 import TripDetail from 'sections/cabprovidor/companyManagement/companyOverview/TripDetails';
+import { APP_DEFAULT_PATH } from 'config';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import AttachedVendorDriver from 'sections/cabprovidor/companyManagement/companyOverview/AttachedVendorDriver/AttachedVendorDriver';
 
 const CompanyOverview = () => {
   const { id } = useParams();
@@ -94,8 +97,15 @@ const CompanyOverview = () => {
     fetchData();
   }, [id]); // Only fetch data when id changes
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Companies', to: '/management/company/view' },
+    { title: `${companyDetails?.company_name}` }
+  ];
+
   return (
     <>
+      <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <Box
           sx={{
@@ -128,6 +138,7 @@ const CompanyOverview = () => {
               <Tab label="Attached Drivers" icon={<Car />} iconPosition="start" />
               <Tab label="View Roster" icon={<Card />} iconPosition="start" />
               <Tab label="Company Rate" icon={<Card />} iconPosition="start" />
+              {/* <Tab label="TestingComb" icon={<Card />} iconPosition="start" /> */}
             </Tabs>
 
             <Box sx={{ p: 3 }}>
@@ -140,6 +151,7 @@ const CompanyOverview = () => {
               {activeTab === 3 && <AttachedDriver data={companiesDriver} loading={loading} />}
               {activeTab === 4 && <ViewRoster id={companyId} />}
               {activeTab === 5 && <CompanyRateListing id={companyId} companyName={companyName} />}
+              {/* {activeTab === 6 && <AttachedVendorDriver data={companiesVendor} loading={loading} />} */}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>

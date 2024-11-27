@@ -101,7 +101,7 @@ const AttachedVendor = ({ data, loading }) => {
             <CircularProgress />
           </Box>
         ) : data.length > 0 ? (
-          <ReactTable columns={columns} data={data} />
+          <ReactTable columns={columns} data={data} hideHeader/>
         ) : (
           <TableNoDataMessage text="No Vendor Found" />
         )}
