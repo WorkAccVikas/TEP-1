@@ -186,8 +186,8 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
 };
 
 export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
-  console.log("data",data);
-  
+  console.log('data', data);
+
   switch (userType) {
     case USERTYPE.iscabProvider:
       return {
@@ -723,7 +723,7 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
   }
 };
 
-const sliceName = "cabs";
+const sliceName = 'cabs';
 
 const AddCab = () => {
   const [showGpsEmi, setShowGpsEmi] = useState(false);
@@ -731,12 +731,11 @@ const AddCab = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { isCreating, getSingleDetails } = useSelector(
-    (state) => state[sliceName]
-  );
+  const { isCreating, getSingleDetails } = useSelector((state) => state[sliceName]);
 
   const userType = useSelector((state) => state.auth.userType);
   const vendors = useSelector((state) => state.vendors.allVendors);
+  console.log(`🚀 ~ AddCab ~ vendors:`, vendors);
   const vehicleTypes = useSelector((state) => state.vehicleTypes.vehicleTypes);
   const [vehicleImages, setVehicleImages] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -745,8 +744,8 @@ const AddCab = () => {
 
   const fileInputRef = useRef();
 
-  console.log("id",id);
-  console.log("getSingleDetails",getSingleDetails);
+  console.log('id', id);
+  console.log('getSingleDetails', getSingleDetails);
 
   const triggerFileInput = () => {
     // console.log('trigger Function click');
@@ -794,28 +793,27 @@ const AddCab = () => {
       dispatch(fetchAllVendors());
     }
 
-     (async () => {
-       try {
-         if (id) {
-           console.log('API Calling .......');
+    (async () => {
+      try {
+        if (id) {
+          console.log('API Calling .......');
 
-           const result = await dispatch(fetchCabDetails(id)).unwrap();
-           console.log(`🚀 ~ Manage ~ result:`, result);
-         }
-       } catch (error) {
-         console.log(`🚀 ~ Manage ~ error:`, error);
-         navigate('/management/cab/view', { replace: true });
-       }
-     })();
+          const result = await dispatch(fetchCabDetails(id)).unwrap();
+          console.log(`🚀 ~ Manage ~ result:`, result);
+        }
+      } catch (error) {
+        console.log(`🚀 ~ Manage ~ error:`, error);
+        navigate('/management/cab/view', { replace: true });
+      }
+    })();
   }, [dispatch, userType]);
 
   // const data = id? null : getSingleDetails;
   const data = isCreating ? null : getSingleDetails;
 
-  console.log("getSingleDetails",getSingleDetails);
-  console.log("isCreating",isCreating);
-  console.log("data",data);
-  
+  console.log('getSingleDetails', getSingleDetails);
+  console.log('isCreating', isCreating);
+  console.log('data', data);
 
   const validationSchema = Yup.object({
     vehicletype: Yup.string().required('Vehicletype is required').min(1, 'Vehicletype is required'),
@@ -1110,7 +1108,7 @@ const AddCab = () => {
                             <DatePicker
                               label="Select Pollution Expiry Date"
                               sx={{
-                                width: '100%',
+                                width: '100%'
                                 // border: !!formik.errors.pollutionExpiryDate && formik.touched.pollutionExpiryDate ? 'red' : 'auto'
                               }}
                               value={values.pollutionExpiryDate}
@@ -1622,35 +1620,21 @@ const AddCab = () => {
                           alignItems="center"
                           justifyContent="center"
                           flexDirection="column"
-                        
-
                           sx={{
                             cursor: vehicleImages.length < MAX_VEHICLE_IMAGES ? 'pointer' : 'not-allowed',
                             '&:hover': {
                               borderColor: vehicleImages.length < MAX_VEHICLE_IMAGES ? '#1976d2' : '#ccc'
                             }
                           }}
-                          onClick={vehicleImages.length < MAX_VEHICLE_IMAGES ? triggerFileInput : undefined} 
+                          onClick={vehicleImages.length < MAX_VEHICLE_IMAGES ? triggerFileInput : undefined}
                         >
                           <DocumentUpload fontSize="large" color="primary" />
                           <Typography variant="body1" color="textSecondary">
                             Click here to upload images of your vehicle
                           </Typography>
-                          <Button
-                            variant="contained"
-                            component="label"
-                            sx={{ mt: 2 }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <Button variant="contained" component="label" sx={{ mt: 2 }} onClick={(e) => e.stopPropagation()}>
                             Upload Images
-                            <input
-                              ref={fileInputRef} 
-                              hidden
-                              accept="image/*"
-                              type="file"
-                              multiple
-                              onChange={handleFileUpload}
-                            />
+                            <input ref={fileInputRef} hidden accept="image/*" type="file" multiple onChange={handleFileUpload} />
                           </Button>
                           {vehicleImageError && (
                             <Typography variant="caption" color="error" sx={{ mt: 1 }}>
@@ -1664,7 +1648,6 @@ const AddCab = () => {
                         </Typography>
                       </Stack>
 
-                     
                       {vehicleImages.length > 0 && (
                         <Box mt={4}>
                           <Typography variant="h6" gutterBottom>
@@ -1692,7 +1675,7 @@ const AddCab = () => {
                                     <IconButton
                                       color="error"
                                       onClick={(e) => {
-                                        e.stopPropagation(); 
+                                        e.stopPropagation();
                                         handleDelete(image.id);
                                       }}
                                     >
@@ -1706,20 +1689,18 @@ const AddCab = () => {
                         </Box>
                       )}
 
-                    
                       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                         <Stack
                           gap={2}
                           sx={{
-                           
                             height: 'inherit'
                           }}
                         >
                           <DialogTitle
                             sx={{
                               fontWeight: 'bold',
-                              bgcolor: 'primary.main', 
-                              color: 'white' 
+                              bgcolor: 'primary.main',
+                              color: 'white'
                             }}
                           >
                             <Stack direction="row" justifyContent="space-between" alignContent="center">
