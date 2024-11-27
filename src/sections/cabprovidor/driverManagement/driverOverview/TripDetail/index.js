@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Chip, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from '@mui/material';
+import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo } from 'react';
@@ -12,10 +12,17 @@ const TripDetail = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
   const columns = useMemo(
     () => [
       {
-        Header: "#",
-        accessor: "id",
-        className: "cell-center",
-        Cell: ({ row }) => <span>{row.index + 1}</span>,
+        Header: '#',
+        accessor: '',
+        disableFilters: true,
+        Cell: ({ row }) => {
+          const serialNo = row.index + 1; // The serial number will be the row index + 1
+          return (
+            <>
+              <Typography>{serialNo}</Typography>
+            </>
+          );
+        }
       },
       {
         Header: 'Date',
