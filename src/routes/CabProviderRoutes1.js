@@ -69,6 +69,8 @@ const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDrive
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
 const AddCab = Loadable(lazy(() => import('pages/management/cab/AddCab')));
+const CabOverview = Loadable(lazy(() => import('pages/overview/CabOverview')));
+
 // company
 const Company = Loadable(lazy(() => import('pages/management/company')));
 const AddCompany = Loadable(lazy(() => import('pages/management/company/AddCompany')));
@@ -420,7 +422,12 @@ const CabProvidorRoutes = {
                 {
                   path: 'edit/:id',
                   element: <AddCab />
-                }
+                },
+                {
+                  path: 'overview/:id',
+                  element: <CabOverview />
+                  //   element: <ProtectedRoute element={CompanyOverview} moduleName={MODULE.COMPANY} permission={PERMISSIONS.READ} />
+                },
               ]
             }
           ]
