@@ -367,6 +367,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
   const [loading, setLoading] = useState(false);
   const [invoiceTripData, setInvoiceTripData] = useState([]);
   const navigate = useNavigate();
+  console.log({ selected });
 
   useEffect(() => {
     if (selected && selected.length > 0) {
@@ -638,6 +639,8 @@ const TripList = () => {
     selectedDriver: {},
     selectedVehicle: {}
   });
+
+  console.log('selectedRow', selectedRow);
 
   const [tripStats, setTripStats] = useState({
     completedTripsCount: 0,
@@ -980,7 +983,7 @@ const TripList = () => {
           }
         }
       },
-      
+
       {
         title: '_id',
         Header: '_id'
