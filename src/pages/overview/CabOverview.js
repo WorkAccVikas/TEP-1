@@ -7,20 +7,21 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, DocumentText, EmptyWallet, MoneyRecive, WalletAdd, WalletMoney } from 'iconsax-react';
+import { Book, DocumentText, EmptyWallet, MoneyRecive, Routing2, WalletAdd, WalletMoney } from 'iconsax-react';
 import Overview from 'sections/cabprovidor/cabManagement/cabOverview/Overview';
 import TripDetail from 'sections/cabprovidor/cabManagement/cabOverview/TripDetails';
 import axiosServices from 'utils/axios';
 import { dispatch, useSelector } from 'store';
 import { fetchCabDetails } from 'store/slice/cabProvidor/cabSlice';
 import CustomCircularLoader from 'components/CustomCircularLoader';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import { APP_DEFAULT_PATH } from 'config';
 
 const CabOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
+  const vehicleId = id;
 
   const [activeTab, setActiveTab] = useState(0);
-  const [driverDetail, setDriverDetail] = useState(null);
-  const [driverSpecificDetail, setDriverSpecificDetail] = useState(null);
 
   const { loading, getSingleDetails: cabDetails } = useSelector((state) => state.cabs);
   console.log(`🚀 ~ CabOverview ~ loading:`, loading);
@@ -33,8 +34,15 @@ const CabOverview = () => {
     dispatch(fetchCabDetails(id));
   }, [id]);
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Cab', to: '/management/cab/view' },
+    { title: `${cabDetails?.vehicleName}` }
+  ];
+
   return (
     <>
+    <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <CustomCircularLoader />
       ) : (
@@ -43,12 +51,12 @@ const CabOverview = () => {
             <Box>
               <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
                 <Tab label="Overview" icon={<Book />} iconPosition="start" />
-                <Tab label="Trip Details" icon={<WalletMoney />} iconPosition="start" />
+                <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
               </Tabs>
 
               <Box sx={{ p: 3 }}>
                 {activeTab === 0 && <Overview />}
-                {activeTab === 1 && <TripDetail />}
+                {activeTab === 1 && <TripDetail vehicleId={vehicleId}/>}
               </Box>
 
               <Box sx={{ mt: 2.5 }}>
