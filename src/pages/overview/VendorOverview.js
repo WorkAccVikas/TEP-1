@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Buliding, DocumentText, EmptyWallet, TableDocument, WalletMoney } from 'iconsax-react';
+import { Book, Buliding, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import Transaction from 'sections/cabprovidor/vendorManagement/vendorOverview/Transaction';
 import Mails from 'sections/cabprovidor/vendorManagement/vendorOverview/Mails';
 import Statement from 'sections/cabprovidor/vendorManagement/vendorOverview/Statement';
@@ -18,6 +18,7 @@ import AttachedCompany from 'sections/cabprovidor/vendorManagement/vendorOvervie
 import axiosServices from 'utils/axios';
 import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import TripDetail from 'sections/cabprovidor/vendorManagement/vendorOverview/TripDetails';
 
 const VendorOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -28,10 +29,7 @@ const VendorOverview = () => {
   const [vendorSpecificDetail, setVendorSpecificDetail] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  console.log("vendorDetail",vendorDetail);
-  
-
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Vendor', to: '/management/vendor/view' }, { title: `${vendorDetail.userName}` }];
+  console.log('vendorDetail', vendorDetail);
 
   //  useEffect: Get vendor's details by vendorId
 
@@ -58,6 +56,12 @@ const VendorOverview = () => {
     }
   }, [vendorId]);
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Vendor', to: '/management/vendor/view' },
+    { title: `${vendorDetail?.userName}` }
+  ];
+
   //  useEffect: Fetch assigned companies to a vendor by vendor Id
 
   // useEffect(() => {
@@ -65,7 +69,6 @@ const VendorOverview = () => {
   //     const fetchCompanyData = async () => {
   //       try {
   //         const response = await axiosServices.get(`/vendor/companies?vendorId=${vendorId}`);
-
 
   //         if (response.status === 200) {
   //           setVendorData(response.data.data);
@@ -109,19 +112,19 @@ const VendorOverview = () => {
     return (Math.random() * 500).toFixed(2); // Random balance due between 0 and 500
   };
 
-    // Function to generate a random vehicle
-    const getRandomVehicle = () => {
-      const vehicles = ['Car', 'Truck', 'Bike', 'Bus', 'Van'];
-      return vehicles[Math.floor(Math.random() * vehicles.length)];
-    };
+  // Function to generate a random vehicle
+  const getRandomVehicle = () => {
+    const vehicles = ['Car', 'Truck', 'Bike', 'Bus', 'Van'];
+    return vehicles[Math.floor(Math.random() * vehicles.length)];
+  };
 
-     // Function to generate random advance rate
+  // Function to generate random advance rate
   const getRandomAdvanceRate = () => {
     return `${Math.floor(Math.random() * 20) + 1}%`; // Random advance rate between 1% and 20%
   };
 
-   // Function to generate random description
-   const getRandomDescription = () => {
+  // Function to generate random description
+  const getRandomDescription = () => {
     return `Installment ${Math.floor(Math.random() * 52) + 1}`; // Random installment between 1 and 52
   };
 
@@ -140,7 +143,6 @@ const VendorOverview = () => {
     return companies[Math.floor(Math.random() * companies.length)];
   };
 
-
   // Function to generate random data for the table
   const generateRandomTransactions = (num) => {
     return Array.from({ length: num }, (_, index) => ({
@@ -149,18 +151,18 @@ const VendorOverview = () => {
       invoiceNumber: getRandomInvoiceNumber(),
       amount: getRandomAmount(),
       balanceDue: getRandomBalanceDue(),
-      status: Math.random() > 0.5 ? 'Active' : 'Inactive' ,
+      status: Math.random() > 0.5 ? 'Active' : 'Inactive',
       vehicle: getRandomVehicle(),
       advanceRate: getRandomAdvanceRate(),
-      advanceType: 'Full', 
+      advanceType: 'Full',
       description: getRandomDescription(),
       company_name: getRandomCompanyName(),
-      totalLoanAmount: `₹${(Math.random() * 10000).toFixed(2)}`, 
+      totalLoanAmount: `₹${(Math.random() * 10000).toFixed(2)}`,
       totalPaid: `₹${(Math.random() * 5000).toFixed(2)}`,
       totalBalance: `₹${(Math.random() * 5000).toFixed(2)}`,
-      loanTerm: `${Math.floor(Math.random() * 10) + 1} years`, 
-      totalWeek: Math.floor(Math.random() * 52), 
-      termPaid: Math.floor(Math.random() * 52), 
+      loanTerm: `${Math.floor(Math.random() * 10) + 1} years`,
+      totalWeek: Math.floor(Math.random() * 52),
+      termPaid: Math.floor(Math.random() * 52),
       endDate: '2025-12-31'
     }));
   };
@@ -170,7 +172,7 @@ const VendorOverview = () => {
 
   return (
     <>
-     <Breadcrumbs custom links={breadcrumbLinks} />
+      <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <Box
           sx={{
@@ -188,7 +190,7 @@ const VendorOverview = () => {
           <Box>
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Trips" icon={<WalletMoney />} iconPosition="start" />
+              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
               <Tab label="Advance" icon={<TableDocument />} iconPosition="start" />
               <Tab label="Invoice" icon={<DocumentText />} iconPosition="start" />
               <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" />
@@ -199,13 +201,13 @@ const VendorOverview = () => {
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview data={vendorDetail} data1={vendorSpecificDetail} />}
-              {activeTab === 1 && <Transaction data={data} />}
+              {activeTab === 1 && <TripDetail vendorId={vendorId} />}
               {activeTab === 2 && <Transaction data={data} />}
               {activeTab === 3 && <Transaction data={data} />}
               {/* {activeTab === 2 && <Mails />} */}
               {activeTab === 4 && <Statement />}
               {/* {activeTab === 4 && <Loan data={data}/>} */}
-              {activeTab === 5 && <AttachedCompany vendorId={vendorId}/>}
+              {activeTab === 5 && <AttachedCompany vendorId={vendorId} />}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>
