@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Buliding, DocumentText, EmptyWallet, MoneyRecive, WalletAdd, WalletMoney } from 'iconsax-react';
+import { Book, Buliding, DocumentText, EmptyWallet, MoneyRecive, Routing2, WalletAdd, WalletMoney } from 'iconsax-react';
 import Overview from 'sections/cabprovidor/driverManagement/driverOverview/Overview';
 import Statement from 'sections/cabprovidor/driverManagement/driverOverview/Statement';
 import TripDetail from 'sections/cabprovidor/driverManagement/driverOverview/TripDetail';
@@ -29,7 +29,7 @@ const DriverOverview = () => {
   const [driverDetail, setDriverDetail] = useState(null);
   const [driverSpecificDetail, setDriverSpecificDetail] = useState(null);
 
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Driver', to: '/management/driver/view' }, { title: `${driverDetail.userName}` }];
+  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Driver', to: '/management/driver/view' }, { title: `${driverDetail?.userName}` }];
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -160,7 +160,7 @@ const DriverOverview = () => {
           <Box>
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Trip Details" icon={<WalletMoney />} iconPosition="start" />
+              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
               {/* <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
               <Tab label="Advance" icon={<WalletAdd />} iconPosition="start" />
               {/* <Tab label="Expenses" icon={<EmptyWallet />} iconPosition="start" /> */}
@@ -170,7 +170,7 @@ const DriverOverview = () => {
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview data={driverDetail} data1={driverSpecificDetail} />}
-              {activeTab === 1 && <TripDetail data={data} />}
+              {activeTab === 1 && <TripDetail driverId={driverId} />}
               {/* {activeTab === 2 && <Statement />} */}
               {activeTab === 2 && <Advance data={data} />}
               {/* {activeTab === 3 && <Loan data={data}/>} */}

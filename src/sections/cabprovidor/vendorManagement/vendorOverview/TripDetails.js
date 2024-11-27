@@ -3,7 +3,7 @@ import { Chip, Link, Skeleton, Stack, Table, TableBody, TableCell, TableHead, Ta
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
+import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
 import axiosServices from 'utils/axios';
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
@@ -11,10 +11,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
-import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
-import { renderFilterTypes } from 'utils/react-table';
+import { TablePagination } from 'components/third-party/ReactTable';
 
-const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) => {
+const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vendorId }) => {
   const theme = useTheme();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +35,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
           params: {
             startDate: formatDateUsingMoment(startDate),
             endDate: formatDateUsingMoment(endDate),
-            vehicleId: vehicleId
+            vendorId: vendorId
           }
         });
         setData(response.data.data || []);
@@ -49,7 +48,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
     };
 
     fetchData();
-  }, [vehicleId, startDate,endDate]);
+  }, [vendorId, startDate,endDate]);
 
   const columns = useMemo(
     () => [
@@ -125,6 +124,11 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
       {
         Header: 'Cab Type',
         accessor: 'vehicleTypeID.vehicleTypeName'
+      },
+      {
+        Header: 'Driver',
+        accessor: 'driverId.userName',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Vehicle Guard Price',
@@ -224,107 +228,107 @@ export default TripDetail;
 // ==============================|| REACT TABLE ||============================== //
 
 function ReactTable({
-  columns,
-  data,
-  renderRowSubComponent,
-}) {
-  const theme = useTheme();
-
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    visibleColumns,
-    rows,
-    page,
-    gotoPage,
-    setPageSize,
-    state: { pageIndex, pageSize, expanded },
-  } = useTable(
-    {
-      columns,
-      data,
-      initialState: {
-        pageIndex: 0,
-        pageSize: 10,
-        hiddenColumns: ['_id'], // Keep this to hide specific columns if needed
+    columns,
+    data,
+    renderRowSubComponent,
+  }) {
+    const theme = useTheme();
+  
+    const {
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      prepareRow,
+      visibleColumns,
+      rows,
+      page,
+      gotoPage,
+      setPageSize,
+      state: { pageIndex, pageSize, expanded },
+    } = useTable(
+      {
+        columns,
+        data,
+        initialState: {
+          pageIndex: 0,
+          pageSize: 10,
+          hiddenColumns: ['_id'], // Keep this to hide specific columns if needed
+        },
       },
-    },
-    useGlobalFilter, // Retain if global filtering is required
-    useFilters, // Retain if individual column filtering is needed
-    useExpanded, // Retain for row expansion
-    usePagination, // Retain for pagination functionality
-    useRowSelect // Retain if row selection is needed
-  );
-
-  return (
-    <>
-      <Stack spacing={3}>
-        <Table {...getTableProps()}>
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
-                    {column.render('Header')}
-                  </TableCell>
-                ))}
+      useGlobalFilter, // Retain if global filtering is required
+      useFilters, // Retain if individual column filtering is needed
+      useExpanded, // Retain for row expansion
+      usePagination, // Retain for pagination functionality
+      useRowSelect // Retain if row selection is needed
+    );
+  
+    return (
+      <>
+        <Stack spacing={3}>
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
+                      {column.render('Header')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, i) => {
+                prepareRow(row);
+                const rowProps = row.getRowProps();
+  
+                return (
+                  <Fragment key={i}>
+                    <TableRow
+                      {...row.getRowProps()}
+                      onClick={() => {
+                        row.toggleRowSelected();
+                      }}
+                      sx={{
+                        bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
+                      }}
+                    >
+                      {row.cells.map((cell) => (
+                        <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {row.isExpanded &&
+                      renderRowSubComponent({
+                        row,
+                        rowProps,
+                        visibleColumns,
+                        expanded
+                      })}
+                  </Fragment>
+                );
+              })}
+              <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
+                <TableCell sx={{ p: 2}} colSpan={10}>
+                  <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+                </TableCell>
               </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row);
-              const rowProps = row.getRowProps();
-
-              return (
-                <Fragment key={i}>
-                  <TableRow
-                    {...row.getRowProps()}
-                    onClick={() => {
-                      row.toggleRowSelected();
-                    }}
-                    sx={{
-                      bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
-                    }}
-                  >
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
-                        {cell.render('Cell')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.isExpanded &&
-                    renderRowSubComponent({
-                      row,
-                      rowProps,
-                      visibleColumns,
-                      expanded
-                    })}
-                </Fragment>
-              );
-            })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2}} colSpan={10}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Stack>
-    </>
-  );
-}
-
-ReactTable.propTypes = {
-  columns: PropTypes.array.isRequired,
-  data: PropTypes.array.isRequired,
-  getHeaderProps: PropTypes.func,
-  handleAdd: PropTypes.func.isRequired,
-  renderRowSubComponent: PropTypes.any,
-  search: PropTypes.bool,
-  csvExport: PropTypes.bool,
-  buttonTitle: PropTypes.string.isRequired
-};
-
+            </TableBody>
+          </Table>
+        </Stack>
+      </>
+    );
+  }
+  
+  ReactTable.propTypes = {
+    columns: PropTypes.array.isRequired,
+    data: PropTypes.array.isRequired,
+    getHeaderProps: PropTypes.func,
+    handleAdd: PropTypes.func.isRequired,
+    renderRowSubComponent: PropTypes.any,
+    search: PropTypes.bool,
+    csvExport: PropTypes.bool,
+    buttonTitle: PropTypes.string.isRequired
+  };
+  

@@ -15,7 +15,7 @@ const Overview = () => {
         <Grid item xs={12} sm={6} md={6} xl={6}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <MainCard>
+              <MainCard title="Cab Details">
                 <Grid container spacing={3}>
                   {/* Cab Information */}
                   <Grid item xs={12}>
