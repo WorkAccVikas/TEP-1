@@ -175,6 +175,10 @@ export const convertToDateUsingMoment = (str, format = 'DD/MM/YYYY') => {
   return result;
 };
 
+export const formatDate = (dateString) => {
+  return moment(dateString, 'DD/MM/YYYY').format('MMMM DD, YYYY');
+};
+
 /**
  * Deeply compares two objects to determine if they are equal.
  *

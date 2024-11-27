@@ -44,7 +44,7 @@ const DriverRegister = ({
   const dispatch = useDispatch();
   const { isCreating, getSingleDetails } = useSelector((state) => state[sliceName]);
 
-  const vendors = useSelector((state) => state.vendors.vendors);
+  const vendors = useSelector((state) => state.vendors.allVendors);
   const userType = useSelector((state) => state.auth.userType);
 
   const data = isCreating ? null : getSingleDetails;
