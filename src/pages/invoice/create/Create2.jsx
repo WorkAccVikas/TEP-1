@@ -1426,7 +1426,7 @@ const Create2 = () => {
                           </TableContainer>
 
                           <Divider />
-                          <Grid container justifyContent="space-between">
+                          <Grid container justifyContent="space-between" sx={{ mt: 2 }}>
                             {/* Left Side */}
                             <Grid item xs={12} md={8}>
                               {/* <Stack direction="row" gap={2} sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}> */}

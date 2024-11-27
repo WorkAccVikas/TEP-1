@@ -68,6 +68,8 @@ import _ from 'lodash'; // For debouncing
 import useAuth from 'hooks/useAuth';
 import CustomCircularLoader from 'components/CustomCircularLoader';
 import { USERTYPE } from 'constant';
+import axiosServices from 'utils/axios';
+import moment from 'moment';
 
 const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/create',
@@ -130,12 +132,14 @@ const item = {
   amount: 0
 };
 
-const getInitialValues = (data, user, userSpecificData, invoiceData = null) => {
+const getInitialValues = (data, user, userSpecificData, invoiceData = null, customerInfo = null, servicePeriod = null) => {
   console.log('data', data);
   console.log('user', user);
   console.log('userSpecificData', userSpecificData);
   console.log('vie = ', user?.userEmail);
   console.log('invoiceData', invoiceData);
+  console.log('customerInfo', customerInfo);
+  console.log('servicePeriod', servicePeriod);
 
   const result = {
     id: 120,
@@ -143,8 +147,8 @@ const getInitialValues = (data, user, userSpecificData, invoiceData = null) => {
     status: 'Unpaid' || '',
     date: new Date(), // For Invoice Date
     due_date: null, // For Invoice Due Date
-    start_date: null, // For Start Date
-    end_date: null, // For End Date
+    start_date: servicePeriod ? new Date(servicePeriod.minDate) : null, // For Start Date
+    end_date: servicePeriod ? new Date(servicePeriod.maxDate) : null, // For End Date
     cashierInfo: {
       cabProviderLegalName: userSpecificData?.cabProviderLegalName || userSpecificData?.vendorCompanyName || '',
       PAN: userSpecificData?.PAN || '',
@@ -160,16 +164,18 @@ const getInitialValues = (data, user, userSpecificData, invoiceData = null) => {
       state: user?.state || '',
       postal_code: user?.pinCode || ''
     },
-    customerInfo: {
-      address: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      GSTIN: '',
-      company_name: '',
-      PAN: '',
-      company_email: ''
-    },
+    customerInfo: customerInfo
+      ? customerInfo
+      : {
+          address: '',
+          city: '',
+          state: '',
+          postal_code: '',
+          GSTIN: '',
+          company_name: '',
+          PAN: '',
+          company_email: ''
+        },
     invoiceData: invoiceData ? invoiceData : [item],
     bank_details: {
       accountHolderName: userSpecificData?.cabProviderLegalName || '',
@@ -207,21 +213,24 @@ const getDiscountLabel = (val) => {
 };
 
 const PARTICULAR_TYPE = {
+  COMPANY_RATE: 0,
   ZONE: 1,
   ZONE_TYPE: 2,
   VEHICLE_TYPE: 3
 };
 
 const PARTICULAR_TYPE_GROUP_KEY = {
+  [PARTICULAR_TYPE.COMPANY_RATE]: 'companyRate',
   [PARTICULAR_TYPE.ZONE]: 'zoneNameID',
   [PARTICULAR_TYPE.ZONE_TYPE]: 'zoneTypeID',
   [PARTICULAR_TYPE.VEHICLE_TYPE]: 'vehicleTypeID'
 };
 
 const optionsForParticularType = [
-  { value: PARTICULAR_TYPE.VEHICLE_TYPE, label: 'Vehicle Type' },
+  { value: PARTICULAR_TYPE.COMPANY_RATE, label: 'Company Rate' },
   { value: PARTICULAR_TYPE.ZONE, label: 'Zone' },
-  { value: PARTICULAR_TYPE.ZONE_TYPE, label: 'Zone Type' }
+  { value: PARTICULAR_TYPE.ZONE_TYPE, label: 'Zone Type' },
+  { value: PARTICULAR_TYPE.VEHICLE_TYPE, label: 'Vehicle Type' }
 ];
 
 const dummyData = [
@@ -436,6 +445,8 @@ const Create3 = () => {
   const location = useLocation();
   const tripData = location.state?.tripData;
 
+  console.log('tripData', tripData);
+
   const { user, userSpecificData } = useAuth();
 
   const { isCustomerOpen, countries, country, lists, isOpen } = useSelector((state) => state.invoice);
@@ -462,6 +473,8 @@ const Create3 = () => {
   const [groupDiscount, setGroupDiscount] = useState(0);
   const [linkedTripIds, setLinkedTripIds] = useState([]);
   const [groupBy, setGroupBy] = useState('companyRate');
+  const [customerInfo, setCustomerInfo] = useState(null);
+  const [servicePeriod, setServicePeriod] = useState(null);
 
   const userType = useSelector((state) => state.auth.userType);
 
@@ -708,11 +721,52 @@ const Create3 = () => {
   }, [settings, user, userSpecificData]);
 
   useEffect(() => {
+    const fetchCompanyData = async (id) => {
+      try {
+        if (id) {
+          const response = await axiosServices.get(`/company/by?companyId=${id}`);
+          console.log('res = ', response);
+          if (response.status === 200) {
+            const data = response.data.data;
+            console.log('Tina = ', data);
+
+            const { rateData, ...rest } = data;
+            console.log('🚀 ~ file: Create3.jsx:654 ~ fetchCompanyData ~ rest:', rest);
+            // setFieldValue('customerInfo', rest);
+            setCustomerInfo(rest);
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching company data:', error);
+      }
+    };
+
+    const companyID = tripData[0]?.companyID?._id || '';
+    console.log(`🚀 ~ useEffect ~ companyID:`, companyID);
+
+    // Extract start date and end date
+    const result = findMinMaxDates(tripData);
+    console.log(result);
+    if (typeof result === 'object') {
+      console.log('Tina = ', result);
+      setServicePeriod(result);
+    }
+
+    const allTripID = tripData.map((trip) => trip._id);
+    console.log('allTripID = ', allTripID);
+    setLinkedTripIds(allTripID);
+
+    if (companyID) {
+      fetchCompanyData(companyID);
+    }
+  }, [tripData, setFieldValue]);
+
+  useEffect(() => {
     console.log('UseEffect of tripData called ........');
     console.log('tripData', tripData);
 
-    // const mappedData = groupDataWithSuffix(tripData, groupBy);
-    const mappedData = groupDataWithSuffix(dummyData, groupBy);
+    const mappedData = groupDataWithSuffix(tripData, groupBy);
+    // const mappedData = groupDataWithSuffix(dummyData, groupBy);
 
     console.log('Tina = ', mappedData);
 
@@ -737,8 +791,12 @@ const Create3 = () => {
     // setFieldValue('invoiceData', updatedData);
     console.log('user', user);
     console.log('userSpecificData', userSpecificData);
-    setFormikInitialValues(getInitialValues(settings, user, userSpecificData, updatedData));
-  }, [tripData, groupBy, setFieldValue, user, userSpecificData, settings]);
+    console.log('settings', settings);
+    console.log('customerInfo', customerInfo);
+    console.log('servicePeriod', servicePeriod);
+
+    setFormikInitialValues(getInitialValues(settings, user, userSpecificData, updatedData, customerInfo, servicePeriod));
+  }, [tripData, groupBy, setFieldValue, user, userSpecificData, settings, customerInfo, servicePeriod]);
 
   console.log('loadingTable = ', loadingTable);
 
@@ -1327,7 +1385,7 @@ const Create3 = () => {
                           </Stack>
                         </Grid>
 
-                        <Grid item xs={12} sm={4}>
+                        {/* <Grid item xs={12} sm={4}>
                           <Box textAlign="right" color="secondary.200">
                             <Button
                               size="small"
@@ -1356,7 +1414,7 @@ const Create3 = () => {
                               handlerAddress={(value) => setFieldValue('customerInfo', value)}
                             />
                           </Box>
-                        </Grid>
+                        </Grid> */}
                       </Grid>
                     )}
 
@@ -1390,7 +1448,19 @@ const Create3 = () => {
 
                 {/* Details */}
                 <Grid item xs={12}>
-                  <Typography variant="h5">Detail</Typography>
+                  <Stack direction="row" spacing={2} gap={2} alignItems={'center'}>
+                    <Typography variant="h5">Details</Typography>
+                    <Box sx={{ width: '20%' }}>
+                      <GenericSelect
+                        label="Group By"
+                        name="particularType"
+                        options={optionsForParticularType}
+                        value={particularType}
+                        onChange={handleSelectChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </Stack>
                 </Grid>
 
                 {/* Particular Table (Invoice) */}
@@ -1626,7 +1696,7 @@ const Create3 = () => {
                           </TableContainer>
 
                           <Divider />
-                          <Grid container justifyContent="space-between">
+                          <Grid container justifyContent="space-between" sx={{ mt: 2 }}>
                             {/* Left Side */}
                             <Grid item xs={12} md={8}>
                               {/* <Stack direction="row" gap={2} sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}> */}
@@ -1664,16 +1734,6 @@ const Create3 = () => {
                                   >
                                     Add Item
                                   </Button>
-                                </Grid>
-                                <Grid item xs={12} md={2}>
-                                  <GenericSelect
-                                    label="Particular Type"
-                                    name="particularType"
-                                    options={optionsForParticularType}
-                                    value={particularType}
-                                    onChange={handleSelectChange}
-                                    fullWidth
-                                  />
                                 </Grid>
                               </Grid>
                               {/* </Stack> */}
@@ -2147,3 +2207,25 @@ function validateFields(fields) {
 
   return formattedMessage;
 }
+
+const findMinMaxDates = (data, dateKey = 'tripDate') => {
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error('Input data must be a non-empty array');
+  }
+
+  // Filter valid dates using moment's validation
+  const validDates = data
+    .map((item) => moment(item[dateKey], moment.ISO_8601, true))
+    .filter((date) => date.isValid())
+    .map((date) => date.toISOString());
+
+  if (validDates.length === 0) {
+    return { minDate: null, maxDate: null };
+  }
+
+  // Find min and max dates
+  const minDate = moment.min(validDates.map((date) => moment(date))).toISOString();
+  const maxDate = moment.max(validDates.map((date) => moment(date))).toISOString();
+
+  return { minDate, maxDate };
+};
