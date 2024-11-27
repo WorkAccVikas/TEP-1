@@ -369,7 +369,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (selected.length > 0) {
+    if (selected && selected.length > 0) {
       const filteredData = selected.filter((item) => item.invoiceId === null);
       setInvoiceTripData(filteredData);
     }
@@ -387,7 +387,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 
   return (
     <>
-      {visible && selected && invoiceTripData.length > 0 && (
+      {visible && invoiceTripData && invoiceTripData.length > 0 && (
         <>
           <Button
             variant="contained"
@@ -919,35 +919,10 @@ const TripList = () => {
         }
       },
       {
-        Header: 'Status',
-        accessor: 'assignedStatus',
-        id: 'status', // Explicitly set id to 'status' for clarity
-        disableFilters: true,
-        // filter: 'includes',
-        Cell: ({ value }) => {
-          switch (value) {
-            case TRIP_STATUS.PENDING: {
-              return <Chip label="Pending" color="warning" variant="light" />;
-            }
-            case TRIP_STATUS.COMPLETED: {
-              return <Chip label="Completed" color="success" variant="light" />;
-            }
-            case TRIP_STATUS.CANCELLED: {
-              return <Chip label="Cancelled" color="error" variant="light" />;
-            }
-            default: {
-              return <Chip label="Not Defined" color="error" variant="light" />;
-            }
-          }
-        }
-      },
-      {
         Header: 'Actions',
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          console.log('row', row.original);
-
           return (
             <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
@@ -978,6 +953,34 @@ const TripList = () => {
           );
         }
       },
+      {
+        Header: 'Status',
+        accessor: 'assignedStatus',
+        id: 'status', // Explicitly set id to 'status' for clarity
+        disableFilters: true,
+        // filter: 'includes',
+        Cell: ({ row, value }) => {
+          switch (value) {
+            case TRIP_STATUS.PENDING: {
+              return <Chip label="Pending" color="warning" variant="light" />;
+            }
+            case TRIP_STATUS.COMPLETED: {
+              return row.original.invoiceId && row.original.invoiceId !== null ? (
+                <Chip label="Invoice ✓" color="info" variant="light" />
+              ) : (
+                <Chip label="Completed" color="success" variant="light" />
+              );
+            }
+            case TRIP_STATUS.CANCELLED: {
+              return <Chip label="Cancelled" color="error" variant="light" />;
+            }
+            default: {
+              return <Chip label="Not Defined" color="error" variant="light" />;
+            }
+          }
+        }
+      },
+      
       {
         title: '_id',
         Header: '_id'
