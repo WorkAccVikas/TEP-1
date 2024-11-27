@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, DocumentText, EmptyWallet, MoneyRecive, WalletAdd, WalletMoney } from 'iconsax-react';
+import { Book, Buliding, DocumentText, EmptyWallet, MoneyRecive, WalletAdd, WalletMoney } from 'iconsax-react';
 import Overview from 'sections/cabprovidor/driverManagement/driverOverview/Overview';
 import Statement from 'sections/cabprovidor/driverManagement/driverOverview/Statement';
 import TripDetail from 'sections/cabprovidor/driverManagement/driverOverview/TripDetail';
@@ -16,6 +16,9 @@ import Advance from 'sections/cabprovidor/driverManagement/driverOverview/Advanc
 import Loan from 'sections/cabprovidor/driverManagement/driverOverview/Loan';
 import axios from 'axios';
 import axiosServices from 'utils/axios';
+import AttachedCompany from 'sections/cabprovidor/driverManagement/driverOverview/AttachedCompany';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import { APP_DEFAULT_PATH } from 'config';
 
 const DriverOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -25,6 +28,8 @@ const DriverOverview = () => {
   const [loading, setLoading] = useState(true); // Set loading to true initially
   const [driverDetail, setDriverDetail] = useState(null);
   const [driverSpecificDetail, setDriverSpecificDetail] = useState(null);
+
+  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Driver', to: '/management/driver/view' }, { title: `${driverDetail.userName}` }];
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -137,6 +142,7 @@ const DriverOverview = () => {
 
   return (
     <>
+     <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <Box
           sx={{
@@ -155,19 +161,21 @@ const DriverOverview = () => {
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
               <Tab label="Trip Details" icon={<WalletMoney />} iconPosition="start" />
-              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" />
+              {/* <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
               <Tab label="Advance" icon={<WalletAdd />} iconPosition="start" />
-              <Tab label="Loan" icon={<EmptyWallet />} iconPosition="start" />
-              <Tab label="Salary Detail" icon={<MoneyRecive />} iconPosition="start" />
+              {/* <Tab label="Expenses" icon={<EmptyWallet />} iconPosition="start" /> */}
+              {/* <Tab label="Transaction" icon={<MoneyRecive />} iconPosition="start" /> */}
+              <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
             </Tabs>
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview data={driverDetail} data1={driverSpecificDetail} />}
               {activeTab === 1 && <TripDetail data={data} />}
-              {activeTab === 2 && <Statement />}
-              {activeTab === 3 && <Advance data={data} />}
-              {activeTab === 4 && <Loan data={data}/>}
-              {activeTab === 5 && <SalaryDetail data={data} />}
+              {/* {activeTab === 2 && <Statement />} */}
+              {activeTab === 2 && <Advance data={data} />}
+              {/* {activeTab === 3 && <Loan data={data}/>} */}
+              {/* {activeTab === 4 && <SalaryDetail data={data} />} */}
+              {activeTab === 3 && <AttachedCompany driverId={driverId}/>}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>
