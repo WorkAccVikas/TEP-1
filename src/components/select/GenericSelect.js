@@ -41,7 +41,7 @@ const GenericSelect = ({
         select
         label={label}
         name={name}
-        value={currentValue || ''}
+        value={currentValue ?? ''}
         onChange={handleChange}
         {...rest}
         SelectProps={{

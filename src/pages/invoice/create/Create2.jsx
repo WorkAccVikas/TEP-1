@@ -1190,7 +1190,7 @@ const Create2 = () => {
 
                 {/* Details */}
                 <Grid item xs={12}>
-                  <Typography variant="h5">Detail</Typography>
+                  <Typography variant="h5">Details</Typography>
                 </Grid>
 
                 {/* Particular Table (Invoice) */}
@@ -1426,49 +1426,53 @@ const Create2 = () => {
                           </TableContainer>
 
                           <Divider />
-                          <Grid container justifyContent="space-between">
+                          <Grid container justifyContent="space-between" sx={{ mt: 2 }}>
                             {/* Left Side */}
                             <Grid item xs={12} md={8}>
-                              <Stack direction="row" gap={2} sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}>
-                                <Button
-                                  color="primary"
-                                  startIcon={<Add />}
-                                  onClick={() =>
-                                    arrayHelpers.push({
-                                      ...item,
-                                      ...(settings?.tax?.apply === TAX_TYPE.GROUP
-                                        ? {
-                                            itemTax: groupTax
-                                          }
-                                        : {}),
-                                      ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP &&
-                                      settings?.discount?.by === DISCOUNT_BY.PERCENTAGE
-                                        ? {
-                                            itemDiscount: groupDiscount
-                                          }
-                                        : {}),
-                                      ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP && settings?.discount?.by === DISCOUNT_BY.AMOUNT
-                                        ? {
-                                            itemDiscount: groupDiscount,
-                                            discount: groupDiscount
-                                          }
-                                        : {})
-                                    })
-                                  }
-                                  variant="dashed"
-                                  sx={{ bgcolor: 'transparent !important' }}
-                                >
-                                  Add Item
-                                </Button>
-
-                                <Tooltip
-                                  title={validateFields({
-                                    start_date: values.start_date,
-                                    end_date: values.end_date,
-                                    company_name: values.customerInfo.company_name
-                                  })}
-                                >
-                                  <span>
+                              {/* <Stack direction="row" gap={2} sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}> */}
+                              <Grid container gap={2}>
+                                <Grid item xs={12} md={2}>
+                                  <Button
+                                    color="primary"
+                                    startIcon={<Add />}
+                                    fullWidth
+                                    onClick={() =>
+                                      arrayHelpers.push({
+                                        ...item,
+                                        ...(settings?.tax?.apply === TAX_TYPE.GROUP
+                                          ? {
+                                              itemTax: groupTax
+                                            }
+                                          : {}),
+                                        ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP &&
+                                        settings?.discount?.by === DISCOUNT_BY.PERCENTAGE
+                                          ? {
+                                              itemDiscount: groupDiscount
+                                            }
+                                          : {}),
+                                        ...(settings?.discount?.apply === DISCOUNT_TYPE.GROUP &&
+                                        settings?.discount?.by === DISCOUNT_BY.AMOUNT
+                                          ? {
+                                              itemDiscount: groupDiscount,
+                                              discount: groupDiscount
+                                            }
+                                          : {})
+                                      })
+                                    }
+                                    variant="dashed"
+                                    sx={{ bgcolor: 'transparent !important' }}
+                                  >
+                                    Add Item
+                                  </Button>
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                  <Tooltip
+                                    title={validateFields({
+                                      start_date: values.start_date,
+                                      end_date: values.end_date,
+                                      company_name: values.customerInfo.company_name
+                                    })}
+                                  >
                                     <GenericSelect
                                       label="Particular Type"
                                       name="particularType"
@@ -1486,9 +1490,10 @@ const Create2 = () => {
                                         )
                                       }
                                     />
-                                  </span>
-                                </Tooltip>
-                              </Stack>
+                                  </Tooltip>
+                                </Grid>
+                              </Grid>
+                              {/* </Stack> */}
                             </Grid>
 
                             {/* Right Side */}
@@ -1951,6 +1956,7 @@ function validateFields(fields) {
 
   if (missingFields.length === 0) {
     return 'All fields are filled.';
+    // return null;
   }
 
   const lastField = missingFields.pop();
