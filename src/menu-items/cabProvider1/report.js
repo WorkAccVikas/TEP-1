@@ -59,14 +59,14 @@ const report = {
           url: '/reports/advance-report',
           icon: icons.samplePage
         },
-        {
-          id: 'trip',
-          title: <FormattedMessage id="trip" />,
-          // type: 'collapse',
-          type: 'item',
-          url: '/reports/trip-report',
-          icon: icons.samplePage
-        }
+        // {
+        //   id: 'trip',
+        //   title: <FormattedMessage id="trip" />,
+        //   // type: 'collapse',
+        //   type: 'item',
+        //   url: '/reports/trip-report',
+        //   icon: icons.samplePage
+        // }
 
         // // Vendor
         // {
