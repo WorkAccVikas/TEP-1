@@ -65,14 +65,11 @@ const Analytic = () => {
 
   const [data, setData] = useState(Array.from({ length: labels.length }, () => 0));
 
-  console.log('chartData', chartData);
-
-  const { companyReportData } = useSelector((state) => state.report);
+  const { cabReportData } = useSelector((state) => state.report);
 
   useEffect(() => {
-    console.log('companyReportData', companyReportData);
-    if (companyReportData) {
-      const totals = companyReportData.reduce(
+    if (cabReportData) {
+      const totals = cabReportData.reduce(
         (acc, item) => ({
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
@@ -90,7 +87,7 @@ const Analytic = () => {
       console.log('Calculated Totals = ', totals);
       setOverAllData(totals);
 
-      const chartData = companyReportData.reduce(
+      const chartData = cabReportData.reduce(
         (acc, item) => ({
           companyGuardPrice: acc.companyGuardPrice + (item?.companyGuardPrice || 0),
           driverGuardPrice: acc.driverGuardPrice + (item?.driverGuardPrice || 0),
@@ -128,7 +125,7 @@ const Analytic = () => {
       setData(val);
       setChartData(chartData);
     }
-  }, [companyReportData]);
+  }, [cabReportData]);
 
   return (
     <>
