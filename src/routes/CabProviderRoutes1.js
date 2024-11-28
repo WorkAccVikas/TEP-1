@@ -84,6 +84,7 @@ const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCom
 // const Reports = Loadable(lazy(() => import('pages/reports/Reports')));
 const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
 const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
+const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 
 // Invoice
 // const Invoice = Loadable(lazy(() => import('pages/invoices/Invoice')));
@@ -448,6 +449,10 @@ const CabProvidorRoutes = {
             {
               path: 'advance-report',
               element: <AdvanceReports />
+            },
+            {
+              path: 'cab-report',
+              element: <CabReports />
             }
           ]
         },

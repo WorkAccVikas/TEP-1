@@ -6,7 +6,7 @@ import { MenuBoard } from 'iconsax-react';
 
 // icons
 const icons = {
-  samplePage: MenuBoard,
+  samplePage: MenuBoard
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -41,6 +41,16 @@ const report = {
           //   }
           // ]
         },
+
+        {
+          id: 'cab-report',
+          title: <FormattedMessage id="cab" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/cab-report',
+          icon: icons.samplePage
+        },
+
         {
           id: 'advance',
           title: <FormattedMessage id="advance" />,
@@ -48,7 +58,8 @@ const report = {
           type: 'item',
           url: '/reports/advance-report',
           icon: icons.samplePage
-        },
+        }
+
         // // Vendor
         // {
         //   id: 'vendor',

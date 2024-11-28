@@ -4,6 +4,7 @@ import axios from 'utils/axios'; // Adjust the import path according to your pro
 
 const initialState = {
   companyReportData: null,
+  cabReportData: null,
   metaData: {
     totalCount: 0,
     page: 1,
@@ -14,11 +15,27 @@ const initialState = {
   error: null
 };
 
-export const fetchCompanyWiseReports = createAsyncThunk('reports/fetchAllReports', async (payload, { rejectWithValue }) => {
+export const fetchCompanyWiseReports = createAsyncThunk('reports/fetchCompanyWiseReports', async (payload, { rejectWithValue }) => {
   try {
     console.log('payload', payload);
     // await new Promise((resolve) => setTimeout(resolve, 4000));
     const response = await axios.get(`/reports/company/wise/summary`, {
+      params: {
+        startDate: payload?.query?.startDate,
+        endDate: payload?.query?.endDate
+      }
+    });
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports', async (payload, { rejectWithValue }) => {
+  try {
+    console.log('payload', payload);
+    // await new Promise((resolve) => setTimeout(resolve, 4000));
+    const response = await axios.get(`/reports/cab/wise/summary`, {
       params: {
         startDate: payload?.query?.startDate,
         endDate: payload?.query?.endDate
@@ -50,6 +67,18 @@ const reportSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchCompanyWiseReports.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      .addCase(fetchCabWiseReports.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCabWiseReports.fulfilled, (state, action) => {
+        state.cabReportData = action.payload || []; // Handle empty result
+        state.loading = false;
+      })
+      .addCase(fetchCabWiseReports.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       });
