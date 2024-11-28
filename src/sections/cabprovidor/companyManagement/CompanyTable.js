@@ -37,11 +37,13 @@ import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { ThemeMode } from 'config';
 import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompanyStatus } from 'store/slice/cabProvidor/companySlice';
+import CompanyFilter from 'pages/trips/filter/CompanyFilter';
 
-const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery, filterOptions, setFilterOptions }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
+
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
   };
@@ -399,6 +401,23 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
               {loading ? 'Loading...' : 'Add Branch'}
             </Button>
           </WrapperButton>
+          {/* <CompanyFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedCompany}
+            setQuery={setQuery}
+          /> */}
         </Stack>
       </Stack>
       <MainCard content={false}>

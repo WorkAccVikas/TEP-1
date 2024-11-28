@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 import { SearchNormal1 } from 'iconsax-react';
 
-const CompanyFilter = ({ setFilterOptions, sx, value }) => {
+const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
@@ -87,6 +87,7 @@ const CompanyFilter = ({ setFilterOptions, sx, value }) => {
         loading={loading}
         onInputChange={(event, newInputValue) => {
           setQuery(newInputValue); // Update query state
+          // setquery(newInputValue)
         }}
         sx={sx}
         onChange={(event, newValue) => {

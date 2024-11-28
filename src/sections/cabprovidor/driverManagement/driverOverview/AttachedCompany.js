@@ -240,7 +240,7 @@ const AttachedCompany = ({ driverId }) => {
     }
   }, [driverId]);
 
-  //  useEffect: Fetch companies rate between vendor and company through companyId and vendorId
+  //  useEffect: Fetch rate between driver and company through companyId and driverId
 
   useEffect(() => {
     const fetchdata = async () => {
