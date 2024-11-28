@@ -365,11 +365,21 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
 const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
   const [remove, setRemove] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [invoiceTripData, setInvoiceTripData] = useState([]);
   const navigate = useNavigate();
+  console.log({ selected });
 
+  useEffect(() => {
+    if (selected && selected.length > 0) {
+      const filteredData = selected.filter((item) => item.invoiceId === null);
+      setInvoiceTripData(filteredData);
+    }
+  }, [selected]);
+
+  console.log({ invoiceTripData });
   const handleTripGeneration = () => {
     console.log({ selected });
-    navigate('/apps/invoices/test', { state: { tripData: selected } });
+    navigate('/apps/invoices/test', { state: { tripData: invoiceTripData } });
   };
 
   const handleCloseForRemove = useCallback(() => {
@@ -378,7 +388,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 
   return (
     <>
-      {visible && selected && selected.length > 0 && (
+      {visible && invoiceTripData && invoiceTripData.length > 0 && (
         <>
           <Button
             variant="contained"
@@ -388,7 +398,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
             onClick={() => setRemove(true)}
             disabled={loading}
           >
-            Generate Invoice ({selected.length})
+            Generate Invoice ({invoiceTripData.length})
           </Button>
 
           {remove && (
@@ -629,6 +639,8 @@ const TripList = () => {
     selectedDriver: {},
     selectedVehicle: {}
   });
+
+  console.log('selectedRow', selectedRow);
 
   const [tripStats, setTripStats] = useState({
     completedTripsCount: 0,
@@ -910,89 +922,12 @@ const TripList = () => {
         }
       },
       {
-        Header: 'Status',
-        accessor: 'assignedStatus',
-        id: 'status', // Explicitly set id to 'status' for clarity
-        disableFilters: true,
-        // filter: 'includes',
-        Cell: ({ value }) => {
-          switch (value) {
-            case TRIP_STATUS.PENDING: {
-              return <Chip label="Pending" color="warning" variant="light" />;
-            }
-            case TRIP_STATUS.COMPLETED: {
-              return <Chip label="Completed" color="success" variant="light" />;
-            }
-            case TRIP_STATUS.CANCELLED: {
-              return <Chip label="Cancelled" color="error" variant="light" />;
-            }
-            default: {
-              return <Chip label="Not Defined" color="error" variant="light" />;
-            }
-          }
-        }
-      },
-      {
         Header: 'Actions',
         className: 'cell-center',
         disableSortBy: true,
         Cell: ({ row }) => {
-          console.log('row', row);
-
-          const [anchorEl, setAnchorEl] = useState(null);
-          const [status, setStatus] = useState(null);
-
-          const handleMenuClick = (event) => {
-            setAnchorEl(event.currentTarget);
-          };
-
-          const handleMenuClose = () => {
-            setAnchorEl(null);
-          };
-
-          const handleCompleted = () => {
-            // alert('Completed');
-            console.log('row', row.original);
-            row.original.status = 'Completed'; // Update the row's status
-            setSelectedRow(row.original);
-
-            setUpdatedStatus(TRIP_STATUS.COMPLETED);
-            setPopup(POPUP_TYPE.ALERT_DIALOG);
-            setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const handlePending = () => {
-            // alert('Pending');
-            console.log('row', row.original);
-            row.original.status = 'Pending'; // Update the row's status
-            setSelectedRow(row.original);
-            // setAlertOpen(true);
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const handleCancelled = () => {
-            // alert('Cancelled');
-            console.log('row', row.original);
-            row.original.status = 'Cancelled'; // Update the row's status
-            setSelectedRow(row.original);
-            setUpdatedStatus(TRIP_STATUS.CANCELLED);
-            // setAlertCancelOpen(true);
-            setPopup(POPUP_TYPE.FORM_DIALOG);
-
-            setAlertOpen(true);
-
-            handleMenuClose(); // Close the menu after selecting an option
-          };
-
-          const openMenu = Boolean(anchorEl);
-
           return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-              <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                <More style={{ fontSize: '1.15rem', transform: 'rotate(90deg)' }} />
-              </IconButton>
-
+            <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
                 <Tooltip
                   componentsProps={{
@@ -1017,33 +952,51 @@ const TripList = () => {
                   </IconButton>
                 </Tooltip>
               )}
-
-              <Menu
-                id="fade-menu"
-                MenuListProps={{
-                  'aria-labelledby': 'fade-button'
-                }}
-                anchorEl={anchorEl}
-                open={openMenu}
-                onClose={handleMenuClose}
-                TransitionComponent={Fade}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && <MenuItem onClick={handleCompleted}>Completed</MenuItem>}
-                {/* {row.original.assignedStatus !== TRIP_STATUS.PENDING && <MenuItem onClick={handlePending}>Pending</MenuItem>} */}
-                {row.original.assignedStatus !== TRIP_STATUS.CANCELLED && <MenuItem onClick={handleCancelled}>Cancelled</MenuItem>}
-              </Menu>
             </Stack>
           );
         }
       },
+      {
+        Header: 'Status',
+        accessor: 'assignedStatus',
+        id: 'status', // Explicitly set id to 'status' for clarity
+        disableFilters: true,
+        // filter: 'includes',
+        Cell: ({ row, value }) => {
+          switch (value) {
+            case TRIP_STATUS.PENDING: {
+              return <Chip label="Pending" color="warning" variant="light" />;
+            }
+            case TRIP_STATUS.COMPLETED: {
+              return row.original.invoiceId && row.original.invoiceId !== null ? (
+                <Chip
+                  label="Invoice ✓"
+                  color="info"
+                  variant="light"
+                  onClick={() => {
+                    navigate(`/apps/invoices/details/${row.original.invoiceId}`);
+                  }}
+                  sx={{
+                    ':hover': {
+                      backgroundColor: 'rgba(0, 211, 211, 0.8)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                />
+              ) : (
+                <Chip label="Completed" color="success" variant="light" />
+              );
+            }
+            case TRIP_STATUS.CANCELLED: {
+              return <Chip label="Cancelled" color="error" variant="light" />;
+            }
+            default: {
+              return <Chip label="Not Defined" color="error" variant="light" />;
+            }
+          }
+        }
+      },
+
       {
         title: '_id',
         Header: '_id'
@@ -1323,7 +1276,6 @@ const TripList = () => {
       <Stack gap={2}>
         <MainCard content={false}>
           {/* <ScrollX> */}
-          {/* <ReactTable columns={columns} data={dummyData} /> */}
           {loading ? (
             <TableSkeleton rows={10} columns={6} />
           ) : data?.length > 0 ? (
@@ -1347,7 +1299,7 @@ const TripList = () => {
         </MainCard>
       </Stack>
 
-      <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} handleClose={handleClose} />
+      <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} />
 
       {alertOpen && popup === POPUP_TYPE.ALERT_DIALOG && (
         <AlertDialog

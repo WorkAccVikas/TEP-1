@@ -22,6 +22,7 @@ import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails'
 import Reports from 'pages/reports/Reports';
 import ReportDriver from 'pages/reports/ReportDriver';
 import Create from 'pages/invoice/create/Create3';
+import TripReports from 'pages/reports/Trips';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -69,6 +70,8 @@ const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDrive
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
 const AddCab = Loadable(lazy(() => import('pages/management/cab/AddCab')));
+const CabOverview = Loadable(lazy(() => import('pages/overview/CabOverview')));
+
 // company
 const Company = Loadable(lazy(() => import('pages/management/company')));
 const AddCompany = Loadable(lazy(() => import('pages/management/company/AddCompany')));
@@ -80,6 +83,10 @@ const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCom
 
 // reports
 // const Reports = Loadable(lazy(() => import('pages/reports/Reports')));
+const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
+const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
+const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
+
 // Invoice
 // const Invoice = Loadable(lazy(() => import('pages/invoices/Invoice')));
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
@@ -113,7 +120,7 @@ const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
 const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
-const ExcelTemplatePage  = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
+const ExcelTemplatePage = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
 // ==============================|| MAIN ROUTES ||============================== //
 
 const CabProvidorRoutes = {
@@ -181,7 +188,7 @@ const CabProvidorRoutes = {
                 },
                 {
                   path: 'test-download',
-                  element: <ExcelTemplatePage  />
+                  element: <ExcelTemplatePage />
                 },
                 {
                   path: 'test-map',
@@ -239,7 +246,7 @@ const CabProvidorRoutes = {
                   path: 'advance-type',
                   element: <AdvanceType />
                   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
-                },
+                }
                 // {
                 //   path: 'test',
                 //   element: <ExpandingDetails />
@@ -420,6 +427,11 @@ const CabProvidorRoutes = {
                 {
                   path: 'edit/:id',
                   element: <AddCab />
+                },
+                {
+                  path: 'overview/:id',
+                  element: <CabOverview />
+                  //   element: <ProtectedRoute element={CompanyOverview} moduleName={MODULE.COMPANY} permission={PERMISSIONS.READ} />
                 }
               ]
             }
@@ -429,7 +441,25 @@ const CabProvidorRoutes = {
         // Reports
         {
           path: 'reports',
-          element: <Reports />
+          // element: <Reports />,
+          children: [
+            {
+              path: 'company-report',
+              element: <CompanyReports />
+            },
+            {
+              path: 'advance-report',
+              element: <AdvanceReports />
+            },
+            {
+              path: 'cab-report',
+              element: <CabReports />
+            },
+            {
+              path: 'trip-report',
+              element: <TripReports />
+            }
+          ]
         },
 
         {

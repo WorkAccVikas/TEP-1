@@ -30,6 +30,7 @@ import DateRangeSelect from 'components/DateRange/DateRangeSelect';
 import moment from 'moment';
 import { formatDateForApi, formatDateUsingMoment } from 'utils/helper';
 import { fetchAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
+import ScrollX from 'components/ScrollX';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -57,7 +58,6 @@ const Dashboard = () => {
     dispatch(fetchZoneNames());
     dispatch(fetchAllZoneTypes());
     dispatch(fetchAccountSettings());
-
   }, [dispatch]);
 
   useEffect(() => {
@@ -302,7 +302,9 @@ const Dashboard = () => {
 
         <MainCard title="Company Wise Recent Earnings">
           {companyWiseEarningsData?.length > 0 ? (
-            <ReactTable columns={columns} data={companyWiseEarningsData} hideHeader />
+            <ScrollX>
+              <ReactTable columns={columns} data={companyWiseEarningsData} hideHeader />
+            </ScrollX>
           ) : (
             <TableNoDataMessage text="Company Wise Recent Earnings Not Found" />
           )}

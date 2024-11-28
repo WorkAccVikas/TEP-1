@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 import { SearchNormal1 } from 'iconsax-react';
 
-const CompanyFilter = ({ setFilterOptions, sx, value }) => {
+const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
@@ -22,8 +22,9 @@ const CompanyFilter = ({ setFilterOptions, sx, value }) => {
 
       setLoading(true);
       try {
-        const response = await axiosServices.get('/company/all');
-        const companies = response.data.companies;
+        const response = await axiosServices.get(`/company?page=1&name=${query}&limit=10`);
+        console.log("response.data",response.data.data.result)
+        const companies = response.data.data.result;
 
         setOptions(companies);
         setCache((prevCache) => ({ ...prevCache, default: companies })); // Cache default results
@@ -87,6 +88,7 @@ const CompanyFilter = ({ setFilterOptions, sx, value }) => {
         loading={loading}
         onInputChange={(event, newInputValue) => {
           setQuery(newInputValue); // Update query state
+          // setquery(newInputValue)
         }}
         sx={sx}
         onChange={(event, newValue) => {

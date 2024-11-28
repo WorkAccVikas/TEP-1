@@ -16,6 +16,7 @@ import DriverRegister from 'sections/cabprovidor/driverManagement/DriverRegister
 import * as Yup from 'yup';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import BulkUploadDialog from './bulkUpload/Dialog';
+import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -63,6 +64,7 @@ const Driver = () => {
 
   useEffect(() => {
     dispatch(fetchDrivers({ page, limit, driverType }));
+    dispatch(fetchAllVendors());
   }, [page, limit, dispatch, driverType, updateKey]);
 
   const handleLimitChange = useCallback((event) => {

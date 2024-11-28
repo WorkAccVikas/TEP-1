@@ -54,13 +54,13 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Header: 'Cab Name',
         accessor: 'vehicleName',
         disableSortBy: true,
-        Cell: ({ value }) => {
+        Cell: ({ row, value }) => {
           const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
           return (
             <Typography>
               <Link
-                // to={`/cab/overview/${row.original._id}`}
-                // onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
+                to={`/management/cab/overview/${row.original._id}`}
+                onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
                 {formattedValue}
@@ -261,7 +261,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
             </Stack>
           );
         }
-      },
+      }
     ],
     []
   );

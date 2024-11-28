@@ -52,10 +52,16 @@
   "files": "Files",
   "user-setting": "User Setting",
   "create template": "Create Template",
-  "advance-type":"Advance Type",
-  "test":"test",
-  "cabreports":"Cab Reports",
-  "invoicereports":"Invoice Reports",
-  "mcdreports":"MCD Reports",
-  "rosterreports":"Roster Reports"
+  "advance-type": "Advance Type",
+  "test": "test",
+  "cabreports": "Cab Reports",
+  "invoicereports": "Invoice Reports",
+  "mcdreports": "MCD Reports",
+  "rosterreports": "Roster Reports",
+  "company report": "Company Report",
+  "vendor report": "Vendor Report",
+  "company1": "Company",
+  "vendor1": "Vendor",
+  "driver1": "Driver",
+  "trip": "Trip"
 }
