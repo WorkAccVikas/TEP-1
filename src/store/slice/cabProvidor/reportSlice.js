@@ -16,11 +16,12 @@ const initialState = {
 
 export const fetchCompanyWiseReports = createAsyncThunk('reports/fetchAllReports', async (payload, { rejectWithValue }) => {
   try {
+    console.log('payload', payload);
     // await new Promise((resolve) => setTimeout(resolve, 4000));
     const response = await axios.get(`/reports/company/wise/summary`, {
       params: {
-        startDate: payload?.startDate,
-        endDate: payload?.endDate
+        startDate: payload?.query?.startDate,
+        endDate: payload?.query?.endDate
       }
     });
     return response.data.data;

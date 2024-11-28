@@ -76,9 +76,9 @@ const Analytic = () => {
         (acc, item) => ({
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
-            acc.companyIncomingAmount + (item?.companyRate - (item?.companyGuardPrice || 0) - (item?.companyPenalty || 0)),
-          driverOutgoingAmount: acc.driverOutgoingAmount + (item?.driverRate - (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
-          vendorOutgoingAmount: acc.vendorOutgoingAmount + (item?.vendorRate - (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
+            acc.companyIncomingAmount + (item?.companyRate + (item?.companyGuardPrice || 0) - (item?.companyPenalty || 0)),
+          driverOutgoingAmount: acc.driverOutgoingAmount + (item?.driverRate + (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
+          vendorOutgoingAmount: acc.vendorOutgoingAmount + (item?.vendorRate + (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
         }),
         {
           tripCount: 0,
@@ -145,6 +145,13 @@ const Analytic = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <Card title="Total Expenses To Vendors" count={overAllData.vendorOutgoingAmount} currency />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Card
+              title="Profit/Loss"
+              count={overAllData.companyIncomingAmount - overAllData.driverOutgoingAmount - overAllData.vendorOutgoingAmount}
+              currency
+            />
           </Grid>
         </Grid>
 
