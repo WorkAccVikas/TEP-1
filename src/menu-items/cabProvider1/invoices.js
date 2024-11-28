@@ -15,34 +15,34 @@ const icons = {
 
 const invoices = {
   id: 'group-invoices',
-  title: <FormattedMessage id="invoices" />,
+  title: <FormattedMessage id="expense management" />,
   type: 'group',
   icon: icons.samplePage,
   children: [
-    // Invoices
-    {
-      id: 'invoice',
-      title: <FormattedMessage id="invoice" />,
-      type: 'item',
-      url: '/apps/invoices/list',
-      icon: icons.invoice
-      // children: [
-      //   {
-      //     id: 'list',
-      //     title: <FormattedMessage id="list" />,
-      //     type: 'item',
-      //     url: '/apps/invoices/list',
-      //     // icon: icons.view
-      //   },
-      //   {
-      //     id: 'create',
-      //     title: <FormattedMessage id="create" />,
-      //     type: 'item',
-      //     url: '/apps/invoices/create',
-      //     // icon: icons.upload
-      //   }
-      // ]
-    },
+    // // Invoices
+    // {
+    //   id: 'invoice',
+    //   title: <FormattedMessage id="invoice" />,
+    //   type: 'item',
+    //   url: '/apps/invoices/list',
+    //   icon: icons.invoice
+    //   // children: [
+    //   //   {
+    //   //     id: 'list',
+    //   //     title: <FormattedMessage id="list" />,
+    //   //     type: 'item',
+    //   //     url: '/apps/invoices/list',
+    //   //     // icon: icons.view
+    //   //   },
+    //   //   {
+    //   //     id: 'create',
+    //   //     title: <FormattedMessage id="create" />,
+    //   //     type: 'item',
+    //   //     url: '/apps/invoices/create',
+    //   //     // icon: icons.upload
+    //   //   }
+    //   // ]
+    // },
      // Advance
       {
         id: 'advance',

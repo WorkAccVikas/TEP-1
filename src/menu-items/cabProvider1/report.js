@@ -25,76 +25,86 @@ const report = {
       icon: icons.samplePage,
       children: [
         // Company
-      {
-        id: 'company',
-        title: <FormattedMessage id="company" />,
-        type: 'collapse',
-        icon: icons.samplePage,
-        children: [
-          {
-            id: 'rosterreports',
-            title: <FormattedMessage id="rosterreports" />,
-            type: 'item',
-            url: '/reports',
-          },
-        ]
-      },
-       // Vendor
-      {
-        id: 'vendor',
-        title: <FormattedMessage id="vendor" />,
-        type: 'collapse',
-        icon: icons.samplePage,
-        children: [
-          {
-            id: 'cabreports',
-            title: <FormattedMessage id="cabreports" />,
-            type: 'item',
-            url: '/reports',
-          },
-          {
-            id: 'invoicereports',
-            title: <FormattedMessage id="invoicereports" />,
-            type: 'item',
-            url: '/reports',
-          },
-          {
-            id: 'mcdreports',
-            title: <FormattedMessage id="mcdreports" />,
-            type: 'item',
-            url: '/reports',
-          },
-        ]
-      },
-       // Driver
-      {
-        id: 'driver',
-        title: <FormattedMessage id="driver" />,
-        type: 'collapse',
-        icon: icons.samplePage,
-        children: [
-          {
-            id: 'cabreports',
-            title: <FormattedMessage id="cabreports" />,
-            type: 'item',
-            url: 'reports-driver'
-          },
-          {
-            id: 'invoicereports',
-            title: <FormattedMessage id="invoicereports" />,
-            type: 'item',
-            url: 'reports-driver'
-          },
-          {
-            id: 'mcdreports',
-            title: <FormattedMessage id="mcdreports" />,
-            type: 'item',
-            url: 'reports-driver'
-          },
-        ]
-      }
+        {
+          id: 'company',
+          title: <FormattedMessage id="company1" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/company-report',
+          icon: icons.samplePage
+          // children: [
+          //   {
+          //     id: 'company report',
+          //     title: <FormattedMessage id="company report" />,
+          //     type: 'item',
+          //     url: '/reports'
+          //   }
+          // ]
+        },
+        {
+          id: 'advance',
+          title: <FormattedMessage id="advance" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/advance-report',
+          icon: icons.samplePage
+        },
+        // // Vendor
+        // {
+        //   id: 'vendor',
+        //   title: <FormattedMessage id="vendor1" />,
+        //   type: 'collapse',
+        //   icon: icons.samplePage,
+        //   children: [
+        //     {
+        //       id: 'cabreports',
+        //       title: <FormattedMessage id="cabreports" />,
+        //       type: 'item',
+        //       url: '/reports'
+        //     },
+        //     {
+        //       id: 'invoicereports',
+        //       title: <FormattedMessage id="invoicereports" />,
+        //       type: 'item',
+        //       url: '/reports'
+        //     },
+        //     {
+        //       id: 'mcdreports',
+        //       title: <FormattedMessage id="mcdreports" />,
+        //       type: 'item',
+        //       url: '/reports'
+        //     }
+        //   ]
+        // },
+        // // Driver
+        // {
+        //   id: 'driver',
+        //   title: <FormattedMessage id="driver1" />,
+        //   type: 'collapse',
+        //   icon: icons.samplePage,
+        //   children: [
+        //     {
+        //       id: 'cabreports',
+        //       title: <FormattedMessage id="cabreports" />,
+        //       type: 'item',
+        //       url: 'reports-driver'
+        //     },
+        //     {
+        //       id: 'invoicereports',
+        //       title: <FormattedMessage id="invoicereports" />,
+        //       type: 'item',
+        //       url: 'reports-driver'
+        //     },
+        //     {
+        //       id: 'mcdreports',
+        //       title: <FormattedMessage id="mcdreports" />,
+        //       type: 'item',
+        //       url: 'reports-driver'
+        //     }
+        //   ]
+        // }
       ]
-    },
+    }
   ]
 };
 
