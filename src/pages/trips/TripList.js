@@ -969,7 +969,20 @@ const TripList = () => {
             }
             case TRIP_STATUS.COMPLETED: {
               return row.original.invoiceId && row.original.invoiceId !== null ? (
-                <Chip label="Invoice ✓" color="info" variant="light" />
+                <Chip
+                  label="Invoice ✓"
+                  color="info"
+                  variant="light"
+                  onClick={() => {
+                    navigate(`/apps/invoices/details/${row.original.invoiceId}`);
+                  }}
+                  sx={{
+                    ':hover': {
+                      backgroundColor: 'rgba(0, 211, 211, 0.8)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                />
               ) : (
                 <Chip label="Completed" color="success" variant="light" />
               );
