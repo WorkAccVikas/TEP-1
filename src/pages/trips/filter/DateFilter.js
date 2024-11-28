@@ -152,7 +152,7 @@ const DateRangeSelect = memo(
               '& .MuiSelect-icon': {
                 color: '#fff'
               },
-              mb: sx?.mb || 1,
+              // mb: sx?.mb || 1,
               width: sx?.width || '220px', 
               height: sx?.height 
             }}

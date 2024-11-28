@@ -45,7 +45,6 @@ const reportSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchCompanyWiseReports.fulfilled, (state, action) => {
-        console.log(action.payload);
         state.companyReportData = action.payload || []; // Handle empty result
         state.loading = false;
       })
