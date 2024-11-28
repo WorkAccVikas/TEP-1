@@ -3,16 +3,18 @@ import { useMemo } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { CircularProgress, IconButton, Stack, Tooltip } from '@mui/material';
+import { IconButton, Stack, Tooltip } from '@mui/material';
 
 // project-imports
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 
 // assets
-import { Box, Eye } from 'iconsax-react';
+import { Eye } from 'iconsax-react';
 import { ThemeMode } from 'config';
-import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
+import ReactTable from 'components/tables/reactTable1/ReactTable';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const AttachedDriver = ({ data, loading }) => {
   const columns = useMemo(
@@ -87,21 +89,11 @@ const AttachedDriver = ({ data, loading }) => {
     <MainCard title="Attached Drivers List" content={false}>
       <ScrollX>
         {loading ? (
-          <Box
-            sx={{
-              height: '100vh',
-              width: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <CircularProgress />
-          </Box>
+          <TableSkeleton rows={10} columns={6} />
         ) : data.length > 0 ? (
           <ReactTable columns={columns} data={data} hideHeader/>
         ) : (
-          <TableNoDataMessage text="No Driver Found" />
+          <EmptyTableDemo />
         )}
       </ScrollX>
     </MainCard>

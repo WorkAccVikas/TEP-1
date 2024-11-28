@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Car, Card, DocumentText, Profile2User, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Car, Card, DocumentText, Profile2User, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import {
   fetchCompanies,
   fetchCompaniesAssignedDrivers,
@@ -28,6 +28,7 @@ import TripDetail from 'sections/cabprovidor/companyManagement/companyOverview/T
 import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import AttachedVendorDriver from 'sections/cabprovidor/companyManagement/companyOverview/AttachedVendorDriver/AttachedVendorDriver';
+import Invoice from 'sections/cabprovidor/companyManagement/companyOverview/Invoice';
 
 const CompanyOverview = () => {
   const { id } = useParams();
@@ -39,7 +40,6 @@ const CompanyOverview = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true); // Set loading to true initially
   const { companyDetails } = useSelector((state) => state.companies || {});
-  const { companiesVendor } = useSelector((state) => state.companies || {});
   const { companiesDriver } = useSelector((state) => state.companies || {});
 
   const handleChange = (event, newValue) => {
@@ -89,7 +89,7 @@ const CompanyOverview = () => {
       setLoading(true); // Set loading to true when data fetching starts
       await dispatch(fetchCompanies());
       await dispatch(fetchCompanyDetails(id));
-      await dispatch(fetchCompaniesAssignedVendors(id));
+      // await dispatch(fetchCompaniesAssignedVendors(id));
       await dispatch(fetchCompaniesAssignedDrivers(id));
       setLoading(false); // Set loading to false after data is fetched
     };
@@ -132,6 +132,7 @@ const CompanyOverview = () => {
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
               {/* <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" /> */}
               <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
+              <Tab label="Invoice" icon={<Bill />} iconPosition="start" />
               {/* <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
               <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
               <Tab label="Attached Vendors" icon={<Profile2User />} iconPosition="start" />
@@ -145,12 +146,13 @@ const CompanyOverview = () => {
               {activeTab === 0 && <Overview data={companyDetails} />}
               {/* {activeTab === 1 && <Transaction data={data} />} */}
               {activeTab === 1 && <TripDetail companyId={companyId}/>}
+              {activeTab === 2 && <Invoice companyId={companyId}/>}
               {/* {activeTab === 2 && <Mails />}
               {activeTab === 3 && <Statement />} */}
-              {activeTab === 2 && <AttachedVendor data={companiesVendor} loading={loading} />}
-              {activeTab === 3 && <AttachedDriver data={companiesDriver} loading={loading} />}
-              {activeTab === 4 && <ViewRoster id={companyId} />}
-              {activeTab === 5 && <CompanyRateListing id={companyId} companyName={companyName} />}
+              {activeTab === 3 && <AttachedVendor companyId={companyId} />}
+              {activeTab === 4 && <AttachedDriver data={companiesDriver} loading={loading} />}
+              {activeTab === 5 && <ViewRoster id={companyId} />}
+              {activeTab === 6 && <CompanyRateListing id={companyId} companyName={companyName} />}
               {/* {activeTab === 6 && <AttachedVendorDriver data={companiesVendor} loading={loading} />} */}
             </Box>
           </Box>
