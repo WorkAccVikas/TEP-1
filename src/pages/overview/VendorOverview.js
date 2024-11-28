@@ -7,7 +7,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Buliding, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Buliding, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import Transaction from 'sections/cabprovidor/vendorManagement/vendorOverview/Transaction';
 import Mails from 'sections/cabprovidor/vendorManagement/vendorOverview/Mails';
 import Statement from 'sections/cabprovidor/vendorManagement/vendorOverview/Statement';
@@ -192,7 +192,7 @@ const VendorOverview = () => {
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
               <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
               <Tab label="Advance" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Invoice" icon={<DocumentText />} iconPosition="start" />
+              <Tab label="Invoice" icon={<Bill />} iconPosition="start" />
               <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" />
               <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
               {/* <Tab label="Vehicle List" icon={<Car />} iconPosition="start" />
