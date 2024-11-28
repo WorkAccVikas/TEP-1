@@ -12,10 +12,15 @@ const Company = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [lastPageNo, setLastPageNo] = useState(Math.ceil(metaData.totalCount / metaData.limit) || 1);
+  const [query,setQuery] = useState(null);
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {}
+  });
+console.log({filterOptions});
 
   useEffect(() => {
-    dispatch(fetchCompanies({ page: page, limit: limit }));
-  }, [dispatch, page, limit]);
+    dispatch(fetchCompanies({ page: page, limit: limit , query:query}));
+  }, [dispatch, page, limit,query]);
 
   if (error) return <Error500 />;
   return (
@@ -29,6 +34,9 @@ const Company = () => {
       lastPageNo={lastPageNo}
       setLastPageNo={setLastPageNo}
       loading={loading}
+      setQuery={setQuery}
+      filterOptions={filterOptions}
+      setFilterOptions={setFilterOptions}
     />
   );
 };

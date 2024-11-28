@@ -53,7 +53,7 @@ import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-t
 
 // assets
 import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
-import { formattedDate } from 'utils/helper';
+import { formatDateUsingMoment, formattedDate } from 'utils/helper';
 import FormDialog from 'components/alertDialog/FormDialog';
 import axiosServices from 'utils/axios';
 import { USERTYPE } from 'constant';
@@ -288,11 +288,26 @@ const List = () => {
 
   console.log({ metadata });
 
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {}
+  });
+
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axiosServices.get(API_URL[userType]);
-
+        const response = await axiosServices.get(API_URL[userType],{
+          params: {
+            // page: page,
+            // limit: limit,
+            invoiceStartDate: formatDateUsingMoment(startDate),
+            invoiceEndDate: formatDateUsingMoment(endDate),
+            companyId: filterOptions?.selectedCompany?._id
+          }
+        });
+        console.log("response",response);
+        
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
         setLoading(false);
@@ -304,7 +319,7 @@ const List = () => {
     };
 
     fetchInvoice();
-  }, [userType]);
+  }, [userType,filterOptions,startDate,endDate]);
 
   const handleClose = (status) => {
     if (status) {
@@ -640,15 +655,6 @@ const List = () => {
       chartData: [] // Add your chart metadata if necessary
     }
   ];
-
-  const [filterOptions, setFilterOptions] = useState({
-    selectedCompany: {},
-    selectedVendor: {},
-    selectedDiver: {},
-    selectedVehicle: {}
-  });
-
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   return (
     <>
