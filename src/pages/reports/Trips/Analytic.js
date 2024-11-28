@@ -120,10 +120,10 @@ const Analytic = () => {
       <Stack gap={2}>
         <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
           {[
-            { title: 'Total Trips', count: overAllData.tripCount },
-            { title: 'Income', count: overAllData.companyIncomingAmount, currency: true },
-            { title: 'Driver Expenses', count: overAllData.driverOutgoingAmount, currency: true },
-            { title: 'Vendor Expenses', count: overAllData.vendorOutgoingAmount, currency: true },
+            { title: 'Total Advances', count: overAllData.tripCount },
+            { title: 'Requested Amount', count: overAllData.companyIncomingAmount, currency: true },
+            { title: 'Projected Revenue', count: overAllData.driverOutgoingAmount, currency: true },
+            { title: 'Potential Difference', count: overAllData.vendorOutgoingAmount, currency: true },
             {
               title: 'Total Revenue',
               count: overAllData.companyIncomingAmount - overAllData.driverOutgoingAmount - overAllData.vendorOutgoingAmount,
@@ -136,13 +136,11 @@ const Analytic = () => {
           ))}
         </Grid>
 
-        <Grid container spacing={3}>
-          {/* Chart */}
+        {/* <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <ApexPieChart labels={labels} series={data} />
           </Grid>
 
-          {/* Badges */}
           <Grid item xs={12} sm={6}>
             <Grid container spacing={3}>
               {labels.map((item, i) => (
@@ -152,7 +150,7 @@ const Analytic = () => {
               ))}
             </Grid>
           </Grid>
-        </Grid>
+        </Grid> */}
       </Stack>
     </>
   );

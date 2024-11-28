@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Grid } from '@mui/material';
+import { Autocomplete, Checkbox, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
-import { SearchNormal1 } from 'iconsax-react';
 
-const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
+const VehicleSelection = ({ sx, value, setSelectedOptions }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
   const [query, setQuery] = useState(''); // Tracks input query
   const [cache, setCache] = useState({}); // Cache for query results
 
-  // Fetch default options when component mounts or when the input is opened
+  // Fetch default options when dropdown is opened
   useEffect(() => {
     const fetchDefaultOptions = async () => {
       if (cache.default) {
@@ -22,12 +20,10 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
 
       setLoading(true);
       try {
-        const response = await axiosServices.get(`/company?page=1&name=${query}&limit=10`);
-        console.log("response.data",response.data.data.result)
-        const companies = response.data.data.result;
-
-        setOptions(companies);
-        setCache((prevCache) => ({ ...prevCache, default: companies })); // Cache default results
+        const response = await axiosServices.get(`/vehicle/all?page=1&limit=10`);
+        const vehicles =response.data.data.result;
+        setOptions(vehicles);
+        setCache((prevCache) => ({ ...prevCache, default: vehicles })); // Cache default results
       } catch (error) {
         console.error('Error fetching default options:', error);
       } finally {
@@ -40,7 +36,6 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
     }
   }, [open, cache.default]);
 
-  // Fetch options based on input query with caching
   useEffect(() => {
     if (!query) return;
 
@@ -69,55 +64,48 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
 
     return () => clearTimeout(debounceFetch); // Cleanup on unmount or re-render
   }, [query, cache]);
-
   return (
     <Grid item xs={12}>
       <Autocomplete
-        id="asynchronous-demo"
-        open={open}
-        value={value}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        isOptionEqualToValue={(option, value) => option.company_name === value.company_name}
-        getOptionLabel={(option) => option.company_name || ''}
+        multiple
+        id="checkboxes-tags-demo"
         options={options}
+        disableCloseOnSelect
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        getOptionLabel={(option) => option.vehicleNumber}
+        onChange={(event, newValue) => {
+          setSelectedOptions(newValue || []); // Set the selected options
+        }}
         loading={loading}
         onInputChange={(event, newInputValue) => {
           setQuery(newInputValue); // Update query state
           // setquery(newInputValue)
         }}
-        sx={sx}
-        onChange={(event, newValue) => {
-          setFilterOptions((prevState) => ({
-            ...prevState,
-            selectedCompany: newValue || {} // Reset to empty object if no selection
-          }));
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder="Filter Company"
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                  <SearchNormal1 size={14} />
-              ),
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
-            }}
-          />
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox style={{ marginRight: 8 }} checked={selected} />
+            {option.vehicleNumber}
+          </li>
         )}
+        renderInput={(params) => <TextField {...params} placeholder="Select Vehicles" />}
+        sx={{
+          '& .MuiOutlinedInput-root': { p: 1 },
+          '& .MuiAutocomplete-tag': {
+            bgcolor: 'primary.lighter',
+            border: '1px solid',
+            borderColor: 'primary.light',
+            '& .MuiSvgIcon-root': {
+              color: 'primary.main',
+              '&:hover': { color: 'primary.dark' }
+            }
+          },
+          ...sx // Allow custom styles via props
+        }}
       />
     </Grid>
   );
 };
 
-export default CompanyFilter;
+export default VehicleSelection;

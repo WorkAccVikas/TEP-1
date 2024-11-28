@@ -22,6 +22,7 @@ import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails'
 import Reports from 'pages/reports/Reports';
 import ReportDriver from 'pages/reports/ReportDriver';
 import Create from 'pages/invoice/create/Create3';
+import TripReports from 'pages/reports/Trips';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -453,6 +454,10 @@ const CabProvidorRoutes = {
             {
               path: 'cab-report',
               element: <CabReports />
+            },
+            {
+              path: 'trip-report',
+              element: <TripReports />
             }
           ]
         },

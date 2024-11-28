@@ -62,5 +62,6 @@
   "vendor report": "Vendor Report",
   "company1": "Company",
   "vendor1": "Vendor",
-  "driver1": "Driver"
+  "driver1": "Driver",
+  "trip": "Trip"
 }

@@ -11,6 +11,10 @@ import CustomCircularLoader from 'components/CustomCircularLoader';
 import { DocumentDownload } from 'iconsax-react';
 import axios from 'utils/axios';
 import MultipleAutocomplete from 'components/autocomplete/MultipleAutocomplete';
+import CompanySelection from 'SearchComponents/CompanySelectionAutocomplete';
+import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
+import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
+import TableSkeleton from 'components/tables/TableSkeleton';
 
 const CabReports = () => {
   const [cab, setCab] = useState(null);
@@ -48,45 +52,48 @@ const CabReports = () => {
   }, []);
 
   const downloadReports = useCallback(() => {
-    alert('Download Report');
     console.log('Data = ', cabReportData);
+    downloadCabWiseReport(cabReportData,"cabWiseReport")
   }, [cabReportData]);
 
-  const handleSelectionChange = useCallback((event, value) => {
-    console.log(`🚀 ~ handleSelectionChange ~ value:`, value);
-    setSelectedCab(value);
-  }, []);
 
   return (
     <>
       <Stack gap={1}>
         {/* Filter */}
-        <Stack direction={'row'} justifyContent={'flex-end'} gap={2} alignItems={'center'}>
-          {/* Company Filter */}
-          <Box sx={{ width: '40%' }}></Box>
+        <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
+          {/* vehicle Filter */}
 
-          {/* Download Report */}
-          <Button
-            variant="contained"
-            startIcon={<DocumentDownload />}
-            color="secondary"
-            onClick={downloadReports}
-            size="medium"
-            title="Download Report"
-          >
-            Download Report
-          </Button>
+          <Stack>
+            <Box sx={{ minWidth: '300px' }}>
+              <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px',maxWidth: '600px' }} />
+            </Box>
+          </Stack>
 
-          {/* Date Filter */}
-          <DateRangeSelect
-            startDate={startDate}
-            endDate={endDate}
-            selectedRange={range}
-            prevRange={prevRange}
-            setSelectedRange={setRange}
-            onRangeChange={handleRangeChange}
-            showSelectedRangeLabel
-          />
+          <Stack direction={'row'} gap={2}>
+            {/* Download Report */}
+
+            {/* Date Filter */}
+            <DateRangeSelect
+              startDate={startDate}
+              endDate={endDate}
+              selectedRange={range}
+              prevRange={prevRange}
+              setSelectedRange={setRange}
+              onRangeChange={handleRangeChange}
+              showSelectedRangeLabel
+            />
+            <Button
+              variant="contained"
+              startIcon={<DocumentDownload />}
+              color="secondary"
+              onClick={downloadReports}
+              size="medium"
+              title="Download Report"
+            >
+              Download Report
+            </Button>
+          </Stack>
         </Stack>
 
         {/* Main Part */}
@@ -95,7 +102,7 @@ const CabReports = () => {
           <Analytic />
 
           {/* Table */}
-          {loading ? <CustomCircularLoader /> : <Table />}
+          {loading ?  <TableSkeleton rows={10} columns={6} /> : <Table />}
         </Stack>
       </Stack>
     </>

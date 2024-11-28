@@ -16,8 +16,6 @@ import { ThemeMode } from 'config';
 // ==============================|| CHART ||============================== //
 
 export const ApexPieChart = ({ labels, series }) => {
-  console.log('ApexPieChart rendered');
-
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -50,7 +48,7 @@ export const ApexPieChart = ({ labels, series }) => {
     const secondary = theme.palette.secondary.main;
     const secondaryLight = theme.palette.secondary[400];
     const secondaryDark = theme.palette.secondary.dark;
-    const secondaryDarker = theme.palette.secondary.darker;
+    const secondaryDarker = theme.palette.secondary[200];
 
     setOptions((prevState) => ({
       ...prevState,
@@ -85,9 +83,24 @@ export const ApexPieChart = ({ labels, series }) => {
     }));
   }, [mode, primary, line, grey200, backColor, theme]);
 
+  const isDataEmpty = series.every((value) => value === 0);
+  const updatedOptions = {
+    ...options,
+    chart: {
+      ...options.chart,
+      background: isDataEmpty ? '#f0f0f0' : 'transparent', // Set grey background if data is empty
+    },
+    fill: {
+      colors: isDataEmpty ? ['#d3d3d3'] : options.fill?.colors || undefined, // Grey color if empty
+    },
+    labels: isDataEmpty ? ['No Data Found'] : options.labels, // Remove labels if data is empty
+    tooltip: {
+      enabled: true, // Disable tooltip when data is empty
+    },
+  };
   return (
     <div id="chart">
-      <ReactApexChart options={options} series={series} type="pie" height={downSM ? 280 : 350} />
+      <ReactApexChart options={updatedOptions} series={isDataEmpty ? [13] : series} type="pie" height={downSM ? 280 : 350}  />
     </div>
   );
 };

@@ -11,14 +11,13 @@ import { DocumentDownload } from 'iconsax-react';
 import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
 import TableSkeleton from 'components/tables/TableSkeleton';
-import { downloadAdvanceReport, downloadReport } from '../utils/DownloadAdvanceReport';
 
-const AdvanceReports = () => {
+const TripReports = () => {
   const [selectedCab, setSelectedCab] = useState([]);
 
   const { loading, advanceReportData } = useSelector((state) => state.report);
 
-  console.log({ advanceReportData });
+  console.log({advanceReportData})
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
   useEffect(() => {
@@ -42,24 +41,9 @@ const AdvanceReports = () => {
 
   const downloadReports = useCallback(() => {
     console.log('Data = ', advanceReportData);
-
-    const transformedData = advanceReportData.map((item) => ({
-      userType: item.isDriver ? 'driver' : 'vendor',
-      requestedBy: item.requestedById?.userName,
-      approvedBy: item.approvedBy?.userName,
-      advanceType: item.advanceTypeId?.advanceTypeName || 'N/A',
-      interestRate: item.advanceTypeId?.interestRate,
-      requestedAmount: item.requestedAmount,
-      requestedInterest: item.advanceTypeId?.interestRate ? (item.requestedAmount * item.advanceTypeId?.interestRate) / 100 : 0,
-      approvedAmount: item.approvedAmount,
-      approvedInterest: item.advanceTypeId?.interestRate ? (item.approvedAmount * item.advanceTypeId?.interestRate) / 100 : 0,
-      transactionId: item.transactionId,
-      totalVehiclesCount: item.totalVehiclesCount,
-      driverCount: item.driverCount
-    }));
-    console.log({ transformedData });
-    downloadAdvanceReport(transformedData, 'advanceReport');
+    downloadCabWiseReport(advanceReportData,"cabWiseReport")
   }, [advanceReportData]);
+
 
   return (
     <>
@@ -106,11 +90,11 @@ const AdvanceReports = () => {
           <Analytic />
 
           {/* Table */}
-          {loading ? <TableSkeleton rows={10} columns={6} /> : <Table />}
+          {loading ?  <TableSkeleton rows={10} columns={6} /> : <Table />}
         </Stack>
       </Stack>
     </>
   );
 };
 
-export default AdvanceReports;
+export default TripReports;

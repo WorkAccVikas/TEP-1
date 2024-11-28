@@ -1,6 +1,7 @@
 import { Button, Stack } from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 import { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
 import ReactTable from 'components/tables/reactTable3/ReactTable';
 import { IndeterminateCheckbox } from 'components/third-party/ReactTable';
@@ -10,8 +11,6 @@ import { useSelector } from 'store';
 
 const Table = () => {
   const { companyReportData } = useSelector((state) => state.report);
-  console.log(`🚀 ~ Table ~ companyReportData:`, companyReportData);
-
   const columns = useMemo(
     () => [
       // {
@@ -101,30 +100,16 @@ const Table = () => {
     ],
     []
   );
-
-  const downloadReports = useCallback(() => {
-    alert('Download Report');
-    console.log('Data = ', companyReportData);
-  }, []);
-
   return (
     <>
       {companyReportData && companyReportData.length > 0 ? (
-        <MainCard>
+        <MainCard content={false}>
           <Stack gap={2}>
-            {/* Header */}
-            {/* <Stack direction={'row'} justifyContent={'flex-end'} gap={2}>
-              <Button variant="contained" startIcon={<DocumentDownload />} color="secondary" onClick={downloadReports}>
-                Download Report
-              </Button>
-            </Stack> */}
-
-            {/* Table */}
             <ReactTable columns={columns} data={companyReportData} />
           </Stack>
         </MainCard>
       ) : (
-        <TableNoDataMessage text="No Data Found" />
+        <EmptyTableDemo />
       )}
     </>
   );

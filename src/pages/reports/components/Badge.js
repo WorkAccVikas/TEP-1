@@ -4,7 +4,6 @@ import MainCard from 'components/MainCard';
 
 function Badge({ title, count, currency = false, currencySymbol = '₹' }) {
   return (
-    <Tooltip title={`${title} : ${currency ? currencySymbol : ''} ${count}`}>
       <MainCard content={false}>
         <Stack alignItems="center" sx={{ py: 1.5 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
@@ -16,7 +15,6 @@ function Badge({ title, count, currency = false, currencySymbol = '₹' }) {
           </Typography>
         </Stack>
       </MainCard>
-    </Tooltip>
   );
 }
 
