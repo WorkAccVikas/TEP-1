@@ -113,11 +113,11 @@ const Table = () => {
         <MainCard>
           <Stack gap={2}>
             {/* Header */}
-            <Stack direction={'row'} justifyContent={'flex-end'} gap={2}>
+            {/* <Stack direction={'row'} justifyContent={'flex-end'} gap={2}>
               <Button variant="contained" startIcon={<DocumentDownload />} color="secondary" onClick={downloadReports}>
                 Download Report
               </Button>
-            </Stack>
+            </Stack> */}
 
             {/* Table */}
             <ReactTable columns={columns} data={companyReportData} />
