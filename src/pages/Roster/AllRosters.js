@@ -62,6 +62,7 @@ import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import { formatDateUsingMoment } from 'utils/helper';
+import { ConsoleView } from 'react-device-detect';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -171,19 +172,21 @@ const AllRosters = () => {
   const [refetch, setRefetch] = useState(false);
 
   const { rosterFiles, metaData, loading, error } = useSelector((state) => state.rosterFile);
+  const { metaData: rosterStat } = metaData;
+
+  console.log({ rosterStat });
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
-  
-  
+
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {},
     selectedVendor: {},
     selectedDiver: {},
     selectedVehicle: {}
   });
-  
+
   const handleCloseForRemove = useCallback(() => {
     setRemove(false);
     setDeleteID(null);
@@ -192,9 +195,9 @@ const AllRosters = () => {
   const handleRefetch = useCallback(() => {
     setRefetch((prev) => !prev);
   }, []);
+  console.log('filterOptions', filterOptions);
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
-  
 
   useEffect(() => {
     dispatch(
@@ -203,10 +206,10 @@ const AllRosters = () => {
         limit: limit,
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        companyID: filterOptions.selectedCompany._id,
+        companyID: filterOptions?.selectedCompany?._id
       })
     );
-  }, [dispatch, page, limit, refetch, startDate, endDate]);
+  }, [dispatch, page, limit, refetch, startDate, endDate, filterOptions]);
 
   const handleLimitChange = useCallback((event) => {
     setLimit(+event.target.value);
@@ -219,7 +222,6 @@ const AllRosters = () => {
 
   const handleDelete = useCallback(async () => {
     try {
-
       if (!deleteID) return;
 
       await axiosServices.delete(`/tripData/delete/roster?Id=${deleteID}`);
@@ -425,6 +427,8 @@ const AllRosters = () => {
     { title: 'Home', to: APP_DEFAULT_PATH },
     { title: 'Roster', to: '/apps/roster/all-roster' }
   ];
+
+  console.log({ metaData });
 
   if (error) return <Error500 />;
 

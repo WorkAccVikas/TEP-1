@@ -4,10 +4,17 @@ import axios from 'utils/axios';
 import { commonInitialState, commonReducers } from '../common';
 
 // Define the async thunk for fetching companies
-export const fetchCompanies = createAsyncThunk('companies/fetchCompanies', async ({ page, limit }, { rejectWithValue }) => {
+export const fetchCompanies = createAsyncThunk('companies/fetchCompanies', async ({ page, limit, query }, { rejectWithValue }) => {
   try {
     // Replace with your actual endpoint
-    const response = await axios.get(`/company?page=${page}&limit=${limit}`);
+    // const response = await axios.get(`/company?page=${page}&limit=${limit}&name=${query}`);
+    const response = await axios.get(`/company`, {
+      params: {
+        page: page,
+        limit: limit,
+        name: query
+      }
+    });
     return response.data.data; // This should match the shape of the data you expect
   } catch (error) {
     // Return a rejected value with error details
@@ -192,17 +199,20 @@ export const updateCompanyStatus = createAsyncThunk('vendors/updateCompanyStatus
 });
 
 // Update status of company branch
-export const updateCompanyBranchStatus = createAsyncThunk('vendors/updateCompanyBranchStatus', async (status, { rejectWithValue, getState }) => {
-  try {
-    const state = getState();
-    const id = state.companies.selectedID;
-    const response = await axios.put('/companyBranch/updateActiveStatus', { data: { companyBranchId: id, status } });
-    console.log(response);
-    return { success: response.data.success, message: response.data.message };
-  } catch (error) {
-    return rejectWithValue(error.response ? error.response.data : error.message);
+export const updateCompanyBranchStatus = createAsyncThunk(
+  'vendors/updateCompanyBranchStatus',
+  async (status, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      const id = state.companies.selectedID;
+      const response = await axios.put('/companyBranch/updateActiveStatus', { data: { companyBranchId: id, status } });
+      console.log(response);
+      return { success: response.data.success, message: response.data.message };
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
   }
-});
+);
 
 const initialState = {
   ...commonInitialState,

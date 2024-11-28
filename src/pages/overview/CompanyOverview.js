@@ -7,11 +7,9 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Bill, Book, Car, Card, DocumentText, Profile2User, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Car, Card, MenuBoard, Profile2User, Routing2 } from 'iconsax-react';
 import {
   fetchCompanies,
-  fetchCompaniesAssignedDrivers,
-  fetchCompaniesAssignedVendors,
   fetchCompanyDetails
 } from 'store/slice/cabProvidor/companySlice';
 import { dispatch } from 'store';
@@ -40,7 +38,6 @@ const CompanyOverview = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true); // Set loading to true initially
   const { companyDetails } = useSelector((state) => state.companies || {});
-  const { companiesDriver } = useSelector((state) => state.companies || {});
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -89,8 +86,6 @@ const CompanyOverview = () => {
       setLoading(true); // Set loading to true when data fetching starts
       await dispatch(fetchCompanies());
       await dispatch(fetchCompanyDetails(id));
-      // await dispatch(fetchCompaniesAssignedVendors(id));
-      await dispatch(fetchCompaniesAssignedDrivers(id));
       setLoading(false); // Set loading to false after data is fetched
     };
 
@@ -137,7 +132,7 @@ const CompanyOverview = () => {
               <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
               <Tab label="Attached Vendors" icon={<Profile2User />} iconPosition="start" />
               <Tab label="Attached Drivers" icon={<Car />} iconPosition="start" />
-              <Tab label="View Roster" icon={<Card />} iconPosition="start" />
+              <Tab label="View Roster" icon={<MenuBoard />} iconPosition="start" />
               <Tab label="Company Rate" icon={<Card />} iconPosition="start" />
               {/* <Tab label="TestingComb" icon={<Card />} iconPosition="start" /> */}
             </Tabs>
@@ -150,8 +145,8 @@ const CompanyOverview = () => {
               {/* {activeTab === 2 && <Mails />}
               {activeTab === 3 && <Statement />} */}
               {activeTab === 3 && <AttachedVendor companyId={companyId} />}
-              {activeTab === 4 && <AttachedDriver data={companiesDriver} loading={loading} />}
-              {activeTab === 5 && <ViewRoster id={companyId} />}
+              {activeTab === 4 && <AttachedDriver companyId={companyId}/>}
+              {activeTab === 5 && <ViewRoster companyId={companyId} />}
               {activeTab === 6 && <CompanyRateListing id={companyId} companyName={companyName} />}
               {/* {activeTab === 6 && <AttachedVendorDriver data={companiesVendor} loading={loading} />} */}
             </Box>
