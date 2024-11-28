@@ -5,9 +5,6 @@ import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { alpha, useTheme } from '@mui/material/styles';
 import {
   AppBar,
-  Box,
-  Chip,
-  CircularProgress,
   Dialog,
   DialogTitle,
   IconButton,
@@ -41,6 +38,8 @@ import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/Re
 import { CSVExport } from 'components/tables/reactTable2/ReactTable';
 import VendorRateTable from 'pages/management/vendor/vendorRate/VendorRateTable';
 import axiosServices from 'utils/axios';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const avatarImage = require.context('assets/images/users', true);
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
@@ -236,7 +235,7 @@ const AttachedCompany = ({ vendorId }) => {
     }
   }, [vendorId]);
 
-  //  useEffect: Fetch companies rate between vendor and company through companyId and vendorId
+  //  useEffect: Fetch rates between vendor and company through companyId and vendorId
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -332,21 +331,11 @@ const AttachedCompany = ({ vendorId }) => {
       <MainCard title="Attached Companies List" content={false}>
         <ScrollX>
           {loading ? (
-            <Box
-              sx={{
-                height: '100vh',
-                width: 'inherit',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <CircularProgress />
-            </Box>
+            <TableSkeleton rows={10} columns={6} />
           ) : vendorData.length > 0 ? (
             <ReactTable columns={columns} data={vendorData} hideHeader />
           ) : (
-            <TableNoDataMessage text="No Company Found" />
+            <EmptyTableDemo />
           )}
         </ScrollX>
       </MainCard>
