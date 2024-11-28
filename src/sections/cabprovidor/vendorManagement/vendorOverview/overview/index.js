@@ -9,7 +9,7 @@ import OverviewGraph from './OverviewGraph';
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 
-const Overview = ({ data, data1 }) => {
+const Overview = ({ data, data1, vendorCompanyName }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6} md={6} xl={6}>
@@ -206,7 +206,7 @@ const Overview = ({ data, data1 }) => {
       <Grid item xs={12} sm={6} md={6} xl={6}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <OverviewGraph/>
+            <OverviewGraph vendorCompanyName={vendorCompanyName}/>
           </Grid>
         </Grid>
       </Grid>

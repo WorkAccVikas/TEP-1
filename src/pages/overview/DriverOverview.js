@@ -12,13 +12,13 @@ import Overview from 'sections/cabprovidor/driverManagement/driverOverview/Overv
 import Statement from 'sections/cabprovidor/driverManagement/driverOverview/Statement';
 import TripDetail from 'sections/cabprovidor/driverManagement/driverOverview/TripDetail';
 import SalaryDetail from 'sections/cabprovidor/driverManagement/driverOverview/SalaryDetail';
-import Advance from 'sections/cabprovidor/driverManagement/driverOverview/Advance';
 import Loan from 'sections/cabprovidor/driverManagement/driverOverview/Loan';
 import axios from 'axios';
 import axiosServices from 'utils/axios';
 import AttachedCompany from 'sections/cabprovidor/driverManagement/driverOverview/AttachedCompany';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
+import AdvanceDriver from 'sections/cabprovidor/driverManagement/driverOverview/Advance';
 
 const DriverOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -172,7 +172,7 @@ const DriverOverview = () => {
               {activeTab === 0 && <Overview data={driverDetail} data1={driverSpecificDetail} />}
               {activeTab === 1 && <TripDetail driverId={driverId} />}
               {/* {activeTab === 2 && <Statement />} */}
-              {activeTab === 2 && <Advance data={data} />}
+              {activeTab === 2 && <AdvanceDriver driverId={driverId} />}
               {/* {activeTab === 3 && <Loan data={data}/>} */}
               {/* {activeTab === 4 && <SalaryDetail data={data} />} */}
               {activeTab === 3 && <AttachedCompany driverId={driverId}/>}

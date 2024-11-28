@@ -19,6 +19,7 @@ import axiosServices from 'utils/axios';
 import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import TripDetail from 'sections/cabprovidor/vendorManagement/vendorOverview/TripDetails';
+import AdvanceVendor from 'sections/cabprovidor/vendorManagement/vendorOverview/AdvanceVendor';
 
 const VendorOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -28,8 +29,7 @@ const VendorOverview = () => {
   const [vendorDetail, setVendorDetail] = useState(null);
   const [vendorSpecificDetail, setVendorSpecificDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  console.log('vendorDetail', vendorDetail);
+  const vendorCompanyName = vendorSpecificDetail?.vendorCompanyName;
 
   //  useEffect: Get vendor's details by vendorId
 
@@ -59,7 +59,7 @@ const VendorOverview = () => {
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
     { title: 'Vendor', to: '/management/vendor/view' },
-    { title: `${vendorDetail?.userName}` }
+    { title: `${vendorCompanyName}` }
   ];
 
   //  useEffect: Fetch assigned companies to a vendor by vendor Id
@@ -200,9 +200,9 @@ const VendorOverview = () => {
             </Tabs>
 
             <Box sx={{ p: 3 }}>
-              {activeTab === 0 && <Overview data={vendorDetail} data1={vendorSpecificDetail} />}
+              {activeTab === 0 && <Overview data={vendorDetail} data1={vendorSpecificDetail} vendorCompanyName={vendorCompanyName}/>}
               {activeTab === 1 && <TripDetail vendorId={vendorId} />}
-              {activeTab === 2 && <Transaction data={data} />}
+              {activeTab === 2 && <AdvanceVendor vendorId={vendorId} />}
               {activeTab === 3 && <Transaction data={data} />}
               {/* {activeTab === 2 && <Mails />} */}
               {activeTab === 4 && <Statement />}

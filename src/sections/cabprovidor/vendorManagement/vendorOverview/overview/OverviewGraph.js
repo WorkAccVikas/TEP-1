@@ -125,7 +125,7 @@ EcommerceDataChart.propTypes = {
 
 // ==============================|| CHART WIDGET - PROJECT ANALYTICS ||============================== //
 
-export default function OverviewGraph() {
+export default function OverviewGraph({vendorCompanyName}) {
   const [age, setAge] = useState('20');
 
   const chartData = [
@@ -178,7 +178,7 @@ export default function OverviewGraph() {
   };
 
   return (
-    <MainCard content={false} title="Company Name">
+    <MainCard content={false} title={vendorCompanyName}>
       <Box sx={{ width: '100%' }}>
         <Box sx={{ p: 2 }}>
           <Grid container spacing={2}>
