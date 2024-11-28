@@ -120,7 +120,7 @@ ReactTable.propTypes = {
 
 // ==============================|| REACT TABLE - EXPANDING DETAILS ||============================== //
 
-const AdvanceDriver = ({driverId}) => {
+const AdvanceVendor = ({vendorId}) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
@@ -150,7 +150,7 @@ const AdvanceDriver = ({driverId}) => {
         limit: limit,
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        filterbyUid: driverId
+        filterbyUid: vendorId
       })
     );
   }, [dispatch, page, limit, startDate, endDate]);
@@ -436,7 +436,7 @@ const AdvanceDriver = ({driverId}) => {
   );
 };
 
-AdvanceDriver.propTypes = {
+AdvanceVendor.propTypes = {
   data: PropTypes.array,
   row: PropTypes.object,
   isExpanded: PropTypes.bool,
@@ -444,4 +444,4 @@ AdvanceDriver.propTypes = {
   value: PropTypes.string
 };
 
-export default AdvanceDriver;
+export default AdvanceVendor;

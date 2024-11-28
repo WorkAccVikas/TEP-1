@@ -2,10 +2,19 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
 
 // Define the async thunk for fetching advance
-export const fetchAdvances = createAsyncThunk('advances/fetchAdvances', async ({page,limit,startDate,endDate}, { rejectWithValue }) => {
+export const fetchAdvances = createAsyncThunk('advances/fetchAdvances', async ({page,limit,startDate,endDate,filterbyUid}, { rejectWithValue }) => {
   try {
     // Advance Requests to CabProvider
-    const response = await axios.get(`/advance/requested/cab/provider?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+    // const response = await axios.get(`/advance/requested/cab/provider?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}&filterbyUid=${filterbyUid}`);
+    const response = await axios.get(`/advance/requested/cab/provider`, {
+      params: {
+        page: page,
+        limit: limit,
+        startDate: startDate,
+        endDate: endDate,
+        filterbyUid: filterbyUid
+      }
+    });
     
     return response.data;
   } catch (error) {
