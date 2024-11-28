@@ -10,6 +10,8 @@ import axiosServices from 'utils/axios';
 import { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
@@ -57,17 +59,7 @@ const CompanyRateListing = ({ companyName, id }) => {
           <MainCard title="Company Rates" content={false}>
           <ScrollX>
           {loading ? (
-            <Box
-              sx={{
-                height: '100vh',
-                width: 'inherit',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <CircularProgress />
-            </Box>
+           <TableSkeleton rows={10} columns={6} />
           ) : companyList.length !== 0 ? (
             <CompanyRateReactTable
               data={companyList}
@@ -80,7 +72,7 @@ const CompanyRateListing = ({ companyName, id }) => {
               loading={loading}
             />
           ) : (
-            <TableNoDataMessage text="No Rates Found" />
+            <EmptyTableDemo />
           )}
             </ScrollX>
             </MainCard>

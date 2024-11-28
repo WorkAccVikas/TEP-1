@@ -1,21 +1,23 @@
 import PropTypes from 'prop-types';
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
 import {
-  Box,
-  CircularProgress,
+  AppBar,
   Dialog,
+  DialogTitle,
   IconButton,
   Skeleton,
+  Slide,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Tooltip
+  Tooltip,
+  Typography
 } from '@mui/material';
 
 // third-party
@@ -30,13 +32,17 @@ import makeData from 'data/react-table';
 import mockData from 'utils/mock-data';
 
 // assets
-import { Eye } from 'iconsax-react';
+import { Add, Eye } from 'iconsax-react';
 import { ThemeMode } from 'config';
 import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
 import { CSVExport } from 'components/tables/reactTable2/ReactTable';
-import VendorRate from 'sections/cabprovidor/vendorManagement/vendorOverview/vendorRate/VendorRate';
+import VendorRateTable from 'pages/management/vendor/vendorRate/VendorRateTable';
+import axiosServices from 'utils/axios';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const avatarImage = require.context('assets/images/users', true);
+const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 // ==============================|| SUB TABLE ||============================== //
 
@@ -189,17 +195,65 @@ SubRowAsync.propTypes = {
 
 // ==============================|| REACT TABLE - EXPANDING SUB TABLE ||============================== //
 
-const AttachedCompany = ({ data, loading }) => {
+const AttachedCompany = ({ vendorId }) => {
   const [open, setOpen] = useState(false); // State to manage popup
+  const [companyId, setCompanyId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState('');
+  const [vendorList, setVendorList] = useState([]);
+  const [updateKey, setUpdateKey] = useState(0);
+  const [vendorData, setVendorData] = useState(null);
 
-  const handleOpen = () => {
-    setOpen(true); // Open the popup
-  };
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
 
-  const handleClose = () => {
-    setOpen(false); // Close the popup
-  };
+  const handleClose = useCallback(() => {
+    setOpen(false);
+  }, []);
+
+  //  useEffect: Fetch assigned companies to a vendor by vendor Id
+
+  useEffect(() => {
+    if (vendorId) {
+      const fetchCompanyData = async () => {
+        try {
+          const response = await axiosServices.get(`/vendor/companies?vendorId=${vendorId}`);
+
+          if (response.status === 200) {
+            setVendorData(response.data.data);
+            setLoading(false);
+          }
+
+          // Handle the response as needed
+        } catch (error) {
+          console.error('Error fetching company data:', error);
+        }
+      };
+
+      fetchCompanyData();
+    }
+  }, [vendorId]);
+
+  //  useEffect: Fetch rates between vendor and company through companyId and vendorId
+
+  useEffect(() => {
+    const fetchdata = async () => {
+      setLoading(true); // Start loading
+      try {
+        const response = await axiosServices.get(`/cabRateMaster/unwind/rate/vendorId?vendorId=${vendorId}&companyID=${companyId}`);
+        setVendorList(response.data.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false); // Stop loading regardless of success or error
+      }
+    };
+
+    if (!companyId || !vendorId) return;
+
+    fetchdata();
+  }, [vendorId, companyId, updateKey]);
 
   const columns = useMemo(
     () => [
@@ -211,60 +265,61 @@ const AttachedCompany = ({ data, loading }) => {
       },
       {
         Header: 'Company Name',
-        accessor: 'company_name',  
-        Cell: ({ value }) => value || 'None' 
+        accessor: 'company_name',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Company Email',
-        accessor: 'company_email',  
-        Cell: ({ value }) => value || 'None' 
+        accessor: 'company_email',
+        Cell: ({ value }) => value || 'None'
       },
 
       {
         Header: 'Mobile Number',
-        accessor: 'mobile',  
-        Cell: ({ value }) => value || 'None' 
+        accessor: 'mobile',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Address',
-        accessor: 'address',  
-        Cell: ({ value }) => value || 'None' 
+        accessor: 'address',
+        Cell: ({ value }) => value || 'None'
       },
-      // {
-      //   Header: 'View Rate',
-      //   className: 'cell-left',
-      //   disableSortBy: true,
-      //   Cell: ({ row }) => {
-      //     const theme = useTheme();
-      //     const mode = theme.palette.mode;
-      //     return (
-      //       <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
-      //         <Tooltip
-      //           componentsProps={{
-      //             tooltip: {
-      //               sx: {
-      //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                 opacity: 0.9
-      //               }
-      //             }
-      //           }}
-      //           title="View"
-      //         >
-      //           <IconButton
-      //             color="secondary"
-      //             onClick={(e) => {
-      //               e.stopPropagation();
-      //               handleOpen();
-      //               setCompanyName(row.original.company_name);
-      //             }}
-      //           >
-      //             <Eye />
-      //           </IconButton>
-      //         </Tooltip>
-      //       </Stack>
-      //     );
-      //   }
-      // }
+      {
+        Header: 'View Rate',
+        className: 'cell-left',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          const theme = useTheme();
+          const mode = theme.palette.mode;
+          return (
+            <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpen();
+                    setCompanyId(row.original._id);
+                    setCompanyName(row.original.company_name);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
+      }
     ],
     []
   );
@@ -272,31 +327,45 @@ const AttachedCompany = ({ data, loading }) => {
   // const renderRowSubComponent = useCallback(() => <SubRowAsync />, []);
 
   return (
-    <MainCard title="Attached Companies List" content={false}>
-      <ScrollX>
-        {loading ? (
-          <Box
-            sx={{
-              height: '100vh',
-              width: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        ) : data.length > 0 ? (
-          <ReactTable columns={columns} data={data} hideHeader/>
-        ) : (
-          <TableNoDataMessage text="No Company Found" />
-        )}
+    <>
+      <MainCard title="Attached Companies List" content={false}>
+        <ScrollX>
+          {loading ? (
+            <TableSkeleton rows={10} columns={6} />
+          ) : vendorData.length > 0 ? (
+            <ReactTable columns={columns} data={vendorData} hideHeader />
+          ) : (
+            <EmptyTableDemo />
+          )}
+        </ScrollX>
+      </MainCard>
 
-        <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md" aria-labelledby="draggable-dialog-title">
-          <VendorRate onClose={handleClose} companyName={companyName} />
+      {companyId && open && (
+        <Dialog
+          fullScreen
+          open={open}
+          onClose={handleClose}
+          fullWidth
+          maxWidth="md"
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          TransitionComponent={Transition}
+        >
+          <AppBar sx={{ position: 'relative', boxShadow: 'none' }}>
+            <DialogTitle id="alert-dialog-title">
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">Vendor Rates with {companyName}</Typography>
+                <IconButton onClick={handleClose} color="inherit" aria-label="close">
+                  <Add style={{ transform: 'rotate(45deg)' }} />
+                </IconButton>
+              </Stack>
+            </DialogTitle>
+          </AppBar>
+
+          <VendorRateTable data={vendorList} updateKey={updateKey} setUpdateKey={setUpdateKey} loading={loading} />
         </Dialog>
-      </ScrollX>
-    </MainCard>
+      )}
+    </>
   );
 };
 

@@ -17,6 +17,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@svgr/webpack": "8.0.1",
     "@tanstack/react-table": "^8.20.5",
+    "apexcharts": "^3.40.0",
     "axios": "^1.4.0",
     "chance": "^1.1.11",
     "crypto-js": "^4.1.1",
