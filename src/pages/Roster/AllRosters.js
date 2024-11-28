@@ -174,8 +174,6 @@ const AllRosters = () => {
   const { rosterFiles, metaData, loading, error } = useSelector((state) => state.rosterFile);
   const { metaData: rosterStat } = metaData;
 
-  console.log({ rosterStat });
-
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
@@ -195,7 +193,6 @@ const AllRosters = () => {
   const handleRefetch = useCallback(() => {
     setRefetch((prev) => !prev);
   }, []);
-  console.log('filterOptions', filterOptions);
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
@@ -313,8 +310,6 @@ const AllRosters = () => {
         Header: 'Status',
         accessor: 'vendorDetails',
         Cell: ({ row }) => {
-          // console.log({ row });
-
           return (
             <>
               <Chip
@@ -393,31 +388,31 @@ const AllRosters = () => {
   const widgetsData = [
     {
       title: 'Roster',
-      count: '131',
-      percentage: 70.5,
+      count: rosterStat?.totalDataCount,
+      percentage: (((rosterStat?.sumOfTotalCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
       isLoss: false,
       even: true,
-      entries: '620',
+      entries: rosterStat?.sumOfTotalCount,
       color: theme.palette.primary,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Completed',
-      count: '10',
-      percentage: 27.4,
+      count: rosterStat?.countOfEqualTotal,
+      percentage:  (((rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
       isLoss: false,
       even: false,
-      entries: '500',
+      entries: rosterStat?.sumOfEqualCount,
       color: theme.palette.success,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Pending',
-      count: '121',
-      percentage: 27.4,
+      count: rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal,
+      percentage: (((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
       isLoss: true,
       even: false,
-      entries: '120',
+      entries: rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount,
       color: theme.palette.warning,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     }
@@ -427,8 +422,6 @@ const AllRosters = () => {
     { title: 'Home', to: APP_DEFAULT_PATH },
     { title: 'Roster', to: '/apps/roster/all-roster' }
   ];
-
-  console.log({ metaData });
 
   if (error) return <Error500 />;
 
@@ -468,10 +461,10 @@ const AllRosters = () => {
               <Stack direction="row" spacing={1} alignItems="center">
                 <Stack direction="row" spacing={1}>
                   <Typography variant="body2" color="white">
-                    Total Entries
+                    Total Rosters
                   </Typography>
                   <Typography variant="body1" color="white">
-                    0
+                    {rosterStat?.totalDataCount}
                   </Typography>
                 </Stack>
               </Stack>
@@ -480,7 +473,7 @@ const AllRosters = () => {
                   Trips Assigned
                 </Typography>
                 <Typography variant="body1" color="white">
-                  0
+                  {rosterStat?.sumOfEqualCount}
                 </Typography>
               </Stack>
             </Stack>
@@ -490,12 +483,12 @@ const AllRosters = () => {
                 Pending
               </Typography>
               <Typography variant="body1" color="white">
-                0
+                {rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal}
               </Typography>
             </Stack>
 
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={0} />
+              <LinearWithLabel value={((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount)/rosterStat?.sumOfTotalCount)*100} />
             </Box>
           </Box>
         </Grid>
