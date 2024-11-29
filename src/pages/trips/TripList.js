@@ -743,7 +743,7 @@ const TripList = () => {
     {
       title: 'Completed',
       count: `₹${(tripStats?.completedTripsAmount || 0).toFixed(2)}`,
-      percentage: (tripStats?.completedTripsPercentage || 0).toFixed(2),
+      percentage: tripStats?.completedTripsPercentage,
       isLoss: false,
       trips: `${tripStats?.completedTripsCount || 0}`,
       color: theme.palette.success
@@ -751,7 +751,7 @@ const TripList = () => {
     {
       title: 'Pending',
       count: `₹${(tripStats?.assignedTripsAmount || 0).toFixed(2)}`,
-      percentage: (tripStats?.assignedTripsPercentage || 0).toFixed(2),
+      percentage: tripStats?.assignedTripsPercentage,
       isLoss: true,
       trips: `${tripStats?.assignedTripsCount || 0}`,
       color: theme.palette.warning
@@ -759,7 +759,7 @@ const TripList = () => {
     {
       title: 'Cancelled',
       count: `₹${(tripStats?.canceledTripsAmount || 0).toFixed(2)}`,
-      percentage: (tripStats?.canceledTripsPercentage || 0).toFixed(2),
+      percentage: tripStats?.canceledTripsPercentage,
       isLoss: true,
       trips: `${tripStats?.canceledTripsCount || 0}`,
       color: theme.palette.error
