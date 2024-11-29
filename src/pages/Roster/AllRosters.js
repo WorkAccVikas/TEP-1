@@ -388,31 +388,34 @@ const AllRosters = () => {
   const widgetsData = [
     {
       title: 'Roster',
-      count: rosterStat?.totalDataCount,
-      percentage: (((rosterStat?.sumOfTotalCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: rosterStat?.totalDataCount ?? 0,
+      percentage: (((rosterStat?.sumOfTotalCount || 0) / (rosterStat?.sumOfTotalCount || 1)) * 100).toFixed(2),
       isLoss: false,
       even: true,
-      entries: rosterStat?.sumOfTotalCount,
+      entries: rosterStat?.sumOfTotalCount ?? 0,
       color: theme.palette.primary,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Completed',
-      count: rosterStat?.countOfEqualTotal,
-      percentage:  (((rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: rosterStat?.countOfEqualTotal ?? 0,
+      percentage: (((rosterStat?.sumOfEqualCount || 0) / (rosterStat?.sumOfTotalCount || 1)) * 100).toFixed(2),
       isLoss: false,
       even: false,
-      entries: rosterStat?.sumOfEqualCount,
+      entries: rosterStat?.sumOfEqualCount ?? 0,
       color: theme.palette.success,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Pending',
-      count: rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal,
-      percentage: (((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: (rosterStat?.totalDataCount ?? 0) - (rosterStat?.countOfEqualTotal ?? 0),
+      percentage: (
+        (((rosterStat?.sumOfTotalCount || 0) - (rosterStat?.sumOfEqualCount || 0)) / (rosterStat?.sumOfTotalCount || 1)) *
+        100
+      ).toFixed(2),
       isLoss: true,
       even: false,
-      entries: rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount,
+      entries: (rosterStat?.sumOfTotalCount ?? 0) - (rosterStat?.sumOfEqualCount ?? 0),
       color: theme.palette.warning,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     }
@@ -464,7 +467,7 @@ const AllRosters = () => {
                     Total Rosters
                   </Typography>
                   <Typography variant="body1" color="white">
-                    {rosterStat?.totalDataCount}
+                    {rosterStat?.totalDataCount ?? 0}
                   </Typography>
                 </Stack>
               </Stack>
@@ -473,7 +476,7 @@ const AllRosters = () => {
                   Trips Assigned
                 </Typography>
                 <Typography variant="body1" color="white">
-                  {rosterStat?.sumOfEqualCount}
+                  {rosterStat?.sumOfEqualCount ?? 0}
                 </Typography>
               </Stack>
             </Stack>
@@ -483,12 +486,16 @@ const AllRosters = () => {
                 Pending
               </Typography>
               <Typography variant="body1" color="white">
-                {rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal}
+                {(rosterStat?.totalDataCount ?? 0) - (rosterStat?.countOfEqualTotal ?? 0)}
               </Typography>
             </Stack>
 
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount)/rosterStat?.sumOfTotalCount)*100} />
+              <LinearWithLabel
+                value={
+                  (((rosterStat?.sumOfTotalCount ?? 0) - (rosterStat?.sumOfEqualCount ?? 0)) / (rosterStat?.sumOfTotalCount || 1)) * 100
+                }
+              />
             </Box>
           </Box>
         </Grid>
