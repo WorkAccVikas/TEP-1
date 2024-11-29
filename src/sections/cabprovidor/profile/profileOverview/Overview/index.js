@@ -9,8 +9,14 @@ import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import { Edit } from 'iconsax-react';
 import { dispatch } from 'store';
-import { updateUserBasicDetails, updateUserSpecificDetails } from 'store/slice/cabProvidor/userSlice';
+import {
+  addSpecificUserDetails,
+  addSpecificUserDetailsCabProvider,
+  updateUserBasicDetails,
+  updateUserSpecificDetails
+} from 'store/slice/cabProvidor/userSlice';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { useSelector } from 'store';
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 
@@ -47,7 +53,9 @@ const specificDataValidationSchema = Yup.object({
   workMobileNumber: Yup.string()
     .required('Mobile Number is required')
     .matches(/^\d{10}$/, 'Invalid Mobile Number'),
-  workLandLineNumber: Yup.string().matches(/^\d{10}$/, 'Invalid Landline Number'),
+  workLandLineNumber: Yup.string()
+    .required('Landline Number is required')
+    .matches(/^\d{10}$/, 'Invalid Landline Number'),
   bankName: Yup.string().required('Bank Name is required'),
   accountNumber: Yup.string().required('Account Number is required').matches(/^\d+$/, 'Invalid Account Number'),
   accountHolderName: Yup.string().required('Account Holder Name is required'),
@@ -67,6 +75,9 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
   const [specificData, setSpecificData] = useState(profileSpecificData);
 
   const fileInputRef = useRef(null);
+
+  const userSpecificInfo = useSelector((state) => state.auth.userSpecificData);
+  console.log(`🚀 ~ Overview ~ userSpecificInfo:`, userSpecificInfo);
 
   const formik = useFormik({
     initialValues: {
@@ -178,22 +189,43 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
     onSubmit: async (values) => {
       try {
         console.log({ data: values });
-        const result = await dispatch(updateUserSpecificDetails({ data: values }));
-        if (result.payload.success) {
-          setSpecificData((prevState) => ({
-            ...prevState,
-            ...values
-          }));
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: result.payload.message,
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: true
-            })
-          );
-          setIsSpecificDataEditing(false);
+
+        if (userSpecificInfo) {
+          console.log('UPDATE API');
+
+          const result = await dispatch(updateUserSpecificDetails({ data: values }));
+          if (result.payload.success) {
+            setSpecificData((prevState) => ({
+              ...prevState,
+              ...values
+            }));
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: `Specific User details have been successfully updated`,
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: true
+              })
+            );
+            setIsSpecificDataEditing(false);
+          }
+        } else {
+          console.log('ADD API');
+          const response = await dispatch(addSpecificUserDetailsCabProvider({ data: values })).unwrap();
+          if (response?.status === 201) {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Specific User details have been successfully added',
+                variant: 'alert',
+                alert: {
+                  color: 'success'
+                },
+                close: true
+              })
+            );
+          }
         }
       } catch (error) {
         dispatch(
@@ -478,6 +510,17 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                           onChange={specificFormik.handleChange}
                           error={specificFormik.touched.workMobileNumber && Boolean(specificFormik.errors.workMobileNumber)}
                           helperText={specificFormik.touched.workMobileNumber && specificFormik.errors.workMobileNumber}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Work Landline Number"
+                          name="workLandLineNumber"
+                          value={specificFormik.values.workLandLineNumber}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.workLandLineNumber && Boolean(specificFormik.errors.workLandLineNumber)}
+                          helperText={specificFormik.touched.workLandLineNumber && specificFormik.errors.workLandLineNumber}
                         />
                       </Grid>
 
