@@ -297,7 +297,7 @@ const List = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axiosServices.get(API_URL[userType],{
+        const response = await axiosServices.get(API_URL[userType], {
           params: {
             // page: page,
             // limit: limit,
@@ -306,8 +306,8 @@ const List = () => {
             companyId: filterOptions?.selectedCompany?._id
           }
         });
-        console.log("response",response);
-        
+        console.log('response', response);
+
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
         setLoading(false);
@@ -319,7 +319,7 @@ const List = () => {
     };
 
     fetchInvoice();
-  }, [userType,filterOptions,startDate,endDate]);
+  }, [userType, filterOptions, startDate, endDate]);
 
   const handleClose = (status) => {
     if (status) {
@@ -614,43 +614,43 @@ const List = () => {
   const widgetsData = [
     {
       title: 'Paid',
-      count: metadata?.paid?.paidCount || 0,
-      amount: metadata?.paid?.paidAmount || 0,
+      count: metadata?.paid?.paidCount ?? 0,
+      amount: metadata?.paid?.paidAmount ?? 0,
       percentage: (
-        ((metadata?.paid?.paidCount || 0) /
-          ((metadata?.paid?.paidCount || 0) + (metadata?.unpaid?.unpaidCount || 0) + (metadata?.overDue?.overDueCount || 0))) *
+        ((metadata?.paid?.paidCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
         100
       ).toFixed(2),
       isLoss: false,
-      invoice: metadata?.paid?.paidCount || 0,
+      invoice: metadata?.paid?.paidCount ?? 0,
       color: { main: '#4caf50' },
       chartData: [] // Add your chart metadata if necessary
     },
     {
       title: 'Unpaid',
-      count: metadata?.unpaid?.unpaidCount || 0,
-      amount: metadata?.unpaid?.unpaidAmount || 0,
+      count: metadata?.unpaid?.unpaidCount ?? 0,
+      amount: metadata?.unpaid?.unpaidAmount ?? 0,
       percentage: (
-        ((metadata?.unpaid?.unpaidCount || 0) /
-          ((metadata?.paid?.paidCount || 0) + (metadata?.unpaid?.unpaidCount || 0) + (metadata?.overDue?.overDueCount || 0))) *
+        ((metadata?.unpaid?.unpaidCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
         100
       ).toFixed(2),
       isLoss: true,
-      invoice: metadata?.unpaid?.unpaidCount || 0,
+      invoice: metadata?.unpaid?.unpaidCount ?? 0,
       color: { main: '#f44336' },
       chartData: [] // Add your chart metadata if necessary
     },
     {
       title: 'Overdue',
-      count: metadata?.overDue?.overDueCount || 0,
-      amount: metadata?.overDue?.overDueAmount || 0,
+      count: metadata?.overDue?.overDueCount ?? 0,
+      amount: metadata?.overDue?.overDueAmount ?? 0,
       percentage: (
-        ((metadata?.overDue?.overDueCount || 0) /
-          ((metadata?.paid?.paidCount || 0) + (metadata?.unpaid?.unpaidCount || 0) + (metadata?.overDue?.overDueCount || 0))) *
+        ((metadata?.overDue?.overDueCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
         100
       ).toFixed(2),
       isLoss: true,
-      invoice: metadata?.overDue?.overDueCount || 0,
+      invoice: metadata?.overDue?.overDueCount ?? 0,
       color: { main: '#ff9800' },
       chartData: [] // Add your chart metadata if necessary
     }
@@ -696,9 +696,9 @@ const List = () => {
                     ₹{' '}
                     {parseFloat(
                       (
-                        (metadata?.paid?.paidAmount || 0) +
-                        (metadata?.unpaid?.unpaidAmount || 0) +
-                        (metadata?.overDue?.overDueAmount || 0)
+                        (metadata?.paid?.paidAmount ?? 0) +
+                        (metadata?.unpaid?.unpaidAmount ?? 0) +
+                        (metadata?.overDue?.overDueAmount ?? 0)
                       ).toFixed(2)
                     )}
                   </Typography>
@@ -709,7 +709,7 @@ const List = () => {
                   Pending
                 </Typography>
                 <Typography variant="body1" color="white">
-                  ₹ {parseFloat(((metadata?.unpaid?.unpaidAmount || 0) + (metadata?.overDue?.overDueAmount || 0)).toFixed(2))}
+                  ₹ {parseFloat(((metadata?.unpaid?.unpaidAmount ?? 0) + (metadata?.overDue?.overDueAmount ?? 0)).toFixed(2))}
                 </Typography>
               </Stack>
             </Stack>
@@ -719,16 +719,20 @@ const List = () => {
                 Recieved
               </Typography>
               <Typography variant="body1" color="white">
-                ₹ {parseFloat((metadata?.paid?.paidAmount || 0).toFixed(2))}
+                ₹ {parseFloat((metadata?.paid?.paidAmount ?? 0).toFixed(2))}
               </Typography>
             </Stack>
 
             <Box sx={{ maxWidth: '100%' }}>
               <LinearWithLabel
                 value={
-                  ((metadata?.paid?.paidAmount || 0) /
-                    ((metadata?.paid?.paidAmount || 0) + (metadata?.unpaid?.unpaidAmount || 0) + (metadata?.overDue?.overDueAmount || 0))) *
-                    100 || 0
+                  (
+                    ((metadata?.paid?.paidAmount ?? 0) /
+                      ((metadata?.paid?.paidAmount ?? 0) +
+                        (metadata?.unpaid?.unpaidAmount ?? 0) +
+                        (metadata?.overDue?.overDueAmount ?? 0) || 1)) *
+                    100
+                  ).toFixed(2) || 0
                 }
               />
             </Box>

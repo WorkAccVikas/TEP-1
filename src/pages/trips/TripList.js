@@ -742,26 +742,26 @@ const TripList = () => {
   const widgetsData = [
     {
       title: 'Completed',
-      count: `₹${tripStats.completedTripsAmount}`,
-      percentage: tripStats.completedTripsPercentage,
+      count: `₹${(tripStats?.completedTripsAmount || 0).toFixed(2)}`,
+      percentage: (tripStats?.completedTripsPercentage || 0).toFixed(2),
       isLoss: false,
-      trips: `${tripStats.completedTripsCount}`,
+      trips: `${tripStats?.completedTripsCount || 0}`,
       color: theme.palette.success
     },
     {
       title: 'Pending',
-      count: `₹${tripStats.assignedTripsAmount}`,
-      percentage: tripStats.assignedTripsPercentage,
+      count: `₹${(tripStats?.assignedTripsAmount || 0).toFixed(2)}`,
+      percentage: (tripStats?.assignedTripsPercentage || 0).toFixed(2),
       isLoss: true,
-      trips: tripStats.assignedTripsCount,
+      trips: `${tripStats?.assignedTripsCount || 0}`,
       color: theme.palette.warning
     },
     {
       title: 'Cancelled',
-      count: `₹${tripStats.canceledTripsAmount}`,
-      percentage: tripStats.canceledTripsPercentage,
+      count: `₹${(tripStats?.canceledTripsAmount || 0).toFixed(2)}`,
+      percentage: (tripStats?.canceledTripsPercentage || 0).toFixed(2),
       isLoss: true,
-      trips: tripStats.canceledTripsCount,
+      trips: `${tripStats?.canceledTripsCount || 0}`,
       color: theme.palette.error
     }
   ];
@@ -1156,7 +1156,12 @@ const TripList = () => {
                     Incoming
                   </Typography>
                   <Typography variant="body1" color="white">
-                    ₹ {tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount}
+                    ₹{' '}
+                    {(
+                      (tripStats?.assignedTripsAmount || 0) +
+                      (tripStats?.completedTripsAmount || 0) -
+                      (tripStats?.canceledTripsAmount || 0)
+                    ).toFixed(2)}
                   </Typography>
                 </Stack>
               </Stack>
@@ -1165,7 +1170,7 @@ const TripList = () => {
                   Outgoing
                 </Typography>
                 <Typography variant="body1" color="white">
-                  ₹ {tripStats.outgoingRate}
+                  ₹ {(tripStats?.outgoingRate || 0).toFixed(2)}
                 </Typography>
               </Stack>
             </Stack>
@@ -1176,18 +1181,29 @@ const TripList = () => {
               </Typography>
 
               <Typography variant="body1" color="white">
-                ₹ {tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount - tripStats.outgoingRate}
+                ₹{' '}
+                {(
+                  (tripStats?.assignedTripsAmount || 0) +
+                  (tripStats?.completedTripsAmount || 0) -
+                  (tripStats?.canceledTripsAmount || 0) -
+                  (tripStats?.outgoingRate || 0)
+                ).toFixed(2)}
               </Typography>
             </Stack>
             <Box sx={{ maxWidth: '100%' }}>
               <LinearWithLabel
                 value={
-                  ((tripStats.assignedTripsAmount +
-                    tripStats.completedTripsAmount -
-                    tripStats.canceledTripsAmount -
-                    tripStats.outgoingRate) /
-                    (tripStats.assignedTripsAmount + tripStats.completedTripsAmount - tripStats.canceledTripsAmount)) *
-                  100
+                  (((tripStats?.assignedTripsAmount || 0) +
+                    (tripStats?.completedTripsAmount || 0) -
+                    (tripStats?.canceledTripsAmount || 0) -
+                    (tripStats?.outgoingRate || 0)) /
+                    Math.max(
+                      (tripStats?.assignedTripsAmount || 0) +
+                        (tripStats?.completedTripsAmount || 0) -
+                        (tripStats?.canceledTripsAmount || 0),
+                      1
+                    )) *
+                    100 || 0
                 }
               />
             </Box>
