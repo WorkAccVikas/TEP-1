@@ -2,19 +2,18 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import {  AddCircle, Buliding, Car, Eye, MenuBoard, Profile, Profile2User, User } from 'iconsax-react';
-import { MODULE, PERMISSIONS } from 'constant';
+import { AddCircle, Buliding, Car, Eye, MenuBoard, Profile, Profile2User, User } from 'iconsax-react';
 
 // icons
 const icons = {
   samplePage: MenuBoard,
-  user:User,
-  company:Buliding,
-  driver:Profile,
-  vehicle:Car,
-  vendor:Profile2User,
-  view:Eye,
-  add:AddCircle
+  user: User,
+  company: Buliding,
+  driver: Profile,
+  vehicle: Car,
+  vendor: Profile2User,
+  view: Eye,
+  add: AddCircle
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -95,7 +94,7 @@ const management = {
       title: <FormattedMessage id="vendor" />,
       type: 'item',
       url: '/management/vendor/view',
-      icon: icons.vendor,
+      icon: icons.vendor
       // children: [
       //   {
       //     id: 'view',
@@ -133,7 +132,7 @@ const management = {
       title: <FormattedMessage id="driver" />,
       type: 'item',
       url: '/management/driver/view',
-      icon: icons.driver,
+      icon: icons.driver
       // children: [
       //   {
       //     id: 'view',
@@ -164,7 +163,7 @@ const management = {
       title: <FormattedMessage id="cab" />,
       type: 'item',
       url: '/management/cab/view',
-      icon: icons.vehicle,
+      icon: icons.vehicle
       // children: [
       //   {
       //     id: 'view',
