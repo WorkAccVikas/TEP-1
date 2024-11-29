@@ -42,7 +42,7 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, EyeSlash, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
+import { Add, Edit, Eye, EyeSlash, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
 import PaginationBox from 'components/tables/Pagination';
 import { useDispatch } from 'react-redux';
 import { fetchCompaniesRosterFile } from 'store/slice/cabProvidor/rosterFileSlice';
@@ -502,24 +502,28 @@ const AllRosters = () => {
       </Grid>
 
       {/* filter */}
-      <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
-        <CompanyFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedCompany}
-        />
-        {/* <VendorFilter
+
+      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+        {/* Left-aligned filters and date range selector */}
+        <Stack direction="row" alignItems="center" gap={1}>
+          <CompanyFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedCompany}
+          />
+
+          {/* <VendorFilter
           setFilterOptions={setFilterOptions}
           sx={{
             color: '#fff',
@@ -568,15 +572,33 @@ const AllRosters = () => {
           value={filterOptions.selectedVehicle}
         /> */}
 
-        <DateRangeSelect
-          startDate={startDate}
-          endDate={endDate}
-          selectedRange={range}
-          prevRange={prevRange}
-          setSelectedRange={setRange}
-          onRangeChange={handleRangeChange}
-          showSelectedRangeLabel
-        />
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            prevRange={prevRange}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+          />
+        </Stack>
+
+        {/* Right-aligned buttons */}
+        <Stack direction="row" gap={1}>
+          <Button variant="contained" size="small" color="success" startIcon={<Add />} onClick={() => navigate('/apps/roster/create')}>
+            Upload
+          </Button>
+
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            startIcon={<Add />}
+            onClick={() => navigate('/apps/roster/file-management')}
+          >
+            Files
+          </Button>
+        </Stack>
       </Stack>
 
       <MainCard content={false}>
