@@ -1,7 +1,7 @@
 // material-ui
 import { useEffect, useRef, useState } from 'react';
 import { Grid, IconButton, List, ListItem, Stack, Typography, TextField, Button, Box } from '@mui/material';
-import { useFormik } from 'formik';
+import { FormikProvider, useFormik } from 'formik';
 import * as Yup from 'yup';
 
 // project-imports
@@ -9,8 +9,14 @@ import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import { Edit } from 'iconsax-react';
 import { dispatch } from 'store';
-import { updateUserBasicDetails, updateUserSpecificDetails } from 'store/slice/cabProvidor/userSlice';
+import {
+  addSpecificUserDetails,
+  addSpecificUserDetailsCabProvider,
+  updateUserBasicDetails,
+  updateUserSpecificDetails
+} from 'store/slice/cabProvidor/userSlice';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { useSelector } from 'store';
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 
@@ -47,7 +53,9 @@ const specificDataValidationSchema = Yup.object({
   workMobileNumber: Yup.string()
     .required('Mobile Number is required')
     .matches(/^\d{10}$/, 'Invalid Mobile Number'),
-  workLandLineNumber: Yup.string().matches(/^\d{10}$/, 'Invalid Landline Number'),
+  workLandLineNumber: Yup.string()
+    .required('Landline Number is required')
+    .matches(/^\d{10}$/, 'Invalid Landline Number'),
   bankName: Yup.string().required('Bank Name is required'),
   accountNumber: Yup.string().required('Account Number is required').matches(/^\d+$/, 'Invalid Account Number'),
   accountHolderName: Yup.string().required('Account Holder Name is required'),
@@ -67,6 +75,9 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
   const [specificData, setSpecificData] = useState(profileSpecificData);
 
   const fileInputRef = useRef(null);
+
+  const userSpecificInfo = useSelector((state) => state.auth.userSpecificData);
+  console.log(`🚀 ~ Overview ~ userSpecificInfo:`, userSpecificInfo);
 
   const formik = useFormik({
     initialValues: {
@@ -178,22 +189,43 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
     onSubmit: async (values) => {
       try {
         console.log({ data: values });
-        const result = await dispatch(updateUserSpecificDetails({ data:  values  }));
-        if (result.payload.success) {
-          setSpecificData((prevState) => ({
-            ...prevState,
-            ...values
-          }));
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: result.payload.message,
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: true
-            })
-          );
-          setIsSpecificDataEditing(false);
+
+        if (userSpecificInfo) {
+          console.log('UPDATE API');
+
+          const result = await dispatch(updateUserSpecificDetails({ data: values }));
+          if (result.payload.success) {
+            setSpecificData((prevState) => ({
+              ...prevState,
+              ...values
+            }));
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: `Specific User details have been successfully updated`,
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: true
+              })
+            );
+            setIsSpecificDataEditing(false);
+          }
+        } else {
+          console.log('ADD API');
+          const response = await dispatch(addSpecificUserDetailsCabProvider({ data: values })).unwrap();
+          if (response?.status === 201) {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Specific User details have been successfully added',
+                variant: 'alert',
+                alert: {
+                  color: 'success'
+                },
+                close: true
+              })
+            );
+          }
         }
       } catch (error) {
         dispatch(
@@ -380,12 +412,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                           <Button variant="outlined" color="secondary" onClick={handleBasicDataCancelClick}>
                             Cancel
                           </Button>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            disabled={!formik.dirty || formik.isSubmitting}
-                          >
+                          <Button variant="contained" color="primary" type="submit" disabled={!formik.dirty || formik.isSubmitting}>
                             Update
                           </Button>
                         </Stack>
@@ -448,413 +475,450 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                 </Box>
               }
             >
-              <form onSubmit={specificFormik.handleSubmit}>
-                {isSpecificDataEditing ? (
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Cab Provider Legal Name"
-                        name="cabProviderLegalName"
-                        value={specificFormik.values.cabProviderLegalName}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.cabProviderLegalName && Boolean(specificFormik.errors.cabProviderLegalName)}
-                        helperText={specificFormik.touched.cabProviderLegalName && specificFormik.errors.cabProviderLegalName}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Contact Person Name"
-                        name="contactPersonName"
-                        value={specificFormik.values.contactPersonName}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.contactPersonName && Boolean(specificFormik.errors.contactPersonName)}
-                        helperText={specificFormik.touched.contactPersonName && specificFormik.errors.contactPersonName}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="PAN"
-                        name="PAN"
-                        value={specificFormik.values.PAN}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.PAN && Boolean(specificFormik.errors.PAN)}
-                        helperText={specificFormik.touched.PAN && specificFormik.errors.PAN}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="GSTIN"
-                        name="GSTIN"
-                        value={specificFormik.values.GSTIN}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.GSTIN && Boolean(specificFormik.errors.GSTIN)}
-                        helperText={specificFormik.touched.GSTIN && specificFormik.errors.GSTIN}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Office Address"
-                        name="officeAddress"
-                        value={specificFormik.values.officeAddress}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.officeAddress && Boolean(specificFormik.errors.officeAddress)}
-                        helperText={specificFormik.touched.officeAddress && specificFormik.errors.officeAddress}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Office City"
-                        name="officeCity"
-                        value={specificFormik.values.officeCity}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.officeCity && Boolean(specificFormik.errors.officeCity)}
-                        helperText={specificFormik.touched.officeCity && specificFormik.errors.officeCity}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Office State"
-                        name="officeState"
-                        value={specificFormik.values.officeState}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.officeState && Boolean(specificFormik.errors.officeState)}
-                        helperText={specificFormik.touched.officeState && specificFormik.errors.officeState}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Office Pin Code"
-                        name="officePinCode"
-                        value={specificFormik.values.officePinCode}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.officePinCode && Boolean(specificFormik.errors.officePinCode)}
-                        helperText={specificFormik.touched.officePinCode && specificFormik.errors.officePinCode}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Bank Name"
-                        name="bankName"
-                        value={specificFormik.values.bankName}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.bankName && Boolean(specificFormik.errors.bankName)}
-                        helperText={specificFormik.touched.bankName && specificFormik.errors.bankName}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Account Holder Name"
-                        name="accountHolderName"
-                        value={specificFormik.values.accountHolderName}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.accountHolderName && Boolean(specificFormik.errors.accountHolderName)}
-                        helperText={specificFormik.touched.accountHolderName && specificFormik.errors.accountHolderName}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Account Number"
-                        name="accountNumber"
-                        value={specificFormik.values.accountNumber}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.accountNumber && Boolean(specificFormik.errors.accountNumber)}
-                        helperText={specificFormik.touched.accountNumber && specificFormik.errors.accountNumber}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Branch Name"
-                        name="branchName"
-                        value={specificFormik.values.branchName}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.branchName && Boolean(specificFormik.errors.branchName)}
-                        helperText={specificFormik.touched.branchName && specificFormik.errors.branchName}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="IFSC Code"
-                        name="IFSC_code"
-                        value={specificFormik.values.IFSC_code}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.IFSC_code && Boolean(specificFormik.errors.IFSC_code)}
-                        helperText={specificFormik.touched.IFSC_code && specificFormik.errors.IFSC_code}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Bank Address"
-                        name="bankAddress"
-                        value={specificFormik.values.bankAddress}
-                        onChange={specificFormik.handleChange}
-                        error={specificFormik.touched.bankAddress && Boolean(specificFormik.errors.bankAddress)}
-                        helperText={specificFormik.touched.bankAddress && specificFormik.errors.bankAddress}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack direction="row" spacing={2} justifyContent="flex-end">
-                        <Button variant="outlined" onClick={handleSpecificDataCancelClick}>
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          disabled={!specificFormik.dirty || specificFormik.isSubmitting}
-                        >
-                          Save
-                        </Button>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                ) : (
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <Grid item xs={12} sm={7} md={8} xl={9}>
-                        <Grid container spacing={3}>
-                          <Grid item xs={12}>
-                            <Typography variant="h6" color="primary">
-                              Basic Details
-                            </Typography>
-                            <List sx={{ py: 0 }}>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Cab Provider Legal Name</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.cabProviderLegalName}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Contact Person Name</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.contactPersonName}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">PAN</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.PAN}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">GSTIN</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.GSTIN}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                            </List>
-                          </Grid>
-                        </Grid>
+              <FormikProvider value={formik}>
+                <form onSubmit={specificFormik.handleSubmit}>
+                  {isSpecificDataEditing ? (
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Cab Provider Legal Name"
+                          name="cabProviderLegalName"
+                          value={specificFormik.values.cabProviderLegalName}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.cabProviderLegalName && Boolean(specificFormik.errors.cabProviderLegalName)}
+                          helperText={specificFormik.touched.cabProviderLegalName && specificFormik.errors.cabProviderLegalName}
+                        />
                       </Grid>
-                    </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Contact Person Name"
+                          name="contactPersonName"
+                          value={specificFormik.values.contactPersonName}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.contactPersonName && Boolean(specificFormik.errors.contactPersonName)}
+                          helperText={specificFormik.touched.contactPersonName && specificFormik.errors.contactPersonName}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Work Mobile Number"
+                          name="workMobileNumber"
+                          value={specificFormik.values.workMobileNumber}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.workMobileNumber && Boolean(specificFormik.errors.workMobileNumber)}
+                          helperText={specificFormik.touched.workMobileNumber && specificFormik.errors.workMobileNumber}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Work Landline Number"
+                          name="workLandLineNumber"
+                          value={specificFormik.values.workLandLineNumber}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.workLandLineNumber && Boolean(specificFormik.errors.workLandLineNumber)}
+                          helperText={specificFormik.touched.workLandLineNumber && specificFormik.errors.workLandLineNumber}
+                        />
+                      </Grid>
 
-                    <Grid item xs={12}>
-                      <Stack spacing={2.5} alignItems="left">
-                        <Stack spacing={0.5} alignItems="left">
-                          <Typography variant="h6" color="primary">
-                            Office Address
-                          </Typography>
-                          <Typography color="secondary">
-                            {specificData?.officeAddress}, {specificData?.officeCity},{specificData?.officeState} -{' '}
-                            {specificData?.officePinCode}
-                          </Typography>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Work Email"
+                          name="workEmail"
+                          value={specificFormik.values.workEmail}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.workEmail && Boolean(specificFormik.errors.workEmail)}
+                          helperText={specificFormik.touched.workEmail && specificFormik.errors.workEmail}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="PAN"
+                          name="PAN"
+                          value={specificFormik.values.PAN}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.PAN && Boolean(specificFormik.errors.PAN)}
+                          helperText={specificFormik.touched.PAN && specificFormik.errors.PAN}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="GSTIN"
+                          name="GSTIN"
+                          value={specificFormik.values.GSTIN}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.GSTIN && Boolean(specificFormik.errors.GSTIN)}
+                          helperText={specificFormik.touched.GSTIN && specificFormik.errors.GSTIN}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Office Address"
+                          name="officeAddress"
+                          value={specificFormik.values.officeAddress}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.officeAddress && Boolean(specificFormik.errors.officeAddress)}
+                          helperText={specificFormik.touched.officeAddress && specificFormik.errors.officeAddress}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Office City"
+                          name="officeCity"
+                          value={specificFormik.values.officeCity}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.officeCity && Boolean(specificFormik.errors.officeCity)}
+                          helperText={specificFormik.touched.officeCity && specificFormik.errors.officeCity}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Office State"
+                          name="officeState"
+                          value={specificFormik.values.officeState}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.officeState && Boolean(specificFormik.errors.officeState)}
+                          helperText={specificFormik.touched.officeState && specificFormik.errors.officeState}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Office Pin Code"
+                          name="officePinCode"
+                          value={specificFormik.values.officePinCode}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.officePinCode && Boolean(specificFormik.errors.officePinCode)}
+                          helperText={specificFormik.touched.officePinCode && specificFormik.errors.officePinCode}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Bank Name"
+                          name="bankName"
+                          value={specificFormik.values.bankName}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.bankName && Boolean(specificFormik.errors.bankName)}
+                          helperText={specificFormik.touched.bankName && specificFormik.errors.bankName}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Account Holder Name"
+                          name="accountHolderName"
+                          value={specificFormik.values.accountHolderName}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.accountHolderName && Boolean(specificFormik.errors.accountHolderName)}
+                          helperText={specificFormik.touched.accountHolderName && specificFormik.errors.accountHolderName}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Account Number"
+                          name="accountNumber"
+                          value={specificFormik.values.accountNumber}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.accountNumber && Boolean(specificFormik.errors.accountNumber)}
+                          helperText={specificFormik.touched.accountNumber && specificFormik.errors.accountNumber}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Branch Name"
+                          name="branchName"
+                          value={specificFormik.values.branchName}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.branchName && Boolean(specificFormik.errors.branchName)}
+                          helperText={specificFormik.touched.branchName && specificFormik.errors.branchName}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="IFSC Code"
+                          name="IFSC_code"
+                          value={specificFormik.values.IFSC_code}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.IFSC_code && Boolean(specificFormik.errors.IFSC_code)}
+                          helperText={specificFormik.touched.IFSC_code && specificFormik.errors.IFSC_code}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Bank Address"
+                          name="bankAddress"
+                          value={specificFormik.values.bankAddress}
+                          onChange={specificFormik.handleChange}
+                          error={specificFormik.touched.bankAddress && Boolean(specificFormik.errors.bankAddress)}
+                          helperText={specificFormik.touched.bankAddress && specificFormik.errors.bankAddress}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack direction="row" spacing={2} justifyContent="flex-end">
+                          <Button variant="outlined" onClick={handleSpecificDataCancelClick}>
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            // disabled={!specificFormik.dirty || specificFormik.isSubmitting}
+                          >
+                            Save
+                          </Button>
                         </Stack>
-                      </Stack>
+                      </Grid>
                     </Grid>
-
-                    <Grid item xs={12}>
-                      <Grid item xs={12} sm={7} md={8} xl={9}>
-                        <Grid container spacing={3}>
-                          <Grid item xs={12}>
-                            <Typography variant="h6" color="primary">
-                              Contact Details
-                            </Typography>
-                            <List sx={{ py: 0 }}>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Work Email</Typography>
-                                    </Stack>
+                  ) : (
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <Grid item xs={12} sm={7} md={8} xl={9}>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                              <Typography variant="h6" color="primary">
+                                Basic Details
+                              </Typography>
+                              <List sx={{ py: 0 }}>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Cab Provider Legal Name</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.cabProviderLegalName}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.workEmail}</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Contact Person Name</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.contactPersonName}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Mobile Number</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">PAN</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.PAN}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.workMobileNumber}</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">GSTIN</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.GSTIN}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Landline Number</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.workLandLineNumber}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                            </List>
+                                </ListItem>
+                              </List>
+                            </Grid>
                           </Grid>
-                          <Grid item xs={12}>
+                        </Grid>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Stack spacing={2.5} alignItems="left">
+                          <Stack spacing={0.5} alignItems="left">
                             <Typography variant="h6" color="primary">
-                              Bank Details
+                              Office Address
                             </Typography>
-                            <List sx={{ py: 0 }}>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Bank Name</Typography>
-                                    </Stack>
+                            <Typography color="secondary">
+                              {specificData?.officeAddress}, {specificData?.officeCity},{specificData?.officeState} -{' '}
+                              {specificData?.officePinCode}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Grid item xs={12} sm={7} md={8} xl={9}>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                              <Typography variant="h6" color="primary">
+                                Contact Details
+                              </Typography>
+                              <List sx={{ py: 0 }}>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Work Email</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.workEmail}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.bankName}</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Mobile Number</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.workMobileNumber}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Account Number</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Landline Number</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.workLandLineNumber}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.accountNumber}</Typography>
-                                    </Stack>
+                                </ListItem>
+                              </List>
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Typography variant="h6" color="primary">
+                                Bank Details
+                              </Typography>
+                              <List sx={{ py: 0 }}>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Bank Name</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.bankName}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Account Holder Name</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Account Number</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.accountNumber}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.accountHolderName}</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Account Holder Name</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.accountHolderName}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Branch</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Branch</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.branchName}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.branchName}</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">IFSC Code</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.IFSC_code}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">IFSC Code</Typography>
-                                    </Stack>
+                                </ListItem>
+                                <ListItem>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography color="secondary">Address</Typography>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      <Stack spacing={0.5}>
+                                        <Typography>{specificData?.bankAddress}</Typography>
+                                      </Stack>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.IFSC_code}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                              <ListItem>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography color="secondary">Address</Typography>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={6}>
-                                    <Stack spacing={0.5}>
-                                      <Typography>{specificData?.bankAddress}</Typography>
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
-                              </ListItem>
-                            </List>
+                                </ListItem>
+                              </List>
+                            </Grid>
                           </Grid>
                         </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                )}
-              </form>
+                  )}
+                </form>
+              </FormikProvider>
             </MainCard>
           </Grid>
         </Grid>
