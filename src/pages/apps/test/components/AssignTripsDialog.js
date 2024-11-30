@@ -131,21 +131,22 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       const response = await axiosServices.post('/assignTrip/to/driver', _generateTripPayLoad);
       if (response.status === 201) {
         const response1 = await axiosServices.put('/tripData/map/roster/update', _mappedRosterDataPayload);
+        console.log(`🚀 ~ generateTrips ~ response1:`, response);
+        console.log(`🚀 ~ generateTrips ~ response1:`, response.data.message);
         if (response1.data.success) {
-          alert(`${payload1.length} Trips Created`);
-          openSnackbar({
-            open: true,
-            message: `${payload1.length} trips successfully Generated!`,
-            variant: 'alert',
-            alert: {
-              color: 'success'
-            },
-            close: false,
-            anchorOrigin: {
-              vertical: 'bottom',
-              horizontal: 'right'
-            }
-          });
+          // alert(`${payload1.length} Trips Created`);
+          dispatch(
+            openSnackbar({
+              open: true,
+              // message: `${payload1.length} trips successfully Generated!`,
+              message: response?.data?.message || 'Trips Generated Successfully',
+              variant: 'alert',
+              alert: {
+                color: 'success'
+              },
+              close: false,
+            })
+          );
           handleClose();
           setPayload1([]);
           setInitateRender((prev) => prev + 1);
@@ -153,6 +154,17 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       }
     } catch (err) {
       console.error(err);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: err?.response?.data?.message || 'Something went wrong',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: false
+        })
+      );
     }
   };
 
