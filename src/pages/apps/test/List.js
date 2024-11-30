@@ -567,7 +567,7 @@ const ViewRosterTest = () => {
 
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Roster', to: '/apps/roster/dashboard' },
+    { title: 'Roster', to: '/apps/roster/all-roster' },
     { title: 'Create Roster' }
   ];
 
