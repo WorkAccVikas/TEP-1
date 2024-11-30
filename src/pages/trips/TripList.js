@@ -552,7 +552,7 @@ function ReactTable({
 
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
             <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <ChangeStatusButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <ChangeStatusButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
               Add Trip
@@ -1067,6 +1067,10 @@ const TripList = () => {
           const { vendorRate, driverRate } = row.original;
           return vendorRate ?? driverRate ?? 'Null';
         }
+      },
+      {
+        Header: 'Company Rates',
+        accessor: 'companyRate',
       },
       {
         Header: 'Additional Rate',
