@@ -144,7 +144,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               alert: {
                 color: 'success'
               },
-              close: false,
+              close: true,
             })
           );
           handleClose();

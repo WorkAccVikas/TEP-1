@@ -162,14 +162,14 @@ const InvoiceDetails = () => {
                   <Edit color={theme.palette.text.secondary} />
                 </IconButton>
 
-                {/* <PDFDownloadLink
+                <PDFDownloadLink
                   document={<ExportPDFView list={details} />}
                   fileName={`${details?._id}-${details?.billedTo?.company_name}.pdf`}
                 >
                   <IconButton>
                     <DocumentDownload color={theme.palette.text.secondary} />
                   </IconButton>
-                </PDFDownloadLink> */}
+                </PDFDownloadLink>
 
                 {/* <ReactToPrint
                   trigger={() => (
@@ -294,11 +294,14 @@ const InvoiceDetails = () => {
 
           {/* Footer */}
           <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ p: 2.5, a: { textDecoration: 'none', color: 'inherit' } }}>
-            {/* <PDFDownloadLink document={<ExportPDFView list={details} />} fileName={`${details?.invoice_id}-${details?.customer_name}.pdf`}> */}
-            <Button variant="contained" color="primary">
-              Download
-            </Button>
-            {/* </PDFDownloadLink> */}
+            <PDFDownloadLink
+              document={<ExportPDFView list={details} />}
+              fileName={`${details?._id}-${details?.billedTo?.company_name}.pdf`}
+            >
+              <Button variant="contained" color="primary">
+                Download
+              </Button>
+            </PDFDownloadLink>
           </Stack>
         </Stack>
       </MainCard>

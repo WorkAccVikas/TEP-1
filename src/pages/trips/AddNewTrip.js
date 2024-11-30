@@ -315,13 +315,13 @@ const updatePayload = (values, driverType) => {
       companyRate: values.companyRate,
       companyPenalty: values.companyPenalty,
 
-      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : -1,
-      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : -1,
-      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : -1,
+      vendorGuardPrice: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorGuardPrice : 0,
+      vendorRate: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorRate : 0,
+      vendorPenalty: driverType === DRIVER_TYPE.VENDOR_DRIVER ? values.vendorPenalty : 0,
 
-      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : -1,
-      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : -1,
-      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : -1,
+      driverGuardPrice: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverGuardPrice : 0,
+      driverRate: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverRate : 0,
+      driverPenalty: driverType === DRIVER_TYPE.CAB_PROVIDER ? values.driverPenalty : 0,
 
       addOnRate: values.addOnRate,
       mcdCharge: values.mcdCharge,
