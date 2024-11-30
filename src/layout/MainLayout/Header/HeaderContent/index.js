@@ -30,16 +30,46 @@ const HeaderContent = () => {
 
   return (
     <>
-      {menuOrientation === MenuOrientation.HORIZONTAL && !downLG && <DrawerHeader open={true} />}
-      {!downLG && <Search />}
+      {/* ----Previous One---- */}
+
+      {/* {menuOrientation === MenuOrientation.HORIZONTAL && !downLG && <DrawerHeader open={true} />} */}
+      {/* {!downLG && <Search />} */}
       {/* {!downLG && megaMenu} */}
       {/* {!downLG && localization} */}
-      {downLG && <Box sx={{ width: '100%', ml: 1 }} />}
+      {/* {downLG && <Box sx={{ width: '100%', ml: 1 }} />} */}
 
       {/* <Notification /> */}
       {/* <Message /> */}
-      {!downLG && <Profile />}
+      {/* {!downLG && <Profile />} */}
       {/* {downLG && <MobileSection />} */}
+
+      {/* ----Previous One---- */}
+
+      
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        {menuOrientation === MenuOrientation.HORIZONTAL && !downLG && <DrawerHeader open={true} />}
+
+        {/* Conditionally render Search and keep Profile at the right */}
+        {!downLG && (
+          <>
+            {/* <Search /> */}
+            <Box sx={{ ml: 'auto' }}>
+              {' '}
+              {/* This will push Profile to the right */}
+              <Profile />
+            </Box>
+          </>
+        )}
+
+        {/* Adjust layout for small screens */}
+        {downLG && <Box sx={{ width: '100%', ml: 1 }} />}
+
+        {/* Uncomment for additional components */}
+        {/* {!downLG && megaMenu} */}
+        {/* {!downLG && localization} */}
+        {/* {!downLG && <Notification />} */}
+        {/* {!downLG && <Message />} */}
+      </Box>
     </>
   );
 };

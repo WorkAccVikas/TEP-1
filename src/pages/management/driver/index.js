@@ -17,6 +17,7 @@ import * as Yup from 'yup';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import BulkUploadDialog from './bulkUpload/Dialog';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
+import DebouncedSearch from 'components/textfield/DebounceSearch';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -61,11 +62,21 @@ const Driver = () => {
   const [driverType, setDriverType] = useState(1);
   const lastPageIndex = metaData.lastPageNo;
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
+  const [query, setQuery] = useState(null);
+  const navigate = useNavigate();
+  const handleAdd = useCallback(() => {
+    dispatch(handleOpen(ACTION.CREATE));
+  }, []);
+  const [search, setSearch] = useState('');
+  // Search change handler
+  const onSearchChange = (value) => {
+    setSearch(value); // Update the search state
+  };
 
   useEffect(() => {
-    dispatch(fetchDrivers({ page, limit, driverType }));
+    dispatch(fetchDrivers({ page, limit, driverType, query: query }));
     dispatch(fetchAllVendors());
-  }, [page, limit, dispatch, driverType, updateKey]);
+  }, [page, limit, dispatch, driverType, updateKey, query]);
 
   const handleLimitChange = useCallback((event) => {
     setLimit(+event.target.value);
@@ -77,6 +88,14 @@ const Driver = () => {
     setPage(1);
     setLimit(10);
   }, []);
+
+  // Debounced function to handle search input
+  const handleSearch = useCallback(
+    _.debounce((searchQuery) => {
+      setQuery(searchQuery); // Update the query state
+    }, 500),
+    []
+  );
 
   const handleCloseDialog = useCallback(async (e, flag = false) => {
     if (typeof flag === 'boolean' && flag) {
@@ -162,16 +181,73 @@ const Driver = () => {
   return (
     <>
       <Stack gap={1} spacing={1}>
-        <Header
+        {/* <Header
           OtherComp={({ loading }) => (
             <ButtonComponent
               driverType={driverType}
               handleDriverTypeChange={handleDriverTypeChange}
               loading={loading}
               handleDriverBulkUploadOpen={handleDriverBulkUploadOpen}
+              setQuery={handleSearch}
             />
           )}
-        />
+        /> */}
+        <Stack
+          direction={'row'}
+          spacing={1}
+          justifyContent="space-between" // Distribute space between left and right
+          alignItems="center"
+          sx={{ p: 0, pb: 1, width: '100%' }} // Make the container take the full width
+        >
+          {/* DebouncedSearch on the left */}
+          <DebouncedSearch
+            search={search}
+            onSearchChange={onSearchChange}
+            handleSearch={handleSearch}
+            label="Search Driver"
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                // padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '180px' // Set desired width for search input
+            }}
+          />
+          <Stack direction="row" alignItems="center" spacing={2} sx={{ ml: 'auto' }}>
+            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                onClick={handleAdd}
+                size="small"
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Add Driver'}
+              </Button>
+            </WrapperButton>
+            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                onClick={() => navigate('/management/driver/add-driver-rate')}
+                size="small"
+                color="success"
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Add Driver Rate'}
+              </Button>
+            </WrapperButton>
+            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
+                Upload Driver List
+              </Button>
+            </WrapperButton>
+          </Stack>
+        </Stack>
         <DriverTable
           data={drivers}
           page={page}
@@ -202,43 +278,74 @@ const Driver = () => {
 
 export default Driver;
 
-const ButtonComponent = ({ driverType, handleDriverTypeChange, loading, handleDriverBulkUploadOpen }) => {
+const ButtonComponent = ({ driverType, handleDriverTypeChange, loading, handleDriverBulkUploadOpen, setQuery }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleAdd = useCallback(() => {
     dispatch(handleOpen(ACTION.CREATE));
   }, []);
+  const [search, setSearch] = useState('');
+  // Search change handler
+  const onSearchChange = (value) => {
+    setSearch(value); // Update the search state
+  };
+
   return (
     <>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-          <Button
-            variant="contained"
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-            onClick={handleAdd}
-            size="small"
-            disabled={loading} // Disable button while loading
-          >
-            {loading ? 'Loading...' : 'Add Driver'}
-          </Button>
-        </WrapperButton>
-        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-          <Button
-            variant="contained"
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-            onClick={() => navigate('/management/driver/add-driver-rate')}
-            size="small"
-            color="success"
-            disabled={loading} // Disable button while loading
-          >
-            {loading ? 'Loading...' : 'Add Driver Rate'}
-          </Button>
-        </WrapperButton>
-        <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
-            Upload Driver List
-          </Button>
-        </WrapperButton>
+      <Stack
+        direction={'row'}
+        spacing={1}
+        justifyContent="space-between" // Distribute space between left and right
+        alignItems="center"
+        sx={{ p: 0, pb: 1, width: '100%' }} // Make the container take the full width
+      >
+        {/* DebouncedSearch on the left */}
+        <DebouncedSearch
+          search={search}
+          onSearchChange={onSearchChange}
+          handleSearch={setQuery}
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              // padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '180px' // Set desired width for search input
+          }}
+        />
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ ml: 'auto' }}>
+          <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+            <Button
+              variant="contained"
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+              onClick={handleAdd}
+              size="small"
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? 'Loading...' : 'Add Driver'}
+            </Button>
+          </WrapperButton>
+          <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+            <Button
+              variant="contained"
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+              onClick={() => navigate('/management/driver/add-driver-rate')}
+              size="small"
+              color="success"
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? 'Loading...' : 'Add Driver Rate'}
+            </Button>
+          </WrapperButton>
+          <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+            <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
+              Upload Driver List
+            </Button>
+          </WrapperButton>
+        </Stack>
       </Stack>
     </>
   );

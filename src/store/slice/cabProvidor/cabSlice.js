@@ -16,12 +16,13 @@ const initialState = {
   errorDetails: null
 };
 
-export const fetchCabs = createAsyncThunk('cabs/fetchCabs', async ({ page = 1, limit = 10, vendorID = null }, { rejectWithValue }) => {
+export const fetchCabs = createAsyncThunk('cabs/fetchCabs', async ({ page = 1, limit = 10, vendorID = null,query }, { rejectWithValue }) => {
   try {
     const queryParams = {
       page,
       limit,
-      ...(vendorID && { vendorId: vendorID })
+      ...(vendorID && { vendorId: vendorID }),
+      vehicleNumber: query
     };
     const response = await axios.get(`/vehicle/all`, {
       params: queryParams
