@@ -135,6 +135,18 @@ export const fetchUserPermissions = createAsyncThunk('users/fetchUserPermissions
   }
 });
 
+export const addSpecificUserDetailsCabProvider = createAsyncThunk(
+  'users/addSpecificUserDetailsCabProvider',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`/cabProvider/add/details`, payload);
+      return { status: response.status };
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
+
 const initialState = {
   users: [], // Empty array initially
   metaData: {
