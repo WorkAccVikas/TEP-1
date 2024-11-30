@@ -1,5 +1,5 @@
 import Error500 from 'pages/maintenance/error/500';
-import React, { useCallback, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCompanies } from 'store/slice/cabProvidor/companySlice';
 import PropTypes from 'prop-types';
