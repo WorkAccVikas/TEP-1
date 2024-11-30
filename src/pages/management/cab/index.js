@@ -7,10 +7,11 @@ import { Add } from 'iconsax-react';
 import Error500 from 'pages/maintenance/error/500';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
 import CabTable from 'sections/cabprovidor/cabManagement/CabTable';
 import { fetchCabs } from 'store/slice/cabProvidor/cabSlice';
 import BulkUploadDialog from './bulkUpload/Dialog';
+import DebouncedSearch from 'components/textfield/DebounceSearch';
+import { useNavigate } from 'react-router';
 
 const Cab = () => {
   const dispatch = useDispatch();
@@ -18,7 +19,14 @@ const Cab = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
+  const [query, setQuery] = useState(null);
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
+  const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  // Search change handler
+  const onSearchChange = (value) => {
+    setSearch(value); // Update the search state
+  };
 
   const handleVehicleBulkUploadOpen = () => {
     setOpenBulkUploadDialog(true);
@@ -28,8 +36,16 @@ const Cab = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchCabs({ page, limit }));
-  }, [page, limit, dispatch]);
+    dispatch(fetchCabs({ page, limit, query: query }));
+  }, [page, limit, dispatch, query]);
+
+  // Debounced function to handle search input
+  const handleSearch = useCallback(
+    _.debounce((searchQuery) => {
+      setQuery(searchQuery); // Update the query state
+    }, 500),
+    []
+  );
 
   const handleLimitChange = useCallback((event) => {
     setLimit(+event.target.value);
@@ -43,9 +59,53 @@ const Cab = () => {
   return (
     <>
       <Stack gap={1} spacing={1}>
-        <Header
+        {/* <Header
           OtherComp={({ loading }) => <ButtonComponent loading={loading} handleVehicleBulkUploadOpen={handleVehicleBulkUploadOpen} />}
-        />
+        /> */}
+        <Stack
+          direction={'row'}
+          spacing={1}
+          justifyContent="space-between" // Distribute space between left and right
+          alignItems="center"
+          sx={{ p: 0, pb: 1, width: '100%' }} // Make the container take the full width
+        >
+          {/* DebouncedSearch on the left */}
+          <DebouncedSearch
+            search={search}
+            onSearchChange={onSearchChange}
+            handleSearch={handleSearch}
+            label="Search Cab"
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                // padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '180px'
+            }}
+          />
+          <Stack direction="row" alignItems="center" spacing={2} sx={{ ml: 'auto' }}>
+            <WrapperButton moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                onClick={() => navigate('/management/cab/add-cab')}
+                size="small"
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Add Cab'}
+              </Button>
+            </WrapperButton>
+            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleVehicleBulkUploadOpen}>
+                Upload Vehicle List
+              </Button>
+            </WrapperButton>
+          </Stack>
+        </Stack>
         <CabTable
           data={cabs}
           page={page}

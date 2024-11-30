@@ -13,14 +13,18 @@ const Company = () => {
   const [limit, setLimit] = useState(10);
   const [lastPageNo, setLastPageNo] = useState(Math.ceil(metaData.totalCount / metaData.limit) || 1);
   const [query,setQuery] = useState(null);
-  const [filterOptions, setFilterOptions] = useState({
-    selectedCompany: {}
-  });
-console.log({filterOptions});
 
   useEffect(() => {
     dispatch(fetchCompanies({ page: page, limit: limit , query:query}));
   }, [dispatch, page, limit,query]);
+
+  // Debounced function to handle search input
+  const handleSearch = useCallback(
+    _.debounce((searchQuery) => {
+      setQuery(searchQuery); // Update the query state
+    }, 500),
+    []
+  );
 
   const handleLimitChange = useCallback((event) => {
     setLimit(+event.target.value);
@@ -39,9 +43,7 @@ console.log({filterOptions});
       lastPageNo={lastPageNo}
       setLastPageNo={setLastPageNo}
       loading={loading}
-      setQuery={setQuery}
-      filterOptions={filterOptions}
-      setFilterOptions={setFilterOptions}
+      setQuery={handleSearch} // Pass the debounced function
     />
   );
 };

@@ -460,7 +460,7 @@ const ViewRosterTest1 = () => {
   );
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Roster', to: '/apps/roster/dashboard' },
+    { title: 'Roster', to: '/apps/roster/all-roster' },
     { title: `${fileData?.companyId?.company_name}`, to: `/management/company/overview/${fileData?.companyId?._id}` },
     { title: 'Generate Trips' }
   ];

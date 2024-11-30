@@ -33,13 +33,10 @@ const CompanyReports = () => {
       companyID = selectedCompanies.map((company) => company._id);
     }
     const payload = {
-      query: {
+      data: {
         startDate: formatDateUsingMoment(startDate),
-        endDate: formatDateUsingMoment(endDate)
-      },
-      // ...(selectedCompanies.length > 0 ? { companyID } : {})
-      body: {
-        companyID
+        endDate: formatDateUsingMoment(endDate),
+        companyId: companyID
       }
     };
 

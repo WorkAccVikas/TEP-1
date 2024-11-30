@@ -20,10 +20,11 @@ export const fetchCompanyWiseReports = createAsyncThunk('reports/fetchCompanyWis
   try {
     console.log('payload', payload);
     // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.get(`/reports/company/wise/summary`, {
-      params: {
-        startDate: payload?.query?.startDate,
-        endDate: payload?.query?.endDate
+    const response = await axios.post(`/reports/company/wise/summary`, {
+      data: {
+        startDate: payload?.data?.startDate,
+        endDate: payload?.data?.endDate,
+        companyIDs: payload?.data?.companyId || []
       }
     });
     return response.data.data;
@@ -57,7 +58,7 @@ export const fetchAdvanceReports = createAsyncThunk('reports/fetchAdvanceReports
         endDate: payload?.query?.endDate
       }
     });
-    console.log("response.data.data",response.data.data)
+    console.log('response.data.data', response.data.data);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);

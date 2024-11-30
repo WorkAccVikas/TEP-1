@@ -3,9 +3,15 @@ import axios from 'utils/axios';
 import { commonInitialState, commonReducers } from '../common';
 
 // Define the async thunk for fetching vendors
-export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
+export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ page = 1, limit = 10, query }, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`vendor/list?page=${page}&limit=${limit}`);
+    const response = await axios.get(`vendor/list`, {
+      params: {
+        page: page,
+        limit: limit,
+        name: query
+      }
+    });
     return response.data.data; // Ensure the API response is in this format
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
