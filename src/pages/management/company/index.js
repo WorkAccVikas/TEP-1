@@ -1,5 +1,5 @@
 import Error500 from 'pages/maintenance/error/500';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCompanies } from 'store/slice/cabProvidor/companySlice';
 import PropTypes from 'prop-types';
@@ -26,6 +26,11 @@ const Company = () => {
     []
   );
 
+  const handleLimitChange = useCallback((event) => {
+    setLimit(+event.target.value);
+    setPage(1);
+  }, []);
+
   if (error) return <Error500 />;
   return (
     <CompanyTable
@@ -34,7 +39,7 @@ const Company = () => {
       page={page}
       setPage={setPage}
       limit={limit}
-      setLimit={setLimit}
+      setLimit={handleLimitChange}
       lastPageNo={lastPageNo}
       setLastPageNo={setLastPageNo}
       loading={loading}
