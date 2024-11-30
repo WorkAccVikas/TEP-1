@@ -31,7 +31,7 @@ const report = {
           // type: 'collapse',
           type: 'item',
           url: '/reports/company-report',
-          icon: icons.samplePage
+          // icon: icons.samplePage
           // children: [
           //   {
           //     id: 'company report',
@@ -48,7 +48,7 @@ const report = {
           // type: 'collapse',
           type: 'item',
           url: '/reports/cab-report',
-          icon: icons.samplePage
+          // icon: icons.samplePage
         },
 
         {
@@ -57,7 +57,7 @@ const report = {
           // type: 'collapse',
           type: 'item',
           url: '/reports/advance-report',
-          icon: icons.samplePage
+          // icon: icons.samplePage
         },
         // {
         //   id: 'trip',

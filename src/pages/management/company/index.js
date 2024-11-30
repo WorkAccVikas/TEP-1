@@ -1,5 +1,5 @@
 import Error500 from 'pages/maintenance/error/500';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCompanies } from 'store/slice/cabProvidor/companySlice';
 import PropTypes from 'prop-types';
@@ -13,14 +13,23 @@ const Company = () => {
   const [limit, setLimit] = useState(10);
   const [lastPageNo, setLastPageNo] = useState(Math.ceil(metaData.totalCount / metaData.limit) || 1);
   const [query,setQuery] = useState(null);
-  const [filterOptions, setFilterOptions] = useState({
-    selectedCompany: {}
-  });
-console.log({filterOptions});
 
   useEffect(() => {
     dispatch(fetchCompanies({ page: page, limit: limit , query:query}));
   }, [dispatch, page, limit,query]);
+
+  // Debounced function to handle search input
+  const handleSearch = useCallback(
+    _.debounce((searchQuery) => {
+      setQuery(searchQuery); // Update the query state
+    }, 500),
+    []
+  );
+
+  const handleLimitChange = useCallback((event) => {
+    setLimit(+event.target.value);
+    setPage(1);
+  }, []);
 
   if (error) return <Error500 />;
   return (
@@ -30,13 +39,11 @@ console.log({filterOptions});
       page={page}
       setPage={setPage}
       limit={limit}
-      setLimit={setLimit}
+      setLimit={handleLimitChange}
       lastPageNo={lastPageNo}
       setLastPageNo={setLastPageNo}
       loading={loading}
-      setQuery={setQuery}
-      filterOptions={filterOptions}
-      setFilterOptions={setFilterOptions}
+      setQuery={handleSearch} // Pass the debounced function
     />
   );
 };

@@ -36,13 +36,20 @@ import { dispatch, useSelector } from 'store';
 import { handleClose, handleOpen, setDeletedName, setSelectedID, updateVendorStatus } from 'store/slice/cabProvidor/vendorSlice';
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import { openSnackbar } from 'store/reducers/snackbar';
+import DebouncedSearch from 'components/textfield/DebounceSearch';
 
-const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
+const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
 
   const navigate = useNavigate();
   const theme = useTheme();
   const mode = theme.palette.mode;
+  const [search, setSearch] = useState('');
+
+  // Search change handler
+  const onSearchChange = (value) => {
+    setSearch(value); // Update the search state
+  };
 
   const columns = useMemo(
     () => [
@@ -374,7 +381,64 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   return (
     <>
       <Stack gap={1} spacing={1}>
-        <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} />} />
+        {/* <Header
+          OtherComp={({ loading, search, setQuery }) => (
+            <ButtonComponent loading={loading} search={search} setQuery={setQuery} onSearchChange={onSearchChange} />
+          )}
+        /> */}
+        <Stack
+          direction={'row'}
+          spacing={1}
+          justifyContent="space-between" // Distribute space between left and right
+          alignItems="center"
+          sx={{ p: 0, pb: 1, width: '100%' }} // Make the container take the full width
+        >
+          {/* DebouncedSearch on the left */}
+          <DebouncedSearch
+            search={search}
+            onSearchChange={onSearchChange}
+            handleSearch={setQuery}
+            label="Search Vendor"
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                // padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '180px' // Set desired width for search input
+            }}
+          />
+
+          {/* Button container on the right */}
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                onClick={() => navigate('/management/vendor/add-vendor')}
+                size="small"
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Add Vendor'}
+              </Button>
+            </WrapperButton>
+            <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                onClick={() => navigate('/management/vendor/add-vendor-rate')}
+                size="small"
+                color="success"
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Add Vendor Rate'}
+              </Button>
+            </WrapperButton>
+          </Stack>
+        </Stack>
         <MainCard content={false}>
           <ScrollX>
             {loading ? (
@@ -462,35 +526,62 @@ ReactTable.propTypes = {
   renderRowSubComponent: PropTypes.any
 };
 
-const ButtonComponent = ({ loading }) => {
-  const navigate = useNavigate();
-  return (
-    <>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
-          <Button
-            variant="contained"
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-            onClick={() => navigate('/management/vendor/add-vendor')}
-            size="small"
-            disabled={loading} // Disable button while loading
-          >
-            {loading ? 'Loading...' : 'Add Vendor'}
-          </Button>
-        </WrapperButton>
-        <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
-          <Button
-            variant="contained"
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-            onClick={() => navigate('/management/vendor/add-vendor-rate')}
-            size="small"
-            color="success"
-            disabled={loading} // Disable button while loading
-          >
-            {loading ? 'Loading...' : 'Add Vendor Rate'}
-          </Button>
-        </WrapperButton>
-      </Stack>
-    </>
-  );
-};
+// const ButtonComponent = ({ loading, search, onSearchChange, setQuery }) => {
+//   const navigate = useNavigate();
+//   return (
+//     <>
+//       <Stack
+//         direction={'row'}
+//         spacing={1}
+//         justifyContent="space-between" // Distribute space between left and right
+//         alignItems="center"
+//         sx={{ p: 0, pb: 3, width: '100%' }} // Make the container take the full width
+//       >
+//         {/* DebouncedSearch on the left */}
+//         <DebouncedSearch
+//           search={search}
+//           onSearchChange={onSearchChange}
+//           handleSearch={setQuery}
+//           sx={{
+//             color: '#fff',
+//             '& .MuiSelect-select': {
+//               // padding: '0.5rem',
+//               pr: '2rem'
+//             },
+//             '& .MuiSelect-icon': {
+//               color: '#fff' // Set the down arrow color to white
+//             },
+//             width: '180px' // Set desired width for search input
+//           }}
+//         />
+
+//         {/* Button container on the right */}
+//         <Stack direction="row" alignItems="center" spacing={2}>
+//           <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+//             <Button
+//               variant="contained"
+//               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+//               onClick={() => navigate('/management/vendor/add-vendor')}
+//               size="small"
+//               disabled={loading} // Disable button while loading
+//             >
+//               {loading ? 'Loading...' : 'Add Vendor'}
+//             </Button>
+//           </WrapperButton>
+//           <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+//             <Button
+//               variant="contained"
+//               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+//               onClick={() => navigate('/management/vendor/add-vendor-rate')}
+//               size="small"
+//               color="success"
+//               disabled={loading} // Disable button while loading
+//             >
+//               {loading ? 'Loading...' : 'Add Vendor Rate'}
+//             </Button>
+//           </WrapperButton>
+//         </Stack>
+//       </Stack>
+//     </>
+//   );
+// };

@@ -5,14 +5,15 @@ import { commonInitialState, commonReducers } from 'store/slice/common';
 // Define the async thunk for fetching drivers
 export const fetchDrivers = createAsyncThunk(
   'drivers/fetchDrivers',
-  async ({ page = 1, limit = 10, driverType = 1, vendorID = null }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, driverType = 1, vendorID = null , query}, { rejectWithValue }) => {
     try {
       // Replace with your actual endpoint
       const queryParams = {
         drivertype: driverType,
         page,
         limit,
-        ...(vendorID && { vendorId: vendorID })
+        ...(vendorID && { vendorId: vendorID }),
+        name: query
       };
       const response = await axios.get(`/driver/list`, { params: queryParams });
       return response.data.data; // This should match the shape of the data you expect

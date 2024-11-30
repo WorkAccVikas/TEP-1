@@ -37,21 +37,28 @@ import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { ThemeMode } from 'config';
 import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompanyStatus } from 'store/slice/cabProvidor/companySlice';
-import CompanyFilter from 'pages/trips/filter/CompanyFilter';
+import CompanyFilter1 from 'pages/trips/filter/CompanyFilter1';
+import DebouncedSearch from 'components/textfield/DebounceSearch';
 
-const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery, filterOptions, setFilterOptions }) => {
+const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery}) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
   };
   const handleAddCompanyBranch = () => {
     navigate('/management/company/add-company-branch');
+    6;
   };
 
-  console.log(page, limit);
+  // Search change handler
+  const onSearchChange = (value) => {
+    setSearch(value); // Update the search state
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -115,14 +122,15 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'State',
         accessor: 'state',
-        Cell: ({ value }) => {
-          if (!value) return '';
-          return value
-            .toLowerCase()
-            .split(' ')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        }
+        // Cell: ({ value }) => {
+        //   if (!value) return '';
+        //   return value
+        //     .toLowerCase()
+        //     .split(' ')
+        //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        //     .join(' ');
+        // }
+         Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Total Vehicle',
@@ -376,15 +384,41 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
 
   return (
     <>
-      <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
+      <Stack
+        direction={'row'}
+        spacing={1}
+        justifyContent="space-between" // Distribute space between left and right
+        alignItems="center"
+        sx={{ p: 0, pb: 1, width: '100%' }} // Make the container take the full width
+      >
+        {/* DebouncedSearch on the left */}
+        <DebouncedSearch
+          search={search}
+          onSearchChange={onSearchChange}
+          handleSearch={setQuery}
+          label="Search Company"
+          sx={{
+            color: '#fff',
+            '& .MuiSelect-select': {
+              // padding: '0.5rem',
+              pr: '2rem'
+            },
+            '& .MuiSelect-icon': {
+              color: '#fff' // Set the down arrow color to white
+            },
+            width: '180px', // Set desired width for search input
+          }}
+        />
+
+        {/* Button container on the right */}
         <Stack direction="row" alignItems="center" spacing={2}>
           <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
             <Button
               variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
               onClick={handleAddCompany}
               size="small"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
             >
               {loading ? 'Loading...' : 'Add Company'}
             </Button>
@@ -392,34 +426,18 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
           <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
             <Button
               variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
               onClick={handleAddCompanyBranch}
               size="small"
               color="success"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
             >
               {loading ? 'Loading...' : 'Add Branch'}
             </Button>
           </WrapperButton>
-          {/* <CompanyFilter
-            setFilterOptions={setFilterOptions}
-            sx={{
-              color: '#fff',
-              '& .MuiSelect-select': {
-                padding: '0.5rem',
-                pr: '2rem'
-              },
-              '& .MuiSelect-icon': {
-                color: '#fff' // Set the down arrow color to white
-              },
-              width: '200px',
-              pb: 1
-            }}
-            value={filterOptions.selectedCompany}
-            setQuery={setQuery}
-          /> */}
         </Stack>
       </Stack>
+
       <MainCard content={false}>
         <ScrollX>
           {loading ? (

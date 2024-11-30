@@ -3,7 +3,6 @@ import { FormattedMessage } from 'react-intl';
 
 // assets
 import { Bill, Car, DocumentUpload, Eye, MenuBoard } from 'iconsax-react';
-import { MODULE, PERMISSIONS } from 'constant';
 
 // icons
 const icons = {
@@ -26,39 +25,39 @@ const roster = {
     {
       id: 'roster',
       title: <FormattedMessage id="roster" />,
-      type: 'collapse',
+      type: 'item',
       icon: icons.samplePage,
-      // url: '/apps/roster/all-roster',
-      children: [
-        {
-          id: 'view',
-          title: <FormattedMessage id="view" />,
-          type: 'item',
-          url: '/apps/roster/all-roster'
-          // icon: icons.upload
-        },
-        {
-          id: 'upload',
-          title: <FormattedMessage id="upload" />,
-          type: 'item',
-          url: '/apps/roster/create'
-          // icon: icons.upload
-        },
-        {
-          id: 'files',
-          title: <FormattedMessage id="files" />,
-          type: 'item',
-          url: '/apps/roster/file-management'
-          // icon: icons.upload
-        }
-        // {
-        //   id: 'trips',
-        //   title: <FormattedMessage id="trips" />,
-        //   type: 'item',
-        //   url: '/apps/trips/list',
-        //   // icon: icons.view
-        // },
-      ]
+      url: '/apps/roster/all-roster',
+      // children: [
+      //   {
+      //     id: 'view',
+      //     title: <FormattedMessage id="view" />,
+      //     type: 'item',
+      //     url: '/apps/roster/all-roster'
+      //     // icon: icons.upload
+      //   },
+      //   {
+      //     id: 'upload',
+      //     title: <FormattedMessage id="upload" />,
+      //     type: 'item',
+      //     url: '/apps/roster/create'
+      //     // icon: icons.upload
+      //   },
+      //   {
+      //     id: 'files',
+      //     title: <FormattedMessage id="files" />,
+      //     type: 'item',
+      //     url: '/apps/roster/file-management'
+      //     // icon: icons.upload
+      //   }
+      //   // {
+      //   //   id: 'trips',
+      //   //   title: <FormattedMessage id="trips" />,
+      //   //   type: 'item',
+      //   //   url: '/apps/trips/list',
+      //   //   // icon: icons.view
+      //   // },
+      // ]
     },
 
     // Invoices
@@ -77,7 +76,7 @@ const roster = {
       type: 'item',
       url: '/apps/trips/list',
       icon: icons.trip
-    }
+    },
   ]
 };
 

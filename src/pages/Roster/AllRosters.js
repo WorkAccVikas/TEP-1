@@ -42,7 +42,7 @@ import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reduce
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, EyeSlash, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
+import { Add, Edit, Eye, EyeSlash, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
 import PaginationBox from 'components/tables/Pagination';
 import { useDispatch } from 'react-redux';
 import { fetchCompaniesRosterFile } from 'store/slice/cabProvidor/rosterFileSlice';
@@ -388,31 +388,34 @@ const AllRosters = () => {
   const widgetsData = [
     {
       title: 'Roster',
-      count: rosterStat?.totalDataCount,
-      percentage: (((rosterStat?.sumOfTotalCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: rosterStat?.totalDataCount ?? 0,
+      percentage: (((rosterStat?.sumOfTotalCount || 0) / (rosterStat?.sumOfTotalCount || 1)) * 100).toFixed(2),
       isLoss: false,
       even: true,
-      entries: rosterStat?.sumOfTotalCount,
+      entries: rosterStat?.sumOfTotalCount ?? 0,
       color: theme.palette.primary,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Completed',
-      count: rosterStat?.countOfEqualTotal,
-      percentage:  (((rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: rosterStat?.countOfEqualTotal ?? 0,
+      percentage: (((rosterStat?.sumOfEqualCount || 0) / (rosterStat?.sumOfTotalCount || 1)) * 100).toFixed(2),
       isLoss: false,
       even: false,
-      entries: rosterStat?.sumOfEqualCount,
+      entries: rosterStat?.sumOfEqualCount ?? 0,
       color: theme.palette.success,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     },
     {
       title: 'Pending',
-      count: rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal,
-      percentage: (((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount || 0) / rosterStat?.sumOfTotalCount) * 100).toFixed(2),
+      count: (rosterStat?.totalDataCount ?? 0) - (rosterStat?.countOfEqualTotal ?? 0),
+      percentage: (
+        (((rosterStat?.sumOfTotalCount || 0) - (rosterStat?.sumOfEqualCount || 0)) / (rosterStat?.sumOfTotalCount || 1)) *
+        100
+      ).toFixed(2),
       isLoss: true,
       even: false,
-      entries: rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount,
+      entries: (rosterStat?.sumOfTotalCount ?? 0) - (rosterStat?.sumOfEqualCount ?? 0),
       color: theme.palette.warning,
       chartData: [0, 0, 0, 0, 0, 0, 0]
     }
@@ -464,7 +467,7 @@ const AllRosters = () => {
                     Total Rosters
                   </Typography>
                   <Typography variant="body1" color="white">
-                    {rosterStat?.totalDataCount}
+                    {rosterStat?.totalDataCount ?? 0}
                   </Typography>
                 </Stack>
               </Stack>
@@ -473,7 +476,7 @@ const AllRosters = () => {
                   Trips Assigned
                 </Typography>
                 <Typography variant="body1" color="white">
-                  {rosterStat?.sumOfEqualCount}
+                  {rosterStat?.sumOfEqualCount ?? 0}
                 </Typography>
               </Stack>
             </Stack>
@@ -483,36 +486,44 @@ const AllRosters = () => {
                 Pending
               </Typography>
               <Typography variant="body1" color="white">
-                {rosterStat?.totalDataCount - rosterStat?.countOfEqualTotal}
+                {(rosterStat?.totalDataCount ?? 0) - (rosterStat?.countOfEqualTotal ?? 0)}
               </Typography>
             </Stack>
 
             <Box sx={{ maxWidth: '100%' }}>
-              <LinearWithLabel value={((rosterStat?.sumOfTotalCount - rosterStat?.sumOfEqualCount)/rosterStat?.sumOfTotalCount)*100} />
+              <LinearWithLabel
+                value={
+                  (((rosterStat?.sumOfTotalCount ?? 0) - (rosterStat?.sumOfEqualCount ?? 0)) / (rosterStat?.sumOfTotalCount || 1)) * 100
+                }
+              />
             </Box>
           </Box>
         </Grid>
       </Grid>
 
       {/* filter */}
-      <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
-        <CompanyFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedCompany}
-        />
-        {/* <VendorFilter
+
+      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+        {/* Left-aligned filters and date range selector */}
+        <Stack direction="row" alignItems="center" gap={1}>
+          <CompanyFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedCompany}
+          />
+
+          {/* <VendorFilter
           setFilterOptions={setFilterOptions}
           sx={{
             color: '#fff',
@@ -561,15 +572,33 @@ const AllRosters = () => {
           value={filterOptions.selectedVehicle}
         /> */}
 
-        <DateRangeSelect
-          startDate={startDate}
-          endDate={endDate}
-          selectedRange={range}
-          prevRange={prevRange}
-          setSelectedRange={setRange}
-          onRangeChange={handleRangeChange}
-          showSelectedRangeLabel
-        />
+          <DateRangeSelect
+            startDate={startDate}
+            endDate={endDate}
+            selectedRange={range}
+            prevRange={prevRange}
+            setSelectedRange={setRange}
+            onRangeChange={handleRangeChange}
+            showSelectedRangeLabel
+          />
+        </Stack>
+
+        {/* Right-aligned buttons */}
+        <Stack direction="row" gap={1}>
+          <Button variant="contained" size="small" color="success" startIcon={<Add />} onClick={() => navigate('/apps/roster/create')}>
+            Upload
+          </Button>
+
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            startIcon={<Add />}
+            onClick={() => navigate('/apps/roster/file-management')}
+          >
+            Files
+          </Button>
+        </Stack>
       </Stack>
 
       <MainCard content={false}>
