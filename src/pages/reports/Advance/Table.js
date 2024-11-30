@@ -35,7 +35,8 @@ const Table = () => {
       },
       {
         Header: 'Contact Number',
-        accessor: 'advanceTypeId.contactNumber'
+        accessor: 'advanceTypeId.contactNumber',
+         Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Vehicle Number',
@@ -52,7 +53,8 @@ const Table = () => {
       },
       {
         Header: 'Advance Type',
-        accessor: 'advanceTypeId.advanceTypeName'
+        accessor: 'advanceTypeId.advanceTypeName',
+         Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Interest Rate',

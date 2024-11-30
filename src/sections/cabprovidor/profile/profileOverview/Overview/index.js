@@ -36,32 +36,29 @@ const basicDataValidationSchema = Yup.object({
 
 const specificDataValidationSchema = Yup.object({
   cabProviderLegalName: Yup.string().required('Cab Provider Legal Name is required'),
-  contactPersonName: Yup.string().required('Contact Person Name is required'),
+  contactPersonName: Yup.string(),
   PAN: Yup.string()
-    .required('PAN is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN'),
+  .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN'),
   GSTIN: Yup.string()
     .required('GSTIN is required')
     .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{3}$/, 'Invalid GSTIN'),
-  officeAddress: Yup.string().required('Office Address is required'),
-  officeCity: Yup.string().required('City is required'),
-  officeState: Yup.string().required('State is required'),
+  officeAddress: Yup.string(),
+  officeCity: Yup.string(),
+  officeState: Yup.string(),
   officePinCode: Yup.string()
-    .required('Pin Code is required')
-    .matches(/^\d{6}$/, 'Invalid Pin Code'),
+  .matches(/^\d{6}$/, 'Invalid Pin Code'),
   workEmail: Yup.string().required('Work Email is required').email('Invalid email'),
   workMobileNumber: Yup.string()
     .required('Mobile Number is required')
     .matches(/^\d{10}$/, 'Invalid Mobile Number'),
   workLandLineNumber: Yup.string()
-    .required('Landline Number is required')
-    .matches(/^\d{10}$/, 'Invalid Landline Number'),
-  bankName: Yup.string().required('Bank Name is required'),
-  accountNumber: Yup.string().required('Account Number is required').matches(/^\d+$/, 'Invalid Account Number'),
-  accountHolderName: Yup.string().required('Account Holder Name is required'),
-  branchName: Yup.string().required('Branch Name is required'),
-  IFSC_code: Yup.string().required('IFSC Code is required'),
-  bankAddress: Yup.string().required('Bank Address is required')
+  .matches(/^\d{10}$/, 'Invalid Landline Number'),
+  bankName: Yup.string(),
+  accountNumber: Yup.string().matches(/^\d+$/, 'Invalid Account Number'),
+  accountHolderName: Yup.string(),
+  branchName: Yup.string(),
+  IFSC_code: Yup.string(),
+  bankAddress: Yup.string()
 });
 
 const Overview = ({ profileBasicData, profileSpecificData }) => {
