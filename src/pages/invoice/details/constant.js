@@ -1,0 +1,11 @@
+export const INVOICE_STATUS_ENUM = {
+  UNPAID: 1,
+  PAID: 2,
+  CANCELLED: 3
+};
+
+export const INVOICE_STATUS = {
+  [INVOICE_STATUS_ENUM.UNPAID]: 'Unpaid',
+  [INVOICE_STATUS_ENUM.PAID]: 'Paid',
+  [INVOICE_STATUS_ENUM.CANCELLED]: 'Cancelled'
+};
