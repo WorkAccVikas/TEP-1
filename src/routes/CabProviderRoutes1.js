@@ -48,6 +48,7 @@ const AllRosters = Loadable(lazy(() => import('pages/Roster/AllRosters')));
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
+const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
 
 //Trip
 const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
@@ -87,8 +88,6 @@ const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
 const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
 const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 
-// Invoice
-// const Invoice = Loadable(lazy(() => import('pages/invoices/Invoice')));
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
 const Advance = Loadable(lazy(() => import('pages/invoices/advance')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));
@@ -231,7 +230,7 @@ const CabProvidorRoutes = {
                 },
                 {
                   path: 'edit/:id',
-                  element: <UnderConstruction title="Edit Invoice" />
+                  element: <InvoiceEdit />
                 },
                 {
                   path: 'loans',
