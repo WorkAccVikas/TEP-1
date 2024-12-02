@@ -115,7 +115,7 @@ const SETTINGS = {
   roundOff: STATUS.YES
 };
 
-const item = {
+export const item = {
   itemName: '',
   rate: 0,
   quantity: 0,
@@ -196,7 +196,7 @@ const getInitialValues = (data, user, userSpecificData) => {
   return result;
 };
 
-const getDiscountLabel = (val) => {
+export const getDiscountLabel = (val) => {
   if (!val) return;
 
   const { by, currency = '₹' } = val;
@@ -1937,7 +1937,7 @@ const Create2 = () => {
 
 export default Create2;
 
-const GenericPriceDisplay = ({ total, roundOff, prefix, variant }) => {
+export const GenericPriceDisplay = ({ total, roundOff, prefix, variant }) => {
   return (
     <Typography {...(variant && { variant })}>
       {roundOff === STATUS.NO ? prefix + total?.toFixed(2) || 0 : prefix + Math.ceil(total) || 0}
