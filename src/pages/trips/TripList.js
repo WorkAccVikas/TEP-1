@@ -566,8 +566,8 @@ function ReactTable({
         </Stack>
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
-      <Box ref={componentRef} sx={{ mt: 2 }}>
-        <Box sx={{ pl: 2, pr: 2 }}>
+      <Box ref={componentRef} >
+        <Box sx={{ p: 1 }}>
           <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
@@ -608,7 +608,7 @@ function ReactTable({
           </Table>
         </ScrollX>
 
-        <Box sx={{ p: 2, py: 3 }}>
+        <Box sx={{ p: 1 }}>
           <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
@@ -662,6 +662,7 @@ const TripList = () => {
     outgoingRate: 0
   });
 
+  console.log({ tripStats });
   useEffect(() => {
     const calculateTripStats = (data) => {
       const stats = {
@@ -701,7 +702,9 @@ const TripList = () => {
           const vendorRate1 = vendorRate + vendorGuardPrice - vendorPenalty;
           const driverRate1 = driverRate + driverGuardPrice - driverPenalty;
 
-          const outGoingRateForTrip = vendorRate !== 0 ? vendorRate1 : driverRate1;
+          console.log({ tripAmount, vendorRate1, driverRate1 });
+          const outGoingRateForTrip = vendorRate1 !== 0 ? vendorRate1 : driverRate1;
+          console.log({ outGoingRateForTrip });
 
           stats.outgoingRate += outGoingRateForTrip;
           const rateData = {
