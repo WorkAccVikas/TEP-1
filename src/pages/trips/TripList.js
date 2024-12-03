@@ -67,6 +67,8 @@ import CustomAlert from './alerts/TripStatusChange';
 import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
 import { ThemeMode } from 'config';
+import { USERTYPE } from 'constant';
+import TransitionsModal from './TripView';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -642,6 +644,13 @@ const TripList = () => {
   const [refetch, setRefetch] = useState(false);
   const [id, setId] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState(null);
+
+  const handleCompanyClick = (tripId) => {
+    setSelectedTripId(tripId);
+    setModalOpen(true);
+  };
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {},
     selectedVendor: {},
@@ -777,6 +786,9 @@ const TripList = () => {
   ];
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+
+  const userType = useSelector((state) => state.auth.userType);
+  console.log(userType);
 
   const navigate = useNavigate();
 
@@ -992,13 +1004,22 @@ const TripList = () => {
         Cell: ({ row, value }) => {
           return (
             <Typography>
-              <Link
+              {/* <Link
                 to={`/apps/trips/trip-view/${row.original.tripId}?id=${row.original._id}`}
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
                 {row.original.companyID.company_name}
-              </Link>
+              </Link> */}
+              <Link
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent row expansion
+                handleCompanyClick(row.original._id);
+              }}
+              style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
+            >
+              {row.original.companyID.company_name}
+            </Link>
             </Typography>
           );
         }
@@ -1014,6 +1035,10 @@ const TripList = () => {
       {
         Header: 'Trip Time',
         accessor: 'tripTime'
+      },
+      {
+        Header: 'Trip Id',
+        accessor: 'rosterTripId'
       },
       {
         Header: 'Zone Name',
@@ -1036,13 +1061,28 @@ const TripList = () => {
         accessor: 'driverId.userName',
         Cell: ({ value }) => value || 'None'
       },
+      // {
+      //   Header: 'Vehicle Guard Price',
+      //   accessor: 'guardPrice', // This can be any key; we won't directly use it.
+      //   Cell: ({ row }) => {
+      //     const { driverGuardPrice, vendorGuardPrice } = row.original;
+      //     return driverGuardPrice || vendorGuardPrice || 'Null';
+      //   }
+      // },
       {
-        Header: 'Vehicle Guard Price',
-        accessor: 'guardPrice', // This can be any key; we won't directly use it.
-        Cell: ({ row }) => {
-          const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
-        }
+        Header: 'Company Guard Price',
+        accessor: 'companyGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Guard Price',
+        accessor: 'vendorGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Guard Price',
+        accessor: 'driverGuardPrice',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Vehicle Rates',
@@ -1061,9 +1101,19 @@ const TripList = () => {
         accessor: 'addOnRate'
       },
       {
-        Header: 'Penalty',
-        accessor: 'penalty',
-        Cell: ({ value }) => value || 'Null'
+        Header: 'Company Penalty',
+        accessor: 'companyPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Penalty',
+        accessor: 'vendorPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Penalty',
+        accessor: 'driverPenalty',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Location',
@@ -1220,22 +1270,25 @@ const TripList = () => {
           }}
           value={filterOptions.selectedCompany}
         />
-        <VendorFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedVendor}
-        />
+
+        {userType === USERTYPE.iscabProvider && (
+          <VendorFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedVendor}
+          />
+        )}
         <DriverFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1343,6 +1396,15 @@ const TripList = () => {
         >
           <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
         </Dialog>
+      )}
+
+      {/* Modal Component */}
+      {isModalOpen && (
+        <TransitionsModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          selectedTripId={selectedTripId}
+        />
       )}
     </>
   );

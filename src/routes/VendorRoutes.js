@@ -77,6 +77,10 @@ const CabRate = Loadable(lazy(() => import('pages/master/CabRate')));
 const AddCabRateVendor = Loadable(lazy(() => import('pages/master/CabRate/Vendor')));
 const AddCabRateDriver = Loadable(lazy(() => import('pages/master/CabRate/Driver')));
 
+//Trip
+const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
+const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const VendorRoutes = {
@@ -101,17 +105,6 @@ const VendorRoutes = {
         {
           path: 'apps',
           children: [
-            // Roster
-            {
-              path: 'roster',
-              children: [
-                {
-                  path: 'view',
-                  element: <AllRosters />
-                }
-              ]
-            },
-
             // Invoices
             {
               path: 'invoices',
@@ -153,6 +146,21 @@ const VendorRoutes = {
                   path: 'advance-type',
                   element: <AdvanceVendorType />
                   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
+                }
+              ]
+            },
+
+            // Trips
+            {
+              path: 'trips',
+              children: [
+                {
+                  path: 'list',
+                  element: <TripList />
+                },
+                {
+                  path: 'trip-view/:id',
+                  element: <TripView />
                 }
               ]
             }

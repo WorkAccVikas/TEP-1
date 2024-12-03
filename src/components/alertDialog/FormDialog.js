@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 // material-ui
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { useState } from 'react';
 
 // ==============================|| DIALOG - FORM ||============================== //
 
@@ -13,8 +14,26 @@ export default function FormDialog({
   content,
   placeholder = 'Enter your remarks',
   cancelledButtonTitle = 'Disagree',
-  confirmedButtonTitle = 'Agree'
+  confirmedButtonTitle = 'Agree',
+  showError = false
 }) {
+  const [error, setError] = useState('');
+  const [val, setVal] = useState('');
+
+  const handleSubmit = () => {
+    if (!val && showError) {
+      setError('Remarks is mandatory');
+      return;
+    }
+    handleConfirm();
+  };
+
+  const handleChange = (e) => {
+    setError('');
+    setVal(e.target.value);
+    handleTextChange(e);
+  };
+
   return (
     <>
       <Dialog open={open} onClose={handleClose}>
@@ -27,20 +46,23 @@ export default function FormDialog({
             <TextField
               id="name"
               placeholder={placeholder}
+              value={val}
               type="text"
               fullWidth
               variant="outlined"
               multiline
               rows={2}
               maxRows={4}
-              onChange={handleTextChange}
+              onChange={handleChange}
+              error={!!error}
+              helperText={error}
             />
           </DialogContent>
           <DialogActions>
             <Button color="error" onClick={handleClose}>
               {cancelledButtonTitle}
             </Button>
-            <Button variant="contained" onClick={handleConfirm}>
+            <Button variant="contained" onClick={handleSubmit}>
               {confirmedButtonTitle}
             </Button>
           </DialogActions>
@@ -59,5 +81,6 @@ FormDialog.propTypes = {
   content: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   cancelledButtonTitle: PropTypes.string,
-  confirmedButtonTitle: PropTypes.string
+  confirmedButtonTitle: PropTypes.string,
+  showError: PropTypes.bool
 };
