@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, Fragment, useState, useRef } from 'react';
+import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { ThemeMode } from 'config';
 
@@ -285,6 +285,11 @@ const List = () => {
 
   const [data, setData] = useState([]);
   const [metadata, setMetadata] = useState([]);
+  const [refetch, setRefetch] = useState(false);
+
+  const handleRefetch = useCallback(() => {
+    setRefetch((prev) => !prev);
+  }, []);
 
   console.log({ metadata });
 
@@ -319,7 +324,7 @@ const List = () => {
     };
 
     fetchInvoice();
-  }, [userType, filterOptions, startDate, endDate]);
+  }, [userType, filterOptions, startDate, endDate, refetch]);
 
   const handleClose = (status) => {
     if (status) {
@@ -417,9 +422,9 @@ const List = () => {
         accessor: 'status',
         disableFilters: true,
         Cell: ({ value }) => {
-          if (value === 3) {
+          if (value === 2) {
             return <Chip color="error" label="Cancelled" size="small" variant="light" />;
-          } else if (value === 2) {
+          } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
           } else {
             return <Chip color="info" label="Unpaid" size="small" variant="light" />;
@@ -450,7 +455,7 @@ const List = () => {
 
           const handleStatusChange = (status) => {
             setNewStatus(status);
-            if (status === 3) {
+            if (status === 2) {
               // Open FormDialog if "Cancelled"
               setFormDialogOpen(true);
             } else {
@@ -467,6 +472,7 @@ const List = () => {
           };
 
           const handleTextChange = (event) => {
+            console.log(`🚀 ~ handleTextChange ~ event:`, event);
             setRemarks(event.target.value);
           };
 
@@ -476,11 +482,11 @@ const List = () => {
                 data: {
                   invoiceId: row.original._id,
                   status: newStatus,
-                  remarks: newStatus === 3 ? remarks : undefined // Include remarks if cancelled
+                  remarks: newStatus === 2 ? remarks : undefined // Include remarks if cancelled
                 }
               });
 
-              if (response.status === 201) {
+              if (response.status >= 200 && response.status < 300) {
                 dispatch(
                   openSnackbar({
                     open: true,
@@ -492,6 +498,8 @@ const List = () => {
                     close: true
                   })
                 );
+
+                handleRefetch();
               }
 
               row.original.status = newStatus;
@@ -558,9 +566,9 @@ const List = () => {
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               >
-                <MenuItem onClick={() => handleStatusChange(1)}>Unpaid</MenuItem>
-                <MenuItem onClick={() => handleStatusChange(2)}>Paid</MenuItem>
-                <MenuItem onClick={() => handleStatusChange(3)}>Cancelled</MenuItem>
+                <MenuItem onClick={() => handleStatusChange(0)}>Unpaid</MenuItem>
+                <MenuItem onClick={() => handleStatusChange(1)}>Paid</MenuItem>
+                <MenuItem onClick={() => handleStatusChange(2)}>Cancelled</MenuItem>
               </Menu>
 
               {/* Confirmation Dialog */}
@@ -574,7 +582,7 @@ const List = () => {
                   <DialogTitle id="alert-dialog-title">Confirm Status Change</DialogTitle>
                   <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                      Are you sure you want to change the status to {newStatus === 1 ? 'Unpaid' : newStatus === 2 ? 'Paid' : 'Cancelled'}?
+                      Are you sure you want to change the status to {newStatus === 0 ? 'Unpaid' : newStatus === 1 ? 'Paid' : 'Cancelled'}?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
@@ -599,6 +607,7 @@ const List = () => {
                 placeholder="Enter your remarks"
                 cancelledButtonTitle="Disagree"
                 confirmedButtonTitle="Confirm Cancellation"
+                showError
               />
             </Stack>
           );
