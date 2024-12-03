@@ -67,6 +67,7 @@ import CustomAlert from './alerts/TripStatusChange';
 import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
 import { ThemeMode } from 'config';
+import { USERTYPE } from 'constant';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -775,6 +776,9 @@ const TripList = () => {
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
+  const userType = useSelector((state) => state.auth.userType);
+  console.log(userType);
+
   const navigate = useNavigate();
 
   const handleCloseAlert = () => {
@@ -1217,22 +1221,25 @@ const TripList = () => {
           }}
           value={filterOptions.selectedCompany}
         />
-        <VendorFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedVendor}
-        />
+
+        {userType === USERTYPE.iscabProvider && (
+          <VendorFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedVendor}
+          />
+        )}
         <DriverFilter
           setFilterOptions={setFilterOptions}
           sx={{

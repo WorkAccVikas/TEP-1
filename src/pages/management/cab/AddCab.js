@@ -392,7 +392,7 @@ const initialValuesFun = (data, userType) => {
   }
 };
 
-const getPayloadForUpdate = (values, userType) => {
+const getPayloadForUpdate = (values, userType, vehicleImages) => {
   console.log(`🚀 ~ getPayloadForUpdate ~ values:`, values);
   switch (userType) {
     case USERTYPE.iscabProvider: {
@@ -427,7 +427,11 @@ const getPayloadForUpdate = (values, userType) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values.vehicleImages);
+      // formData.append('vehicleImages', values.vehicleImages);
+
+      vehicleImages.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
