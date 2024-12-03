@@ -34,6 +34,7 @@ const DateRangeSelect = memo(
     sx
   }) => {
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const currentRef = useRef('custom');
 
     const predefinedDateRanges = {
       [DATE_RANGE_OPTIONS.ALL_TIME]: {
@@ -91,6 +92,7 @@ const DateRangeSelect = memo(
       if (startDate && endDate && !selectedRange) {
         const initialRange = determineRange(startDate, endDate);
         setSelectedRange(initialRange);
+        currentRef.current = initialRange;
       }
     }, [startDate, endDate, selectedRange, setSelectedRange]);
 
@@ -102,6 +104,7 @@ const DateRangeSelect = memo(
       const range = event.target.value;
       // console.log({ range });
       setSelectedRange(range);
+      currentRef.current = range;
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
         setDialogOpen(true);
@@ -121,6 +124,7 @@ const DateRangeSelect = memo(
       setDialogOpen(false);
       if (flag === 'backdropClick') {
         setSelectedRange(prevRange);
+        currentRef.current = prevRange;
         return;
       }
       setSelectedRange(!flag ? prevRange : DATE_RANGE_OPTIONS.CUSTOM);
@@ -132,6 +136,7 @@ const DateRangeSelect = memo(
         : predefinedDateRanges[selectedRange]?.label
         ? predefinedDateRanges[selectedRange]?.label
         : `${moment(startDate).format(FORMAT_DATE)} - ${moment(endDate).format(FORMAT_DATE)}`;
+
     return (
       <>
         <FormControl variant="outlined">
@@ -141,6 +146,16 @@ const DateRangeSelect = memo(
             value={selectedRange}
             onChange={handleRangeSelection}
             label={showLabel ? 'Date Range' : ''}
+            onClick={(e) => {
+              e.stopPropagation();
+              // console.log('onClick');
+              // console.log('range == ', selectedRange);
+              // console.log('prevRange == ', currentRef.current);
+
+              if (currentRef.current === DATE_RANGE_OPTIONS.CUSTOM) {
+                setDialogOpen(true);
+              }
+            }}
             displayEmpty
             sx={{
               backgroundColor: 'primary.main',
@@ -153,8 +168,8 @@ const DateRangeSelect = memo(
                 color: '#fff'
               },
               // mb: sx?.mb || 1,
-              width: sx?.width || '220px', 
-              height: sx?.height 
+              width: sx?.width || '220px',
+              height: sx?.height
             }}
             renderValue={() => (
               <Box display="flex" alignItems="center">

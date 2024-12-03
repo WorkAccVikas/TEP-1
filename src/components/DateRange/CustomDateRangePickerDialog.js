@@ -10,9 +10,9 @@ const validationSchema = Yup.object().shape({
   endDate: Yup.date()
     .required('End date is required')
     //  .nullable()
-    .test('is-greater', 'End date must be greater than start date', function (value) {
+    .test('is-greater', "The end date can't be before the start date.", function (value) {
       const { startDate } = this.parent;
-      return !startDate || !value || new Date(value) > new Date(startDate);
+      return !startDate || !value || new Date(value) >= new Date(startDate);
     })
 });
 
@@ -25,8 +25,6 @@ const CustomDateRangePickerDialog = ({
   initialStartDate,
   initialEndDate
 }) => {
-  console.log('range', selectedRange);
-  console.log('prevRange', prevRange);
   const formik = useFormik({
     initialValues: {
       startDate: null,
@@ -47,13 +45,13 @@ const CustomDateRangePickerDialog = ({
 
   return (
     <>
-      <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+      <Dialog open={isOpen} onClose={onClose} maxWidth="sm">
         <DialogTitle>Select Date Range</DialogTitle>
         <FormikProvider value={formik}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Form onSubmit={formik.handleSubmit} noValidate>
               <DialogContent>
-                <Grid spacing={2} direction="row" container>
+                <Grid direction="row" container spacing={2}>
                   {/* Start Date */}
                   <Grid item xs={6}>
                     <DatePicker
@@ -117,10 +115,10 @@ const CustomDateRangePickerDialog = ({
               </DialogContent>
 
               <DialogActions>
-                <Button onClick={onClose} color="primary">
+                <Button onClick={onClose} color="error" variant="outlined">
                   Cancel
                 </Button>
-                <Button color="primary" type="submit">
+                <Button color="primary" type="submit" variant="contained">
                   Save
                 </Button>
               </DialogActions>

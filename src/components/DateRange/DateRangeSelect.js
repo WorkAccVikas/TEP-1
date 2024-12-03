@@ -32,11 +32,12 @@ const DateRangeSelect = memo(
     prevRange,
     availableRanges
   }) => {
-    console.log('DateRangeSelect render');
+    // console.log('DateRangeSelect render');
 
     // console.log('range', selectedRange);
     // console.log('prevRange', prevRange);
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const currentRef = useRef('custom');
 
     // Predefined date range objects based on the above enum
     const predefinedDateRanges = {
@@ -97,8 +98,9 @@ const DateRangeSelect = memo(
       // Automatically set the range based on the initial dates
       if (startDate && endDate && !selectedRange) {
         const initialRange = determineRange(startDate, endDate);
-        console.log(`🚀 ~ useEffect ~ initialRange:`, initialRange);
+        // console.log(`🚀 ~ useEffect ~ initialRange:`, initialRange);
         setSelectedRange(initialRange);
+        currentRef.current = initialRange;
       }
     }, [startDate, endDate, selectedRange, setSelectedRange]);
 
@@ -108,7 +110,9 @@ const DateRangeSelect = memo(
 
     const handleRangeSelection = (event) => {
       const range = event.target.value;
+      // console.log('🚀 ~ handleRangeSelection ~ range:', range);
       setSelectedRange(range);
+      currentRef.current = range;
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
         setDialogOpen(true);
@@ -128,6 +132,7 @@ const DateRangeSelect = memo(
       setDialogOpen(false);
       if (flag === 'backdropClick') {
         setSelectedRange(prevRange);
+        currentRef.current = prevRange;
         return;
       }
       setSelectedRange(!flag ? prevRange : DATE_RANGE_OPTIONS.CUSTOM);
@@ -148,6 +153,16 @@ const DateRangeSelect = memo(
           <Select
             value={selectedRange}
             onChange={handleRangeSelection}
+            onClick={(e) => {
+              e.stopPropagation();
+              // console.log('onClick');
+              // console.log('range == ', selectedRange);
+              // console.log('prevRange == ', currentRef.current);
+
+              if (currentRef.current === DATE_RANGE_OPTIONS.CUSTOM) {
+                setDialogOpen(true);
+              }
+            }}
             label={showLabel ? 'Date Range' : ''}
             displayEmpty
             sx={{
@@ -207,7 +222,6 @@ const DateRangeSelect = memo(
             isOpen={isDialogOpen}
             onClose={handleDialogClose}
             onDateRangeChange={(newRange, flag) => {
-              // console.log('f = ', flag);
               onRangeChange(newRange);
               handleDialogClose(null, flag);
             }}
@@ -221,6 +235,8 @@ const DateRangeSelect = memo(
     );
   }
 );
+
+DateRangeSelect.displayName = 'DateRangeSelect';
 
 // Prop validation using PropTypes
 DateRangeSelect.propTypes = {
