@@ -2,13 +2,15 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Bill, MenuBoard } from 'iconsax-react';
-import { MODULE, PERMISSIONS } from 'constant';
+import { Bill, Car, DocumentUpload, Eye, MenuBoard } from 'iconsax-react';
 
 // icons
 const icons = {
   samplePage: MenuBoard,
-  invoice: Bill
+  view: Eye,
+  upload: DocumentUpload,
+  invoice: Bill,
+  trip: Car
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -19,45 +21,21 @@ const application = {
   type: 'group',
   icon: icons.samplePage,
   children: [
-    // Roster
-    // {
-    //   id: 'roster',
-    //   title: <FormattedMessage id="roster" />,
-    //   type: 'collapse',
-    //   icon: icons.samplePage,
-    //   children: [
-    //     {
-    //       id: 'list',
-    //       title: <FormattedMessage id="list" />,
-    //       type: 'item',
-    //       url: '/apps/roster/all-roster',
-    //     },
-    //   ]
-    // },
-
+    // Trips
+    {
+      id: 'trips',
+      title: <FormattedMessage id="trips" />,
+      type: 'item',
+      url: '/apps/trips/list',
+      icon: icons.trip
+    },
     // Invoices
     {
       id: 'invoices',
       title: <FormattedMessage id="invoices" />,
-      type: 'collapse',
-      // url: '/apps/invoices/dashboard',
-      icon: icons.invoice,
-      children: [
-        {
-          id: 'list',
-          title: <FormattedMessage id="list" />,
-          type: 'item',
-          url: '/apps/invoices/list',
-          // icon: icons.samplePage,
-        },
-        // {
-        //   id: 'create',
-        //   title: <FormattedMessage id="create" />,
-        //   type: 'item',
-        //   url: '/apps/invoices/create',
-        //   // icon: icons.samplePage,
-        // }
-      ]
+      type: 'item',
+      url: '/apps/invoices/list',
+      icon: icons.invoice
     }
   ]
 };
