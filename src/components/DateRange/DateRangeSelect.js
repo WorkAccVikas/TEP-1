@@ -108,6 +108,7 @@ const DateRangeSelect = memo(
 
     const handleRangeSelection = (event) => {
       const range = event.target.value;
+      console.log('🚀 ~ handleRangeSelection ~ range:', range);
       setSelectedRange(range);
 
       if (range === DATE_RANGE_OPTIONS.CUSTOM) {
@@ -148,6 +149,15 @@ const DateRangeSelect = memo(
           <Select
             value={selectedRange}
             onChange={handleRangeSelection}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('onClick');
+              console.log('range == ', selectedRange);
+
+              if(selectedRange === DATE_RANGE_OPTIONS.CUSTOM) {
+                setDialogOpen(true);
+              }
+            }}
             label={showLabel ? 'Date Range' : ''}
             displayEmpty
             sx={{
