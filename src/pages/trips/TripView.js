@@ -1,475 +1,272 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Stack, InputLabel, TextField, Button } from '@mui/material';
-import { FormikProvider, useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useNavigate, useParams } from 'react-router';
-import axiosServices from 'utils/axios';
+import { useEffect, useState } from 'react';
+
+// material-ui
+import { Divider, Fade, CardContent, Modal, Stack, Typography, Button, Grid, CircularProgress } from '@mui/material';
+
+// project-imports
 import MainCard from 'components/MainCard';
-import Breadcrumbs from 'components/@extended/Breadcrumbs';
-import { APP_DEFAULT_PATH } from 'config';
+import axiosServices from 'utils/axios';
 import { formatDateUsingMoment } from 'utils/helper';
-import { format } from 'date-fns';
-import CustomCircularLoader from 'components/CustomCircularLoader';
-import { dispatch } from 'store';
-import { openSnackbar } from 'store/reducers/snackbar';
 
-// function formatUnixTimeToTime(unixTimestamp) {
-//   return format(new Date(unixTimestamp * 1000), 'HH:mm');
-// }
-
-const TripView = () => {
-  const { id } = useParams();
-  const tripId = id;
-  const queryParams = new URLSearchParams(location.search);
-  const rowId = queryParams.get('id');
-  const navigate = useNavigate();
+export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
   const [tripDetails, setTripDetails] = useState(null);
   const [isApiLoading, setIsApiLoading] = useState(false);
 
-  console.log('tripDetails', tripDetails);
-  console.log('rowId', rowId);
-
-  // Fetch trip details on mount
+  // Fetch trip details when the modal is opened
   useEffect(() => {
-    axiosServices
-      .get(`/assignTrip/details/by?tripId=${tripId}`)
-      .then((response) => {
-        console.log('response', response);
-
-        setTripDetails(response.data.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching trip details:', error);
-      });
-  }, [tripId]);
-
-  // Formik setup
-  const formik = useFormik({
-    initialValues: {
-      company_name: tripDetails?.companyID?.company_name || null,
-      //   tripDate: tripDetails?.tripDate ? moment(tripDetails?.tripDate).format('YYYY-MM-DD')  || '',
-      // tripDate: tripDetails?.tripDate ? moment(tripDetails?.tripDate).format('MM-DD-YYYY') : null,
-      tripDate: tripDetails?.tripDate ? formatDateUsingMoment(tripDetails?.tripDate, 'YYYY-MM-DD') : '',
-      // tripTime: tripDetails?.tripTime ? formatUnixTimeToTime(tripDetails?.tripTime) : '',
-      tripTime: tripDetails?.tripTime || '',
-      zoneName: tripDetails?.zoneNameID?.zoneName || '',
-      zoneType: tripDetails?.zoneTypeID?.zoneTypeName || '',
-      cab: tripDetails?.vehicleNumber?.vehicleNumber || '',
-      cabType: tripDetails?.vehicleTypeID?.vehicleTypeName || '',
-      driver: tripDetails?.driverId?.userName || '',
-      guard: tripDetails?.guard ?? '',
-      guardPrice: tripDetails?.guardPrice || '',
-      companyRate: tripDetails?.companyRate ?? '',
-      vendorRate: tripDetails?.vendorRate ?? '',
-      driverRate: tripDetails?.driverRate ?? '',
-      additionalRate: tripDetails?.addOnRate || '',
-      penalty: tripDetails?.penalty || '',
-      location: tripDetails?.location || '',
-      remarks: tripDetails?.remarks || ''
-    },
-    enableReinitialize: true,
-    validationSchema: Yup.object({
-      //   tripDate: Yup.date().required('Trip Date is required'),
-      //   tripTime: Yup.string().required('Trip Time is required')
-      // Add validation for other fields as needed
-    }),
-    onSubmit: (values) => {
-      setIsApiLoading(true); // Disable the button during API call
-
-      const updatedTripData = {
-        data: {
-          assignTripsData: [
-            {
-              assignTripId: rowId,
-              company_name: values?.company_name,
-              tripDate: values?.tripDate,
-              tripTime: values?.tripTime,
-              zoneName: values?.zoneName,
-              zoneType: values?.zoneType,
-              cab: values?.cab,
-              cabType: values?.cabType,
-              driver: values?.driver,
-              guard: values?.guard,
-              guardPrice: values?.guardPrice,
-              companyRate: values?.companyRate,
-              vendorRate: values?.vendorRate,
-              driverRate: values?.driverRate,
-              additionalRate: values?.additionalRate,
-              penalty: values?.penalty,
-              location: values?.location,
-              remarks: values?.remarks
-            }
-          ]
-        }
-      };
-
-      try {
-        const response = axiosServices.put(`/assignTrip/edit/trip/data`, updatedTripData);
-        console.log('Trip updated successfully', response.data);
-
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: response.data?.message || 'Trip updated successfully',
-            variant: 'alert',
-            alert: {
-              color: 'success'
-            },
-            close: true
-          })
-        );
-        formik.resetForm({ values }); // Resets the form with current values
-      } catch (error) {
-        console.error('Error updating trip:', error);
-
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: error?.message || 'Something went wrong',
-            variant: 'alert',
-            alert: {
-              color: 'error'
-            },
-            close: true
-          })
-        );
-      } finally {
-        setIsApiLoading(false); // Re-enable the button after API call
-      }
+    if (isOpen) {
+      setIsApiLoading(true);
+      axiosServices
+        .get(`/assignTrip/details/by?tripId=${selectedTripId}`)
+        .then((response) => {
+          setTripDetails(response.data.data);
+        })
+        .catch((error) => {
+          console.error('Error fetching trip details:', error);
+        })
+        .finally(() => {
+          setIsApiLoading(false);
+        });
     }
-  });
-
-  const handleCancelEdit = () => {
-    navigate('/apps/trips/list');
-  };
-
-  if (!tripDetails) return <CustomCircularLoader />;
-
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH }, { title: 'Trips', to: '/apps/trips/list' }, { title: 'Trip Details' }];
+  }, [isOpen, selectedTripId]);
 
   return (
-    <>
-      <Breadcrumbs custom links={breadcrumbLinks} />
+    <Modal
+      aria-labelledby="transition-modal-title"
+      aria-describedby="transition-modal-description"
+      open={isOpen}
+      onClose={onClose}
+      closeAfterTransition
+    >
+      <Fade in={isOpen}>
+        <MainCard
+          title="Trip Details"
+          modal
+          darkTitle
+          content={false}
+          sx={{
+            width: '50%', // Adjust the width as needed
+            maxWidth: '500px', // Set a maximum width
+          }}
+        >
+          {isApiLoading ? (
+            <CardContent>
+              <CircularProgress size={30} />
+            </CardContent>
+          ) : tripDetails ? (
+            <>
+              <CardContent>
+                <Grid container spacing={1}>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Company Name:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.companyID?.company_name}</Typography>
+                  </Grid>
 
-      <MainCard title="Trip Details">
-        <FormikProvider value={formik}>
-          <form onSubmit={formik.handleSubmit}>
-            <Grid container spacing={3}>
-              {/* Company Name */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Company Name</InputLabel>
-                  <TextField
-                    id="company_name"
-                    name="company_name"
-                    value={formik.values.company_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.company_name && Boolean(formik.errors.company_name)}
-                    helperText={formik.touched.company_name && formik.errors.company_name}
-                    fullWidth
-                    autoComplete="company_name"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Trip Date:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{formatDateUsingMoment(tripDetails?.tripDate, 'YYYY-MM-DD')}</Typography>
+                  </Grid>
 
-              {/* Trip Date */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Trip Date</InputLabel>
-                  <TextField
-                    id="tripDate"
-                    name="tripDate"
-                    type="date"
-                    value={formik.values.tripDate}
-                    onChange={formik.handleChange}
-                    error={formik.touched.tripDate && Boolean(formik.errors.tripDate)}
-                    helperText={formik.touched.tripDate && formik.errors.tripDate}
-                    fullWidth
-                    autoComplete="tripDate"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Trip Time:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.tripTime}</Typography>
+                  </Grid>
 
-              {/* Trip Time */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Trip Time</InputLabel>
-                  <TextField
-                    id="tripTime"
-                    name="tripTime"
-                    type="time"
-                    value={formik.values.tripTime}
-                    onChange={formik.handleChange}
-                    error={formik.touched.tripTime && Boolean(formik.errors.tripTime)}
-                    helperText={formik.touched.tripTime && formik.errors.tripTime}
-                    fullWidth
-                    autoComplete="tripTime"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Zone Name:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.zoneNameID?.zoneName}</Typography>
+                  </Grid>
 
-              {/* Zone Name */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Zone Name</InputLabel>
-                  <TextField
-                    id="zoneName"
-                    name="zoneName"
-                    value={formik.values.zoneName}
-                    onChange={formik.handleChange}
-                    error={formik.touched.zoneName && Boolean(formik.errors.zoneName)}
-                    helperText={formik.touched.zoneName && formik.errors.zoneName}
-                    fullWidth
-                    autoComplete="zoneName"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Zone Type:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.zoneTypeID?.zoneTypeName}</Typography>
+                  </Grid>
 
-              {/* Zone Type */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Zone Type</InputLabel>
-                  <TextField
-                    id="zoneType"
-                    name="zoneType"
-                    value={formik.values.zoneType}
-                    onChange={formik.handleChange}
-                    error={formik.touched.zoneType && Boolean(formik.errors.zoneType)}
-                    helperText={formik.touched.zoneType && formik.errors.zoneType}
-                    fullWidth
-                    autoComplete="zoneType"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Cab:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.vehicleNumber?.vehicleNumber}</Typography>
+                  </Grid>
 
-              {/* Cab */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Cab</InputLabel>
-                  <TextField
-                    id="cab"
-                    name="cab"
-                    value={formik.values.cab}
-                    onChange={formik.handleChange}
-                    error={formik.touched.cab && Boolean(formik.errors.cab)}
-                    helperText={formik.touched.cab && formik.errors.cab}
-                    fullWidth
-                    autoComplete="cab"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Cab Type:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.vehicleTypeID?.vehicleTypeName}</Typography>
+                  </Grid>
 
-              {/* Cab Type */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Cab Type</InputLabel>
-                  <TextField
-                    id="cabType"
-                    name="cabType"
-                    value={formik.values.cabType}
-                    onChange={formik.handleChange}
-                    error={formik.touched.cabType && Boolean(formik.errors.cabType)}
-                    helperText={formik.touched.cabType && formik.errors.cabType}
-                    fullWidth
-                    autoComplete="cabType"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Driver:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.driverId?.userName}</Typography>
+                  </Grid>
 
-              {/* Driver */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Driver</InputLabel>
-                  <TextField
-                    id="driver"
-                    name="driver"
-                    value={formik.values.driver}
-                    onChange={formik.handleChange}
-                    error={formik.touched.driver && Boolean(formik.errors.driver)}
-                    helperText={formik.touched.driver && formik.errors.driver}
-                    fullWidth
-                    autoComplete="driver"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Guard:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.guard}</Typography>
+                  </Grid>
 
-              {/* Guard */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Guard</InputLabel>
-                  <TextField
-                    id="guard"
-                    name="guard"
-                    value={formik.values.guard}
-                    onChange={formik.handleChange}
-                    error={formik.touched.guard && Boolean(formik.errors.guard)}
-                    helperText={formik.touched.guard && formik.errors.guard}
-                    fullWidth
-                    autoComplete="guard"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                     Company Guard Price:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.companyGuardPrice || 0}</Typography>
+                  </Grid>
 
-              {/* Guard Price */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Guard Price</InputLabel>
-                  <TextField
-                    id="guardPrice"
-                    name="guardPrice"
-                    value={formik.values.guardPrice}
-                    onChange={formik.handleChange}
-                    error={formik.touched.guardPrice && Boolean(formik.errors.guardPrice)}
-                    helperText={formik.touched.guardPrice && formik.errors.guardPrice}
-                    fullWidth
-                    autoComplete="guardPrice"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                     Vendor Guard Price:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.vendorGuardPrice || 0}</Typography>
+                  </Grid>
 
-              {/* Company Rate */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Company Rate</InputLabel>
-                  <TextField
-                    id="companyRate"
-                    name="companyRate"
-                    value={formik.values.companyRate}
-                    onChange={formik.handleChange}
-                    error={formik.touched.companyRate && Boolean(formik.errors.companyRate)}
-                    helperText={formik.touched.companyRate && formik.errors.companyRate}
-                    fullWidth
-                    autoComplete="companyRate"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                     Driver Guard Price:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.driverGuardPrice || 0}</Typography>
+                  </Grid>
 
-              {/* Vendor Rate */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Vendor Rate</InputLabel>
-                  <TextField
-                    id="vendorRate"
-                    name="vendorRate"
-                    value={formik.values.vendorRate}
-                    onChange={formik.handleChange}
-                    error={formik.touched.vendorRate && Boolean(formik.errors.vendorRate)}
-                    helperText={formik.touched.vendorRate && formik.errors.vendorRate}
-                    fullWidth
-                    autoComplete="vendorRate"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Company Rate:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.companyRate}</Typography>
+                  </Grid>
 
-              {/* Driver Rate */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Driver Rate</InputLabel>
-                  <TextField
-                    id="driverRate"
-                    name="driverRate"
-                    value={formik.values.driverRate}
-                    onChange={formik.handleChange}
-                    error={formik.touched.driverRate && Boolean(formik.errors.driverRate)}
-                    helperText={formik.touched.driverRate && formik.errors.driverRate}
-                    fullWidth
-                    autoComplete="driverRate"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Vendor Rate:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.vendorRate}</Typography>
+                  </Grid>
 
-              {/* Additional Rate */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Additional Rate</InputLabel>
-                  <TextField
-                    id="additionalRate"
-                    name="additionalRate"
-                    value={formik.values.additionalRate}
-                    onChange={formik.handleChange}
-                    error={formik.touched.additionalRate && Boolean(formik.errors.additionalRate)}
-                    helperText={formik.touched.additionalRate && formik.errors.additionalRate}
-                    fullWidth
-                    autoComplete="additionalRate"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Driver Rate:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.driverRate}</Typography>
+                  </Grid>
 
-              {/* Penalty */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Penalty</InputLabel>
-                  <TextField
-                    id="penalty"
-                    name="penalty"
-                    value={formik.values.penalty}
-                    onChange={formik.handleChange}
-                    error={formik.touched.penalty && Boolean(formik.errors.penalty)}
-                    helperText={formik.touched.penalty && formik.errors.penalty}
-                    fullWidth
-                    autoComplete="penalty"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Additional Rate:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.addOnRate}</Typography>
+                  </Grid>
 
-              {/* Location */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Location</InputLabel>
-                  <TextField
-                    id="location"
-                    name="location"
-                    value={formik.values.location}
-                    onChange={formik.handleChange}
-                    error={formik.touched.location && Boolean(formik.errors.location)}
-                    helperText={formik.touched.location && formik.errors.location}
-                    fullWidth
-                    autoComplete="location"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                     Company Penalty:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.companyPenalty || 0}</Typography>
+                  </Grid>
 
-              {/* Remarks */}
-              <Grid item xs={4}>
-                <Stack spacing={1}>
-                  <InputLabel>Remarks</InputLabel>
-                  <TextField
-                    id="remarks"
-                    name="remarks"
-                    value={formik.values.remarks}
-                    onChange={formik.handleChange}
-                    error={formik.touched.remarks && Boolean(formik.errors.remarks)}
-                    helperText={formik.touched.remarks && formik.errors.remarks}
-                    fullWidth
-                    autoComplete="remarks"
-                  />
-                </Stack>
-              </Grid>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Vendor Penalty:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.vendorPenalty || 0}</Typography>
+                  </Grid>
 
-              {/* Save / Cancel buttons */}
-              <Grid item xs={12}>
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      disabled={isApiLoading || formik.isSubmitting || !formik.dirty}
-                    >
-                      {isApiLoading ? 'Saving...' : 'Save'}
-                    </Button>
-                    <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
-                      Cancel
-                    </Button>
-                  </>
-                </Stack>
-              </Grid>
-            </Grid>
-          </form>
-        </FormikProvider>
-      </MainCard>
-    </>
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                     Driver Penalty:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.driverPenalty || 0}</Typography>
+                  </Grid>
+
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Location:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.location}</Typography>
+                  </Grid>
+
+                  <Grid item xs={5}>
+                    <Typography variant="textSecondary" color="textSecondary">
+                      Remarks:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="textSecondary">{tripDetails?.remarks}</Typography>
+                  </Grid>
+                </Grid>
+              </CardContent>
+
+              <Divider />
+              <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ px: 2.5, py: 2 }}>
+                <Button color="error" size="small" onClick={onClose}>
+                  Close
+                </Button>
+              </Stack>
+            </>
+          ) : (
+            <CardContent>
+              <Typography>No trip details available.</Typography>
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Button color="error" size="small" onClick={onClose}>
+                  Close
+                </Button>
+              </Stack>
+            </CardContent>
+          )}
+        </MainCard>
+      </Fade>
+    </Modal>
   );
-};
-
-export default TripView;
+}
