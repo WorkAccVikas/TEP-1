@@ -43,7 +43,9 @@ import { APP_DEFAULT_PATH } from 'config';
 import * as XLSX from 'xlsx';
 import moment from 'moment';
 import axiosServices from 'utils/axios';
-import { getMergeResult } from './utils/MappingAlgorithem';
+import { getMergeResult } from './functions/MappingAlgorithem';
+import TableSkeleton from 'components/tables/TableSkeleton';
+// import { getMergeResult } from './utils/MappingAlgorithem';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -213,10 +215,11 @@ ReactTable.propTypes = {
 
 // ==============================|| Roster - LIST ||============================== //
 
-const ViewRosterTest = () => {
+const UploadPreview = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { fileData, selectedValue } = location.state || {};
+  console.log({ fileData, selectedValue });
   const navigate = useNavigate();
   const [excelData, setExcelData] = useState([]);
   const [earliestDate, setEarliestDate] = useState(null);
@@ -567,13 +570,13 @@ const ViewRosterTest = () => {
 
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Roster', to: '/apps/roster/all-roster' },
+    { title: 'Roster', to: '/apps/roster' },
     { title: 'Create Roster' }
   ];
 
   const handleSaveRoster = async () => {
     const rosterFileId = fileData._id;
-    const companyID = fileData.companyId._id;
+    const companyID = typeof fileData.companyId === 'string' ? fileData.companyId : fileData.companyId._id;
     const startDate = earliestDate._i;
     const endDate = latestDate._i;
 
@@ -603,7 +606,7 @@ const ViewRosterTest = () => {
         });
         setLoading(false);
         if (updateResponse.data.success) {
-          navigate('/apps/roster/all-roster');
+          navigate('/apps/roster');
         }
       }
     } catch (error) {
@@ -617,16 +620,22 @@ const ViewRosterTest = () => {
 
   return (
     <>
-      <Breadcrumbs custom heading="Create Roster" links={breadcrumbLinks} />
+      <Breadcrumbs custom  links={breadcrumbLinks} />
 
       <MainCard content={false}>
-        <ScrollX>{mappedRowData && <ReactTable columns={columns} data={mappedRowData} handleSaveRoster={handleSaveRoster} />}</ScrollX>
+        <ScrollX>
+          {mappedRowData && mappedRowData.length === 0 ? (
+            <TableSkeleton rows={10} columns={6} />
+          ) : (
+            <ReactTable columns={columns} data={mappedRowData} handleSaveRoster={handleSaveRoster} />
+          )}
+        </ScrollX>
       </MainCard>
     </>
   );
 };
 
-ViewRosterTest.propTypes = {
+UploadPreview.propTypes = {
   row: PropTypes.object,
   values: PropTypes.object,
   email: PropTypes.string,
@@ -641,4 +650,4 @@ ViewRosterTest.propTypes = {
   getToggleRowSelectedProps: PropTypes.func
 };
 
-export default ViewRosterTest;
+export default UploadPreview;

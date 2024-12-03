@@ -428,7 +428,9 @@ function ReactTable({
   handleTripSelectedData,
   tripSelectedData,
   otherSelectedData,
-  handleOtherSelectedData
+  handleOtherSelectedData,
+  selectedData,
+  handleSelectedData
 }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
@@ -474,6 +476,7 @@ function ReactTable({
   useEffect(() => {
     const selectedTripRowsData = [];
     const selectedOtherRowsData = [];
+    const selectedAllRowsData = [];
 
     if (selectedFlatRows.length > 0) {
       selectedFlatRows.forEach((row) => {
@@ -482,9 +485,11 @@ function ReactTable({
         } else {
           selectedOtherRowsData.push(row.original._id); // Add to other data
         }
+        if (!row.original.invoiceId) selectedAllRowsData.push(row.original._id);
       });
     }
 
+    handleSelectedData(selectedAllRowsData);
     handleTripSelectedData(selectedTripRowsData); // Pass filtered trip rows data
     handleOtherSelectedData(selectedOtherRowsData); // Pass filtered other rows data
   }, [selectedFlatRows, handleTripSelectedData, handleOtherSelectedData]);
@@ -552,7 +557,7 @@ function ReactTable({
 
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
             <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <ChangeStatusButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <ChangeStatusButton selected={selectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
               Add Trip
@@ -562,6 +567,9 @@ function ReactTable({
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef} sx={{ mt: 2 }}>
+        <Box sx={{ pl: 2, pr: 2 }}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </Box>
         <ScrollX>
           <Table {...getTableProps()}>
             <TableHead>
@@ -625,6 +633,7 @@ const TripList = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [tripSelectedData, setTripSelectedData] = useState(null);
   const [otherSelectedData, setOtherSelectedData] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
   const [popup, setPopup] = useState('');
   const [updatedStatus, setUpdatedStatus] = useState(-1);
   const { alertPopup } = useSelector((state) => state.invoice);
@@ -639,8 +648,6 @@ const TripList = () => {
     selectedDriver: {},
     selectedVehicle: {}
   });
-
-  console.log('selectedRow', selectedRow);
 
   const [tripStats, setTripStats] = useState({
     completedTripsCount: 0,
@@ -768,33 +775,7 @@ const TripList = () => {
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
 
-  const [invoiceId, setInvoiceId] = useState(0);
-  const [getInvoiceId, setGetInvoiceId] = useState(0);
-
   const navigate = useNavigate();
-
-  const handleClose = (status) => {
-    if (status) {
-      dispatch(getInvoiceDelete(invoiceId));
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Column deleted successfully',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false
-        })
-      );
-    }
-    dispatch(
-      alertPopupToggle({
-        alertToggle: false
-      })
-    );
-  };
 
   const handleCloseAlert = () => {
     setSelectedRow(null);
@@ -1070,7 +1051,7 @@ const TripList = () => {
       },
       {
         Header: 'Company Rates',
-        accessor: 'companyRate',
+        accessor: 'companyRate'
       },
       {
         Header: 'Additional Rate',
@@ -1094,7 +1075,7 @@ const TripList = () => {
             case 1: // For Pick Up
               return <Chip label="Pick Up" color="warning" variant="light" />;
             case 2: // For Pick Drop
-              return <Chip label="Pick Drop" color="success" variant="light" />;
+              return <Chip label="Drop" color="success" variant="light" />;
           }
         }
       },
@@ -1121,6 +1102,9 @@ const TripList = () => {
   }, []);
   const handleOtherSelectedData = useCallback((selectedRows) => {
     setOtherSelectedData(selectedRows);
+  }, []);
+  const handleSelectedData = useCallback((selectedRows) => {
+    setSelectedData(selectedRows);
   }, []);
 
   return (
@@ -1311,6 +1295,8 @@ const TripList = () => {
               handleTripSelectedData={handleTripSelectedData}
               otherSelectedData={otherSelectedData}
               handleOtherSelectedData={handleOtherSelectedData}
+              selectedData={selectedData}
+              handleSelectedData={handleSelectedData}
             />
           ) : (
             <EmptyTableDemo />
@@ -1318,8 +1304,6 @@ const TripList = () => {
           {/* </ScrollX> */}
         </MainCard>
       </Stack>
-
-      <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} />
 
       {alertOpen && popup === POPUP_TYPE.ALERT_DIALOG && (
         <AlertDialog

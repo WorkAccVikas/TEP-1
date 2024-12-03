@@ -6,23 +6,17 @@ import MainLayout from 'layout/MainLayout';
 import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-import ProtectedRoute from 'components/common/guards/ProtectedRoute';
-import { MODULE, PERMISSIONS } from 'constant';
 
 // import RosterDashboard from 'pages/apps/test/dashboard';
-import MapRosterFileTest from 'pages/apps/test/CreateRosterTemplateDrawer.js';
-import ViewRosterTest from 'pages/apps/test/List';
-import ViewRosterTest1 from 'pages/apps/test/ViewRoster';
-import AddRosterFileForm from 'pages/apps/test/components/AddRosterFileForm';
 import DriverRate from 'pages/management/driver/driverRate/DriverRate';
 import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelisting';
 import TripView from 'pages/trips/TripView';
-import ExpandingFile from 'sections/cabprovidor/testAdvance/ExpandingFile';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
-import Reports from 'pages/reports/Reports';
 import ReportDriver from 'pages/reports/ReportDriver';
 import Create from 'pages/invoice/create/Create3';
 import TripReports from 'pages/reports/Trips';
+
+// import Roster from 'pages/apps/roster';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -36,13 +30,12 @@ const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')))
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('pages')));
 const ProfileOverview = Loadable(lazy(() => import('pages/overview/ProfileOverview')));
+
 // Roster
-const Roster = Loadable(lazy(() => import('pages/apps/roster')));
-const RosterFileList = Loadable(lazy(() => import('pages/apps/test/RosterFileManagement')));
-const MapRosterFile = Loadable(lazy(() => import('pages/Roster/map-roster')));
-const ViewRoster = Loadable(lazy(() => import('pages/Roster/view-roster')));
-const AssignTrips = Loadable(lazy(() => import('pages/Roster/assign-trips')));
-const AllRosters = Loadable(lazy(() => import('pages/Roster/AllRosters')));
+const AllRosters = Loadable(lazy(() => import('pages/apps/roster')));
+const RosterFileList = Loadable(lazy(() => import('pages/apps/roster/FileList')));
+const UploadPreview = Loadable(lazy(() => import('pages/apps/roster/UploadPreview')));
+const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTripsList')));
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
@@ -89,7 +82,6 @@ const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
 const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
-const Advance = Loadable(lazy(() => import('pages/invoices/advance')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));
 // Master
 const Role = Loadable(lazy(() => import('pages/master/Role')));
@@ -98,20 +90,16 @@ const ZoneType = Loadable(lazy(() => import('pages/master/zones/ZoneType')));
 
 const CabType = Loadable(lazy(() => import('pages/master/CabType')));
 // Cab Rate
-const CabRate = Loadable(lazy(() => import('pages/master/CabRate')));
 const AddCabRateVendor = Loadable(lazy(() => import('pages/master/CabRate/Vendor')));
 const AddCabRateDriver = Loadable(lazy(() => import('pages/master/CabRate/Driver')));
 
 // Dashboard
-const RosterDashboard = Loadable(lazy(() => import('pages/dashboard/rosterDashboard/RosterDashboard')));
 const CabDashBoard = Loadable(lazy(() => import('pages/dashboard/cabDashboard/CabDashBoard')));
 const DriverDashboard = Loadable(lazy(() => import('pages/dashboard/driverDashboard/DriverDashboard')));
 const VendorDashboard = Loadable(lazy(() => import('pages/dashboard/vendorDashboard/VendorDashboard')));
 const CompanyDashboard = Loadable(lazy(() => import('pages/dashboard/companyDashboard/CompanyDashboard')));
 const UserDashboard = Loadable(lazy(() => import('pages/dashboard/userDashboard/UserDashboard')));
-const InvoiceDashboard = Loadable(lazy(() => import('pages/dashboard/invoiceDashboard/InvoiceDashboard')));
 // Dashboard
-const RosterDashboard1 = Loadable(lazy(() => import('pages/apps/test/dashboard')));
 
 // Settings
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
@@ -119,7 +107,6 @@ const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
 const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
-const ExcelTemplatePage = Loadable(lazy(() => import('pages/apps/downloadExcelTemplate/DownloadExcel')));
 // ==============================|| MAIN ROUTES ||============================== //
 
 const CabProvidorRoutes = {
@@ -137,7 +124,6 @@ const CabProvidorRoutes = {
         {
           path: 'dashboard',
           element: <Dashboard />
-          //   element: <UnderConstruction title="Dashboard" />
         },
 
         {
@@ -153,54 +139,51 @@ const CabProvidorRoutes = {
             {
               path: 'roster',
               children: [
-                // {
-                //   path: 'dashboard',
-                //   element: <RosterDashboard />
-                // },
                 {
-                  path: 'view',
-                  element: <Roster />
+                  path: '',
+                  element: <AllRosters />
                 },
                 {
-                  path: 'create',
-                  element: <AddRosterFileForm />
-                },
-                {
-                  path: 'file-management',
+                  path: 'files',
                   element: <RosterFileList />
                 },
                 {
-                  path: 'map-roster',
-                  element: <MapRosterFile />
+                  path: 'preview',
+                  element: <UploadPreview />
                 },
                 {
-                  path: 'test-view',
-                  element: <ViewRosterTest />
+                  path: 'assign-trip',
+                  element: <AssignTripList />
                 },
-                {
-                  path: 'test-view-1',
-                  element: <ViewRosterTest1 /> // Render Company only for base path
-                },
-                {
-                  path: 'assign-trips',
-                  element: <AssignTrips />
-                },
-                {
-                  path: 'test-download',
-                  element: <ExcelTemplatePage />
-                },
-                {
-                  path: 'test-map',
-                  element: <MapRosterFileTest />
-                },
-                {
-                  path: 'test-view',
-                  element: <ViewRoster /> // Render Company only for base path
-                },
-                {
-                  path: 'all-roster',
-                  element: <AllRosters />
-                }
+
+                // {
+                //   path: 'map-roster',
+                //   element: <MapRosterFile />
+                // },
+                // {
+                //   path: 'test-view',
+                //   element: <ViewRosterTest />
+                // },
+                // {
+                //   path: 'test-view-1',
+                //   element: <ViewRosterTest1 /> // Render Company only for base path
+                // },
+                // {
+                //   path: 'assign-trips',
+                //   element: <AssignTrips />
+                // },
+                // {
+                //   path: 'test-map',
+                //   element: <MapRosterFileTest />
+                // },
+                // {
+                //   path: 'test-view',
+                //   element: <ViewRoster /> // Render Company only for base path
+                // },
+                // {
+                //   path: 'all-roster',
+                //   element: <AllRosters />
+                // }
               ]
             },
 

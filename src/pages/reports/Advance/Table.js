@@ -14,7 +14,6 @@ const Table = () => {
 
   const columns = useMemo(
     () => [
-  
       {
         Header: '#',
         accessor: 'id',
@@ -31,21 +30,29 @@ const Table = () => {
       },
       {
         Header: 'Requested By',
-        accessor: 'requestedById.userName'
+        accessor: 'requestedById.userName',
+        Cell: ({ row, value }) => {
+          const isVendor = row.original.isVendor;
+          return isVendor ? row.original.vendorCompanyName || 'N/A' : value;
+        }
       },
       {
         Header: 'Contact Number',
-        accessor: 'advanceTypeId.contactNumber',
-         Cell: ({ value }) => value || 'None'
+        accessor: 'requestedById.contactNumber',
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Vehicle Number',
-        accessor: 'totalVehicleList',
-        Cell: ({ row }) => {
-          console.log(row.original.totalVehicleList);
-          const vehicleArray = row.original.totalVehicleList;
-          return vehicleArray.length === 1 ? (
-            vehicleArray[0].vehicleNumber
+        accessor: 'driverList',
+        Cell: ({ value }) => {
+          console.log({ value });
+
+          return value.length === 1 ? (
+            value[0].attachedVehicles[0]?.vehicleNumber ? (
+              value[0].attachedVehicles[0]?.vehicleNumber
+            ) : (
+              'N/A'
+            )
           ) : (
             <Chip label={'Muliple Vehicle'} color={'info'} variant="light" size="small" />
           );
@@ -54,7 +61,7 @@ const Table = () => {
       {
         Header: 'Advance Type',
         accessor: 'advanceTypeId.advanceTypeName',
-         Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Interest Rate',
@@ -97,6 +104,7 @@ const Table = () => {
     []
   );
 
+  console.log({ advanceReportData });
   return (
     <>
       {advanceReportData && advanceReportData.length > 0 ? (

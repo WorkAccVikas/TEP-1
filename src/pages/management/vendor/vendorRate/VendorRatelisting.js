@@ -14,7 +14,7 @@ import {
   Stack,
   TextField
 } from '@mui/material';
-import SearchComponent from 'pages/apps/test/CompanySearch';
+// import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import VendorRateTable from './VendorRateTable';
 import { useLocation, useNavigate } from 'react-router';
@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
+import SearchComponent from 'pages/apps/roster/components/CompanySearch';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 

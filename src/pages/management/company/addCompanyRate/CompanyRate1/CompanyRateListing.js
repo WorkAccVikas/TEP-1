@@ -7,8 +7,9 @@ import Header from 'components/tables/genericTable/Header';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { Add } from 'iconsax-react';
 import CompanyRate from './CompanyRate';
-import SearchComponent from 'pages/apps/test/CompanySearch';
+// import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
+import SearchComponent from 'pages/apps/roster/components/CompanySearch';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 

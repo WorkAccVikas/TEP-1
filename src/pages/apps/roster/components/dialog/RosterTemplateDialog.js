@@ -1,12 +1,9 @@
-import PropTypes from 'prop-types';
-import { useState } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import ListItemText from '@mui/material/ListItemText';
@@ -15,12 +12,10 @@ import ListItemButton from '@mui/material/ListItemButton';
 
 // project-imports
 import IconButton from 'components/@extended/IconButton';
-// import { ImagePath, getImageUrl } from 'utils/getImageUrl';
 
 // assets
 import { Add, TableDocument } from 'iconsax-react';
-import { useDrawer } from 'contexts/DrawerContext';
-import CreateRosterTemplate from '../CreateRosterTemplateDrawer.js';
+import CreateRosterTemplate from './components/CreateRosterTemplateDrawer';
 
 // ==============================|| DIALOG - SIMPLE ||============================== //
 
@@ -34,8 +29,6 @@ function RosterTemplateDialog({ onClose, selectedValue, open, templates }) {
   const handleListItemClick = (value) => {
     onClose(value);
   };
-
-  const { openDrawer } = useDrawer();
 
   return (
     <>
@@ -74,21 +67,6 @@ function RosterTemplateDialog({ onClose, selectedValue, open, templates }) {
                 <ListItemText primary={template.templateName} />
               </ListItemButton>
             ))}
-          {/* <ListItemButton
-            autoFocus
-            onClick={() => {
-              handleClose();
-              openDrawer();
-            }}
-            sx={{ p: 1.25 }}
-          >
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: 'primary.lighter', color: 'primary.main', width: 32, height: 32 }}>
-                <Add style={{ fontSize: '0.625rem' }} />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Add New Template" />
-          </ListItemButton> */}
         </List>
       </Dialog>
       <CreateRosterTemplate />

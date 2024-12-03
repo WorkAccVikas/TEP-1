@@ -9,7 +9,6 @@ import {
   LinearProgress,
   Tabs,
   Tab,
-  Grid,
   Typography,
   Stack,
   Table,
@@ -30,25 +29,22 @@ import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, 
 import Loader from 'components/Loader';
 import ScrollX from 'components/ScrollX';
 import MainCard from 'components/MainCard';
-import Avatar from 'components/@extended/Avatar';
 import IconButton from 'components/@extended/IconButton';
-import InvoiceCard from 'components/cards/invoice/InvoiceCard';
-import InvoiceChart from 'components/cards/invoice/InvoiceChart';
-import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
+import { HeaderSort, IndeterminateCheckbox, TablePagination } from 'components/third-party/ReactTable';
 import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
 
 import { dispatch, useSelector } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reducers/invoice';
+import { alertPopupToggle, getInvoiceDelete } from 'store/reducers/invoice';
 import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Edit, Eye, InfoCircle, ProfileTick, Trash } from 'iconsax-react';
+import { Edit, Eye, InfoCircle } from 'iconsax-react';
 import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import axiosServices from 'utils/axios';
-import AssignTripsDialog from './components/AssignTripsDialog';
-// import AssignTripsDialog from './components/AssignTripsDialog';
+import AssignTripsDialog from './components/dialog/AssignTripsDialog';
+import TableSkeleton from 'components/tables/TableSkeleton';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -155,22 +151,20 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
               />
             ))}
           </Tabs>
-
-         
         </Stack>
       </Box>
       <Stack direction={matchDownSM ? 'column' : 'row'} spacing={1} justifyContent="space-between" alignItems="center" sx={{ p: 1, pb: 1 }}>
-          <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
-           {/* Button Section */}
-           {selectedData.length > 0 && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAssignDialogOpen} // Replace this with your actual onClick function
-            >
-              Assign Trips ({selectedData.filter((data) => data.status !== 3).length})
-            </Button>
-          )}
+        <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
+        {/* Button Section */}
+        {selectedData.length > 0 && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAssignDialogOpen} // Replace this with your actual onClick function
+          >
+            Assign Trips ({selectedData.filter((data) => data.status !== 3).length})
+          </Button>
+        )}
       </Stack>
       <Box ref={componentRef}>
         <Table {...getTableProps()}>
@@ -236,7 +230,7 @@ export function formatIndianDate(isoDateString) {
   return `${day}/${month}/${year}`;
 }
 
-const ViewRosterTest1 = () => {
+const AssignTripList = () => {
   const [loading, setLoading] = useState(false);
   const { alertPopup } = useSelector((state) => state.invoice);
   const location = useLocation();
@@ -244,9 +238,7 @@ const ViewRosterTest1 = () => {
   const { rosterData: stateData, fileData } = location.state || {};
   const [selectedData, setSelectedData] = useState([]);
   const [initateRender, setInitateRender] = useState(0);
-  const handleAssignTrips = () => {
-    console.log(selectedData);
-  };
+ 
   const handleSetSelectedData = useCallback((selectedRows) => {
     setSelectedData(selectedRows);
   }, []);
@@ -256,46 +248,38 @@ const ViewRosterTest1 = () => {
       setRosterData(stateData);
     }
   }, []);
+
   useEffect(() => {
+    let isMounted = true; // Flag to handle component unmounting
+
     const fetchRosterData = async (id) => {
-      const response = await axiosServices.post('/tripData/trip/requests/company', {
-        data: {
-          rosterFileId: id
+      setLoading(true);
+      try {
+        const response = await axiosServices.post('/tripData/trip/requests/company', {
+          data: { rosterFileId: id }
+        });
+        if (isMounted) {
+          setRosterData(response.data.data);
         }
-      });
-      setRosterData(response.data.data);
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching roster data:', error);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
     if (fileData?._id) {
       fetchRosterData(fileData._id);
     }
-  }, [initateRender]);
 
-  const [invoiceId, setInvoiceId] = useState(0);
-  const [getInvoiceId, setGetInvoiceId] = useState(0);
-
-  const handleClose = (status) => {
-    if (status) {
-      dispatch(getInvoiceDelete(invoiceId));
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Column deleted successfully',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false
-        })
-      );
-    }
-    dispatch(
-      alertPopupToggle({
-        alertToggle: false
-      })
-    );
-  };
+    return () => {
+      isMounted = false; // Cleanup to avoid state updates on unmounted component
+    };
+  }, [fileData?._id, initateRender]);
 
   const columns = useMemo(
     () => [
@@ -460,7 +444,7 @@ const ViewRosterTest1 = () => {
   );
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Roster', to: '/apps/roster/all-roster' },
+    { title: 'Roster', to: '/apps/roster' },
     { title: `${fileData?.companyId?.company_name}`, to: `/management/company/overview/${fileData?.companyId?._id}` },
     { title: 'Generate Trips' }
   ];
@@ -474,22 +458,24 @@ const ViewRosterTest1 = () => {
   const handleAssignDialogClose = () => {
     setOpenAssignTripDialog(false);
   };
-  if (loading) return <Loader />;
 
   return (
     <>
       <Breadcrumbs custom links={breadcrumbLinks} sx={{ mb: 0 }} />
       <MainCard content={false}>
         <ScrollX>
-          {rosterData && (
-            <ReactTable
-              columns={columns}
-              data={rosterData}
-              selectedData={selectedData}
-              handleSetSelectedData={handleSetSelectedData}
-              handleAssignTrips={handleAssignTrips}
-              handleAssignDialogOpen={handleAssignDialogOpen}
-            />
+          {loading ? (
+            <TableSkeleton rows={10} columns={8} />
+          ) : (
+            rosterData && (
+              <ReactTable
+                columns={columns}
+                data={rosterData}
+                selectedData={selectedData}
+                handleSetSelectedData={handleSetSelectedData}
+                handleAssignDialogOpen={handleAssignDialogOpen}
+              />
+            )
           )}
         </ScrollX>
       </MainCard>
@@ -501,12 +487,11 @@ const ViewRosterTest1 = () => {
         setInitateRender={setInitateRender}
         fileData={fileData}
       />
-      <AlertColumnDelete title={`${getInvoiceId}`} open={alertPopup} handleClose={handleClose} />
     </>
   );
 };
 
-ViewRosterTest1.propTypes = {
+AssignTripList.propTypes = {
   row: PropTypes.object,
   values: PropTypes.object,
   email: PropTypes.string,
@@ -539,4 +524,4 @@ LinearWithLabel.propTypes = {
   others: PropTypes.any
 };
 
-export default ViewRosterTest1;
+export default AssignTripList;

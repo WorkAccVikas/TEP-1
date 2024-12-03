@@ -26,7 +26,7 @@ import FormikTextField from 'components/textfield/TextField';
 import { USERTYPE } from 'constant';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { Add, DocumentUpload, Trash } from 'iconsax-react';
-import MultiFileUpload from 'pages/apps/test/components/MultiFileUpload';
+// import MultiFileUpload from 'pages/apps/test/components/MultiFileUpload';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';

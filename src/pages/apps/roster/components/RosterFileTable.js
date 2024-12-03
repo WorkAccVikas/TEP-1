@@ -1,4 +1,17 @@
-import { Button, Chip, Dialog, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Button,
+  Chip,
+  Dialog,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import { PopupTransition } from 'components/@extended/Transitions';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
@@ -8,19 +21,22 @@ import PropTypes from 'prop-types';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExpanded, useTable } from 'react-table';
-import AddRosterFileForm from './forms/AddRosterFileForm';
-import ViewRosterForm from './forms/ViewRosterForm';
-import RosterTemplateDialog from './dialog/RosterTemplateDialog';
 import axiosServices from 'utils/axios';
-import { Add } from 'iconsax-react';
+import { Add, Eye, Trash } from 'iconsax-react';
 import { useDrawer } from 'contexts/DrawerContext';
+import RosterTemplateDialog from './dialog/RosterTemplateDialog';
+import { useTheme } from '@mui/material/styles';
+import { ThemeMode } from 'config';
 
-const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
+const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, handleFileUploadOpen, fileData: fileInfo, openTemplate }) => {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [fileData, setFileData] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
   const [isReadyToNavigate, setIsReadyToNavigate] = useState(false);
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const { openDrawer } = useDrawer();
   const columns = useMemo(
     () => {
@@ -30,7 +46,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
       };
 
       const handleViewClick = (rowData) => {
-        navigate('/apps/roster/test-view-1', { state: { fileData: rowData } });
+        navigate('/apps/roster/assign-trip', { state: { fileData: rowData } });
       };
 
       return [
@@ -69,8 +85,53 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
           accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '')
         },
         {
-          Header: 'Action',
+          Header: 'sTATUS',
           accessor: 'isVisited',
+          //   Cell: ({ row }) => {
+
+          //     return (
+          //       <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
+          //         <Tooltip
+          //           componentsProps={{
+          //             tooltip: {
+          //               sx: {
+          //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+          //                 opacity: 0.9
+          //               }
+          //             }
+          //           }}
+          //           title="View Roster"
+          //         >
+          //           <IconButton color="secondary" onClick={() => handleViewClick(row.original)}>
+          //             <Eye />
+          //           </IconButton>
+          //         </Tooltip>
+
+          //         <Tooltip
+          //           componentsProps={{
+          //             tooltip: {
+          //               sx: {
+          //                 backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+          //                 opacity: 0.9
+          //               }
+          //             }
+          //           }}
+          //           title="Delete"
+          //         >
+          //           <IconButton
+          //             color="error"
+          //             onClick={() => {
+          //               setRemove(true);
+          //               setDeleteID(row.original._id);
+          //             }}
+          //           >
+          //             <Trash />
+          //           </IconButton>
+          //         </Tooltip>
+          //       </Stack>
+          //     );
+          //   }
+          // }
           Cell: ({ row }) => {
             const isVisited = row.original.isVisited;
 
@@ -130,9 +191,6 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
     fetchRosterTemplate();
   }, []);
 
-  const [fileDialogue, setFileDialogue] = useState(false);
-  const [viewDialogue, setViewDialogue] = useState(false);
-
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = (rowData) => {
@@ -147,17 +205,13 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
     setIsReadyToNavigate(true); // trigger navigation once states are updated
   };
 
-  const handleFileUploadDialogue = () => {
-    setFileDialogue(!fileDialogue);
-  };
-  const handleViewUploadDialogue = () => {
-    setViewDialogue(!viewDialogue);
-  };
-
+  useEffect(() => {
+    if (openTemplate && fileInfo) handleClickOpen(fileInfo);
+  }, []);
   useEffect(() => {
     if (fileData && selectedValue && isReadyToNavigate) {
       // Both states are updated, now navigate to the next page
-      navigate('/apps/roster/test-view', { state: { fileData, selectedValue } });
+      navigate('/apps/roster/preview', { state: { fileData, selectedValue } });
     }
   }, [fileData, selectedValue, isReadyToNavigate, navigate]);
 
@@ -172,7 +226,7 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo }) =
               <Button
                 variant="contained"
                 startIcon={<Add />} // Show loading spinner if loading
-                onClick={() => navigate('/apps/roster/create')}
+                onClick={handleFileUploadOpen}
                 size="small"
                 // color="info"
                 color="inherit"
