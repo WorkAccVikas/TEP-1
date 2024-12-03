@@ -1030,6 +1030,10 @@ const TripList = () => {
         accessor: 'tripTime'
       },
       {
+        Header: 'Trip Id',
+        accessor: 'rosterTripId'
+      },
+      {
         Header: 'Zone Name',
         accessor: 'zoneNameID.zoneName'
       },
@@ -1050,13 +1054,28 @@ const TripList = () => {
         accessor: 'driverId.userName',
         Cell: ({ value }) => value || 'None'
       },
+      // {
+      //   Header: 'Vehicle Guard Price',
+      //   accessor: 'guardPrice', // This can be any key; we won't directly use it.
+      //   Cell: ({ row }) => {
+      //     const { driverGuardPrice, vendorGuardPrice } = row.original;
+      //     return driverGuardPrice || vendorGuardPrice || 'Null';
+      //   }
+      // },
       {
-        Header: 'Vehicle Guard Price',
-        accessor: 'guardPrice', // This can be any key; we won't directly use it.
-        Cell: ({ row }) => {
-          const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
-        }
+        Header: 'Company Guard Price',
+        accessor: 'companyGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Guard Price',
+        accessor: 'vendorGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Guard Price',
+        accessor: 'driverGuardPrice',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Vehicle Rates',
@@ -1075,9 +1094,19 @@ const TripList = () => {
         accessor: 'addOnRate'
       },
       {
-        Header: 'Penalty',
-        accessor: 'penalty',
-        Cell: ({ value }) => value || 'Null'
+        Header: 'Company Penalty',
+        accessor: 'companyPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Penalty',
+        accessor: 'vendorPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Penalty',
+        accessor: 'driverPenalty',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Location',
