@@ -10,9 +10,9 @@ const validationSchema = Yup.object().shape({
   endDate: Yup.date()
     .required('End date is required')
     //  .nullable()
-    .test('is-greater', 'End date must be greater than start date', function (value) {
+    .test('is-greater', "The end date can't be before the start date.", function (value) {
       const { startDate } = this.parent;
-      return !startDate || !value || new Date(value) > new Date(startDate);
+      return !startDate || !value || new Date(value) >= new Date(startDate);
     })
 });
 
@@ -115,7 +115,7 @@ const CustomDateRangePickerDialog = ({
               </DialogContent>
 
               <DialogActions>
-                <Button onClick={onClose} color="error" variant='outlined'>
+                <Button onClick={onClose} color="error" variant="outlined">
                   Cancel
                 </Button>
                 <Button color="primary" type="submit" variant="contained">
