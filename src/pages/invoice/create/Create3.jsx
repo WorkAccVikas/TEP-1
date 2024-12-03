@@ -1,4 +1,4 @@
-import { redirect, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -19,11 +19,9 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  MenuItem,
   Paper,
   Radio,
   RadioGroup,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -32,34 +30,25 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 // third-party
-import * as yup from 'yup';
-import { v4 as UIDV4 } from 'uuid';
-import { format } from 'date-fns';
-import { FieldArray, Form, Formik, FormikProvider, getIn, useFormik } from 'formik';
+
+import { FieldArray, Form, FormikProvider, useFormik } from 'formik';
 
 // project-imports
 import MainCard from 'components/MainCard';
-import InvoiceItem from 'sections/apps/invoice/InvoiceItem';
-import AddressModal from 'sections/apps/invoice/AddressModal';
-import InvoiceModal from 'sections/apps/invoice/InvoiceModal';
 
-import incrementer from 'utils/incrementer';
 import { dispatch, set, useSelector } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { customerPopup, selectCountry, getInvoiceInsert, reviewInvoicePopup, getInvoiceList } from 'store/reducers/invoice';
+import { customerPopup, selectCountry, reviewInvoicePopup, getInvoiceList } from 'store/reducers/invoice';
 
 // assets
 import { Add, Edit, Setting, Trash } from 'iconsax-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import CustomDialog from './CustomDialog';
-import InvoiceSetting from 'pages/setting/invoice';
+import { useCallback, useEffect, useState } from 'react';
 import GenericSelect from 'components/select/GenericSelect';
 import { formatDateUsingMoment } from 'utils/helper';
 import axios from 'utils/axios';
@@ -133,14 +122,6 @@ const item = {
 };
 
 const getInitialValues = (data, user, userSpecificData, invoiceData = null, customerInfo = null, servicePeriod = null) => {
-  console.log('data', data);
-  console.log('user', user);
-  console.log('userSpecificData', userSpecificData);
-  console.log('vie = ', user?.userEmail);
-  console.log('invoiceData', invoiceData);
-  console.log('customerInfo', customerInfo);
-  console.log('servicePeriod', servicePeriod);
-
   const result = {
     id: 120,
     invoice_id: Date.now(),
@@ -233,166 +214,6 @@ const optionsForParticularType = [
   { value: PARTICULAR_TYPE.VEHICLE_TYPE, label: 'Vehicle Type' }
 ];
 
-const dummyData = [
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '11',
-      zoneTypeName: 'Mum-A'
-    },
-    vehicleTypeID: {
-      _id: '10',
-      vehicleTypeName: 'Sedan'
-    },
-    companyRate: 200
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '11',
-      zoneTypeName: 'Mum-A'
-    },
-    vehicleTypeID: {
-      _id: '102',
-      vehicleTypeName: 'Suv'
-    },
-    companyRate: 300
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '11',
-      zoneTypeName: 'Mum-A'
-    },
-    vehicleTypeID: {
-      _id: '103',
-      vehicleTypeName: 'Nano'
-    },
-    companyRate: 400
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '11',
-      zoneTypeName: 'Mum-A'
-    },
-    vehicleTypeID: {
-      _id: '101',
-      vehicleTypeName: 'Sedan'
-    },
-    companyRate: 200
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '11',
-      zoneTypeName: 'Mum-A'
-    },
-    vehicleTypeID: {
-      _id: '101',
-      vehicleTypeName: 'Sedan'
-    },
-    companyRate: 200
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    zoneTypeID: {
-      _id: '12',
-      zoneTypeName: 'Mum-B'
-    },
-    vehicleTypeID: {
-      _id: '103',
-      vehicleTypeName: 'Nano'
-    },
-    companyRate: 200
-  },
-  {
-    zoneNameID: {
-      _id: '2',
-      zoneName: 'Goa'
-    },
-    zoneTypeID: {
-      _id: '21',
-      zoneTypeName: 'Goa-A'
-    },
-    vehicleTypeID: {
-      _id: '101',
-      vehicleTypeName: 'Sedan'
-    },
-    companyRate: 500
-  },
-  {
-    zoneNameID: {
-      _id: '2',
-      zoneName: 'Goa'
-    },
-    zoneTypeID: {
-      _id: '21',
-      zoneTypeName: 'Goa-A'
-    },
-    vehicleTypeID: {
-      _id: '102',
-      vehicleTypeName: 'Suv'
-    },
-    companyRate: 400
-  },
-  {
-    zoneNameID: {
-      _id: '2',
-      zoneName: 'Goa'
-    },
-    zoneTypeID: {
-      _id: '21',
-      zoneTypeName: 'Goa-A'
-    },
-    vehicleTypeID: {
-      _id: '101',
-      vehicleTypeName: 'Sedan'
-    },
-    companyRate: 500
-  },
-  {
-    zoneNameID: {
-      _id: '2',
-      zoneName: 'Goa'
-    },
-    vehicleTypeID: {
-      _id: '102',
-      vehicleTypeName: 'Suv'
-    },
-    companyRate: 200
-  },
-  {
-    zoneNameID: {
-      _id: '1',
-      zoneName: 'Mumbai'
-    },
-    vehicleTypeID: {
-      _id: '103',
-      vehicleTypeName: 'Nano'
-    },
-    companyRate: 300
-  }
-];
-
 // Helper function to extract the correct grouping key
 const getGroupKey = (item, key) => {
   if (key === 'zoneNameID') {
@@ -437,15 +258,28 @@ const groupDataWithSuffix = (data, groupByKey) => {
   return result;
 };
 
-const Create3 = () => {
-  console.log('Invoice Create3.jsx');
+const groupGuardRates = (tripData) => {
+  const groupedRates = tripData.reduce((acc, item) => {
+    const guardPrice = item.companyGuardPrice;
 
+    if (!acc[guardPrice]) {
+      acc[guardPrice] = { name: `Guard Price (${Object.keys(acc).length + 1})`, qty: 0, rate: guardPrice };
+    }
+
+    acc[guardPrice].qty += 1; // Increment the count for the unique rate
+
+    return acc;
+  }, {});
+
+  // Convert grouped data into an array format
+  return Object.values(groupedRates);
+};
+
+const Create3 = () => {
   const theme = useTheme();
   const navigation = useNavigate();
   const location = useLocation();
   const tripData = location.state?.tripData;
-
-  console.log('tripData', tripData);
 
   const { user, userSpecificData } = useAuth();
 
@@ -478,12 +312,8 @@ const Create3 = () => {
 
   const userType = useSelector((state) => state.auth.userType);
 
-  console.log('settings = ', settings);
-
   const handleFormikSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
-      console.log('Formik submit', values);
-
       const cabProviderId = JSON.parse(localStorage.getItem('userInformation'))?.userId || '';
       const format = 'YYYY-MM-DD';
 
@@ -542,8 +372,6 @@ const Create3 = () => {
       };
 
       // alert(JSON.stringify(payload, null, 2));
-      console.log('payload', payload);
-
       const response = await axios.post(API_URL[userType], payload);
 
       if (response.status === 201) {
@@ -579,15 +407,8 @@ const Create3 = () => {
   const { handleBlur, errors, handleChange, handleSubmit, values, isValid, setFieldValue, touched } = formik;
 
   useEffect(() => {
-    console.log('useEffect of invoice create');
-    console.log(dialogOpen);
-
     async function fetchSettings() {
-      // TODO : Get settings from API
       try {
-        console.log('Api call for get settings (At Invoice Creation)');
-        // await new Promise((resolve) => setTimeout(resolve, 3000));
-
         const cabProviderId = JSON.parse(localStorage.getItem('userInformation'))?.userId || '';
         const url = `/invoice/settings/list`;
         const config = {
@@ -597,7 +418,6 @@ const Create3 = () => {
         };
 
         const response = await getApiResponse(url, config);
-        console.log(`🚀 ~ response:`, response);
 
         if (response.success) {
           if (!response.data) {
@@ -609,7 +429,6 @@ const Create3 = () => {
           }
           const { invoiceSetting } = response.data;
 
-          console.log(invoiceSetting);
           setSettings(invoiceSetting);
 
           setPrefix(invoiceSetting?.invoice?.prefix + '-' || 'INV-');
@@ -617,29 +436,14 @@ const Create3 = () => {
           setInvoiceId(invoiceSetting?.invoice?.prefix + '-' + String(invoiceSetting?.invoice?.invoiceNumber));
 
           setLoading(false);
-          console.log('Api call done .......');
         }
-
-        console.log('Api call done get settings ........');
-        // setSettings(SETTINGS);
       } catch (error) {
         console.log('Error fetching settings: (Invoice Creation)', error);
       }
     }
 
     fetchSettings();
-
-    // if (!dialogOpen) {
-    //   fetchSettings();
-    // }
   }, []);
-
-  //   setCashierValues(formik.values?.cashierInfo || {});
-
-  const handleDialogSave = () => {
-    setDialogOpen(false); // Close the dialog only after saving
-    setShowCreatePage(true); // Show Create page when preferences are saved
-  };
 
   const handleBankDetailsEditToggle = () => {
     setIsBankDetailsEditing(!isBankDetailsEditing);
@@ -684,14 +488,6 @@ const Create3 = () => {
     setFormValues(cashierValues);
   }, [cashierValues]);
 
-  const addNextInvoiceHandler = () => {
-    dispatch(
-      reviewInvoicePopup({
-        isOpen: false
-      })
-    );
-  };
-
   const handleChangeCashierDetails = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
@@ -712,8 +508,6 @@ const Create3 = () => {
 
   useEffect(() => {
     setLoadingTable(true); // Set loading to true while waiting for initial values
-    console.log('user', user);
-    console.log('userSpecificData', userSpecificData);
 
     setFormikInitialValues(getInitialValues(settings, user, userSpecificData));
 
@@ -725,14 +519,9 @@ const Create3 = () => {
       try {
         if (id) {
           const response = await axiosServices.get(`/company/by?companyId=${id}`);
-          console.log('res = ', response);
           if (response.status === 200) {
             const data = response.data.data;
-            console.log('Tina = ', data);
-
             const { rateData, ...rest } = data;
-            console.log('🚀 ~ file: Create3.jsx:654 ~ fetchCompanyData ~ rest:', rest);
-            // setFieldValue('customerInfo', rest);
             setCustomerInfo(rest);
           }
         }
@@ -742,18 +531,14 @@ const Create3 = () => {
     };
 
     const companyID = tripData[0]?.companyID?._id || '';
-    console.log(`🚀 ~ useEffect ~ companyID:`, companyID);
 
     // Extract start date and end date
     const result = findMinMaxDates(tripData);
-    console.log(result);
     if (typeof result === 'object') {
-      console.log('Tina = ', result);
       setServicePeriod(result);
     }
 
     const allTripID = tripData.map((trip) => trip._id);
-    console.log('allTripID = ', allTripID);
     setLinkedTripIds(allTripID);
 
     if (companyID) {
@@ -762,18 +547,13 @@ const Create3 = () => {
   }, [tripData, setFieldValue]);
 
   useEffect(() => {
-    console.log('UseEffect of tripData called ........');
-    console.log('tripData', tripData);
-
     const mappedData = groupDataWithSuffix(tripData, groupBy);
     // const mappedData = groupDataWithSuffix(dummyData, groupBy);
-
-    console.log('Tina = ', mappedData);
 
     const updatedData = mappedData.map((item) => {
       return {
         itemName: item.itemName,
-        rate: item.rate,
+        rate: typeof item.rate === 'string' ? 0 : item.rate,
         quantity: item.qty,
 
         HSN_SAC_code: '',
@@ -783,104 +563,48 @@ const Create3 = () => {
         itemDiscount: 0,
         discount: 0,
 
-        amount: item.rate * item.qty
+        amount: typeof item.rate === 'string' ? 0 : item.rate * item.qty
       };
     });
+    const groupedGuardRates = groupGuardRates(tripData);
 
-    console.log('Updated data = ', updatedData);
-    // setFieldValue('invoiceData', updatedData);
-    console.log('user', user);
-    console.log('userSpecificData', userSpecificData);
-    console.log('settings', settings);
-    console.log('customerInfo', customerInfo);
-    console.log('servicePeriod', servicePeriod);
+    console.log({ groupedGuardRates });
+    const guardRates =
+      groupedGuardRates.length > 0
+        ? groupedGuardRates.map((item) => {
+            return {
+              itemName: item.name,
+              rate: typeof item.rate === 'string' ? 0 : item.rate,
+              quantity: item.qty,
 
-    setFormikInitialValues(getInitialValues(settings, user, userSpecificData, updatedData, customerInfo, servicePeriod));
+              HSN_SAC_code: '',
+              itemTax: 0,
+              Tax_amount: 0,
+
+              itemDiscount: 0,
+              discount: 0,
+
+              amount: typeof item.rate === 'string' ? 0 : item.rate * item.qty
+            };
+          })
+        : [];
+
+    console.log({ guardRates });
+
+    const allData = [...updatedData, ...guardRates];
+
+    setFormikInitialValues(getInitialValues(settings, user, userSpecificData, allData, customerInfo, servicePeriod));
   }, [tripData, groupBy, setFieldValue, user, userSpecificData, settings, customerInfo, servicePeriod]);
-
-  console.log('loadingTable = ', loadingTable);
 
   const handleSelectChange = async (event) => {
     try {
       const selectedType = event.target.value;
-      console.log('handleSelectChange', selectedType);
       setParticularType(selectedType);
       setGroupBy(PARTICULAR_TYPE_GROUP_KEY[selectedType] || 'companyRate');
     } catch (error) {
       console.log('Error : api of particular type', error);
     }
   };
-
-  // Debounce the effect to avoid over-triggering on fast inputs
-  const debouncedSetValues = useCallback(
-    _.debounce((updatedItems, subTotal, totalTax, totalDiscount, grandTotal) => {
-      setFieldValue('invoiceData', updatedItems);
-      setFieldValue('subTotal', subTotal);
-      setFieldValue('totalTax', totalTax);
-      setFieldValue('totalDiscount', totalDiscount);
-      setFieldValue('grandTotal', grandTotal);
-    }, 2000),
-    [setFieldValue]
-  );
-
-  // useEffect(() => {
-  //   const updatedItems = values.invoiceData.map((item) => {
-  //     const amount = item.rate * item.quantity;
-
-  //     // Calculate tax based on group or individual settings
-  //     const itemTaxAmount = settings?.tax?.apply === 'Individual' ? (amount * item.itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
-
-  //     // Calculate item discount
-  //     let itemDiscountAmount = 0;
-
-  //     if (settings?.discount?.apply === 'Individual') {
-  //       if (settings?.discount?.by === 'Percentage') {
-  //         itemDiscountAmount = (amount * item.itemDiscount) / 100;
-  //       } else if (settings?.discount?.by === 'Amount') {
-  //         itemDiscountAmount = item.itemDiscount;
-  //       }
-  //     } else if (settings?.discount?.apply === 'Group') {
-  //       if (settings?.discount?.by === 'Percentage') {
-  //         itemDiscountAmount = (amount * groupDiscount) / 100;
-  //       } else if (settings?.discount?.by === 'Amount') {
-  //         itemDiscountAmount = groupDiscount;
-  //         item.itemDiscount = groupDiscount;
-  //       }
-  //     }
-
-  //     return {
-  //       ...item,
-  //       amount,
-  //       Tax_amount: itemTaxAmount, // Now using groupTax for group settings
-  //       discount: itemDiscountAmount,
-  //       itemTax: settings?.tax?.apply === 'Group' ? groupTax : item.itemTax,
-  //       itemDiscount: settings?.discount?.apply === 'Group' ? groupDiscount : item.itemDiscount
-  //     };
-  //   });
-
-  //   const subTotal = updatedItems.reduce((acc, item) => acc + item.amount, 0);
-
-  //   const totalTax =
-  //     settings?.tax?.apply === 'Group'
-  //       ? (subTotal * groupTax) / 100 // Calculate totalTax based on groupTax
-  //       : updatedItems.reduce((acc, item) => acc + item.Tax_amount, 0);
-
-  //   const totalDiscount =
-  //     settings?.discount?.apply === 'Group' && settings?.discount?.by === 'Percentage'
-  //       ? (subTotal * groupDiscount) / 100
-  //       : updatedItems.reduce((acc, item) => acc + item.discount, 0);
-
-  //   const grandTotal = subTotal + totalTax - totalDiscount;
-
-  //   console.log('updatedItems', updatedItems);
-
-  //   // debouncedSetValues(updatedItems, subTotal, totalTax, totalDiscount, grandTotal);
-  //   // setFieldValue('invoiceData', updatedItems);
-  //   // setFieldValue('subTotal', subTotal);
-  //   // setFieldValue('totalTax', totalTax);
-  //   // setFieldValue('totalDiscount', totalDiscount);
-  //   // setFieldValue('grandTotal', grandTotal);
-  // }, [values.invoiceData, groupTax, groupDiscount]);
 
   useEffect(() => {
     async function fetchCabProviderDetails() {
@@ -910,29 +634,68 @@ const Create3 = () => {
     }
   }, [userType]);
 
-  const calculateTotals = (invoiceData) => {
-    const subTotal = invoiceData.reduce((sum, item) => sum + item.amount, 0);
-    const totalTaxAmount = invoiceData.reduce((sum, item) => sum + item.Tax_amount, 0);
-    const totalDiscountAmount = invoiceData.reduce((sum, item) => sum + item.discount, 0);
-    const grandTotal = subTotal + totalTaxAmount - totalDiscountAmount;
+  const calculateTotals = (invoiceData, additionalRates) => {
+    const { guardRate, tollCharges, additonalCharges, penalty, mcdCharge } = additionalRates;
 
-    return { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal };
+    console.log({ guardRate });
+    const totals = invoiceData.reduce(
+      (acc, item) => ({
+        subTotal: acc.subTotal + item.amount,
+        totalTaxAmount: acc.totalTaxAmount + item.Tax_amount,
+        totalDiscountAmount: acc.totalDiscountAmount + item.discount
+      }),
+      { subTotal: 0, totalTaxAmount: 0, totalDiscountAmount: 0 }
+    );
+
+    // Incorporate additional rates into subTotal
+    totals.subTotal += tollCharges + additonalCharges + mcdCharge + penalty;
+   
+    totals.grandTotal = totals.subTotal + totals.totalTaxAmount - totals.totalDiscountAmount;
+
+    return totals;
   };
+  // tripData
+  const [additionalRates, setAdditonalRates] = useState({
+    guardRate: 0,
+    tollCharges: 0,
+    additonalCharges: 0,
+    penalty: 0,
+    mcdCharge: 0
+  });
 
-  const { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal } = calculateTotals(formik.values.invoiceData);
+  useEffect(() => {
+    if (tripData && tripData.length > 0) {
+      console.log({ tripData });
+      const { guardRate, additonalRate, mcdCharges, tollCharges, penalties } = tripData.reduce(
+        (totals, item) => ({
+          guardRate: totals.guardRate + item.companyGuardPrice,
+          additonalRate: totals.additonalRate + item.addOnRate,
+          mcdCharges: totals.mcdCharges + item.mcdCharge,
+          tollCharges: totals.tollCharges + item.tollCharge,
+          penalties: totals.penalties - item.companyPenalty // Subtract for negative penalties
+        }),
+        { guardRate: 0, additonalRate: 0, mcdCharges: 0, tollCharges: 0, penalties: 0 }
+      );
+
+      console.log({ guardRate, additonalRate, mcdCharges, tollCharges, penalties });
+      setAdditonalRates({
+        guardRate: guardRate,
+        tollCharges: tollCharges,
+        additonalCharges: additonalRate,
+        penalty: penalties,
+        mcdCharge: mcdCharges
+      });
+    }
+  }, [tripData]);
+
+  const { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal } = calculateTotals(formik.values.invoiceData, additionalRates);
+
+  console.log({ subTotal, totalTaxAmount, totalDiscountAmount, grandTotal });
 
   if (loading) return <CustomCircularLoader />;
 
   return (
     <>
-      {/* {dialogOpen && (
-        <>
-          <Dialog open={dialogOpen} maxWidth="sm" fullWidth keepMounted scroll="paper">
-            <InvoiceSetting redirect="/apps/invoices/create" onClose={handleDialogSave} />
-          </Dialog>
-        </>
-      )} */}
-
       {showCreatePage && (
         <MainCard>
           <FormikProvider value={formik}>
@@ -1065,41 +828,6 @@ const Create3 = () => {
                     </Grid>
                   </Grid>
                 </Grid>
-
-                {/* Status */}
-                {/* <Grid item xs={12} sm={6} md={3}>
-                  <Stack spacing={1}>
-                    <InputLabel>Status</InputLabel>
-                    <FormControl sx={{ width: '100%' }}>
-                      <Select
-                        value={values.status}
-                        displayEmpty
-                        name="status"
-                        renderValue={(selected) => {
-                          if (selected.length === 0) {
-                            return <Box sx={{ color: 'secondary.400' }}>Select status</Box>;
-                          }
-                          return selected;
-                        }}
-                        onChange={handleChange}
-                        error={Boolean(errors.status && touched.status)}
-                        sx={{
-                          '& .MuiSelect-select': {
-                            padding: '8px'
-                          }
-                        }}
-                      >
-                        <MenuItem disabled value="">
-                          Select status
-                        </MenuItem>
-                        <MenuItem value="Paid">Paid</MenuItem>
-                        <MenuItem value="Unpaid">Unpaid</MenuItem>
-                        <MenuItem value="Cancelled">Cancelled</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Stack>
-                  {touched.status && errors.status && <FormHelperText error={true}>{errors.status}</FormHelperText>}
-                </Grid> */}
 
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
@@ -1384,37 +1112,6 @@ const Create3 = () => {
                             </Stack>
                           </Stack>
                         </Grid>
-
-                        {/* <Grid item xs={12} sm={4}>
-                          <Box textAlign="right" color="secondary.200">
-                            <Button
-                              size="small"
-                              startIcon={<Add />}
-                              color="secondary"
-                              variant="outlined"
-                              onClick={() =>
-                                dispatch(
-                                  customerPopup({
-                                    isCustomerOpen: true
-                                  })
-                                )
-                              }
-                            >
-                              Add
-                            </Button>
-                            <AddressModal
-                              open={isCustomerOpen}
-                              setOpen={(value) =>
-                                dispatch(
-                                  customerPopup({
-                                    isCustomerOpen: value
-                                  })
-                                )
-                              }
-                              handlerAddress={(value) => setFieldValue('customerInfo', value)}
-                            />
-                          </Box>
-                        </Grid> */}
                       </Grid>
                     )}
 
@@ -1451,7 +1148,7 @@ const Create3 = () => {
                   <Stack direction="row" spacing={2} justifyContent={'space-between'} alignItems={'center'}>
                     <Typography variant="h5">Details</Typography>
                     <Typography variant="caption" sx={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'text.secondary' }}>
-                      Invoices have been generated for{' '}
+                      Generating Invoice for{' '}
                       <Typography component="span" sx={{ fontWeight: 'bold', fontStyle: 'normal', color: 'primary.main' }}>
                         {tripData?.length} trips
                       </Typography>
@@ -1503,202 +1200,198 @@ const Create3 = () => {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {values.invoiceData.map((item, index) => (
-                                  <TableRow key={index}>
-                                    {/* Item Name */}
-                                    <TableCell>
-                                      <TextField
-                                        label="Item Name"
-                                        name={`invoiceData[${index}].itemName`}
-                                        value={item.itemName}
-                                        onChange={handleChange}
-                                        fullWidth
-                                      />
-                                    </TableCell>
-
-                                    {/* Rate */}
-                                    <TableCell>
-                                      <TextField
-                                        label="Rate"
-                                        type="number"
-                                        name={`invoiceData[${index}].rate`}
-                                        value={item.rate}
-                                        // onChange={handleChange}
-                                        onChange={(e) => {
-                                          const rateValue = e.target.value;
-                                          const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
-                                          const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
-                                          const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
-                                          const amount = rateValue * qty;
-
-                                          const taxAmount =
-                                            settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
-
-                                          setFieldValue(`invoiceData[${index}].rate`, Number(rateValue));
-                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
-                                          setFieldValue(`invoiceData[${index}].amount`, Number(amount));
-
-                                          let itemDiscountAmount = 0;
-                                          if (settings?.discount?.apply === 'Individual') {
-                                            if (settings?.discount?.by === 'Percentage') {
-                                              itemDiscountAmount = (amount * itemDiscount) / 100;
-                                            } else if (settings?.discount?.by === 'Amount') {
-                                              itemDiscountAmount = itemDiscount;
-                                            }
-                                          } else if (settings?.discount?.apply === 'Group') {
-                                            if (settings?.discount?.by === 'Percentage') {
-                                              itemDiscountAmount = (amount * itemDiscount) / 100;
-                                            } else if (settings?.discount?.by === 'Amount') {
-                                              itemDiscountAmount = itemDiscount;
-                                            }
-                                          }
-
-                                          setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
-                                        }}
-                                        fullWidth
-                                      />
-                                    </TableCell>
-
-                                    {/* Quantity */}
-                                    <TableCell>
-                                      <TextField
-                                        label="Quantity"
-                                        type="number"
-                                        name={`invoiceData[${index}].quantity`}
-                                        value={item.quantity}
-                                        // onChange={handleChange}
-                                        onChange={(e) => {
-                                          const qtyValue = e.target.value;
-                                          const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
-                                          const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
-                                          const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
-
-                                          const amount = rate * qtyValue;
-                                          const taxAmount =
-                                            settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
-
-                                          setFieldValue(`invoiceData[${index}].quantity`, Number(qtyValue));
-                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
-                                          setFieldValue(`invoiceData[${index}].amount`, Number(amount));
-
-                                          let itemDiscountAmount = 0;
-                                          if (settings?.discount?.apply === 'Individual') {
-                                            if (settings?.discount?.by === 'Percentage') {
-                                              itemDiscountAmount = (amount * itemDiscount) / 100;
-                                            } else if (settings?.discount?.by === 'Amount') {
-                                              itemDiscountAmount = itemDiscount;
-                                            }
-                                          } else if (settings?.discount?.apply === 'Group') {
-                                            if (settings?.discount?.by === 'Percentage') {
-                                              itemDiscountAmount = (amount * itemDiscount) / 100;
-                                            } else if (settings?.discount?.by === 'Amount') {
-                                              itemDiscountAmount = itemDiscount;
-                                            }
-                                          }
-
-                                          setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
-                                        }}
-                                        fullWidth
-                                      />
-                                    </TableCell>
-
-                                    {/* Code */}
-                                    <TableCell>
-                                      <TextField
-                                        label="HSN/SAC Code"
-                                        name={`invoiceData[${index}].HSN_SAC_code`} // HSN/SAC field
-                                        value={item.HSN_SAC_code}
-                                        onChange={handleChange}
-                                        fullWidth
-                                      />
-                                    </TableCell>
-
-                                    {/* Item Tax */}
-                                    <TableCell>
-                                      <TextField
-                                        label="Tax (%)"
-                                        type="number"
-                                        name={`invoiceData[${index}].itemTax`} // Tax for individual items
-                                        value={item.itemTax}
-                                        // onChange={handleChange}
-                                        onChange={(e) => {
-                                          const taxValue = e.target.value;
-                                          console.log('taxValue', taxValue);
-                                          const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
-                                          const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
-                                          const amount = rate * qty;
-                                          const taxAmount =
-                                            settings?.tax?.apply === 'Individual' ? (amount * taxValue) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
-                                          setFieldValue(`invoiceData[${index}].itemTax`, Number(taxValue));
-                                          setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
-                                        }}
-                                        fullWidth
-                                        disabled={settings?.tax?.apply === 'Group'} // Disable if tax applies at group level
-                                      />
-                                    </TableCell>
-
-                                    {/* Item Discount */}
-                                    {settings?.discount?.apply !== DISCOUNT_TYPE.NO && (
+                                {values.invoiceData.map((item, index) => {
+                                  return (
+                                    <TableRow key={index}>
+                                      {/* Item Name */}
                                       <TableCell>
                                         <TextField
-                                          // label="Discount (%)"
-                                          label={getDiscountLabel(settings?.discount)}
+                                          label="Item Name"
+                                          name={`invoiceData[${index}].itemName`}
+                                          value={item.itemName}
+                                          onChange={handleChange}
+                                          fullWidth
+                                        />
+                                      </TableCell>
+
+                                      {/* Rate */}
+                                      <TableCell>
+                                        <TextField
+                                          label="Rate"
                                           type="number"
-                                          name={`invoiceData[${index}].itemDiscount`} // Discount for individual items
-                                          value={item.itemDiscount}
+                                          name={`invoiceData[${index}].rate`}
+                                          value={item.rate}
                                           // onChange={handleChange}
                                           onChange={(e) => {
-                                            const discountValue = e.target.value;
-                                            let itemDiscountAmount = 0;
-
-                                            const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                            const rateValue = e.target.value;
                                             const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
-                                            const amount = rate * qty;
+                                            const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
+                                            const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
+                                            const amount = rateValue * qty;
 
+                                            const taxAmount =
+                                              settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+
+                                            setFieldValue(`invoiceData[${index}].rate`, Number(rateValue));
+                                            setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                            setFieldValue(`invoiceData[${index}].amount`, Number(amount));
+
+                                            let itemDiscountAmount = 0;
                                             if (settings?.discount?.apply === 'Individual') {
                                               if (settings?.discount?.by === 'Percentage') {
-                                                itemDiscountAmount = (amount * discountValue) / 100;
+                                                itemDiscountAmount = (amount * itemDiscount) / 100;
                                               } else if (settings?.discount?.by === 'Amount') {
-                                                itemDiscountAmount = discountValue;
+                                                itemDiscountAmount = itemDiscount;
                                               }
                                             } else if (settings?.discount?.apply === 'Group') {
                                               if (settings?.discount?.by === 'Percentage') {
-                                                itemDiscountAmount = (amount * discountValue) / 100;
+                                                itemDiscountAmount = (amount * itemDiscount) / 100;
                                               } else if (settings?.discount?.by === 'Amount') {
-                                                itemDiscountAmount = discountValue;
+                                                itemDiscountAmount = itemDiscount;
                                               }
                                             }
 
-                                            setFieldValue(`invoiceData[${index}].itemDiscount`, Number(discountValue));
                                             setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
                                           }}
                                           fullWidth
-                                          disabled={settings?.discount?.apply === 'Group'} // Disable if discount applies at group level
                                         />
                                       </TableCell>
-                                    )}
 
-                                    {/* <TableCell>
-                          <Typography variant="body1">
-                            {item.tax.toFixed(2)}
-                          </Typography>
-                        </TableCell> */}
-                                    <TableCell>
-                                      <Typography variant="body1">{item.Tax_amount.toFixed(2)}</Typography>{' '}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Typography variant="body1">{item.discount.toFixed(2)}</Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Typography variant="body1">{item.amount.toFixed(2)}</Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                      <IconButton onClick={() => arrayHelpers.remove(index)} color="secondary">
-                                        <Trash color="red" />
-                                      </IconButton>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
+                                      {/* Quantity */}
+                                      <TableCell>
+                                        <TextField
+                                          label="Quantity"
+                                          type="number"
+                                          name={`invoiceData[${index}].quantity`}
+                                          value={item.quantity}
+                                          // onChange={handleChange}
+                                          onChange={(e) => {
+                                            const qtyValue = e.target.value;
+                                            const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                            const itemTax = formik.getFieldProps(`invoiceData[${index}].itemTax`).value;
+                                            const itemDiscount = formik.getFieldProps(`invoiceData[${index}].itemDiscount`).value;
+
+                                            const amount = rate * qtyValue;
+                                            const taxAmount =
+                                              settings?.tax?.apply === 'Individual' ? (amount * itemTax) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+
+                                            setFieldValue(`invoiceData[${index}].quantity`, Number(qtyValue));
+                                            setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                            setFieldValue(`invoiceData[${index}].amount`, Number(amount));
+
+                                            let itemDiscountAmount = 0;
+                                            if (settings?.discount?.apply === 'Individual') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * itemDiscount) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = itemDiscount;
+                                              }
+                                            } else if (settings?.discount?.apply === 'Group') {
+                                              if (settings?.discount?.by === 'Percentage') {
+                                                itemDiscountAmount = (amount * itemDiscount) / 100;
+                                              } else if (settings?.discount?.by === 'Amount') {
+                                                itemDiscountAmount = itemDiscount;
+                                              }
+                                            }
+
+                                            setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
+                                          }}
+                                          fullWidth
+                                        />
+                                      </TableCell>
+
+                                      {/* Code */}
+                                      <TableCell>
+                                        <TextField
+                                          label="HSN/SAC Code"
+                                          name={`invoiceData[${index}].HSN_SAC_code`} // HSN/SAC field
+                                          value={item.HSN_SAC_code}
+                                          onChange={handleChange}
+                                          fullWidth
+                                        />
+                                      </TableCell>
+
+                                      {/* Item Tax */}
+                                      <TableCell>
+                                        <TextField
+                                          label="Tax (%)"
+                                          type="number"
+                                          name={`invoiceData[${index}].itemTax`} // Tax for individual items
+                                          value={item.itemTax}
+                                          // onChange={handleChange}
+                                          onChange={(e) => {
+                                            const taxValue = e.target.value;
+                                            const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                            const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
+                                            const amount = rate * qty;
+                                            const taxAmount =
+                                              settings?.tax?.apply === 'Individual' ? (amount * taxValue) / 100 : (amount * groupTax) / 100; // Apply groupTax for group settings
+                                            setFieldValue(`invoiceData[${index}].itemTax`, Number(taxValue));
+                                            setFieldValue(`invoiceData[${index}].Tax_amount`, Number(taxAmount));
+                                          }}
+                                          fullWidth
+                                          disabled={settings?.tax?.apply === 'Group'} // Disable if tax applies at group level
+                                        />
+                                      </TableCell>
+
+                                      {/* Item Discount */}
+                                      {settings?.discount?.apply !== DISCOUNT_TYPE.NO && (
+                                        <TableCell>
+                                          <TextField
+                                            // label="Discount (%)"
+                                            label={getDiscountLabel(settings?.discount)}
+                                            type="number"
+                                            name={`invoiceData[${index}].itemDiscount`} // Discount for individual items
+                                            value={item.itemDiscount}
+                                            // onChange={handleChange}
+                                            onChange={(e) => {
+                                              const discountValue = e.target.value;
+                                              let itemDiscountAmount = 0;
+
+                                              const rate = formik.getFieldProps(`invoiceData[${index}].rate`).value;
+                                              const qty = formik.getFieldProps(`invoiceData[${index}].quantity`).value;
+                                              const amount = rate * qty;
+
+                                              if (settings?.discount?.apply === 'Individual') {
+                                                if (settings?.discount?.by === 'Percentage') {
+                                                  itemDiscountAmount = (amount * discountValue) / 100;
+                                                } else if (settings?.discount?.by === 'Amount') {
+                                                  itemDiscountAmount = discountValue;
+                                                }
+                                              } else if (settings?.discount?.apply === 'Group') {
+                                                if (settings?.discount?.by === 'Percentage') {
+                                                  itemDiscountAmount = (amount * discountValue) / 100;
+                                                } else if (settings?.discount?.by === 'Amount') {
+                                                  itemDiscountAmount = discountValue;
+                                                }
+                                              }
+
+                                              setFieldValue(`invoiceData[${index}].itemDiscount`, Number(discountValue));
+                                              setFieldValue(`invoiceData[${index}].discount`, Number(itemDiscountAmount));
+                                            }}
+                                            fullWidth
+                                            disabled={settings?.discount?.apply === 'Group'} // Disable if discount applies at group level
+                                          />
+                                        </TableCell>
+                                      )}
+
+                                      <TableCell>
+                                        <Typography variant="body1">{item.Tax_amount.toFixed(2)}</Typography>{' '}
+                                      </TableCell>
+                                      <TableCell>
+                                        <Typography variant="body1">{item.discount.toFixed(2)}</Typography>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Typography variant="body1">{item.amount.toFixed(2)}</Typography>
+                                      </TableCell>
+                                      <TableCell>
+                                        <IconButton onClick={() => arrayHelpers.remove(index)} color="secondary">
+                                          <Trash color="red" />
+                                        </IconButton>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
                               </TableBody>
                             </Table>
                           </TableContainer>
@@ -1761,7 +1454,6 @@ const Create3 = () => {
                                         onChange={(e) => {
                                           const val = Number(e.target.value);
                                           const data = formik.getFieldProps('invoiceData').value;
-                                          console.log(`🚀 ~ Create2 ~ data:`, data);
                                           const updatedData = data.map((item) => {
                                             return {
                                               ...item,
@@ -1831,6 +1523,42 @@ const Create3 = () => {
 
                                 <Grid item xs={12}>
                                   <Stack spacing={2}>
+                                    <Stack direction="row" justifyContent="space-between">
+                                      <Typography color={theme.palette.secondary.main}>Penalties:</Typography>
+                                      <GenericPriceDisplay
+                                        // total={formik.values?.subTotal}
+                                        total={additionalRates.penalty}
+                                        roundOff={settings.roundOff}
+                                        prefix={country?.prefix}
+                                      />
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between">
+                                      <Typography color={theme.palette.secondary.main}>MCD Charges:</Typography>
+                                      <GenericPriceDisplay
+                                        // total={formik.values?.subTotal}
+                                        total={additionalRates.mcdCharge}
+                                        roundOff={settings.roundOff}
+                                        prefix={country?.prefix}
+                                      />
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between">
+                                      <Typography color={theme.palette.secondary.main}>Toll Charges:</Typography>
+                                      <GenericPriceDisplay
+                                        // total={formik.values?.subTotal}
+                                        total={additionalRates.tollCharges}
+                                        roundOff={settings.roundOff}
+                                        prefix={country?.prefix}
+                                      />
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between">
+                                      <Typography color={theme.palette.secondary.main}>Additonal Charges:</Typography>
+                                      <GenericPriceDisplay
+                                        // total={formik.values?.subTotal}
+                                        total={additionalRates.additonalCharges}
+                                        roundOff={settings.roundOff}
+                                        prefix={country?.prefix}
+                                      />
+                                    </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                       <Typography color={theme.palette.secondary.main}>Sub Total:</Typography>
                                       <GenericPriceDisplay
