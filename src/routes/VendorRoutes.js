@@ -10,9 +10,10 @@ import ProtectedRoute from 'components/common/guards/ProtectedRoute';
 import { MODULE, PERMISSIONS } from 'constant';
 import Create from 'pages/invoice/create/Create2';
 import { element } from 'prop-types';
-import AllRosters from 'pages/Roster/AllRosters';
+// import AllRosters from 'pages/Roster/AllRosters';
 import AdvancesVendorTable from 'sections/cabprovidor/advances/advancesVendor/AdvancesVendorTable';
 import AdvanceVendorType from 'sections/cabprovidor/advances/advancesVendor/AdvanceVendorType';
+import AllRosters from 'pages/apps/roster';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/error/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/error/500')));
@@ -26,11 +27,10 @@ const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')))
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('pages')));
 // Roster
-const Roster = Loadable(lazy(() => import('pages/apps/roster')));
-const RosterFileList = Loadable(lazy(() => import('pages/Roster/file-management')));
-const MapRosterFile = Loadable(lazy(() => import('pages/Roster/map-roster')));
-const ViewRoster = Loadable(lazy(() => import('pages/Roster/view-roster')));
-const AssignTrips = Loadable(lazy(() => import('pages/Roster/assign-trips')));
+// const RosterFileList = Loadable(lazy(() => import('pages/Roster/file-management')));
+// const MapRosterFile = Loadable(lazy(() => import('pages/Roster/map-roster')));
+// const ViewRoster = Loadable(lazy(() => import('pages/Roster/view-roster')));
+// const AssignTrips = Loadable(lazy(() => import('pages/Roster/assign-trips')));
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
@@ -107,30 +107,6 @@ const VendorRoutes = {
               children: [
                 {
                   path: 'view',
-                  element: <Roster />
-                },
-                {
-                  path: 'create',
-                  element: <UnderConstruction title="Roster Upload" />
-                },
-                {
-                  path: 'file-management',
-                  element: <RosterFileList />
-                },
-                {
-                  path: 'map-roster',
-                  element: <MapRosterFile />
-                },
-                {
-                  path: 'view-roster',
-                  element: <ViewRoster />
-                },
-                {
-                  path: 'assign-trips',
-                  element: <AssignTrips />
-                },
-                {
-                  path: 'all-roster',
                   element: <AllRosters />
                 }
               ]

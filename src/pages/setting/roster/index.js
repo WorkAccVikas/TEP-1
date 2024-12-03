@@ -1,5 +1,5 @@
 import { useDrawer } from 'contexts/DrawerContext';
-import CreateRosterTemplate from 'pages/apps/test/CreateRosterTemplateDrawer';
+import CreateRosterTemplate from 'pages/apps/roster/components/CreateRosterTemplateDrawer';
 import { useEffect } from 'react';
 
 const RosterSetting = () => {

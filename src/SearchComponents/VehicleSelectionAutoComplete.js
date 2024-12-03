@@ -21,7 +21,7 @@ const VehicleSelection = ({ sx, value, setSelectedOptions }) => {
       setLoading(true);
       try {
         const response = await axiosServices.get(`/vehicle/all?page=1&limit=10`);
-        const vehicles =response.data.data.result;
+        const vehicles = response.data.data.result;
         setOptions(vehicles);
         setCache((prevCache) => ({ ...prevCache, default: vehicles })); // Cache default results
       } catch (error) {
@@ -48,7 +48,7 @@ const VehicleSelection = ({ sx, value, setSelectedOptions }) => {
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        const response = await axiosServices.get(`/company/getCompanyByName?filter=${query}&page=1&limit=10`);
+        const response = await axiosServices.get(`/vehicle/all?vehicleNumber=${query}`);
         const companies = response.data.data.result;
 
         setOptions(companies);

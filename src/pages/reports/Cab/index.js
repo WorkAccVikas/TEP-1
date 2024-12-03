@@ -31,31 +31,20 @@ const CabReports = () => {
     }
 
     const payload = {
-      query: {
+      data: {
         startDate: formatDateUsingMoment(startDate),
-        endDate: formatDateUsingMoment(endDate)
-      },
-      body: {
-        cabID
+        endDate: formatDateUsingMoment(endDate),
+        vehicleIDs: cabID || []
       }
     };
 
     dispatch(fetchCabWiseReports(payload));
   }, [startDate, endDate, selectedCab]);
 
-  useEffect(() => {
-    const getCabs = async () => {
-      //   const { data } = await axios.get('/cabProvidor/getCabs');
-      //   setCab(data.cabs);
-    };
-    getCabs();
-  }, []);
-
   const downloadReports = useCallback(() => {
     console.log('Data = ', cabReportData);
-    downloadCabWiseReport(cabReportData,"cabWiseReport")
+    downloadCabWiseReport(cabReportData, 'cabWiseReport');
   }, [cabReportData]);
-
 
   return (
     <>
@@ -66,7 +55,7 @@ const CabReports = () => {
 
           <Stack>
             <Box sx={{ minWidth: '300px' }}>
-              <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px',maxWidth: '600px' }} />
+              <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
             </Box>
           </Stack>
 
@@ -102,7 +91,7 @@ const CabReports = () => {
           <Analytic />
 
           {/* Table */}
-          {loading ?  <TableSkeleton rows={10} columns={6} /> : <Table />}
+          {loading ? <TableSkeleton rows={10} columns={6} /> : <Table />}
         </Stack>
       </Stack>
     </>

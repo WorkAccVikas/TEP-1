@@ -21,7 +21,7 @@ import { openSnackbar } from 'store/reducers/snackbar';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-export default function AssignTripsDialog({ data: tripData, open, handleClose, setInitateRender, fileData }) {
+export default function AssignTripsDialog({ data: tripData, open, handleClose, setInitateRender }) {
   const [data, setData] = useState([]);
 
   const [payload1, setPayload1] = useState([]);
@@ -29,14 +29,22 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [vehicleTypeInfo, setVehicleTypeInfo] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [cabOptions, setCabOptions] = useState([]);
+
   const [tripPayload, setTripPayload] = useState([]);
+
+  const [errorMessages, setErrorMessages] = useState([]);
+
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [tripLoading, setTripLoading] = useState(false);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0]; // This will return the date in yyyy-mm-dd format
   };
 
   const generateTrips = async () => {
-    const assignedTripsArray = payload1.map((item) => {
+    setTripLoading(true);
+    const assignedTripsArray = tripPayload.map((item) => {
       return {
         _roster_id: item._roster_id,
         tripId: item._roster_id,
@@ -72,7 +80,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       };
     });
 
-    const rosterUploadArray = payload1.map((item) => {
+    const rosterUploadArray = tripPayload.map((item) => {
       return {
         vehicleTypeArray: item._vehicleType ? [{ _id: item._vehicleType._id, vehicleTypeName: item._vehicleType.vehicleTypeName }] : [],
 
@@ -131,8 +139,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       const response = await axiosServices.post('/assignTrip/to/driver', _generateTripPayLoad);
       if (response.status === 201) {
         const response1 = await axiosServices.put('/tripData/map/roster/update', _mappedRosterDataPayload);
-        console.log(`🚀 ~ generateTrips ~ response1:`, response);
-        console.log(`🚀 ~ generateTrips ~ response1:`, response.data.message);
         if (response1.data.success) {
           // alert(`${payload1.length} Trips Created`);
           dispatch(
@@ -144,7 +150,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               alert: {
                 color: 'success'
               },
-              close: true,
+              close: true
             })
           );
           handleClose();
@@ -165,6 +171,10 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           close: false
         })
       );
+    } finally {
+      setPayload1([]);
+      setTripPayload([]);
+      setTripLoading(false);
     }
   };
 
@@ -301,7 +311,6 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       setData(mappedData); // Update main data state
     }
   }, [tripData, drivers, vehicleTypeInfo, zoneInfo]);
-  console.log({ data });
 
   const handleChange = (rowIndex, key, value) => {
     setData((prevData) => {
@@ -333,7 +342,10 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const bulkSync = async () => {
     const updatedData = [...data];
     const successTrips = [];
+    const generateTripPayload = [];
+    const errors = []; // Temporary array to collect error messages
 
+    setSyncLoading(true);
     for (const trip of payload1) {
       const { _id, _zoneName, _zoneType, _vehicleType, _driver, _cab, companyID } = trip;
 
@@ -353,18 +365,42 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           const amounts = response.data.data;
 
           // Update all rows in updatedData with the same _id
+
           updatedData.forEach((row) => {
             if (row._id === _id) {
               if (row._isDualTrip > 0) {
+                // Validation for dual trip rates
+                if (!amounts.companyDualAmount || (!amounts.driverDualAmount && !amounts.vendorDualAmount)) {
+                  errors.push(
+                    `Row with ID ${row?.rosterTripId} has invalid dual trip rates. companyDualAmount, driverDualAmount, or vendorDualAmount cannot be 0.`
+                  );
+                  return; // Skip further processing for this row
+                } else {
+                  generateTripPayload.push(row);
+                }
+
+                // Set rates for dual trip
                 row['_companyRate'] = amounts.companyDualAmount ? amounts.companyDualAmount / 2 : 0;
                 row['_vendorRate'] = amounts.vendorDualAmount ? amounts.vendorDualAmount / 2 : 0;
                 row['_driverRate'] = amounts.driverDualAmount ? amounts.driverDualAmount / 2 : 0;
               } else {
+                // Validation for non-dual trip rates
+                if (!amounts.companyAmount || (!amounts.driverAmount && !amounts.vendorAmount)) {
+                  errors.push(
+                    `Row with ID ${row.rosterTripId} has invalid non-dual trip rates. companyAmount, driverAmount, or vendorAmount cannot be 0.`
+                  );
+                  return; // Skip further processing for this row
+                } else {
+                  generateTripPayload.push(row);
+                }
+
+                // Set rates for non-dual trip
                 row['_companyRate'] = amounts.companyAmount;
                 row['_vendorRate'] = amounts.vendorAmount;
                 row['_driverRate'] = amounts.driverAmount;
               }
 
+              // Handle guard rates
               if (row._guardRequired) {
                 row['_vendorGuardRate'] = amounts.vendorGuardPrice;
                 row['_driverGuardRate'] = amounts.driverGuardPrice;
@@ -377,6 +413,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 row['_driverGuardRate_or_vendorGuardRate'] = 0;
               }
 
+              // Store additional rates
               row['_companyDualRate'] = amounts.companyDualAmount;
               row['_vendorDualRate'] = amounts.vendorDualAmount;
               row['_driverDualRate'] = amounts.driverDualAmount;
@@ -385,6 +422,9 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
             }
           });
 
+          // Update error messages in state
+          setErrorMessages(errors);
+          setTripPayload(generateTripPayload);
           successTrips.push(trip);
         } catch (error) {
           console.error(`Error syncing trip with _id ${_id}:`, error);
@@ -397,6 +437,26 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     // Update state after all operations
     setData([...updatedData]);
 
+    console.log(errors);
+
+    if (errors.length > 0) {
+      console.log('here');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: `${errors.length} trips successfully synced!`,
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: true,
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right'
+          }
+        })
+      );
+    }
     // Show alert based on success count
     if (successTrips.length > 0) {
       dispatch(
@@ -407,9 +467,9 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
           alert: {
             color: 'success'
           },
-          close: false,
+          close: true,
           anchorOrigin: {
-            vertical: 'bottom',
+            vertical: 'top',
             horizontal: 'right'
           }
         })
@@ -429,6 +489,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         }
       });
     }
+
+    setSyncLoading(false);
   };
 
   const [currentGroup, setCurrentGroup] = useState(1); // Track the next group number
@@ -976,12 +1038,24 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
               Assign New Trips
             </Typography>
-            <Button sx={{ ml: 2, flex: 0.2 }} color="secondary" variant="contained" onClick={bulkSync}>
+            <Button
+              sx={{ ml: 2, flex: 0.2 }}
+              color="secondary"
+              variant="contained"
+              onClick={bulkSync}
+              disabled={payload1.length === 0 || syncLoading || tripLoading}
+            >
               {`Sync ${payload1.length} Trips`}
             </Button>
-            <Button sx={{ ml: 2, flex: 0.2 }} color="success" variant="contained" disabled={payload1.length === 0} onClick={generateTrips}>
+            <Button
+              sx={{ ml: 2, flex: 0.2 }}
+              color="success"
+              variant="contained"
+              disabled={tripPayload.length === 0 || syncLoading || tripLoading}
+              onClick={generateTrips}
+            >
               {/* Save */}
-              {`Generate ${payload1.length} Trips`}
+              {`Generate ${tripPayload.length} Trips`}
             </Button>
           </Toolbar>
         </AppBar>

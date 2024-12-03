@@ -3,7 +3,7 @@ import { Autocomplete, Checkbox, Grid } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import axiosServices from 'utils/axios';
 
-const VendorSelection = ({ sx, value, setSelectedOptions }) => {
+const DriverSelection = ({ sx, value, setSelectedOptions }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
@@ -20,11 +20,12 @@ const VendorSelection = ({ sx, value, setSelectedOptions }) => {
 
       setLoading(true);
       try {
-        const response = await axiosServices.get('/vendor/list?page=1&limit=10');
-        const vendors = response.data.data.results;
+        const response = await axiosServices.get('/driver/list?drivertype=1&page=1&limit=10');
+        console.log('response.data.data', response.data.data);
+        const drivers = response.data.data.result;
 
-        setOptions(vendors);
-        setCache((prevCache) => ({ ...prevCache, default: vendors })); // Cache default results
+        setOptions(drivers);
+        setCache((prevCache) => ({ ...prevCache, default: drivers })); // Cache default results
       } catch (error) {
         console.error('Error fetching default options:', error);
       } finally {
@@ -49,11 +50,11 @@ const VendorSelection = ({ sx, value, setSelectedOptions }) => {
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        const response = await axiosServices.get(`/vendor/list?page=1&limit=10&name=${query}`);
-        const vendors = response.data.data.results;
+        const response = await axiosServices.get(`/driver/list?drivertype=1&page=1&limit=50&name=${query}`);
+        const drivers = response.data.data.result;
 
-        setOptions(vendors);
-        setCache((prevCache) => ({ ...prevCache, [query]: vendors })); // Cache query results
+        setOptions(drivers);
+        setCache((prevCache) => ({ ...prevCache, [query]: drivers })); // Cache query results
       } catch (error) {
         console.error('Error fetching options:', error);
       } finally {
@@ -75,7 +76,7 @@ const VendorSelection = ({ sx, value, setSelectedOptions }) => {
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
-        getOptionLabel={(option) => option.vendorCompanyName}
+        getOptionLabel={(option) => option.userName}
         onInputChange={(event, newInputValue) => setQuery(newInputValue)}
         onChange={(event, newValue) => {
           setSelectedOptions(newValue || []); // Set the selected options
@@ -83,10 +84,10 @@ const VendorSelection = ({ sx, value, setSelectedOptions }) => {
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.vendorCompanyName}
+            {option.userName}
           </li>
         )}
-        renderInput={(params) => <TextField {...params} placeholder="Select Vendors" />}
+        renderInput={(params) => <TextField {...params} placeholder="Select Drivers" />}
         sx={{
           '& .MuiOutlinedInput-root': { p: 1 },
           '& .MuiAutocomplete-tag': {
@@ -105,4 +106,4 @@ const VendorSelection = ({ sx, value, setSelectedOptions }) => {
   );
 };
 
-export default VendorSelection;
+export default DriverSelection;

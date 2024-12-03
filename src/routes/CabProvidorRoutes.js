@@ -22,7 +22,6 @@ const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/comi
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('pages')));
 // Roster
-const Roster = Loadable(lazy(() => import('pages/apps/roster')));
 const RosterFileList = Loadable(lazy(() => import('pages/Roster/file-management')));
 const MapRosterFile = Loadable(lazy(() => import('pages/Roster/map-roster')));
 const ViewRoster = Loadable(lazy(() => import('pages/Roster/view-roster')));

@@ -32,7 +32,6 @@ import * as Yup from 'yup';
 import ConfigurableAutocomplete from 'components/autocomplete/ConfigurableAutocomplete';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { openSnackbar } from 'store/reducers/snackbar';
-import SearchComponent from 'pages/apps/test/CompanySearch';
 import GenericSelect from 'components/select/GenericSelect';
 import { useSelector } from 'store';
 import FormikAutocomplete from 'components/autocomplete/AutoComplete';
@@ -51,6 +50,7 @@ import { fetchAllVehicleTypesForAll } from 'store/slice/cabProvidor/vehicleTypeS
 import { fetchDrivers1 } from 'store/slice/cabProvidor/driverSlice';
 import { fetchCab1 } from 'store/slice/cabProvidor/cabSlice';
 import moment from 'moment';
+import SearchComponent from './CompanySearch';
 
 const NUMERIC_INPUT_FIELD = {
   // guardPrice: {

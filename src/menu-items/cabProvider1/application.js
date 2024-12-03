@@ -27,46 +27,7 @@ const roster = {
       title: <FormattedMessage id="roster" />,
       type: 'item',
       icon: icons.samplePage,
-      url: '/apps/roster/all-roster',
-      // children: [
-      //   {
-      //     id: 'view',
-      //     title: <FormattedMessage id="view" />,
-      //     type: 'item',
-      //     url: '/apps/roster/all-roster'
-      //     // icon: icons.upload
-      //   },
-      //   {
-      //     id: 'upload',
-      //     title: <FormattedMessage id="upload" />,
-      //     type: 'item',
-      //     url: '/apps/roster/create'
-      //     // icon: icons.upload
-      //   },
-      //   {
-      //     id: 'files',
-      //     title: <FormattedMessage id="files" />,
-      //     type: 'item',
-      //     url: '/apps/roster/file-management'
-      //     // icon: icons.upload
-      //   }
-      //   // {
-      //   //   id: 'trips',
-      //   //   title: <FormattedMessage id="trips" />,
-      //   //   type: 'item',
-      //   //   url: '/apps/trips/list',
-      //   //   // icon: icons.view
-      //   // },
-      // ]
-    },
-
-    // Invoices
-    {
-      id: 'invoices',
-      title: <FormattedMessage id="invoices" />,
-      type: 'item',
-      url: '/apps/invoices/list',
-      icon: icons.invoice
+      url: '/apps/roster'
     },
 
     // Trips
@@ -77,6 +38,14 @@ const roster = {
       url: '/apps/trips/list',
       icon: icons.trip
     },
+    // Invoices
+    {
+      id: 'invoices',
+      title: <FormattedMessage id="invoices" />,
+      type: 'item',
+      url: '/apps/invoices/list',
+      icon: icons.invoice
+    }
   ]
 };
 

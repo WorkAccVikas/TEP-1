@@ -37,12 +37,9 @@ export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports
   try {
     console.log('payload', payload);
     // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.get(`/reports/cab/wise/summary`, {
-      params: {
-        startDate: payload?.query?.startDate,
-        endDate: payload?.query?.endDate
-      }
-    });
+    const response = await axios.post(`/reports/cab/wise/summary`, payload);
+    console.log('payload', response.data);
+
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
@@ -52,12 +49,7 @@ export const fetchAdvanceReports = createAsyncThunk('reports/fetchAdvanceReports
   try {
     console.log('payload', payload);
     // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.get(`/reports/advance/summary`, {
-      params: {
-        startDate: payload?.query?.startDate,
-        endDate: payload?.query?.endDate
-      }
-    });
+    const response = await axios.post(`/reports/advance/summary`, payload);
     console.log('response.data.data', response.data.data);
     return response.data.data;
   } catch (error) {

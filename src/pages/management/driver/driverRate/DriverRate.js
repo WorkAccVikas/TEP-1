@@ -18,7 +18,7 @@ import {
 import Header from 'components/tables/genericTable/Header';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { Add } from 'iconsax-react';
-import SearchComponent from 'pages/apps/test/CompanySearch';
+// import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import DriverTable from './DriverTable';
 import AddCabRateDriver from 'pages/master/CabRate/Driver';
@@ -28,6 +28,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import MainCard from 'components/MainCard';
 import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import SearchComponent from 'pages/apps/roster/components/CompanySearch';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
