@@ -141,6 +141,14 @@ const DateRangeSelect = memo(
             value={selectedRange}
             onChange={handleRangeSelection}
             label={showLabel ? 'Date Range' : ''}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('range == ', selectedRange);
+
+              if (selectedRange === DATE_RANGE_OPTIONS.CUSTOM) {
+                setDialogOpen(true);
+              }
+            }}
             displayEmpty
             sx={{
               backgroundColor: 'primary.main',
@@ -153,8 +161,8 @@ const DateRangeSelect = memo(
                 color: '#fff'
               },
               // mb: sx?.mb || 1,
-              width: sx?.width || '220px', 
-              height: sx?.height 
+              width: sx?.width || '220px',
+              height: sx?.height
             }}
             renderValue={() => (
               <Box display="flex" alignItems="center">
