@@ -68,6 +68,7 @@ import Avatar from 'components/@extended/Avatar';
 import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
 import { ThemeMode } from 'config';
 import { USERTYPE } from 'constant';
+import TransitionsModal from './TripView';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -568,7 +569,7 @@ function ReactTable({
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef} sx={{ mt: 2 }}>
-        <Box sx={{ pl: 2, pr: 2 }}>
+        <Box sx={{ pl: 2, pr: 2, pb: 2 }}>
           <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
@@ -643,6 +644,13 @@ const TripList = () => {
   const [refetch, setRefetch] = useState(false);
   const [id, setId] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState(null);
+
+  const handleCompanyClick = (tripId) => {
+    setSelectedTripId(tripId);
+    setModalOpen(true);
+  };
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {},
     selectedVendor: {},
@@ -993,13 +1001,22 @@ const TripList = () => {
         Cell: ({ row, value }) => {
           return (
             <Typography>
-              <Link
+              {/* <Link
                 to={`/apps/trips/trip-view/${row.original.tripId}?id=${row.original._id}`}
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
                 {row.original.companyID.company_name}
-              </Link>
+              </Link> */}
+              <Link
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent row expansion
+                handleCompanyClick(row.original._id);
+              }}
+              style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
+            >
+              {row.original.companyID.company_name}
+            </Link>
             </Typography>
           );
         }
@@ -1015,6 +1032,10 @@ const TripList = () => {
       {
         Header: 'Trip Time',
         accessor: 'tripTime'
+      },
+      {
+        Header: 'Trip Id',
+        accessor: 'rosterTripId'
       },
       {
         Header: 'Zone Name',
@@ -1037,13 +1058,28 @@ const TripList = () => {
         accessor: 'driverId.userName',
         Cell: ({ value }) => value || 'None'
       },
+      // {
+      //   Header: 'Vehicle Guard Price',
+      //   accessor: 'guardPrice', // This can be any key; we won't directly use it.
+      //   Cell: ({ row }) => {
+      //     const { driverGuardPrice, vendorGuardPrice } = row.original;
+      //     return driverGuardPrice || vendorGuardPrice || 'Null';
+      //   }
+      // },
       {
-        Header: 'Vehicle Guard Price',
-        accessor: 'guardPrice', // This can be any key; we won't directly use it.
-        Cell: ({ row }) => {
-          const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
-        }
+        Header: 'Company Guard Price',
+        accessor: 'companyGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Guard Price',
+        accessor: 'vendorGuardPrice',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Guard Price',
+        accessor: 'driverGuardPrice',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Vehicle Rates',
@@ -1062,9 +1098,19 @@ const TripList = () => {
         accessor: 'addOnRate'
       },
       {
-        Header: 'Penalty',
-        accessor: 'penalty',
-        Cell: ({ value }) => value || 'Null'
+        Header: 'Company Penalty',
+        accessor: 'companyPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Vendor Penalty',
+        accessor: 'vendorPenalty',
+        Cell: ({ value }) => value || 0
+      },
+      {
+        Header: 'Driver Penalty',
+        accessor: 'driverPenalty',
+        Cell: ({ value }) => value || 0
       },
       {
         Header: 'Location',
@@ -1347,6 +1393,15 @@ const TripList = () => {
         >
           <AddNewTrip handleClose={handleCloseModal} handleRefetch={handleRefetch} id={id} />
         </Dialog>
+      )}
+
+      {/* Modal Component */}
+      {isModalOpen && (
+        <TransitionsModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          selectedTripId={selectedTripId}
+        />
       )}
     </>
   );
