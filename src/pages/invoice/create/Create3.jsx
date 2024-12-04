@@ -1909,7 +1909,7 @@ const Create3 = () => {
                 {/* Action Buttons */}
                 <Grid item xs={12} sm={6}>
                   <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={2} sx={{ height: '100%' }}>
-                    <Button
+                    {/* <Button
                       variant="outlined"
                       color="secondary"
                       disabled={values.status === '' || !isValid}
@@ -1923,7 +1923,7 @@ const Create3 = () => {
                       }
                     >
                       Preview
-                    </Button>
+                    </Button> */}
                     {/* save data to database */}
                     {/* <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }}>
                       Create
