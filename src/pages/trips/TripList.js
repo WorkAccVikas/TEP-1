@@ -1009,14 +1009,14 @@ const TripList = () => {
                 {row.original.companyID.company_name}
               </Link> */}
               <Link
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent row expansion
-                handleCompanyClick(row.original._id);
-              }}
-              style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
-            >
-              {row.original.companyID.company_name}
-            </Link>
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row expansion
+                  handleCompanyClick(row.original._id);
+                }}
+                style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
+              >
+                {row.original.companyID.company_name}
+              </Link>
             </Typography>
           );
         }
@@ -1396,13 +1396,7 @@ const TripList = () => {
       )}
 
       {/* Modal Component */}
-      {isModalOpen && (
-        <TransitionsModal
-          isOpen={isModalOpen}
-          onClose={() => setModalOpen(false)}
-          selectedTripId={selectedTripId}
-        />
-      )}
+      {isModalOpen && <TransitionsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} selectedTripId={selectedTripId} />}
     </>
   );
 };
