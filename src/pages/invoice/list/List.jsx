@@ -864,7 +864,7 @@ const List = () => {
           />
         </Stack>
 
-        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
+        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/test')}>
           Create Invoice
         </Button>
       </Stack>

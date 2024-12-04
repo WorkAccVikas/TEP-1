@@ -164,7 +164,7 @@ const getInitialValues = (data, user, userSpecificData, invoiceData = null, cust
       IFSCCode: userSpecificData?.IFSC_code || '',
       bankName: userSpecificData?.branchName || ''
     },
-
+    total: 0,
     subTotal: 0,
     totalTax: 0,
     totalDiscount: 0,
@@ -247,11 +247,13 @@ const groupDataWithSuffix = (data, groupByKey) => {
     suffixCounts[primaryKey] = (suffixCounts[primaryKey] || 0) + 1;
     const suffix = `(${suffixCounts[primaryKey]})`;
 
+    const ids = items.map((item) => item._id);
     // Add the formatted object to the result
     result.push({
       itemName: groupByKey === 'companyRate' ? `Trip (${i + 1})` : `${primaryKey} ${suffix}`,
       rate: secondaryKey || items[0].companyRate || 'Unknown',
-      qty: items.length
+      qty: items.length,
+      ids: ids
     });
   });
 
@@ -279,7 +281,8 @@ const Create3 = () => {
   const theme = useTheme();
   const navigation = useNavigate();
   const location = useLocation();
-  const tripData = location.state?.tripData;
+  const stateData = location.state?.tripData;
+  const [tripData, setTripData] = useState(stateData || []);
 
   const { user, userSpecificData } = useAuth();
 
@@ -309,6 +312,14 @@ const Create3 = () => {
   const [groupBy, setGroupBy] = useState('companyRate');
   const [customerInfo, setCustomerInfo] = useState(null);
   const [servicePeriod, setServicePeriod] = useState(null);
+  // tripData
+  const [additionalRates, setAdditonalRates] = useState({
+    guardRate: 0,
+    tollCharges: 0,
+    additonalCharges: 0,
+    penalty: 0,
+    mcdCharge: 0
+  });
 
   const userType = useSelector((state) => state.auth.userType);
 
@@ -331,7 +342,14 @@ const Create3 = () => {
         );
         return;
       }
+      console.log('values.invoiceData', values);
 
+      const taxInformation = values.invoiceData.map((item) => {
+        return {
+          ids: item.ids,
+          taxRate: item.itemTax
+        };
+      });
       const payload = {
         data: {
           companyId: values?.customerInfo?._id || '',
@@ -341,6 +359,7 @@ const Create3 = () => {
           dueDate: formatDateUsingMoment(values?.due_date, format),
           servicePeriod:
             formatDateUsingMoment(values?.start_date, 'DD-MM-YYYY') + ' to ' + formatDateUsingMoment(values?.end_date, 'DD-MM-YYYY'),
+          linkedTripIds1: taxInformation,
           linkedTripIds,
           invoiceData: values?.invoiceData || [],
           // subTotal: values?.subTotal,
@@ -349,12 +368,12 @@ const Create3 = () => {
           subTotal: subTotal,
           totalAmount: grandTotal,
           grandTotal: grandTotal,
-          CGST: values?.CGST,
-          SGST: values?.SGST,
-          IGST: values?.IGST,
-          MCDAmount: values?.MCDAmount,
-          tollParkingCharges: values?.tollParkingCharges,
-          penalty: values?.penalty,
+          CGST: totalTaxAmount / 2 || 0,
+          SGST: totalTaxAmount/ 2 || 0,
+          IGST: totalTaxAmount || 0,
+          MCDAmount: additionalRates.mcdCharge,
+          tollParkingCharges: additionalRates.tollCharges,
+          penalty: additionalRates.penalty,
           terms: values?.terms,
           billedTo: values?.customerInfo,
           billedBy: values?.cashierInfo,
@@ -371,6 +390,7 @@ const Create3 = () => {
         }
       };
 
+      console.log({ payload });
       // alert(JSON.stringify(payload, null, 2));
       const response = await axios.post(API_URL[userType], payload);
 
@@ -549,11 +569,12 @@ const Create3 = () => {
   useEffect(() => {
     const mappedData = groupDataWithSuffix(tripData, groupBy);
     // const mappedData = groupDataWithSuffix(dummyData, groupBy);
+    console.log({ mappedData });
 
     const updatedData = mappedData.map((item) => {
       return {
         itemName: item.itemName,
-        rate: typeof item.rate === 'string' ? 0 : item.rate,
+        rate: isNaN(Number(item.rate)) ? 0 : Number(item.rate),
         quantity: item.qty,
 
         HSN_SAC_code: '',
@@ -562,13 +583,14 @@ const Create3 = () => {
 
         itemDiscount: 0,
         discount: 0,
+        ids: item.ids || [],
 
-        amount: typeof item.rate === 'string' ? 0 : item.rate * item.qty
+        amount: isNaN(Number(item.rate)) ? 0 : Number(item.rate) * item.qty
       };
     });
+
     const groupedGuardRates = groupGuardRates(tripData);
 
-    console.log({ groupedGuardRates });
     const guardRates =
       groupedGuardRates.length > 0
         ? groupedGuardRates.map((item) => {
@@ -588,8 +610,6 @@ const Create3 = () => {
             };
           })
         : [];
-
-    console.log({ guardRates });
 
     const allData = [...updatedData, ...guardRates];
 
@@ -640,28 +660,21 @@ const Create3 = () => {
     console.log({ guardRate });
     const totals = invoiceData.reduce(
       (acc, item) => ({
+        total: acc.subTotal + item.amount,
         subTotal: acc.subTotal + item.amount,
         totalTaxAmount: acc.totalTaxAmount + item.Tax_amount,
         totalDiscountAmount: acc.totalDiscountAmount + item.discount
       }),
-      { subTotal: 0, totalTaxAmount: 0, totalDiscountAmount: 0 }
+      { total: 0, subTotal: 0, totalTaxAmount: 0, totalDiscountAmount: 0 }
     );
 
     // Incorporate additional rates into subTotal
-    totals.subTotal += tollCharges + additonalCharges + mcdCharge + penalty;
-   
-    totals.grandTotal = totals.subTotal + totals.totalTaxAmount - totals.totalDiscountAmount;
+    totals.subTotal += penalty;
+
+    totals.grandTotal = totals.subTotal + totals.totalTaxAmount + tollCharges + additonalCharges + mcdCharge + -totals.totalDiscountAmount;
 
     return totals;
   };
-  // tripData
-  const [additionalRates, setAdditonalRates] = useState({
-    guardRate: 0,
-    tollCharges: 0,
-    additonalCharges: 0,
-    penalty: 0,
-    mcdCharge: 0
-  });
 
   useEffect(() => {
     if (tripData && tripData.length > 0) {
@@ -688,7 +701,7 @@ const Create3 = () => {
     }
   }, [tripData]);
 
-  const { subTotal, totalTaxAmount, totalDiscountAmount, grandTotal } = calculateTotals(formik.values.invoiceData, additionalRates);
+  const { total, subTotal, totalTaxAmount, totalDiscountAmount, grandTotal } = calculateTotals(formik.values.invoiceData, additionalRates);
 
   console.log({ subTotal, totalTaxAmount, totalDiscountAmount, grandTotal });
 
@@ -1522,84 +1535,100 @@ const Create3 = () => {
                                 )}
 
                                 <Grid item xs={12}>
-                                  <Stack spacing={2}>
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Penalties:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.subTotal}
-                                        total={additionalRates.penalty}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>MCD Charges:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.subTotal}
-                                        total={additionalRates.mcdCharge}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Toll Charges:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.subTotal}
-                                        total={additionalRates.tollCharges}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Additonal Charges:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.subTotal}
-                                        total={additionalRates.additonalCharges}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Sub Total:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.subTotal}
-                                        total={subTotal}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
+                                  <MainCard content={false} border={false} sx={{ p: 2, bgcolor: 'background.default' }}>
+                                    <Stack spacing={2}>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Total:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={total}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+                                      <Divider sx={{ borderStyle: 'dashed' }} />
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Penalties:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={additionalRates.penalty}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Discount:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.totalDiscount}
+                                          total={totalDiscountAmount}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
 
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Tax:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.totalTax}
-                                        total={totalTaxAmount}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
+                                      <Divider sx={{ borderStyle: 'dashed' }} />
 
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography color={theme.palette.secondary.main}>Discount:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.totalDiscount}
-                                        total={totalDiscountAmount}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                      />
-                                    </Stack>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Sub Total:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={subTotal}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
 
-                                    <Stack direction="row" justifyContent="space-between">
-                                      <Typography variant="subtitle1">Grand Total:</Typography>
-                                      <GenericPriceDisplay
-                                        // total={formik.values?.grandTotal}
-                                        total={grandTotal}
-                                        roundOff={settings.roundOff}
-                                        prefix={country?.prefix}
-                                        variant="subtitle1" // Optional
-                                      />
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>GST:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.totalTax}
+                                          total={totalTaxAmount}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>MCD Charges:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={additionalRates.mcdCharge}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Toll Charges:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={additionalRates.tollCharges}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography color={theme.palette.secondary.main}>Additonal Charges:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.subTotal}
+                                          total={additionalRates.additonalCharges}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                        />
+                                      </Stack>
+
+                                      <Divider />
+
+                                      <Stack direction="row" justifyContent="space-between">
+                                        <Typography variant="subtitle1">Grand Total:</Typography>
+                                        <GenericPriceDisplay
+                                          // total={formik.values?.grandTotal}
+                                          total={grandTotal}
+                                          roundOff={settings.roundOff}
+                                          prefix={country?.prefix}
+                                          variant="subtitle1" // Optional
+                                        />
+                                      </Stack>
                                     </Stack>
-                                  </Stack>
+                                  </MainCard>
                                 </Grid>
                               </Grid>
                             </Grid>
