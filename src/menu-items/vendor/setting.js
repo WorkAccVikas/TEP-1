@@ -25,7 +25,16 @@ const setting = {
       type: 'collapse',
       icon: icons.setting,
       children: [
-        // Role
+        // User Setting
+        {
+          id: 'user',
+          title: <FormattedMessage id="user" />,
+          type: 'item',
+          url: '/management/user/view',
+          icon: icons.user
+        },
+
+        // Role Setting
         {
           id: 'role',
           title: <FormattedMessage id="role" />,
@@ -34,7 +43,7 @@ const setting = {
           icon: icons.role
         }
       ]
-    },
+    }
   ]
 };
 
