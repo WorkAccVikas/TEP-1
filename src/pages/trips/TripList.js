@@ -47,7 +47,7 @@ import { alertPopupToggle, getInvoiceDelete } from 'store/reducers/invoice';
 import { renderFilterTypes, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Add, ArrowCircleDown2, Edit, Money4, More, NotificationBing, Routing2, Trash } from 'iconsax-react';
+import { Add, ArrowCircleDown2, Edit, Eye, Money4, More, NotificationBing, Routing2, Trash } from 'iconsax-react';
 import AlertDialog from 'components/alertDialog/AlertDialog';
 import axiosServices from 'utils/axios';
 import FormDialog from 'components/alertDialog/FormDialog';
@@ -568,7 +568,7 @@ function ReactTable({
         </Stack>
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
-      <Box ref={componentRef} >
+      <Box ref={componentRef}>
         <Box sx={{ p: 1 }}>
           <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
@@ -948,6 +948,27 @@ const TripList = () => {
                   </IconButton>
                 </Tooltip>
               )}
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View Trip"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row expansion
+                    handleCompanyClick(row.original);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
             </Stack>
           );
         }
@@ -1012,6 +1033,14 @@ const TripList = () => {
                 {row.original.companyID.company_name}
               </Link> */}
               <Link
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row expansion
+                  handleCompanyClick(row.original);
+                }}
+                style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
+              >
+                {row.original.companyID.company_name}
+              </Link>
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent row expansion
                   handleCompanyClick(row.original._id);
@@ -1399,6 +1428,7 @@ const TripList = () => {
       )}
 
       {/* Modal Component */}
+      {isModalOpen && <TransitionsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} selectedTripId={selectedTripId} />}
       {isModalOpen && <TransitionsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} selectedTripId={selectedTripId} />}
     </>
   );
