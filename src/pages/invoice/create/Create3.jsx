@@ -369,7 +369,7 @@ const Create3 = () => {
           totalAmount: grandTotal,
           grandTotal: grandTotal,
           CGST: totalTaxAmount / 2 || 0,
-          SGST: totalTaxAmount/ 2 || 0,
+          SGST: totalTaxAmount / 2 || 0,
           IGST: totalTaxAmount || 0,
           MCDAmount: additionalRates.mcdCharge,
           tollParkingCharges: additionalRates.tollCharges,
@@ -459,6 +459,17 @@ const Create3 = () => {
         }
       } catch (error) {
         console.log('Error fetching settings: (Invoice Creation)', error);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: error?.message || 'Something went wrong',
+            variant: 'alert',
+            alert: {
+              color: 'error'
+            },
+            close: true
+          })
+        );
       }
     }
 

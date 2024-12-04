@@ -69,6 +69,7 @@ import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
 import { ThemeMode } from 'config';
 import { USERTYPE } from 'constant';
 import TransitionsModal from './TripView';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -561,9 +562,11 @@ function ReactTable({
             <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <ChangeStatusButton selected={selectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
-              Add Trip
-            </Button>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
+                Add Trip
+              </Button>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
       </Box>
@@ -925,28 +928,30 @@ const TripList = () => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
+                <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
-                    }
-                  }}
-                  title="Edit"
-                >
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsOpen(true); // Open the dialog for editing
-                      setId(row.original._id);
                     }}
+                    title="Edit"
                   >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(true); // Open the dialog for editing
+                        setId(row.original._id);
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                </AccessControlWrapper>
               )}
               <Tooltip
                 componentsProps={{
@@ -1274,7 +1279,14 @@ const TripList = () => {
       </Grid>
 
       {/* filter */}
-      <Stack direction="row" alignItems="center" justifyContent="space-evenly">
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+          gap: 2
+        }}
+      >
+        {/* Company Filter */}
         <CompanyFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1286,13 +1298,14 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '200px',
+            // width: '200px',
             pb: 1
           }}
           value={filterOptions.selectedCompany}
         />
 
-        {userType === USERTYPE.iscabProvider && (
+        {/* Vendor Filter */}
+        <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
           <VendorFilter
             setFilterOptions={setFilterOptions}
             sx={{
@@ -1304,12 +1317,14 @@ const TripList = () => {
               '& .MuiSelect-icon': {
                 color: '#fff' // Set the down arrow color to white
               },
-              width: '200px',
+              // width: '200px',
               pb: 1
             }}
             value={filterOptions.selectedVendor}
           />
-        )}
+        </AccessControlWrapper>
+
+        {/* Driver Filter */}
         <DriverFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1321,11 +1336,13 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '200px',
+            // width: '200px',
             pb: 1
           }}
           value={filterOptions.selectedDriver}
         />
+
+        {/* Vehicle Filter */}
         <VehicleFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1337,12 +1354,13 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '220px',
+            // width: '220px',
             pb: 1
           }}
           value={filterOptions.selectedVehicle}
         />
 
+        {/* Date Filter */}
         <DateRangeSelect
           startDate={startDate}
           endDate={endDate}
@@ -1352,7 +1370,7 @@ const TripList = () => {
           onRangeChange={handleRangeChange}
           showSelectedRangeLabel
         />
-      </Stack>
+      </Box>
 
       <Stack gap={2}>
         <MainCard content={false}>

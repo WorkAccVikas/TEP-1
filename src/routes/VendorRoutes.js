@@ -36,6 +36,7 @@ const Dashboard = Loadable(lazy(() => import('pages')));
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
+const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3')));
 
 // Management
 const User = Loadable(lazy(() => import('pages/management/user')));
@@ -120,6 +121,10 @@ const VendorRoutes = {
                 {
                   path: 'create',
                   element: <InvoiceCreate />
+                },
+                {
+                  path: 'test',
+                  element: <InvoiceCreate3 />
                 },
                 // {
                 //   path: 'invoice',
