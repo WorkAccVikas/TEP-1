@@ -65,6 +65,7 @@ import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import PaidModal from '../others/PaidModal';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -444,6 +445,8 @@ const List = () => {
           const theme = useTheme();
           const mode = theme.palette.mode;
           const navigate = useNavigate();
+          const [paidModalOpen, setPaidModalOpen] = useState(false);
+          const [paidAmount, setPaidAmount] = useState(0);
 
           const handleMenuClick = (event) => {
             setAnchorEl(event.currentTarget);
@@ -476,13 +479,25 @@ const List = () => {
             setRemarks(event.target.value);
           };
 
-          const confirmStatusChange = async () => {
+          const handleOpenPaidModal = useCallback((val) => {
+            setPaidAmount(val);
+            setPaidModalOpen(true);
+          }, []);
+
+          const handleClosePaidModal = useCallback(() => {
+            setPaidModalOpen(false);
+            setPaidAmount(0);
+          }, []);
+
+          const confirmStatusChange = async (type, data) => {
             try {
+              console.log("🚀 ~ confirmStatusChange ~ data:", data);
               const response = await axiosServices.put(`/invoice/update/paymentStatus`, {
                 data: {
                   invoiceId: row.original._id,
                   status: newStatus,
-                  remarks: newStatus === 2 ? remarks : undefined // Include remarks if cancelled
+                  remarks: newStatus === 2 ? remarks : undefined, // Include remarks if cancelled
+                  ...(type === 'Paid' && { ...data })
                 }
               });
 
@@ -521,6 +536,7 @@ const List = () => {
 
             setDialogOpen(false);
             setFormDialogOpen(false);
+            handleClosePaidModal();
             handleMenuClose();
           };
 
@@ -567,7 +583,14 @@ const List = () => {
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               >
                 <MenuItem onClick={() => handleStatusChange(0)}>Unpaid</MenuItem>
-                <MenuItem onClick={() => handleStatusChange(1)}>Paid</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    console.log('row = ', row.original);
+                    handleOpenPaidModal(row.original.grandTotal);
+                  }}
+                >
+                  Paid
+                </MenuItem>
                 <MenuItem onClick={() => handleStatusChange(2)}>Cancelled</MenuItem>
               </Menu>
 
@@ -609,6 +632,19 @@ const List = () => {
                 confirmedButtonTitle="Confirm Cancellation"
                 showError
               />
+
+              {paidModalOpen && (
+                <Dialog
+                  open={paidModalOpen}
+                  onClose={handleClosePaidModal}
+                  maxWidth="sm"
+                  fullWidth
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <PaidModal open={paidModalOpen} amount={paidAmount} onClose={handleClosePaidModal} onConfirm={confirmStatusChange} />
+                </Dialog>
+              )}
             </Stack>
           );
         }
