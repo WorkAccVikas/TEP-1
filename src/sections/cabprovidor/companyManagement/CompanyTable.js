@@ -29,7 +29,7 @@ import { useExpanded, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import WrapperButton from 'components/common/guards/WrapperButton';
-import { MODULE, PERMISSIONS } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import axiosServices from 'utils/axios';
@@ -39,12 +39,14 @@ import { ThemeMode } from 'config';
 import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompanyStatus } from 'store/slice/cabProvidor/companySlice';
 import CompanyFilter1 from 'pages/trips/filter/CompanyFilter1';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 
-const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery}) => {
+const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+
 
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
@@ -130,7 +132,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         //     .join(' ');
         // }
-         Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'None'
       },
       {
         Header: 'Total Vehicle',
@@ -260,34 +262,36 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         Cell: ({ row }) => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const id = row.original._id;
-                    const isSubRow = !Array.isArray(row.original.Branches);
-                    console.log('row = ', row);
-                    if (isSubRow) {
-                      navigate(`/management/company/edit-company-branch/${id}`);
-                    } else {
-                      navigate(`/management/company/edit/${id}`);
+              <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
                   }}
+                  title="Edit"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const id = row.original._id;
+                      const isSubRow = !Array.isArray(row.original.Branches);
+                      console.log('row = ', row);
+                      if (isSubRow) {
+                        navigate(`/management/company/edit-company-branch/${id}`);
+                      } else {
+                        navigate(`/management/company/edit/${id}`);
+                      }
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </AccessControlWrapper>
             </Stack>
           );
         }
@@ -406,35 +410,40 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '180px', // Set desired width for search input
+            width: '180px' // Set desired width for search input
           }}
         />
 
         {/* Button container on the right */}
         <Stack direction="row" alignItems="center" spacing={2}>
-          <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
-            <Button
-              variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-              onClick={handleAddCompany}
-              size="small"
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Add Company'}
-            </Button>
-          </WrapperButton>
-          <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
-            <Button
-              variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-              onClick={handleAddCompanyBranch}
-              size="small"
-              color="success"
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Add Branch'}
-            </Button>
-          </WrapperButton>
+          <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+            <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                onClick={handleAddCompany}
+                size="small"
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Add Company'}
+              </Button>
+            </WrapperButton>
+          </AccessControlWrapper>
+
+          <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+            <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                onClick={handleAddCompanyBranch}
+                size="small"
+                color="success"
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Add Branch'}
+              </Button>
+            </WrapperButton>
+          </AccessControlWrapper>
         </Stack>
       </Stack>
 

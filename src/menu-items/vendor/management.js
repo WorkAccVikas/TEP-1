@@ -22,30 +22,30 @@ const management = {
   type: 'group',
   icon: icons.samplePage,
   children: [
-    // User
-    {
-      id: 'user',
-      title: <FormattedMessage id="user" />,
-      type: 'item',
-      url: '/management/user/view',
-      icon: icons.user,
-      // children: [
-      //   {
-      //     id: 'view',
-      //     title: <FormattedMessage id="view" />,
-      //     type: 'item',
-      //     url: '/management/user/view',
-      //     // icon: icons.samplePage
-      //   },
-      //   {
-      //     id: 'create',
-      //     title: <FormattedMessage id="create user" />,
-      //     type: 'item',
-      //     url: '/management/user/add-user',
-      //     // icon: icons.samplePage
-      //   }
-      // ]
-    },
+    // // User
+    // {
+    //   id: 'user',
+    //   title: <FormattedMessage id="user" />,
+    //   type: 'item',
+    //   url: '/management/user/view',
+    //   icon: icons.user,
+    //   // children: [
+    //   //   {
+    //   //     id: 'view',
+    //   //     title: <FormattedMessage id="view" />,
+    //   //     type: 'item',
+    //   //     url: '/management/user/view',
+    //   //     // icon: icons.samplePage
+    //   //   },
+    //   //   {
+    //   //     id: 'create',
+    //   //     title: <FormattedMessage id="create user" />,
+    //   //     type: 'item',
+    //   //     url: '/management/user/add-user',
+    //   //     // icon: icons.samplePage
+    //   //   }
+    //   // ]
+    // },
 
     // Company
     {
