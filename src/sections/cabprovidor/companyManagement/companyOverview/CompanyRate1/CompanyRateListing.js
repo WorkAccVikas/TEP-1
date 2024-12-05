@@ -14,8 +14,14 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { USERTYPE } from 'constant';
+import { useSelector } from 'store';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
+
+const API = {
+  [USERTYPE.iscabProvider]: `/company/unwind/rates?companyId=`,
+  [USERTYPE.isVendor]: '/cabRateMaster/unwind/rate?companyID='
+};
 
 const CompanyRateListing = ({ companyName, id }) => {
   const [data, setData] = useState([]);
@@ -28,16 +34,19 @@ const CompanyRateListing = ({ companyName, id }) => {
   const [loading, setLoading] = useState('true');
   const [showCompanyList, setShowCompanyList] = useState(false);
 
+  const userType = useSelector((state) => state.auth.userType);
+  console.log('🚀 ~ CompanyRateListing ~ userType:', userType);
+
   useEffect(() => {
     const fetchdata = async () => {
-      const response = await axiosServices.get(`/company/unwind/rates?companyId=${id}`);
+      const response = await axiosServices.get(API[userType] + id);
       setCompanyList(response.data.data);
       setLoading(false);
       console.log('response.data', response.data.data);
     };
 
     fetchdata();
-  }, [id]);
+  }, [id, userType]);
 
   const handleAddRate = () => {
     setShowCompanyList(true);
