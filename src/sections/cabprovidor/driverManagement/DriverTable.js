@@ -153,6 +153,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         Cell: ({ row, value }) => {
           const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
           const isCabProviderDriver = row.original.isCabProviderDriver;
+          console.log('isCabProviderDriver', isCabProviderDriver);
 
           return (
             <Typography>
@@ -162,7 +163,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 {formattedValue}
-                {isCabProviderDriver && (
+                {isCabProviderDriver > 0 && (
                   <Tooltip title="Cabprovider" arrow>
                     <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
                   </Tooltip>
