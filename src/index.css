@@ -7,6 +7,6 @@ div:hover .logo-overlay {
 }
 
 /* CSS to change the color of the required asterisk */
-.MuiInputLabel-root .MuiFormLabel-asterisk {
+.MuiInputLabel-root .MuiFormLabel-asterisk, .MuiFormLabel-asterisk {
   color: red; /* Apply red color to the required asterisk */
 }
