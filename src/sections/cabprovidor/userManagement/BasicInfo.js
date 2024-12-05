@@ -126,7 +126,7 @@ const BasicInfo = () => {
                 {/* Username */}
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel required>Username</FormLabel>
                     <FormikTextField
                       name="userName"
                       placeholder="Enter Username"
@@ -141,7 +141,7 @@ const BasicInfo = () => {
                 {/* Email */}
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel required>Email</FormLabel>
                     <FormikTextField
                       name="userEmail"
                       placeholder="Enter Email"
@@ -156,7 +156,7 @@ const BasicInfo = () => {
                 {/* Password */}
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel required>Password</FormLabel>
 
                     <PasswordField
                       name="userPassword"
@@ -171,7 +171,7 @@ const BasicInfo = () => {
                 {/* Confirm Password */}
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel required>Confirm Password</FormLabel>
                     <PasswordField
                       name="userConfirmPassword"
                       placeholder="Enter Confirm Password"
