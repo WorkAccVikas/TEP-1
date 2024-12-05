@@ -8,7 +8,7 @@ import { Bill, MenuBoard, Setting2 } from 'iconsax-react';
 const icons = {
   samplePage: MenuBoard,
   setting: Setting2,
-  invoice: Bill,
+  invoice: Bill
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -19,8 +19,9 @@ const setting = {
   type: 'group',
   icon: icons.samplePage,
   children: [
+    // User Setting
     {
-      id: 'setting',
+      id: 'user-setting',
       title: <FormattedMessage id="user-setting" />,
       type: 'collapse',
       icon: icons.setting,
@@ -43,6 +44,15 @@ const setting = {
           icon: icons.role
         }
       ]
+    },
+
+    // Invoice Setting
+    {
+      id: 'invoice-setting',
+      title: <FormattedMessage id="invoice setting" />,
+      type: 'item',
+      icon: icons.invoice,
+      url: '/settings/invoice'
     }
   ]
 };

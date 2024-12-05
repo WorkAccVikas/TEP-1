@@ -86,6 +86,9 @@ const AddCabRateDriver = Loadable(lazy(() => import('pages/master/CabRate/Driver
 const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
 const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
 
+// Settings
+const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const VendorRoutes = {
@@ -151,11 +154,11 @@ const VendorRoutes = {
                   element: <AdvancesVendorTable />
                   //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
                 },
-                {
-                  path: 'advance-type',
-                  element: <AdvanceVendorType />
-                  //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
-                }
+                // {
+                //   path: 'advance-type',
+                //   element: <AdvanceVendorType />
+                //   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
+                // }
               ]
             },
 
@@ -293,6 +296,20 @@ const VendorRoutes = {
             {
               path: 'role',
               element: <Role />
+            }
+          ]
+        },
+
+        // Settings
+        {
+          path: 'settings',
+          children: [
+
+
+            // Invoice Settings
+            {
+              path: 'invoice',
+              element: <InvoiceSettings />
             }
           ]
         }
