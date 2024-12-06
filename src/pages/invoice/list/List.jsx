@@ -74,6 +74,25 @@ const API_URL = {
   [USERTYPE.isVendor]: '/invoice/all/vendor'
 };
 
+const INVOICE_STATUS = {
+  UNPAID: 0,
+  PAID: 1,
+  CANCELLED: 2
+};
+
+const getTabName = (status) => {
+  switch (status) {
+    case INVOICE_STATUS.PAID:
+      return 'Paid';
+    case INVOICE_STATUS.UNPAID:
+      return 'Unpaid';
+    case INVOICE_STATUS.CANCELLED:
+      return 'Cancelled';
+    default:
+      return 'All';
+  }
+};
+
 // ==============================|| REACT TABLE ||============================== //
 
 function ReactTable({ columns, data }) {
@@ -125,51 +144,46 @@ function ReactTable({ columns, data }) {
   // ================ Tab ================
 
   // Map status codes to labels and colors
-  const statusMap = {
-    3: { label: 'Cancelled', color: 'error' },
-    2: { label: 'Paid', color: 'success' },
-    1: { label: 'Unpaid', color: 'warning' }
-  };
 
-  const INOVICE_STATUS = {
-    UNPAID: 1,
-    PAID: 2,
-    CANCELLED: 3
-  };
-
-  const getTabName = (status) => {
-    switch (status) {
-      case INOVICE_STATUS.PAID:
-        return 'Paid';
-      case INOVICE_STATUS.UNPAID:
-        return 'Unpaid';
-      case INOVICE_STATUS.CANCELLED:
-        return 'Cancelled';
-      default:
-        return 'All';
-    }
-  };
   // Create groups and counts
-  const groups = ['All', INOVICE_STATUS.PAID, INOVICE_STATUS.UNPAID, INOVICE_STATUS.CANCELLED];
+  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED];
 
   const countGroup = data.map((item) => item.status);
+  // console.log('countGroup', countGroup);
+  console.log('rows', rows);
 
   const counts = {
-    Paid: countGroup.filter((status) => status === INOVICE_STATUS.PAID).length,
-    Unpaid: countGroup.filter((status) => status === INOVICE_STATUS.UNPAID).length,
-    Cancelled: countGroup.filter((status) => status === INOVICE_STATUS.CANCELLED).length
+    Paid: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
+    Unpaid: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length,
+    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length
   };
+
+  // console.log('counts', counts);
+  // console.log('page = ', page);
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
   useEffect(() => {
-    setFilter('status', activeTab === 'All' ? '' : activeTab);
-  }, [activeTab]);
+    console.log('x = ', activeTab);
 
-  useEffect(() => {
-    setFilter('status', activeTab === 'All' ? '' : activeTab === INOVICE_STATUS.UNPAID ? 1 : activeTab === INOVICE_STATUS.PAID ? 2 : 3);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+    setFilter('status', activeTab === 'All' ? '' : activeTab);
+  }, [activeTab, setFilter]);
+
+  // useEffect(() => {
+  //   console.log('x = ', activeTab);
+  //   setFilter('status', activeTab === 'All' ? '' : activeTab === INVOICE_STATUS.UNPAID ? 1 : activeTab === INVOICE_STATUS.PAID ? 2 : 3);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [activeTab]);
+
+  const filterData = rows.filter((row) => {
+    if (activeTab === 'All') {
+      return true;
+    } else {
+      return row.original.status === activeTab;
+    }
+  });
+
+  console.log('filterData', filterData);
 
   return (
     <>
@@ -186,18 +200,18 @@ function ReactTable({ columns, data }) {
                     label={
                       status === 'All'
                         ? data.length
-                        : status === INOVICE_STATUS.PAID
+                        : status === INVOICE_STATUS.PAID
                         ? counts.Paid
-                        : status === INOVICE_STATUS.UNPAID
+                        : status === INVOICE_STATUS.UNPAID
                         ? counts.Unpaid
                         : counts.Cancelled
                     }
                     color={
                       status === 'All'
                         ? 'primary'
-                        : status === INOVICE_STATUS.PAID
+                        : status === INVOICE_STATUS.PAID
                         ? 'success'
-                        : status === INOVICE_STATUS.UNPAID
+                        : status === INVOICE_STATUS.UNPAID
                         ? 'warning'
                         : 'error'
                     }
@@ -237,7 +251,7 @@ function ReactTable({ columns, data }) {
             ))}
           </TableHead>
           <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
+            {filterData.map((row, i) => {
               prepareRow(row);
               return (
                 <Fragment key={i}>
@@ -259,7 +273,13 @@ function ReactTable({ columns, data }) {
             })}
             <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
               <TableCell sx={{ p: 2, py: 3 }} colSpan={9}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+                <TablePagination
+                  gotoPage={gotoPage}
+                  rows={filterData}
+                  setPageSize={setPageSize}
+                  pageSize={pageSize}
+                  pageIndex={pageIndex}
+                />
               </TableCell>
             </TableRow>
           </TableBody>
@@ -427,7 +447,7 @@ const List = () => {
             return <Chip color="error" label="Cancelled" size="small" variant="light" />;
           } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
-          } else {
+          } else if (value === 0) {
             return <Chip color="info" label="Unpaid" size="small" variant="light" />;
           }
         }
@@ -491,7 +511,7 @@ const List = () => {
 
           const confirmStatusChange = async (type, data) => {
             try {
-              console.log("🚀 ~ confirmStatusChange ~ data:", data);
+              console.log('🚀 ~ confirmStatusChange ~ data:', data);
               const response = await axiosServices.put(`/invoice/update/paymentStatus`, {
                 data: {
                   invoiceId: row.original._id,

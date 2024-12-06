@@ -31,6 +31,7 @@ import { useEffect, useState } from 'react';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { registerUser } from 'store/slice/cabProvidor/userSlice';
+import { addSpecialDetails } from 'store/slice/cabProvidor/vendorSlice';
 
 //Validation Schema for formData
 
@@ -42,7 +43,13 @@ const validationSchema = yup.object({
   confirmpassword: yup
     .string()
     .required('Confirm Password is required')
-    .oneOf([yup.ref('password'), null], 'Passwords must match')
+    .oneOf([yup.ref('password'), null], 'Passwords must match'),
+  vendorCompanyName: yup.string().required('Cab Provider Name is required'),
+  officeChargeAmount: yup
+    .number()
+    .typeError('Office Charge Amount must be a number')
+    .required('Office Charge Amount is required')
+    .positive('Office Charge Amount must be a positive number')
   // contactNumber: yup
   //   .string()
   //   .required('Contact Number is required')
@@ -93,6 +100,8 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
       confirmpassword: basicInfo.confirmpassword || '',
       contactNumber: basicInfo.contactNumber || '',
       alternateContactNumber: basicInfo.alternateContactNumber || '',
+      vendorCompanyName: '',
+      officeChargeAmount: '',
       // pinCode: basicInfo.pinCode || '',
       // city: basicInfo.city || '',
       // state: basicInfo.state || '',
@@ -122,22 +131,33 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
 
         if (response?.status === 201) {
           setVendorId(response.data._id);
-          handleNext(); // handling next button
-          resetForm(); // Reset the form after successful submission
+          const specificPayload = {
+            data: {
+              vendorId: response.data._id,
+              vendorCompanyName: values.vendorCompanyName,
+              officeChargeAmount: values.officeChargeAmount
+            }
+          };
 
-          //Alert message on success added
+          const specificAPIResponse = await dispatch(addSpecialDetails(specificPayload)).unwrap();
+          if (specificAPIResponse?.status === 201) {
+            handleNext(); // handling next button
+            resetForm(); // Reset the form after successful submission
 
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Basic User details have been successfully added',
-              variant: 'alert',
-              alert: {
-                color: 'success'
-              },
-              close: true
-            })
-          );
+            //Alert message on success added
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Basic User details have been successfully added',
+                variant: 'alert',
+                alert: {
+                  color: 'success'
+                },
+                close: true
+              })
+            );
+          }
         }
       } catch (error) {
         dispatch(
@@ -197,9 +217,10 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
                Personal Info:
             </Typography>
           </Grid> */}
+          {/* Username */}
           <Grid item xs={12} sm={3}>
             <Stack spacing={1}>
-              <InputLabel>Username</InputLabel>
+              <InputLabel required>Username</InputLabel>
               <TextField
                 id="userName"
                 name="userName"
@@ -213,9 +234,11 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
               />
             </Stack>
           </Grid>
-          <Grid item xs={3}>
+
+          {/* Email */}
+          <Grid item xs={12} sm={3}>
             <Stack spacing={1}>
-              <InputLabel>Email</InputLabel>
+              <InputLabel required>Email</InputLabel>
               <TextField
                 id="userEmail"
                 name="userEmail"
@@ -230,9 +253,11 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
               />
             </Stack>
           </Grid>
-          <Grid item xs={3}>
+
+          {/* Password */}
+          <Grid item xs={12} sm={3}>
             <Stack spacing={1}>
-              <InputLabel>Password</InputLabel>
+              <InputLabel required>Password</InputLabel>
               <OutlinedInput
                 id="password"
                 name="password"
@@ -259,9 +284,11 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
               {formik.touched.password && formik.errors.password && <FormHelperText error>{formik.errors.password}</FormHelperText>}
             </Stack>
           </Grid>
+
+          {/* Confirm Password */}
           <Grid item xs={12} sm={3}>
             <Stack spacing={1}>
-              <InputLabel>Confirm Password</InputLabel>
+              <InputLabel required>Confirm Password</InputLabel>
               <OutlinedInput
                 id="text-adornment-password"
                 name="confirmpassword"
@@ -290,6 +317,48 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
               )}
             </Stack>
           </Grid>
+
+          {/* Vendor Legal Name */}
+          <Grid item xs={12} sm={3}>
+            <Stack spacing={1}>
+              <InputLabel required>Vendor Legal Name</InputLabel>
+              <TextField
+                id="vendorCompanyName"
+                name="vendorCompanyName"
+                value={formik.values.vendorCompanyName}
+                onChange={formik.handleChange}
+                error={formik.touched.vendorCompanyName && Boolean(formik.errors.vendorCompanyName)}
+                helperText={formik.touched.vendorCompanyName && formik.errors.vendorCompanyName}
+                placeholder="Enter Cab Provider Name"
+                fullWidth
+                autoComplete="name"
+              />
+            </Stack>
+          </Grid>
+
+          {/* Office Charge Amount */}
+          <Grid item xs={12} sm={3}>
+            <Stack spacing={1}>
+              <InputLabel required>Office Charge Amount</InputLabel>
+
+              <TextField
+                id="officeChargeAmount"
+                name="officeChargeAmount"
+                type="number"
+                placeholder="Enter Office Charge Amount"
+                value={formik.values.officeChargeAmount}
+                onChange={formik.handleChange}
+                error={formik.touched.officeChargeAmount && Boolean(formik.errors.officeChargeAmount)}
+                helperText={formik.touched.officeChargeAmount && formik.errors.officeChargeAmount}
+                fullWidth
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">₹</InputAdornment>
+                }}
+                autoComplete="officeChargeAmount"
+              />
+            </Stack>
+          </Grid>
+
           <Grid item xs={12}>
             <Typography variant="h5" component="div">
               Contact Info:
