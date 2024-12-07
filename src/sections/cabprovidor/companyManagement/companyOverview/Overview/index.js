@@ -7,6 +7,7 @@ import Avatar from 'components/@extended/Avatar';
 import OverviewGraph from './OverviewGraph';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { USERTYPE } from 'constant';
+import InvoiceStats from './InvoiceStats';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -211,7 +212,8 @@ const Overview = ({ data }) => {
       <Grid item xs={12} sm={6} md={6} xl={6}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <OverviewGraph />
+            {/* <OverviewGraph /> */}
+            <InvoiceStats />
           </Grid>
         </Grid>
       </Grid>
