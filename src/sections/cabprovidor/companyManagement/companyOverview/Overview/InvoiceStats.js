@@ -165,3 +165,4 @@ export default InvoiceStats;
 
 // Utility function to determine if the current item is the last
 export const isLastItem = (index, totalItems) => index === totalItems - 1;
+
