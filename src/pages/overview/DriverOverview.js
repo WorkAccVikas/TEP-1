@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // material-ui
 import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 
@@ -19,17 +20,42 @@ import AttachedCompany from 'sections/cabprovidor/driverManagement/driverOvervie
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
 import AdvanceDriver from 'sections/cabprovidor/driverManagement/driverOverview/Advance';
+import { USERTYPE } from 'constant';
+import { useSelector } from 'store';
+import { Base64 } from 'js-base64';
+
+const tabConfig = [
+  { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Advance', icon: <WalletAdd />, access: [USERTYPE.iscabProvider] },
+  { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] }
+];
 
 const DriverOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
+  const navigate = useNavigate();
+  // const location = useLocation();
+  // console.log(`🚀 ~ DriverOverview ~ location:`, location);
+  // const { CabProvider } = location.state || {}; // Destructure state
+  // console.log(`🚀 ~ DriverOverview ~ CabProvider:`, CabProvider);
+  const [searchParams] = useSearchParams();
+  console.log(`🚀 ~ DriverOverview ~ queryParams:`, searchParams);
+  const CabProvider = searchParams.get('cabProvider') === 'true'; // "testCode"
+  console.log(`🚀 ~ DriverOverview ~ code:`, CabProvider);
+
   const driverId = id;
 
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true); // Set loading to true initially
   const [driverDetail, setDriverDetail] = useState(null);
   const [driverSpecificDetail, setDriverSpecificDetail] = useState(null);
+  const userType = useSelector((state) => state.auth.userType);
 
-  let breadcrumbLinks = [{ title: 'Home', to: APP_DEFAULT_PATH },{ title: 'Driver', to: '/management/driver/view' }, { title: `${driverDetail?.userName}` }];
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Driver', to: '/management/driver/view' },
+    { title: `${driverDetail?.userName}` }
+  ];
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -100,15 +126,15 @@ const DriverOverview = () => {
       status: Math.random() > 0.5 ? 'Active' : 'Inactive',
       vehicle: getRandomVehicle(),
       advanceRate: getRandomAdvanceRate(),
-      advanceType: 'Full', 
+      advanceType: 'Full',
       description: getRandomDescription(),
       company_name: getRandomCompanyName(),
-      totalLoanAmount: `₹${(Math.random() * 10000).toFixed(2)}`, 
+      totalLoanAmount: `₹${(Math.random() * 10000).toFixed(2)}`,
       totalPaid: `₹${(Math.random() * 5000).toFixed(2)}`,
       totalBalance: `₹${(Math.random() * 5000).toFixed(2)}`,
-      loanTerm: `${Math.floor(Math.random() * 10) + 1} years`, 
-      totalWeek: Math.floor(Math.random() * 52), 
-      termPaid: Math.floor(Math.random() * 52), 
+      loanTerm: `${Math.floor(Math.random() * 10) + 1} years`,
+      totalWeek: Math.floor(Math.random() * 52),
+      termPaid: Math.floor(Math.random() * 52),
       endDate: '2025-12-31'
     }));
   };
@@ -118,7 +144,6 @@ const DriverOverview = () => {
 
   useEffect(() => {
     if (driverId) {
-        
       const fetchDriverData = async () => {
         const token = localStorage.getItem('serviceToken');
         try {
@@ -140,9 +165,29 @@ const DriverOverview = () => {
     }
   }, [driverId]);
 
+  // const filteredTabs = tabConfig.filter((tab) => !tab.access || tab.access.includes(userType));
+
+  const filteredTabs = useMemo(() => {
+    if (userType === USERTYPE.isVendor) {
+      console.log('Vendor');
+      return tabConfig.filter((tab) => tab.access.includes(USERTYPE.isVendor));
+    }
+
+    if (userType === USERTYPE.iscabProvider) {
+      console.log('CabProvider');
+      return CabProvider
+        ? tabConfig // Show all tabs if `CabProvider` is true
+        : tabConfig.filter((tab) => tab.access.includes(USERTYPE.isVendor));
+    }
+
+    return []; // Return an empty array if no conditions match
+  }, [userType, CabProvider]);
+
+  console.log('🚀 ~ DriverOverview ~ filteredTabs:', filteredTabs.length);
+
   return (
     <>
-     <Breadcrumbs custom links={breadcrumbLinks} />
+      <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <Box
           sx={{
@@ -159,24 +204,18 @@ const DriverOverview = () => {
         <MainCard border={false}>
           <Box>
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
-              <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
-              {/* <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
-              <Tab label="Advance" icon={<WalletAdd />} iconPosition="start" />
-              {/* <Tab label="Expenses" icon={<EmptyWallet />} iconPosition="start" /> */}
-              {/* <Tab label="Transaction" icon={<MoneyRecive />} iconPosition="start" /> */}
-              <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
+              {filteredTabs.map((tab, index) => (
+                <Tab key={index} label={tab.label} icon={tab.icon} iconPosition="start" />
+              ))}
             </Tabs>
 
-            <Box sx={{ p: 3 }}>
-              {activeTab === 0 && <Overview data={driverDetail} data1={driverSpecificDetail} />}
-              {activeTab === 1 && <TripDetail driverId={driverId} />}
-              {/* {activeTab === 2 && <Statement />} */}
-              {activeTab === 2 && <AdvanceDriver driverId={driverId} />}
-              {/* {activeTab === 3 && <Loan data={data}/>} */}
-              {/* {activeTab === 4 && <SalaryDetail data={data} />} */}
-              {activeTab === 3 && <AttachedCompany driverId={driverId}/>}
-            </Box>
+            <TabContent
+              activeTab={activeTab}
+              driverDetail={driverDetail}
+              driverId={driverId}
+              driverSpecificDetail={driverSpecificDetail}
+              filteredTabs={filteredTabs}
+            />
           </Box>
           <Box sx={{ mt: 2.5 }}>
             <Outlet />
@@ -188,3 +227,25 @@ const DriverOverview = () => {
 };
 
 export default DriverOverview;
+
+const TabContent = ({ activeTab, driverDetail, driverId, driverSpecificDetail, filteredTabs }) => {
+  const components = {
+    Overview: <Overview data={driverDetail} data1={driverSpecificDetail} />,
+    Trips: <TripDetail driverId={driverId} />,
+    Advance: <AdvanceDriver driverId={driverId} />,
+    'Attached Companies': <AttachedCompany driverId={driverId} />
+  };
+  // Get the active tab label
+  const activeTabLabel = filteredTabs[activeTab]?.label;
+
+  // Render the corresponding component
+  return <Box sx={{ p: 3 }}>{components[activeTabLabel]}</Box>;
+};
+
+TabContent.propTypes = {
+  activeTab: PropTypes.number.isRequired,
+  driverDetail: PropTypes.object.isRequired,
+  driverId: PropTypes.string.isRequired,
+  driverSpecificDetail: PropTypes.object.isRequired,
+  filteredTabs: PropTypes.array.isRequired
+};
