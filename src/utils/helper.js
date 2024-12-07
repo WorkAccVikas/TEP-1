@@ -443,3 +443,4 @@ export function filteredArrayOfObjectsByUserPermissions(options, userPermissions
         }, {});
     });
 }
+
