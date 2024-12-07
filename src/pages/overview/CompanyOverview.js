@@ -30,7 +30,7 @@ import { checkUserAccess } from 'components/common/guards/AccessControlWrapper';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
-  { label: 'Trips', icon: <Routing2 /> },
+  { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Attached Vendors', icon: <Profile2User />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Drivers', icon: <Car />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
@@ -185,9 +185,9 @@ const TabContent = ({ activeTab, companyDetails, companyId, companyName, filtere
 };
 
 TabContent.propTypes = {
-  activeTab: PropTypes.number,
-  companyDetails: PropTypes.object,
-  companyId: PropTypes.string,
-  companyName: PropTypes.string,
-  filteredTabs: PropTypes.array
+  activeTab: PropTypes.number.isRequired,
+  companyDetails: PropTypes.object.isRequired,
+  companyId: PropTypes.string.isRequired,
+  companyName: PropTypes.string.isRequired,
+  filteredTabs: PropTypes.array.isRequired
 };
