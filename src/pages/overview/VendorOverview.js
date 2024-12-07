@@ -193,7 +193,7 @@ const VendorOverview = () => {
               <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
               <Tab label="Advance" icon={<TableDocument />} iconPosition="start" />
               <Tab label="Invoice" icon={<Bill />} iconPosition="start" />
-              <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" />
+              {/* <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" /> */}
               <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
               {/* <Tab label="Vehicle List" icon={<Car />} iconPosition="start" />
               <Tab label="Driver List" icon={<Profile2User />} iconPosition="start" /> */}
@@ -205,7 +205,7 @@ const VendorOverview = () => {
               {activeTab === 2 && <AdvanceVendor vendorId={vendorId} />}
               {activeTab === 3 && <Transaction data={data} />}
               {/* {activeTab === 2 && <Mails />} */}
-              {activeTab === 4 && <Statement />}
+              {/* {activeTab === 4 && <Statement />} */}
               {/* {activeTab === 4 && <Loan data={data}/>} */}
               {activeTab === 5 && <AttachedCompany vendorId={vendorId} />}
             </Box>

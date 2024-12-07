@@ -1,5 +1,20 @@
 import PropTypes from 'prop-types';
-import { Chip, IconButton, Link, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Chip,
+  IconButton,
+  Link,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
@@ -304,11 +319,7 @@ export default ViewRoster;
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({
-  columns,
-  data,
-  renderRowSubComponent,
-}) {
+function ReactTable({ columns, data, renderRowSubComponent }) {
   const theme = useTheme();
 
   const {
@@ -321,7 +332,7 @@ function ReactTable({
     page,
     gotoPage,
     setPageSize,
-    state: { pageIndex, pageSize, expanded },
+    state: { pageIndex, pageSize, expanded }
   } = useTable(
     {
       columns,
@@ -329,8 +340,8 @@ function ReactTable({
       initialState: {
         pageIndex: 0,
         pageSize: 10,
-        hiddenColumns: ['_id'], // Keep this to hide specific columns if needed
-      },
+        hiddenColumns: ['_id'] // Keep this to hide specific columns if needed
+      }
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
@@ -408,4 +419,3 @@ ReactTable.propTypes = {
   csvExport: PropTypes.bool,
   buttonTitle: PropTypes.string.isRequired
 };
-

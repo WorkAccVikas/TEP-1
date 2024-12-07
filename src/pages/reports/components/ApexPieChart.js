@@ -88,19 +88,19 @@ export const ApexPieChart = ({ labels, series }) => {
     ...options,
     chart: {
       ...options.chart,
-      background: isDataEmpty ? '#f0f0f0' : 'transparent', // Set grey background if data is empty
+      background: isDataEmpty ? '#f0f0f0' : 'transparent' // Set grey background if data is empty
     },
     fill: {
-      colors: isDataEmpty ? ['#d3d3d3'] : options.fill?.colors || undefined, // Grey color if empty
+      colors: isDataEmpty ? ['#d3d3d3'] : options.fill?.colors || undefined // Grey color if empty
     },
-    labels: isDataEmpty ? ['No Data Found'] : options.labels, // Remove labels if data is empty
+    labels: isDataEmpty ? ['No Data Found'] : labels, // Remove labels if data is empty
     tooltip: {
-      enabled: true, // Disable tooltip when data is empty
-    },
+      enabled: true // Disable tooltip when data is empty
+    }
   };
   return (
     <div id="chart">
-      <ReactApexChart options={updatedOptions} series={isDataEmpty ? [13] : series} type="pie" height={downSM ? 280 : 350}  />
+      <ReactApexChart options={updatedOptions} series={isDataEmpty ? [13] : series} type="pie" height={downSM ? 280 : 350} />
     </div>
   );
 };
