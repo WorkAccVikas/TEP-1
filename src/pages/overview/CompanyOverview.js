@@ -38,6 +38,7 @@ const tabConfig = [
   { label: 'Company Rate', icon: <Card />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] }
 ];
 
+
 const CompanyOverview = () => {
   const { id } = useParams();
   const companyId = id;
