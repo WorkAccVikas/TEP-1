@@ -52,7 +52,6 @@ const DriverOverview = Loadable(lazy(() => import('pages/overview/DriverOverview
 // const AddDriver = Loadable(lazy(() => import('pages/management/driver/AddDriver')));
 const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver')));
 
-
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
 const AddCab = Loadable(lazy(() => import('pages/management/cab/AddCab')));
@@ -88,6 +87,11 @@ const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
 
 // Settings
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
+
+// reports
+const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
+const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
+const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -153,7 +157,7 @@ const VendorRoutes = {
                   path: 'advance',
                   element: <AdvancesVendorTable />
                   //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
-                },
+                }
                 // {
                 //   path: 'advance-type',
                 //   element: <AdvanceVendorType />
@@ -286,7 +290,21 @@ const VendorRoutes = {
         // Reports
         {
           path: 'reports',
-          element: <Reports />
+          // element: <Reports />,
+          children: [
+            {
+              path: 'company-report',
+              element: <CompanyReports />
+            },
+            {
+              path: 'advance-report',
+              element: <AdvanceReports />
+            },
+            {
+              path: 'cab-report',
+              element: <CabReports />
+            }
+          ]
         },
 
         // Master
@@ -304,8 +322,6 @@ const VendorRoutes = {
         {
           path: 'settings',
           children: [
-
-
             // Invoice Settings
             {
               path: 'invoice',

@@ -30,7 +30,7 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {

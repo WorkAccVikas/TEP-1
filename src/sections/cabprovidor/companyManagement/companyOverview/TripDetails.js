@@ -53,7 +53,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
   const userType = useSelector((state) => state.auth.userType);
   console.log(`🚀 ~ TripDetail ~ userType:`, userType);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const TRIP_STATUS = {
     PENDING: 1,
@@ -146,14 +146,6 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
         accessor: 'vehicleTypeID.vehicleTypeName'
       },
       {
-        Header: GUARD_PRICE_LABEL[userType] || 'Vehicle Guard Price',
-        accessor: 'guardPrice', // This can be any key; we won't directly use it.
-        Cell: ({ row }) => {
-          const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
-        }
-      },
-      {
         Header: RATE_LABEL[userType] || 'Vehicle Rates',
         accessor: (row) => row.vendorRate ?? row.driverRate,
         Cell: ({ row }) => {
@@ -162,14 +154,24 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
         }
       },
       {
-        Header: 'Additional Rate',
-        accessor: 'addOnRate'
+        Header: GUARD_PRICE_LABEL[userType] || 'Vehicle Guard Price',
+        accessor: 'guardPrice', // This can be any key; we won't directly use it.
+        Cell: ({ row }) => {
+          const { driverGuardPrice, vendorGuardPrice } = row.original;
+          return driverGuardPrice || vendorGuardPrice || 'Null';
+        }
       },
+
       {
         Header: PENALTY_LABEL[userType] || 'Penalty',
         accessor: 'penalty',
         Cell: ({ value }) => value || 'Null'
       },
+      {
+        Header: 'Additional Rate',
+        accessor: 'addOnRate'
+      },
+
       {
         Header: 'Location',
         accessor: 'location',

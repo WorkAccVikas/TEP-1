@@ -251,7 +251,7 @@ function ReactTable({ columns, data }) {
             ))}
           </TableHead>
           <TableBody {...getTableBodyProps()}>
-            {filterData.map((row, i) => {
+            {filterData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((row, i) => {
               prepareRow(row);
               return (
                 <Fragment key={i}>
@@ -318,7 +318,7 @@ const List = () => {
     selectedCompany: {}
   });
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {

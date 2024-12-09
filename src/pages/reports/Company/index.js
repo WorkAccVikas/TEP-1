@@ -23,7 +23,7 @@ const CompanyReports = () => {
 
   const { loading, companyReportData } = useSelector((state) => state.report);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     console.log({ selectedCompanies });

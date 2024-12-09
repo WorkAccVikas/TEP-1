@@ -39,7 +39,7 @@ const Dashboard = () => {
   const theme = useTheme();
 
   // const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange();
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   // console.log('range', range);
   // console.log('prevRange', prevRange);

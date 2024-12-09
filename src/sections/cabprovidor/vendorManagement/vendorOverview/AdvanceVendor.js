@@ -120,7 +120,7 @@ ReactTable.propTypes = {
 
 // ==============================|| REACT TABLE - EXPANDING DETAILS ||============================== //
 
-const AdvanceVendor = ({vendorId}) => {
+const AdvanceVendor = ({ vendorId }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
@@ -132,7 +132,7 @@ const AdvanceVendor = ({vendorId}) => {
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
@@ -188,7 +188,7 @@ const AdvanceVendor = ({vendorId}) => {
       {
         Header: 'Interest Rate',
         accessor: 'advanceTypeId.interestRate',
-        Cell: ({ value }) => (value || 'Null')
+        Cell: ({ value }) => value || 'Null'
       },
       {
         Header: 'Remarks',
@@ -395,7 +395,7 @@ const AdvanceVendor = ({vendorId}) => {
             setSelectedRange={setRange}
             onRangeChange={handleRangeChange}
             showSelectedRangeLabel
-            sx={{ height: '36px', width: '180px', mb: '0px' }} 
+            sx={{ height: '36px', width: '180px', mb: '0px' }}
           />
         </Stack>
       </Stack>

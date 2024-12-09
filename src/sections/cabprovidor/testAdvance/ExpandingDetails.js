@@ -133,7 +133,7 @@ const ExpandingDetails = () => {
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');

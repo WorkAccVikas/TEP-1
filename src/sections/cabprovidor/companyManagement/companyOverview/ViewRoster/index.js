@@ -45,7 +45,7 @@ const ViewRoster = ({ companyId }) => {
   // const [loading, setLoading] = useState(false);
   const { rosterFiles, metaData, loading, error } = useSelector((state) => state.rosterFile);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
