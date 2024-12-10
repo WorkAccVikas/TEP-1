@@ -80,6 +80,9 @@ const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCom
 const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
 const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
 const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
+const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
+const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
+const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
 
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));
@@ -154,7 +157,7 @@ const CabProvidorRoutes = {
                 {
                   path: 'assign-trip',
                   element: <AssignTripList />
-                },
+                }
 
                 // {
                 //   path: 'map-roster',
@@ -425,21 +428,36 @@ const CabProvidorRoutes = {
           path: 'reports',
           // element: <Reports />,
           children: [
+            // Cab Provider
             {
-              path: 'company-report',
+              path: 'cabProvider/company-report',
               element: <CompanyReports />
             },
             {
-              path: 'advance-report',
+              path: 'cabProvider/advance-report',
               element: <AdvanceReports />
             },
             {
-              path: 'cab-report',
+              path: 'cabProvider/cab-report',
               element: <CabReports />
             },
             {
-              path: 'trip-report',
+              path: 'cabProvider/trip-report',
               element: <TripReports />
+            },
+
+            // Vendor
+            {
+              path: 'vendor/company-report',
+              element: <CompanyWiseReportForVendor />
+            },
+            {
+              path: 'vendor/advance-report',
+              element: <AdvanceReportsForVendor />
+            },
+            {
+              path: 'vendor/cab-report',
+              element: <CabReportsForVendor />
             }
           ]
         },

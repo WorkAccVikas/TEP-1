@@ -42,7 +42,8 @@ export const fetchCompanyWiseReports = createAsyncThunk(
         data: {
           startDate: payload?.data?.startDate,
           endDate: payload?.data?.endDate,
-          companyIDs: payload?.data?.companyId || []
+          companyIDs: payload?.data?.companyId || [],
+          vendorIds : payload?.data?.vendorIds || []
         }
       });
       return response.data.data;

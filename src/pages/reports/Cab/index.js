@@ -15,10 +15,12 @@ import CompanySelection from 'SearchComponents/CompanySelectionAutocomplete';
 import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
 import TableSkeleton from 'components/tables/TableSkeleton';
+import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 
 const CabReports = () => {
   const [cab, setCab] = useState(null);
   const [selectedCab, setSelectedCab] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState([]);
 
   const { loading, cabReportData } = useSelector((state) => state.report);
 
@@ -30,16 +32,19 @@ const CabReports = () => {
       cabID = selectedCab.map((cab) => cab._id);
     }
 
+    const selectedVendorID = selectedVendor.map((vendor) => vendor.vendorId);
+
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        vehicleIDs: cabID || []
+        vehicleIDs: cabID || [],
+        vendorIds: selectedVendorID || []
       }
     };
 
     dispatch(fetchCabWiseReports(payload));
-  }, [startDate, endDate, selectedCab]);
+  }, [startDate, endDate, selectedCab, selectedVendor]);
 
   const downloadReports = useCallback(() => {
     console.log('Data = ', cabReportData);
@@ -53,9 +58,16 @@ const CabReports = () => {
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
           {/* vehicle Filter */}
 
-          <Stack>
+          <Stack direction={'row'} gap={2} alignItems={'center'}>
             <Box sx={{ minWidth: '300px' }}>
               <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
+            </Box>
+            <Box sx={{ minWidth: '300px' }}>
+              <VendorSelection
+                value={selectedVendor}
+                setSelectedOptions={setSelectedVendor}
+                sx={{ minWidth: '300px', maxWidth: '600px' }}
+              />
             </Box>
           </Stack>
 

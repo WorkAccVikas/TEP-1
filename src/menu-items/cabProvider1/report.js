@@ -17,7 +17,7 @@ const report = {
   type: 'group',
   icon: icons.samplePage,
   children: [
-    // Report
+    // Report for cab provider
     {
       id: 'reports',
       title: <FormattedMessage id="reports" />,
@@ -26,11 +26,11 @@ const report = {
       children: [
         // Company
         {
-          id: 'company',
+          id: 'company1',
           title: <FormattedMessage id="company1" />,
           // type: 'collapse',
           type: 'item',
-          url: '/reports/company-report',
+          url: '/reports/cabProvider/company-report'
           // icon: icons.samplePage
           // children: [
           //   {
@@ -43,22 +43,23 @@ const report = {
         },
 
         {
-          id: 'cab-report',
+          id: 'cab-report1',
           title: <FormattedMessage id="cab" />,
           // type: 'collapse',
           type: 'item',
-          url: '/reports/cab-report',
+          url: '/reports/cabProvider/cab-report'
           // icon: icons.samplePage
         },
 
+        // Advance
         {
-          id: 'advance',
+          id: 'advance1',
           title: <FormattedMessage id="advance" />,
           // type: 'collapse',
           type: 'item',
-          url: '/reports/advance-report',
+          url: '/reports/cabProvider/advance-report'
           // icon: icons.samplePage
-        },
+        }
         // {
         //   id: 'trip',
         //   title: <FormattedMessage id="trip" />,
@@ -122,6 +123,44 @@ const report = {
         //     }
         //   ]
         // }
+      ]
+    },
+
+    // Report for vendor
+    {
+      id: 'vendor-reports',
+      title: <FormattedMessage id="vendor reports" />,
+      type: 'collapse',
+      icon: icons.samplePage,
+      children: [
+        // Company
+        {
+          id: 'company2',
+          title: <FormattedMessage id="company1" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/vendor/company-report'
+          // icon: icons.samplePage
+        },
+
+        {
+          id: 'cab-report2',
+          title: <FormattedMessage id="cab" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/vendor/cab-report'
+          // icon: icons.samplePage
+        },
+
+        // Advance
+        {
+          id: 'advance2',
+          title: <FormattedMessage id="advance" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/vendor/advance-report'
+          // icon: icons.samplePage
+        }
       ]
     }
   ]

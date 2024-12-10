@@ -1,28 +1,24 @@
-import { Autocomplete, Box, Button, Stack } from '@mui/material';
-import { useEffect, useState, useCallback } from 'react';
-import { useSelector, dispatch } from 'store';
-import Analytic from './Analytic';
-import Table from './Table';
-import DateRangeSelect from 'pages/trips/filter/DateFilter';
+import { Box, Button, Stack } from '@mui/material';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
-import { formatDateForApi, formatDateUsingMoment } from 'utils/helper';
-import { fetchCompanyWiseReports } from 'store/slice/cabProvidor/reportSlice';
-import CustomCircularLoader from 'components/CustomCircularLoader';
 import { DocumentDownload } from 'iconsax-react';
-import axios from 'utils/axios';
-import MultipleAutocomplete from 'components/autocomplete/MultipleAutocomplete';
+import { downloadCompanyWiseReport } from 'pages/reports/utils/DownloadCompanyWiseReport';
+import DateRangeSelect from 'pages/trips/filter/DateFilter';
+import { useCallback, useEffect, useState } from 'react';
 import CompanySelection from 'SearchComponents/CompanySelectionAutocomplete';
-import { minWidth } from '@mui/system';
+import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
+import { dispatch } from 'store';
+import { useSelector } from 'store';
+import { fetchCompanyWiseReports } from 'store/slice/cabProvidor/reportSlice';
+import { formatDateUsingMoment } from 'utils/helper';
+import Analytic from './Analytic';
 import TableSkeleton from 'components/tables/TableSkeleton';
-import { downloadCompanyWiseReport } from '../utils/DownloadCompanyWiseReport';
-import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
+import Table from './Table';
 
-const CompanyReports = () => {
-  const [company, setCompany] = useState(null);
+const CompanyWiseReportForVendor = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState([]);
 
   const { loading, companyReportData } = useSelector((state) => state.report);
-
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
@@ -32,66 +28,44 @@ const CompanyReports = () => {
     if (selectedCompanies.length > 0) {
       companyID = selectedCompanies.map((company) => company._id);
     }
+    console.log('selectedVendor = ', selectedVendor);
+
+    const selectedVendorID = selectedVendor.map((vendor) => vendor.vendorId);
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        companyId: companyID
+        companyId: companyID || [],
+        vendorIds: selectedVendorID || []
       }
     };
 
     dispatch(fetchCompanyWiseReports(payload));
-  }, [startDate, endDate, selectedCompanies]);
-
-  // useEffect(() => {
-  //   const fetchCompanyData = async () => {
-  //     try {
-  //       const response = await axios.get('/company/all');
-  //       setCompany(response.data.companies);
-  //     } catch (error) {
-  //       console.error('Error fetching company data:', error);
-  //     }
-  //   };
-  //   fetchCompanyData();
-  // }, []);
+  }, [startDate, endDate, selectedCompanies, selectedVendor]);
 
   const downloadReports = useCallback(() => {
     console.log('Data = ', companyReportData);
     downloadCompanyWiseReport(companyReportData, 'companyWiseReport');
   }, [companyReportData]);
 
-  // const handleSelectionChange = useCallback((event, value) => {
-  //   console.log(`🚀 ~ handleSelectionChange ~ value:`, value);
-  //   setSelectedCompanies(value);
-  // }, []);
-
   return (
     <>
       <Stack gap={1}>
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
-          {/* Company Filter */}
-
-          <Stack>
+          <Stack direction={'row'} gap={2} alignItems={'center'}>
             <Box sx={{ minWidth: '300px' }}>
-              {/* <MultipleAutocomplete
-                options={company || []}
-                label="Select Companies"
-                placeholder="Start typing..."
-                value={selectedCompanies}
-                onChange={handleSelectionChange}
-                getOptionLabel={(option) => option.company_name}
-                renderOption={(props, option) => (
-                  <li {...props}>
-                    <strong>{option.company_name}</strong>
-                  </li>
-                )}
-                isOptionEqualToValue={(option, value) => option._id === value._id}
-                disableCloseOnSelect
-              /> */}
               <CompanySelection
                 value={selectedCompanies}
                 setSelectedOptions={setSelectedCompanies}
+                sx={{ minWidth: '300px', maxWidth: '600px' }}
+              />
+            </Box>
+
+            <Box sx={{ minWidth: '300px' }}>
+              <VendorSelection
+                value={selectedVendor}
+                setSelectedOptions={setSelectedVendor}
                 sx={{ minWidth: '300px', maxWidth: '600px' }}
               />
             </Box>
@@ -136,4 +110,4 @@ const CompanyReports = () => {
   );
 };
 
-export default CompanyReports;
+export default CompanyWiseReportForVendor;
