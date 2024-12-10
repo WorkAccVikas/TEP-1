@@ -178,6 +178,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
           }
         }
       } catch (error) {
+        setErrorIndex(0);
         dispatch(
           openSnackbar({
             open: true,
@@ -207,7 +208,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         Basic Information
       </Typography>
-      <form onSubmit={formik.handleSubmit} id="validation-forms" autoComplete="off">
+      <form onSubmit={formik.handleSubmit} id="validation-forms" autoComplete="off" noValidate>
         <Grid container spacing={3}>
           {/* <Grid item xs={12}>
             <Grid container spacing={3}>
@@ -532,7 +533,12 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
           <Grid item xs={12}>
             <Stack direction="row" justifyContent="flex-end">
               <AnimateButton>
-                <Button variant="contained" sx={{ my: 3, ml: 1 }} type="submit" onClick={() => setErrorIndex(0)}>
+                <Button
+                  variant="contained"
+                  sx={{ my: 3, ml: 1 }}
+                  type="submit"
+                  // onClick={() => setErrorIndex(0)}
+                >
                   Next
                 </Button>
               </AnimateButton>

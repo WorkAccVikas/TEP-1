@@ -9,7 +9,7 @@ import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import { dispatch } from 'store';
 import { useSelector } from 'store';
 import { fetchCompanyWiseReports } from 'store/slice/cabProvidor/reportSlice';
-import { formatDateUsingMoment } from 'utils/helper';
+import { filterKeys, formatDateUsingMoment } from 'utils/helper';
 import Analytic from './Analytic';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import Table from './Table';
@@ -44,8 +44,9 @@ const CompanyWiseReportForVendor = () => {
   }, [startDate, endDate, selectedCompanies, selectedVendor]);
 
   const downloadReports = useCallback(() => {
-    console.log('Data = ', companyReportData);
-    downloadCompanyWiseReport(companyReportData, 'companyWiseReport');
+    const ignoredKeys = ['companyGuardPrice', 'driverGuardPrice', 'companyRate', 'driverRate', 'companyPenalty', 'driverPenalty'];
+    const filteredData = filterKeys(companyReportData, ignoredKeys);
+    downloadCompanyWiseReport(filteredData, 'companyWiseReport');
   }, [companyReportData]);
 
   return (
@@ -91,6 +92,7 @@ const CompanyWiseReportForVendor = () => {
               onClick={downloadReports}
               size="medium"
               title="Download Report"
+              disabled={loading}
             >
               Download Report
             </Button>

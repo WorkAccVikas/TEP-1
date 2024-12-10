@@ -444,4 +444,25 @@ export function filteredArrayOfObjectsByUserPermissions(options, userPermissions
     });
 }
 
-// vikas end  22 2
+/**
+ * Filters out specified keys from an array of objects.
+ * @param {Array<Object>} dataArray - The array of objects to process.
+ * @param {Array<string>} ignoredKeys - The list of keys to ignore.
+ * @returns {Array<Object>} A new array of objects with the ignored keys removed.
+ */
+export function filterKeys(dataArray, ignoredKeys) {
+  if (!Array.isArray(dataArray)) {
+    throw new TypeError('dataArray should be an array of objects.');
+  }
+
+  if (!Array.isArray(ignoredKeys)) {
+    throw new TypeError('ignoredKeys should be an array of strings.');
+  }
+
+  return dataArray.map((item) => {
+    // Use Object.entries to iterate and filter out ignored keys.
+    const filteredEntries = Object.entries(item).filter(([key]) => !ignoredKeys.includes(key));
+    // Reconstruct object from filtered entries.
+    return Object.fromEntries(filteredEntries);
+  });
+}

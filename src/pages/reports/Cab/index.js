@@ -56,13 +56,13 @@ const CabReports = () => {
       <Stack gap={1}>
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
-          {/* vehicle Filter */}
-
           <Stack direction={'row'} gap={2} alignItems={'center'}>
+            {/* Vehicle Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
             </Box>
             <Box sx={{ minWidth: '300px' }}>
+              {/* Vendor Filter */}
               <VendorSelection
                 value={selectedVendor}
                 setSelectedOptions={setSelectedVendor}
@@ -72,8 +72,6 @@ const CabReports = () => {
           </Stack>
 
           <Stack direction={'row'} gap={2}>
-            {/* Download Report */}
-
             {/* Date Filter */}
             <DateRangeSelect
               startDate={startDate}
@@ -84,6 +82,8 @@ const CabReports = () => {
               onRangeChange={handleRangeChange}
               showSelectedRangeLabel
             />
+
+            {/* Download Report */}
             <Button
               variant="contained"
               startIcon={<DocumentDownload />}
@@ -91,6 +91,7 @@ const CabReports = () => {
               onClick={downloadReports}
               size="medium"
               title="Download Report"
+              disabled={loading}
             >
               Download Report
             </Button>

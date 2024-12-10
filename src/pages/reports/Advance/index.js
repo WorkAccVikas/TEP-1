@@ -100,6 +100,7 @@ const AdvanceReports = () => {
               onClick={downloadReports}
               size="medium"
               title="Download Report"
+              disabled={loading}
             >
               Download Report
             </Button>

@@ -7,15 +7,15 @@ import Badge from 'pages/reports/components/Badge';
 import Card from 'pages/reports/components/Card';
 
 const labels = [
-  'Company Rate',
-  'Company Guard Price',
-  'Company Penalty',
+  //   'Company Rate',
+  //   'Company Guard Price',
+  //   'Company Penalty',
   'Vendor Rate',
   'Vendor Guard Price',
   'Vendor Penalty',
-  'Driver Rate',
-  'Driver Guard Price',
-  'Driver Penalty',
+  //   'Driver Rate',
+  //   'Driver Guard Price',
+  //   'Driver Penalty',
   'Add On Rate',
   'Toll Charge',
   'MCD Charge'
@@ -115,7 +115,7 @@ const Analytic = () => {
   return (
     <>
       <Stack gap={2}>
-        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+        {/* <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
           {[
             { title: 'Total Trips', count: overAllData.tripCount },
             { title: 'Income', count: overAllData.companyIncomingAmount, currency: true },
@@ -131,7 +131,7 @@ const Analytic = () => {
               <Card title={cardData.title} count={cardData.count} currency={cardData.currency} />
             </Grid>
           ))}
-        </Grid>
+        </Grid> */}
 
         <Grid container spacing={3}>
           {/* Chart */}
