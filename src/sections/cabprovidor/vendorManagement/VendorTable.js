@@ -28,7 +28,7 @@ import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
 import { Add, Eye, Edit } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
-import { ACTION, MODULE, PERMISSIONS } from 'constant';
+import { ACTION, MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { ThemeMode } from 'config';
@@ -37,6 +37,8 @@ import { handleClose, handleOpen, setDeletedName, setSelectedID, updateVendorSta
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import { openSnackbar } from 'store/reducers/snackbar';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { BulkUploadDialog } from 'pages/management/vendor/bulkUpload/Dialog';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
@@ -45,10 +47,18 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   const theme = useTheme();
   const mode = theme.palette.mode;
   const [search, setSearch] = useState('');
+  const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
 
   // Search change handler
   const onSearchChange = (value) => {
     setSearch(value); // Update the search state
+  };
+
+  const handleDriverBulkUploadOpen = () => {
+    setOpenBulkUploadDialog(true);
+  };
+  const handleDriverBulkUploadClose = () => {
+    setOpenBulkUploadDialog(false);
   };
 
   const columns = useMemo(
@@ -425,6 +435,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 {loading ? 'Loading...' : 'Add Vendor'}
               </Button>
             </WrapperButton>
+
             <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
               <Button
                 variant="contained"
@@ -437,6 +448,21 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 {loading ? 'Loading...' : 'Add Vendor Rate'}
               </Button>
             </WrapperButton>
+
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                  onClick={handleDriverBulkUploadOpen}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Upload Vendor List'}
+                </Button>
+              </WrapperButton>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
         <MainCard content={false}>
@@ -451,12 +477,16 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           </ScrollX>
         </MainCard>
         <Box>
-          {data.length > 0 && (
+          {data.length > 0 && !loading && (
             <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
           )}
         </Box>
       </Stack>
       {/* {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />} */}
+
+      {openBulkUploadDialog && (
+        <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
+      )}
     </>
   );
 };

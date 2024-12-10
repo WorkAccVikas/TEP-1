@@ -245,7 +245,7 @@ const Driver = () => {
               </WrapperButton>
             </AccessControlWrapper>
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.isVendor]}>
               <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
                 <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
                   Upload Driver List
