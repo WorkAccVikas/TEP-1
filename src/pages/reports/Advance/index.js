@@ -61,9 +61,8 @@ const AdvanceReports = () => {
       <Stack gap={1}>
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
-          {/* vehicle Filter */}
-
           <Stack direction={'row'} gap={2} alignItems={'center'}>
+            {/* Driver Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <DriverSelection
                 value={selectedDriver}
@@ -71,6 +70,8 @@ const AdvanceReports = () => {
                 sx={{ minWidth: '300px', maxWidth: '600px' }}
               />
             </Box>
+
+            {/* Vendor Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <VendorSelection
                 value={selectedVendor}
