@@ -82,7 +82,7 @@ const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
 const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
 const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
-const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
+const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Advance/Vendor')));
 
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));

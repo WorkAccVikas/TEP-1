@@ -13,6 +13,9 @@ import { filterAndExtractValues, filterKeys, formatDateUsingMoment } from 'utils
 import { dispatch } from 'store';
 import { fetchCabWiseReports } from 'store/slice/cabProvidor/reportSlice';
 import Table from './Table';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { USERTYPE } from 'constant';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const CabWiseReportForVendor = () => {
   const [selectedCab, setSelectedCab] = useState([]);
@@ -43,6 +46,20 @@ const CabWiseReportForVendor = () => {
   }, [startDate, endDate, selectedCab, selectedVendor]);
 
   const downloadReports = useCallback(() => {
+    if (cabReportData.length === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'No Data Found',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+      return;
+    }
     const ignoredKeys = ['companyGuardPrice', 'driverGuardPrice', 'companyRate', 'driverRate', 'companyPenalty', 'driverPenalty'];
     const filteredData = filterKeys(cabReportData, ignoredKeys);
     downloadCabWiseReport(filteredData, 'cabWiseReport');
@@ -58,14 +75,17 @@ const CabWiseReportForVendor = () => {
             <Box sx={{ minWidth: '300px' }}>
               <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
             </Box>
-            <Box sx={{ minWidth: '300px' }}>
-              {/* Vendor Filter */}
-              <VendorSelection
-                value={selectedVendor}
-                setSelectedOptions={setSelectedVendor}
-                sx={{ minWidth: '300px', maxWidth: '600px' }}
-              />
-            </Box>
+
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <Box sx={{ minWidth: '300px' }}>
+                {/* Vendor Filter */}
+                <VendorSelection
+                  value={selectedVendor}
+                  setSelectedOptions={setSelectedVendor}
+                  sx={{ minWidth: '300px', maxWidth: '600px' }}
+                />
+              </Box>
+            </AccessControlWrapper>
           </Stack>
 
           <Stack direction={'row'} gap={2}>

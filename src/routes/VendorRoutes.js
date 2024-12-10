@@ -89,9 +89,9 @@ const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
 
 // reports
-const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
-const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
-const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
+const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
+const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
+const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Advance/Vendor')));
 
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -292,17 +292,18 @@ const VendorRoutes = {
           path: 'reports',
           // element: <Reports />,
           children: [
+            // Vendor
             {
-              path: 'company-report',
-              element: <CompanyReports />
+              path: 'vendor/company-report',
+              element: <CompanyWiseReportForVendor />
             },
             {
-              path: 'advance-report',
-              element: <AdvanceReports />
+              path: 'vendor/advance-report',
+              element: <AdvanceReportsForVendor />
             },
             {
-              path: 'cab-report',
-              element: <CabReports />
+              path: 'vendor/cab-report',
+              element: <CabReportsForVendor />
             }
           ]
         },

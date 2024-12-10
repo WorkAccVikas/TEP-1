@@ -13,6 +13,9 @@ import { filterKeys, formatDateUsingMoment } from 'utils/helper';
 import Analytic from './Analytic';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import Table from './Table';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { USERTYPE } from 'constant';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const CompanyWiseReportForVendor = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
@@ -44,6 +47,20 @@ const CompanyWiseReportForVendor = () => {
   }, [startDate, endDate, selectedCompanies, selectedVendor]);
 
   const downloadReports = useCallback(() => {
+    if (companyReportData.length === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'No Data Found',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+      return;
+    }
     const ignoredKeys = ['companyGuardPrice', 'driverGuardPrice', 'companyRate', 'driverRate', 'companyPenalty', 'driverPenalty'];
     const filteredData = filterKeys(companyReportData, ignoredKeys);
     downloadCompanyWiseReport(filteredData, 'companyWiseReport');
@@ -63,13 +80,15 @@ const CompanyWiseReportForVendor = () => {
               />
             </Box>
 
-            <Box sx={{ minWidth: '300px' }}>
-              <VendorSelection
-                value={selectedVendor}
-                setSelectedOptions={setSelectedVendor}
-                sx={{ minWidth: '300px', maxWidth: '600px' }}
-              />
-            </Box>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <Box sx={{ minWidth: '300px' }}>
+                <VendorSelection
+                  value={selectedVendor}
+                  setSelectedOptions={setSelectedVendor}
+                  sx={{ minWidth: '300px', maxWidth: '600px' }}
+                />
+              </Box>
+            </AccessControlWrapper>
           </Stack>
 
           <Stack direction={'row'} gap={2}>

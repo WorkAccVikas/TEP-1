@@ -9,11 +9,13 @@ import { formatDateUsingMoment } from 'utils/helper';
 import { fetchAdvanceReports } from 'store/slice/cabProvidor/reportSlice';
 import { DocumentDownload } from 'iconsax-react';
 import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
-import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
 import TableSkeleton from 'components/tables/TableSkeleton';
-import { downloadAdvanceReport, downloadReport } from '../utils/DownloadAdvanceReport';
+// import { downloadAdvanceReport } from '../../utils/DownloadAdvanceReport';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { USERTYPE } from 'constant';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const AdvanceReportForVendor = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
@@ -36,6 +38,20 @@ const AdvanceReportForVendor = () => {
   }, [startDate, endDate, selectedDriver, selectedVendor]);
 
   const downloadReports = useCallback(() => {
+    if (advanceReportData.length === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'No Data Found',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+      return;
+    }
     console.log('Data = ', advanceReportData);
 
     const transformedData = advanceReportData.map((item) => ({
@@ -53,7 +69,7 @@ const AdvanceReportForVendor = () => {
       driverCount: item.driverCount
     }));
     console.log({ transformedData });
-    downloadAdvanceReport(transformedData, 'advanceReport');
+    // downloadAdvanceReport(transformedData, 'advanceReport');
   }, [advanceReportData]);
 
   return (
@@ -71,14 +87,16 @@ const AdvanceReportForVendor = () => {
               />
             </Box>
 
-            {/* Vendor Filter */}
-            <Box sx={{ minWidth: '300px' }}>
-              <VendorSelection
-                value={selectedVendor}
-                setSelectedOptions={setSelectedVendor}
-                sx={{ minWidth: '300px', maxWidth: '600px' }}
-              />
-            </Box>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              {/* Vendor Filter */}
+              <Box sx={{ minWidth: '300px' }}>
+                <VendorSelection
+                  value={selectedVendor}
+                  setSelectedOptions={setSelectedVendor}
+                  sx={{ minWidth: '300px', maxWidth: '600px' }}
+                />
+              </Box>
+            </AccessControlWrapper>
           </Stack>
 
           <Stack direction={'row'} gap={2}>

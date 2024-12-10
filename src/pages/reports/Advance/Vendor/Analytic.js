@@ -2,20 +2,20 @@ import PropTypes from 'prop-types';
 import { Grid, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'store';
-import { ApexPieChart } from '../components/ApexPieChart';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
+import { ApexPieChart } from 'pages/reports/components/ApexPieChart';
+import Badge from 'pages/reports/components/Badge';
+import Card from 'pages/reports/components/Card';
 
 const labels = [
-//   'Company Rate',
-//   'Company Guard Price',
-//   'Company Penalty',
+  //   'Company Rate',
+  //   'Company Guard Price',
+  //   'Company Penalty',
   'Vendor Rate',
   'Vendor Guard Price',
   'Vendor Penalty',
-//   'Driver Rate',
-//   'Driver Guard Price',
-//   'Driver Penalty',
+  //   'Driver Rate',
+  //   'Driver Guard Price',
+  //   'Driver Penalty',
   'Add On Rate',
   'Toll Charge',
   'MCD Charge'

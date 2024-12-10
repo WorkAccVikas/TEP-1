@@ -7,7 +7,7 @@ import report from './report';
 import setting from './setting';
 
 const cabProviderMenuItems = {
-  items: [dashboard, roster, management, invoices,report, master, setting]
+  items: [dashboard, roster, management, invoices, report, master, setting]
 };
 
 export default cabProviderMenuItems;
