@@ -358,3 +358,4 @@ BulkUploadDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired
 };
+
