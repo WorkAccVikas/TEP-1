@@ -210,13 +210,24 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         torch: data.torch,
         GPS: data.GPS,
 
-        fitnessDate: typeof data?.fitnessDate === 'undefined' ? null : convertToDateUsingMoment(data?.fitnessDate),
-        insuranceExpiryDate: typeof data?.insuranceExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.insuranceExpiryDate),
-        pollutionExpiryDate: typeof data?.pollutionExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.pollutionExpiryDate),
+        fitnessDate:
+          typeof data?.fitnessDate === 'undefined' || data?.fitnessDate === '' ? null : convertToDateUsingMoment(data?.fitnessDate),
+        insuranceExpiryDate:
+          typeof data?.insuranceExpiryDate === 'undefined' || data?.insuranceExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.insuranceExpiryDate),
+        pollutionExpiryDate:
+          typeof data?.pollutionExpiryDate === 'undefined' || data?.pollutionExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.pollutionExpiryDate),
         permitOneYrExpiryDate:
-          typeof data?.permitOneYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
+          typeof data?.permitOneYrExpiryDate === 'undefined' || data?.permitOneYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
         permitFiveYrExpiryDate:
-          typeof data?.permitFiveYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+          typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -254,13 +265,24 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         torch: data.torch,
         GPS: data.GPS,
 
-        fitnessDate: typeof data?.fitnessDate === 'undefined' ? null : convertToDateUsingMoment(data?.fitnessDate),
-        insuranceExpiryDate: typeof data?.insuranceExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.insuranceExpiryDate),
-        pollutionExpiryDate: typeof data?.pollutionExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.pollutionExpiryDate),
+        fitnessDate:
+          typeof data?.fitnessDate === 'undefined' || data?.fitnessDate === '' ? null : convertToDateUsingMoment(data?.fitnessDate),
+        insuranceExpiryDate:
+          typeof data?.insuranceExpiryDate === 'undefined' || data?.insuranceExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.insuranceExpiryDate),
+        pollutionExpiryDate:
+          typeof data?.pollutionExpiryDate === 'undefined' || data?.pollutionExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.pollutionExpiryDate),
         permitOneYrExpiryDate:
-          typeof data?.permitOneYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
+          typeof data?.permitOneYrExpiryDate === 'undefined' || data?.permitOneYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
         permitFiveYrExpiryDate:
-          typeof data?.permitFiveYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+          typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -298,13 +320,24 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         torch: data.torch,
         GPS: data.GPS,
 
-        fitnessDate: typeof data?.fitnessDate === 'undefined' ? null : convertToDateUsingMoment(data?.fitnessDate),
-        insuranceExpiryDate: typeof data?.insuranceExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.insuranceExpiryDate),
-        pollutionExpiryDate: typeof data?.pollutionExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.pollutionExpiryDate),
+        fitnessDate:
+          typeof data?.fitnessDate === 'undefined' || data?.fitnessDate === '' ? null : convertToDateUsingMoment(data?.fitnessDate),
+        insuranceExpiryDate:
+          typeof data?.insuranceExpiryDate === 'undefined' || data?.insuranceExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.insuranceExpiryDate),
+        pollutionExpiryDate:
+          typeof data?.pollutionExpiryDate === 'undefined' || data?.pollutionExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.pollutionExpiryDate),
         permitOneYrExpiryDate:
-          typeof data?.permitOneYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
+          typeof data?.permitOneYrExpiryDate === 'undefined' || data?.permitOneYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
         permitFiveYrExpiryDate:
-          typeof data?.permitFiveYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+          typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -342,13 +375,24 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
         torch: data.torch,
         GPS: data.GPS,
 
-        fitnessDate: typeof data?.fitnessDate === 'undefined' ? null : convertToDateUsingMoment(data?.fitnessDate),
-        insuranceExpiryDate: typeof data?.insuranceExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.insuranceExpiryDate),
-        pollutionExpiryDate: typeof data?.pollutionExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.pollutionExpiryDate),
+        fitnessDate:
+          typeof data?.fitnessDate === 'undefined' || data?.fitnessDate === '' ? null : convertToDateUsingMoment(data?.fitnessDate),
+        insuranceExpiryDate:
+          typeof data?.insuranceExpiryDate === 'undefined' || data?.insuranceExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.insuranceExpiryDate),
+        pollutionExpiryDate:
+          typeof data?.pollutionExpiryDate === 'undefined' || data?.pollutionExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.pollutionExpiryDate),
         permitOneYrExpiryDate:
-          typeof data?.permitOneYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
+          typeof data?.permitOneYrExpiryDate === 'undefined' || data?.permitOneYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitOneYrExpiryDate),
         permitFiveYrExpiryDate:
-          typeof data?.permitFiveYrExpiryDate === 'undefined' ? null : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+          typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
+            ? null
+            : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -394,6 +438,7 @@ const initialValuesFun = (data, userType) => {
 
 const getPayloadForUpdate = (values, userType, vehicleImages) => {
   console.log(`🚀 ~ getPayloadForUpdate ~ values:`, values);
+  console.log(`vehicleImages`, vehicleImages);
   switch (userType) {
     case USERTYPE.iscabProvider: {
       const formData = new FormData();
@@ -405,11 +450,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -421,15 +468,15 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values.vehicleImages);
 
-      vehicleImages.forEach((item) => {
+      vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
       return formData;
@@ -445,11 +492,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -461,13 +510,16 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values.vehicleImages);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values.vehicleImages);
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
@@ -481,11 +533,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -497,13 +551,17 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values.vehicleImages);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values.vehicleImages);
+
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
@@ -517,11 +575,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -533,13 +593,17 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values.vehicleImages);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values.vehicleImages);
+
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
     default:
@@ -560,11 +624,13 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -576,16 +642,16 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values?.vehicleImages);
 
       // Append multiple vehicle images
-      vehicleImages.forEach((item) => {
+      vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
 
@@ -609,7 +675,7 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       // }
 
       //       if (values?.vehicleImages && values.vehicleImages.length > 0) {
-      //         values.vehicleImages.forEach((file) => {
+      //         values.vehicleImages?.forEach((file) => {
       //           vehicleImageArray.push(file);
       //         });
       //       }
@@ -662,11 +728,13 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -678,13 +746,18 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values?.vehicleImages);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values?.vehicleImages);
+
+      // Append multiple vehicle images
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
@@ -696,11 +769,13 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('GPS_EMI', values.GPS_EMI);
 
       // formData.append('fitnessDate', values.fitnessDate);
-      formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
-      formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
-      formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
-      formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
+      values.fitnessDate && formData.append('fitnessDate', formatDateUsingMoment(values.fitnessDate, 'DD/MM/YYYY'));
+      values.insuranceExpiryDate && formData.append('insuranceExpiryDate', formatDateUsingMoment(values.insuranceExpiryDate, 'DD/MM/YYYY'));
+      values.pollutionExpiryDate && formData.append('pollutionExpiryDate', formatDateUsingMoment(values.pollutionExpiryDate, 'DD/MM/YYYY'));
+      values.permitOneYrExpiryDate &&
+        formData.append('permitOneYrExpiryDate', formatDateUsingMoment(values.permitOneYrExpiryDate, 'DD/MM/YYYY'));
+      values.permitFiveYrExpiryDate &&
+        formData.append('permitFiveYrExpiryDate', formatDateUsingMoment(values.permitFiveYrExpiryDate, 'DD/MM/YYYY'));
 
       formData.append('fuelType', values.fuelType);
       formData.append('fireCylinder', values.fireCylinder);
@@ -712,13 +787,18 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('torch', values.torch);
       formData.append('GPS', values.GPS);
 
-      formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
-      formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
-      formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
-      formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
-      formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
-      formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values?.vehicleImages);
+      values.fitnessDate_Doc && formData.append('fitnessDate_Doc', values.fitnessDate_Doc?.[0]);
+      values.insuranceExpiryDate_Doc && formData.append('insuranceExpiryDate_Doc', values.insuranceExpiryDate_Doc?.[0]);
+      values.pollutionExpiryDate_Doc && formData.append('pollutionExpiryDate_Doc', values.pollutionExpiryDate_Doc?.[0]);
+      values.RC_Model_doc && formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
+      values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
+      values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
+      // formData.append('vehicleImages', values?.vehicleImages);
+
+      // Append multiple vehicle images
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
@@ -747,6 +827,8 @@ const AddCab = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [vehicleImageError, setVehicleImageError] = useState(''); // State for error messages
   const [maxVehicleImg, setMaxVehicleImg] = useState(MAX_VEHICLE_IMAGES);
+
+  const [formikInitialValues, setFormikInitialValues] = useState(initialValuesFun(null, userType));
 
   console.log(`🚀 ~ apiVehicleImages:`, apiVehicleImages);
 
@@ -808,6 +890,7 @@ const AddCab = () => {
 
           const result = await dispatch(fetchCabDetails(id)).unwrap();
           console.log(`🚀 ~ Manage ~ result:`, result);
+          setFormikInitialValues(initialValuesFun(result, userType));
 
           const vehicleImagesLength = result.vehicleImages.length;
           const vehicleImages = result.vehicleImages;
@@ -826,10 +909,9 @@ const AddCab = () => {
   }, [dispatch, userType, id, navigate]);
 
   // const data = id? null : getSingleDetails;
-  const data = isCreating ? null : getSingleDetails;
+  const data = !id ? null : getSingleDetails;
 
   console.log('getSingleDetails', getSingleDetails);
-  console.log('isCreating', isCreating);
   console.log('data', data);
 
   const validationSchema = Yup.object({
@@ -860,7 +942,9 @@ const AddCab = () => {
   });
 
   const formik = useFormik({
-    initialValues: initialValuesFun(data, userType),
+    // initialValues: initialValuesFun(data, userType),
+    initialValues: formikInitialValues,
+
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
@@ -871,7 +955,7 @@ const AddCab = () => {
           const response = await dispatch(addCab(formData)).unwrap();
         } else {
           console.log('API Calling (UPDATE) .......');
-          const formData = getPayloadForUpdate(values, userType);
+          const formData = getPayloadForUpdate(values, userType, vehicleImages);
           await dispatch(editCab(formData));
         }
 
@@ -934,6 +1018,8 @@ const AddCab = () => {
   }, []);
 
   const style = !id && (userType === USERTYPE.iscabProvider || userType === USERTYPE.iscabProviderUser) ? 3 : 4;
+
+  console.log('TIna = ', id && vehicleImages.length === 0);
 
   return (
     <>
@@ -1055,7 +1141,7 @@ const AddCab = () => {
                               error={touched.fitnessDate_Doc && !!errors.fitnessDate_Doc}
                             />
 
-                            {id && (
+                            {id && values.fitnessDate_DocUrl && (
                               <Button
                                 variant="outlined"
                                 color="secondary"
@@ -1104,7 +1190,7 @@ const AddCab = () => {
                               error={touched.insuranceExpiryDate_Doc && !!errors.insuranceExpiryDate_Doc}
                             />
 
-                            {id && (
+                            {id && values.insuranceExpiryDate_DocUrl && (
                               <Button
                                 variant="outlined"
                                 color="secondary"
@@ -1154,7 +1240,7 @@ const AddCab = () => {
                               error={touched.pollutionExpiryDate_Doc && !!errors.pollutionExpiryDate_Doc}
                             />
 
-                            {id && (
+                            {id && values.pollutionExpiryDate_DocUrl && (
                               <Button
                                 variant="outlined"
                                 color="secondary"
@@ -1201,7 +1287,7 @@ const AddCab = () => {
                               error={touched.permitOneYrExpiryDate_doc && !!errors.permitOneYrExpiryDate_doc}
                             />
 
-                            {id && (
+                            {id && values.permitOneYrExpiryDate_docUrl && (
                               <Button
                                 variant="outlined"
                                 color="secondary"
@@ -1255,7 +1341,7 @@ const AddCab = () => {
                               error={touched.permitFiveYrExpiryDate_doc && !!errors.permitFiveYrExpiryDate_doc}
                             />
 
-                            {id && (
+                            {id && values.permitFiveYrExpiryDate_docUrl && (
                               <Button
                                 variant="outlined"
                                 color="secondary"
@@ -1299,7 +1385,7 @@ const AddCab = () => {
                             </Grid>
                           </Grid>
 
-                          {id && (
+                          {id && values.RC_Model_docUrl && (
                             <Button
                               variant="outlined"
                               color="secondary"
@@ -1766,7 +1852,7 @@ const AddCab = () => {
                     <Button color="error" onClick={() => navigate('/management/cab/view')}>
                       Cancel
                     </Button>
-                    <Button variant="contained" type="submit" disabled={isSubmitting || !dirty}>
+                    <Button variant="contained" type="submit" disabled={isSubmitting || (!id ? !dirty : vehicleImages.length === 0)}>
                       {!id ? 'Add' : 'Save'}
                     </Button>
                   </DialogActions>

@@ -38,18 +38,18 @@ const invoices = {
     {
       id: 'advance',
       title: <FormattedMessage id="advance" />,
-      type: 'collapse',
+      type: 'item',
       icon: icons.advance,
       url: '/apps/invoices/advance',
-      children: [
-        {
-          id: 'advance-type',
-          title: <FormattedMessage id="advance-type" />,
-          type: 'item',
-          url: '/apps/invoices/advance-type'
-          // icon: icons.upload
-        }
-      ]
+      // children: [
+      //   {
+      //     id: 'advance-type',
+      //     title: <FormattedMessage id="advance-type" />,
+      //     type: 'item',
+      //     url: '/apps/invoices/advance-type'
+      //     // icon: icons.upload
+      //   }
+      // ]
     }
   ]
 };

@@ -20,11 +20,13 @@ import { useSelector } from 'react-redux';
 import { fetchCompaniesAssignedDrivers } from 'store/slice/cabProvidor/companySlice';
 import { dispatch } from 'store';
 import axiosServices from 'utils/axios';
+import { FaLock } from 'react-icons/fa';
+import { USERTYPE } from 'constant';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 const AttachedDriver = ({ companyId }) => {
-  const [open, setOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [driverList, setDriverList] = useState([]);
   const [updateKey, setUpdateKey] = useState(0);
@@ -32,6 +34,7 @@ const AttachedDriver = ({ companyId }) => {
   const [driverName, setDriverName] = useState(null);
 
   const { companiesDriver } = useSelector((state) => state.companies || {});
+  const userType = useSelector((state) => state.auth.userType);
 
   const handleOpen = useCallback(() => {
     setOpen(true);
@@ -41,11 +44,11 @@ const AttachedDriver = ({ companyId }) => {
     setOpen(false);
   }, []);
 
-   //  useEffect: get attached vendor to the company by company Id
+  //  useEffect: get attached vendor to the company by company Id
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); 
+      setLoading(true);
       await dispatch(fetchCompaniesAssignedDrivers(companyId));
       setLoading(false); // Set loading to false after data is fetched
     };
@@ -100,14 +103,23 @@ const AttachedDriver = ({ companyId }) => {
         accessor: 'contactNumber'
       },
       {
-        Header: 'View Rate',
+        // Header: 'View Rate',
+        Header: (
+          <Tooltip title={userType !== USERTYPE.iscabProvider ? 'Upcoming Feature' : ''}>
+            <Stack direction="row" alignItems="center" gap={1}>
+              View Rate
+              {userType !== USERTYPE.iscabProvider && <FaLock />}
+            </Stack>
+          </Tooltip>
+        ),
+        accessor: 'viewRate', // Add a valid accessor
         className: 'cell-left',
         disableSortBy: true,
         Cell: ({ row }) => {
           const theme = useTheme();
           const mode = theme.palette.mode;
-          console.log("row",row.original);
-          
+          console.log('row', row.original);
+
           return (
             <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
               <Tooltip
@@ -129,6 +141,7 @@ const AttachedDriver = ({ companyId }) => {
                     setDriverId(row.original._id);
                     setDriverName(row.original.userName);
                   }}
+                  disabled={userType !== USERTYPE.iscabProvider}
                 >
                   <Eye />
                 </IconButton>
@@ -138,7 +151,7 @@ const AttachedDriver = ({ companyId }) => {
         }
       }
     ],
-    []
+    [userType]
   );
 
   return (

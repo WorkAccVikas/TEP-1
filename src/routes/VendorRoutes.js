@@ -36,6 +36,7 @@ const Dashboard = Loadable(lazy(() => import('pages')));
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
+const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3')));
 
 // Management
 const User = Loadable(lazy(() => import('pages/management/user')));
@@ -49,10 +50,14 @@ const VendorOverview = Loadable(lazy(() => import('pages/overview/VendorOverview
 const Driver = Loadable(lazy(() => import('pages/management/driver')));
 const DriverOverview = Loadable(lazy(() => import('pages/overview/DriverOverview')));
 // const AddDriver = Loadable(lazy(() => import('pages/management/driver/AddDriver')));
+const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver')));
+
 
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
 const AddCab = Loadable(lazy(() => import('pages/management/cab/AddCab')));
+const CabOverview = Loadable(lazy(() => import('pages/overview/CabOverview')));
+
 // company
 const Company = Loadable(lazy(() => import('pages/management/company')));
 const AddCompany = Loadable(lazy(() => import('pages/management/company/AddCompany')));
@@ -80,6 +85,9 @@ const AddCabRateDriver = Loadable(lazy(() => import('pages/master/CabRate/Driver
 //Trip
 const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
 const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
+
+// Settings
+const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
 
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -121,6 +129,10 @@ const VendorRoutes = {
                   path: 'create',
                   element: <InvoiceCreate />
                 },
+                {
+                  path: 'test',
+                  element: <InvoiceCreate3 />
+                },
                 // {
                 //   path: 'invoice',
                 //   element: <InvoiceList />
@@ -142,11 +154,11 @@ const VendorRoutes = {
                   element: <AdvancesVendorTable />
                   //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
                 },
-                {
-                  path: 'advance-type',
-                  element: <AdvanceVendorType />
-                  //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
-                }
+                // {
+                //   path: 'advance-type',
+                //   element: <AdvanceVendorType />
+                //   //   element: <ProtectedRoute element={AdvanceType} moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ} />
+                // }
               ]
             },
 
@@ -228,6 +240,10 @@ const VendorRoutes = {
                   path: 'overview/:id',
                   element: <DriverOverview />
                   //   element: <ProtectedRoute element={DriverOverview} moduleName={MODULE.DRIVER} permission={PERMISSIONS.READ} />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <EditDriver />
                 }
                 // {
                 //   path: 'add-driver',
@@ -252,6 +268,15 @@ const VendorRoutes = {
                   path: 'add-cab',
                   element: <AddCab />
                   //   element: <ProtectedRoute element={AddCab} moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE} />
+                },
+                {
+                  path: 'edit/:id',
+                  element: <AddCab />
+                },
+                {
+                  path: 'overview/:id',
+                  element: <CabOverview />
+                  //   element: <ProtectedRoute element={CompanyOverview} moduleName={MODULE.COMPANY} permission={PERMISSIONS.READ} />
                 }
               ]
             }
@@ -271,6 +296,20 @@ const VendorRoutes = {
             {
               path: 'role',
               element: <Role />
+            }
+          ]
+        },
+
+        // Settings
+        {
+          path: 'settings',
+          children: [
+
+
+            // Invoice Settings
+            {
+              path: 'invoice',
+              element: <InvoiceSettings />
             }
           ]
         }

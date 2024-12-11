@@ -5,6 +5,9 @@ import { Grid, List, ListItem, Stack, Typography } from '@mui/material';
 import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import OverviewGraph from './OverviewGraph';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { USERTYPE } from 'constant';
+import InvoiceStats from './InvoiceStats';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -133,69 +136,71 @@ const Overview = ({ data }) => {
                           </ListItem>
                         </List>
                       </Grid>
-                      <Grid item xs={12}>
-                        <Typography variant="h6" color="primary">
-                          Bank Details
-                        </Typography>
-                        <List sx={{ py: 0 }}>
-                          <ListItem>
-                            <Grid container spacing={3}>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography color="secondary">Bank Name</Typography>
-                                </Stack>
+                      <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+                        <Grid item xs={12}>
+                          <Typography variant="h6" color="primary">
+                            Bank Details
+                          </Typography>
+                          <List sx={{ py: 0 }}>
+                            <ListItem>
+                              <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography color="secondary">Bank Name</Typography>
+                                  </Stack>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography>HDFC</Typography>
+                                  </Stack>
+                                </Grid>
                               </Grid>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography>HDFC</Typography>
-                                </Stack>
+                            </ListItem>
+                            <ListItem>
+                              <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography color="secondary">Account Holder Name</Typography>
+                                  </Stack>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography>Shiv</Typography>
+                                  </Stack>
+                                </Grid>
                               </Grid>
-                            </Grid>
-                          </ListItem>
-                          <ListItem>
-                            <Grid container spacing={3}>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography color="secondary">Account Holder Name</Typography>
-                                </Stack>
+                            </ListItem>
+                            <ListItem>
+                              <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography color="secondary">Branch</Typography>
+                                  </Stack>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography>Patel Nagar</Typography>
+                                  </Stack>
+                                </Grid>
                               </Grid>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography>Shiv</Typography>
-                                </Stack>
+                            </ListItem>
+                            <ListItem>
+                              <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography color="secondary">IFSC Code</Typography>
+                                  </Stack>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                  <Stack spacing={0.5}>
+                                    <Typography>07AAFCL6776MZ</Typography>
+                                  </Stack>
+                                </Grid>
                               </Grid>
-                            </Grid>
-                          </ListItem>
-                          <ListItem>
-                            <Grid container spacing={3}>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography color="secondary">Branch</Typography>
-                                </Stack>
-                              </Grid>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography>Patel Nagar</Typography>
-                                </Stack>
-                              </Grid>
-                            </Grid>
-                          </ListItem>
-                          <ListItem>
-                            <Grid container spacing={3}>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography color="secondary">IFSC Code</Typography>
-                                </Stack>
-                              </Grid>
-                              <Grid item xs={12} md={6}>
-                                <Stack spacing={0.5}>
-                                  <Typography>07AAFCL6776MZ</Typography>
-                                </Stack>
-                              </Grid>
-                            </Grid>
-                          </ListItem>
-                        </List>
-                      </Grid>
+                            </ListItem>
+                          </List>
+                        </Grid>
+                      </AccessControlWrapper>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -207,7 +212,8 @@ const Overview = ({ data }) => {
       <Grid item xs={12} sm={6} md={6} xl={6}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <OverviewGraph />
+            {/* <OverviewGraph /> */}
+            <InvoiceStats />
           </Grid>
         </Grid>
       </Grid>

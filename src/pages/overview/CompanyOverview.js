@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 // material-ui
@@ -8,10 +9,7 @@ import MainCard from 'components/MainCard';
 
 // assets
 import { Bill, Book, Car, Card, MenuBoard, Profile2User, Routing2 } from 'iconsax-react';
-import {
-  fetchCompanies,
-  fetchCompanyDetails
-} from 'store/slice/cabProvidor/companySlice';
+import { fetchCompanies, fetchCompanyDetails } from 'store/slice/cabProvidor/companySlice';
 import { dispatch } from 'store';
 import Overview from 'sections/cabprovidor/companyManagement/companyOverview/Overview';
 import { useSelector } from 'react-redux';
@@ -27,6 +25,18 @@ import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import AttachedVendorDriver from 'sections/cabprovidor/companyManagement/companyOverview/AttachedVendorDriver/AttachedVendorDriver';
 import Invoice from 'sections/cabprovidor/companyManagement/companyOverview/Invoice';
+import { USERTYPE } from 'constant';
+import { checkUserAccess } from 'components/common/guards/AccessControlWrapper';
+
+const tabConfig = [
+  { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Attached Vendors', icon: <Profile2User />, access: [USERTYPE.iscabProvider] },
+  { label: 'Attached Drivers', icon: <Car />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'View Roster', icon: <MenuBoard />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  { label: 'Company Rate', icon: <Card />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] }
+];
 
 const CompanyOverview = () => {
   const { id } = useParams();
@@ -38,6 +48,8 @@ const CompanyOverview = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true); // Set loading to true initially
   const { companyDetails } = useSelector((state) => state.companies || {});
+  const { userType } = useSelector((state) => state.auth);
+  console.log(`🚀 ~ CompanyOverview ~ userType:`, userType);
 
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -98,6 +110,12 @@ const CompanyOverview = () => {
     { title: `${companyDetails?.company_name}` }
   ];
 
+  const hasAccess = checkUserAccess(userType, [USERTYPE.iscabProvider]);
+  console.log(`🚀 ~ CompanyOverview ~ hasAccess:`, hasAccess);
+
+  // Filter the tabs based on userType
+  const filteredTabs = tabConfig.filter((tab) => !tab.access || tab.access.includes(userType));
+
   return (
     <>
       <Breadcrumbs custom links={breadcrumbLinks} />
@@ -124,32 +142,17 @@ const CompanyOverview = () => {
               scrollButtons="auto"
               allowScrollButtonsMobile
             >
-              <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              {/* <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" /> */}
-              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
-              <Tab label="Invoice" icon={<Bill />} iconPosition="start" />
-              {/* <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
-              <Tab label="Attached Vendors" icon={<Profile2User />} iconPosition="start" />
-              <Tab label="Attached Drivers" icon={<Car />} iconPosition="start" />
-              <Tab label="View Roster" icon={<MenuBoard />} iconPosition="start" />
-              <Tab label="Company Rate" icon={<Card />} iconPosition="start" />
-              {/* <Tab label="TestingComb" icon={<Card />} iconPosition="start" /> */}
+              {filteredTabs.map((tab, index) => (
+                <Tab key={index} label={tab.label} icon={tab.icon} iconPosition="start" />
+              ))}
             </Tabs>
-
-            <Box sx={{ p: 3 }}>
-              {activeTab === 0 && <Overview data={companyDetails} />}
-              {/* {activeTab === 1 && <Transaction data={data} />} */}
-              {activeTab === 1 && <TripDetail companyId={companyId}/>}
-              {activeTab === 2 && <Invoice companyId={companyId}/>}
-              {/* {activeTab === 2 && <Mails />}
-              {activeTab === 3 && <Statement />} */}
-              {activeTab === 3 && <AttachedVendor companyId={companyId} />}
-              {activeTab === 4 && <AttachedDriver companyId={companyId}/>}
-              {activeTab === 5 && <ViewRoster companyId={companyId} />}
-              {activeTab === 6 && <CompanyRateListing id={companyId} companyName={companyName} />}
-              {/* {activeTab === 6 && <AttachedVendorDriver data={companiesVendor} loading={loading} />} */}
-            </Box>
+            <TabContent
+              activeTab={activeTab}
+              companyDetails={companyDetails}
+              companyId={companyId}
+              companyName={companyName}
+              filteredTabs={filteredTabs}
+            />
           </Box>
           <Box sx={{ mt: 2.5 }}>
             <Outlet />
@@ -161,3 +164,30 @@ const CompanyOverview = () => {
 };
 
 export default CompanyOverview;
+
+const TabContent = ({ activeTab, companyDetails, companyId, companyName, filteredTabs }) => {
+  // Dynamic components array based on filteredTabs
+  const components = {
+    Overview: <Overview data={companyDetails} />,
+    Trips: <TripDetail companyId={companyId} />,
+    Invoice: <Invoice companyId={companyId} />,
+    'Attached Vendors': <AttachedVendor companyId={companyId} />,
+    'Attached Drivers': <AttachedDriver companyId={companyId} />,
+    'View Roster': <ViewRoster companyId={companyId} />,
+    'Company Rate': <CompanyRateListing id={companyId} companyName={companyName} />
+  };
+
+  // Get the active tab label
+  const activeTabLabel = filteredTabs[activeTab]?.label;
+
+  // Render the corresponding component
+  return <Box sx={{ p: 3 }}>{components[activeTabLabel]}</Box>;
+};
+
+TabContent.propTypes = {
+  activeTab: PropTypes.number.isRequired,
+  companyDetails: PropTypes.object.isRequired,
+  companyId: PropTypes.string.isRequired,
+  companyName: PropTypes.string.isRequired,
+  filteredTabs: PropTypes.array.isRequired
+};

@@ -12,8 +12,16 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { USERTYPE } from 'constant';
+import { useSelector } from 'store';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
+
+const API = {
+  [USERTYPE.iscabProvider]: `/company/unwind/rates?companyId=`,
+  [USERTYPE.isVendor]: '/cabRateMaster/unwind/rate?companyID='
+};
 
 const CompanyRateListing = ({ companyName, id }) => {
   const [data, setData] = useState([]);
@@ -24,18 +32,21 @@ const CompanyRateListing = ({ companyName, id }) => {
   const [limit, setLimit] = useState(10);
   const [updateKey, setUpdateKey] = useState(0);
   const [loading, setLoading] = useState('true');
-  const [showCompanyList, setShowCompanyList] = useState(false); 
+  const [showCompanyList, setShowCompanyList] = useState(false);
+
+  const userType = useSelector((state) => state.auth.userType);
+  console.log('🚀 ~ CompanyRateListing ~ userType:', userType);
 
   useEffect(() => {
     const fetchdata = async () => {
-      const response = await axiosServices.get(`/company/unwind/rates?companyId=${id}`);
+      const response = await axiosServices.get(API[userType] + id);
       setCompanyList(response.data.data);
       setLoading(false);
       console.log('response.data', response.data.data);
     };
 
     fetchdata();
-  }, [id]);
+  }, [id, userType]);
 
   const handleAddRate = () => {
     setShowCompanyList(true);
@@ -47,7 +58,7 @@ const CompanyRateListing = ({ companyName, id }) => {
   useEffect(() => {}, [companyRate]);
 
   const handleBackToList = () => {
-    setShowCompanyList(false); 
+    setShowCompanyList(false);
   };
 
   return (
@@ -57,25 +68,25 @@ const CompanyRateListing = ({ companyName, id }) => {
           <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} />
 
           <MainCard title="Company Rates" content={false}>
-          <ScrollX>
-          {loading ? (
-           <TableSkeleton rows={10} columns={6} />
-          ) : companyList.length !== 0 ? (
-            <CompanyRateReactTable
-              data={companyList}
-              page={page}
-              setPage={setPage}
-              limit={limit}
-              setLimit={setLimit}
-              updateKey={updateKey}
-              setUpdateKey={setUpdateKey}
-              loading={loading}
-            />
-          ) : (
-            <EmptyTableDemo />
-          )}
+            <ScrollX>
+              {loading ? (
+                <TableSkeleton rows={10} columns={6} />
+              ) : companyList.length !== 0 ? (
+                <CompanyRateReactTable
+                  data={companyList}
+                  page={page}
+                  setPage={setPage}
+                  limit={limit}
+                  setLimit={setLimit}
+                  updateKey={updateKey}
+                  setUpdateKey={setUpdateKey}
+                  loading={loading}
+                />
+              ) : (
+                <EmptyTableDemo />
+              )}
             </ScrollX>
-            </MainCard>
+          </MainCard>
 
           {/* {companyList.length !== 0 && (
             <CompanyRateReactTable
@@ -91,7 +102,7 @@ const CompanyRateListing = ({ companyName, id }) => {
           )} */}
         </Stack>
       ) : (
-        <CompanyRate id={id} companyName={companyName} onBackToList={handleBackToList}/> // Render CompanyList1 when the state is true
+        <CompanyRate id={id} companyName={companyName} onBackToList={handleBackToList} /> // Render CompanyList1 when the state is true
       )}
     </>
   );
@@ -102,7 +113,7 @@ export default CompanyRateListing;
 const ButtonComponent = ({ loading, onAddRate }) => {
   return (
     <Stack direction="row" spacing={1} alignItems="center">
-      <WrapperButton>
+      <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
         <Button
           variant="contained"
           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
@@ -112,7 +123,7 @@ const ButtonComponent = ({ loading, onAddRate }) => {
         >
           {loading ? 'Loading...' : ' Add Rate'}
         </Button>
-      </WrapperButton>
+      </AccessControlWrapper>
     </Stack>
   );
 };

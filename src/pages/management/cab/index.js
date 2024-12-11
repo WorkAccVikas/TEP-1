@@ -2,7 +2,7 @@
 import { Button, CircularProgress, Stack } from '@mui/material';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import Header from 'components/tables/genericTable/Header';
-import { MODULE, PERMISSIONS } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import { Add } from 'iconsax-react';
 import Error500 from 'pages/maintenance/error/500';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { fetchCabs } from 'store/slice/cabProvidor/cabSlice';
 import BulkUploadDialog from './bulkUpload/Dialog';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import { useNavigate } from 'react-router';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 
 const Cab = () => {
   const dispatch = useDispatch();
@@ -99,11 +100,13 @@ const Cab = () => {
                 {loading ? 'Loading...' : 'Add Cab'}
               </Button>
             </WrapperButton>
-            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleVehicleBulkUploadOpen}>
-                Upload Vehicle List
-              </Button>
-            </WrapperButton>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+                <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleVehicleBulkUploadOpen}>
+                  Upload Vehicle List
+                </Button>
+              </WrapperButton>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
         <CabTable

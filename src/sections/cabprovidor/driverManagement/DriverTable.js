@@ -30,7 +30,7 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { dispatch, useSelector } from 'store';
 import { Edit, Eye, Trash } from 'iconsax-react';
 import { ThemeMode } from 'config';
-import { ACTION, FUEL_TYPE, MODULE, PERMISSIONS } from 'constant';
+import { ACTION, FUEL_TYPE, MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import {
   deleteDriver,
   fetchDriverDetails,
@@ -43,6 +43,7 @@ import {
 } from 'store/slice/cabProvidor/driverSlice';
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
+import { Base64 } from 'js-base64';
 
 const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
@@ -55,6 +56,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   const [assignedVehicle, setAssignedVehicle] = useState([]);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+  const userType = useSelector((state) => state.auth.userType);
 
   const { remove, deletedName, selectedID } = useSelector((state) => state.drivers);
 
@@ -134,220 +136,259 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   // };
 
   const columns = useMemo(
-    () => [
-      {
-        Header: '_id',
-        accessor: '_id',
-        className: 'cell-center',
-        disableSortBy: true
-      },
-      {
-        Header: '#',
-        accessor: 'id',
-        className: 'cell-center',
-        Cell: ({ row }) => <span>{row.index + 1}</span> // Use row.index to display incremental number
-      },
-      {
-        Header: 'Driver Name',
-        accessor: 'userName',
-        Cell: ({ row, value }) => {
-          const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
-          const isCabProviderDriver = row.original.isCabProviderDriver;
+    () => {
+      const generateLinkState = (isCabProviderDriver, userType) => {
+        // Encapsulate logic for queryParams based on userType
+        const queryParams = userType === USERTYPE.iscabProvider ? { CabProvider: isCabProviderDriver > 0 } : null;
+        return queryParams;
+      };
 
-          return (
-            <Typography>
-              <Link
-                to={`/management/driver/overview/${row.original._id}`}
-                onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                {formattedValue}
-                {isCabProviderDriver && (
-                  <Tooltip title="Cabprovider" arrow>
-                    <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
-                  </Tooltip>
-                )}
-              </Link>
-            </Typography>
-          );
-        }
-      },
-      {
-        Header: 'Email',
-        accessor: 'userEmail',
-        disableSortBy: true
-      },
-      {
-        Header: 'Contact Number',
-        accessor: 'contactNumber',
-        disableSortBy: true
-      },
-      {
-        Header: 'Vehicles',
-        accessor: 'assignedVehicle',
-        Cell: ({ row }) => {
-          // console.log("row.original",row.original);
+      return [
+        {
+          Header: '_id',
+          accessor: '_id',
+          className: 'cell-center',
+          disableSortBy: true
+        },
+        {
+          Header: '#',
+          accessor: 'id',
+          className: 'cell-center',
+          Cell: ({ row }) => <span>{row.index + 1}</span> // Use row.index to display incremental number
+        },
+        {
+          Header: 'Driver Name',
+          accessor: 'userName',
+          Cell: ({ row, value }) => {
+            const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+            const isCabProviderDriver = row.original.isCabProviderDriver;
+            console.log('isCabProviderDriver', isCabProviderDriver);
+            // const queryParams = generateLinkState(isCabProviderDriver, userType);
 
-          const assignedVehicle = row.original.assignedVehicle;
-          const cabNo = assignedVehicle ? assignedVehicle.vehicleId.vehicleNumber : null; // accessing vehicleNumber if assigned
+            // const encodedParams = Base64.encode(JSON.stringify({ cabProvider: isCabProviderDriver > 0 }));
+            // console.log(`🚀 ~ DriverTable ~ encodedParams:`, encodedParams);
+            // const queryParams = userType === USERTYPE.iscabProvider ? `?cabProvider=${isCabProviderDriver > 0}&data=${encodedParams}` : ''; // Conditional query params
+            const queryParams = userType === USERTYPE.iscabProvider ? `?cabProvider=${isCabProviderDriver > 0}` : ''; // Conditional query params
+            console.log(`🚀 ~ DriverTable ~ queryParams:`, queryParams);
 
-          if (!assignedVehicle) {
             return (
-              <Chip
-                color="error"
-                variant="light"
-                size="small"
-                label="Not Assigned"
-                sx={{
-                  ':hover': {
-                    backgroundColor: 'rgba(255, 0, 0, 0.3)',
-                    cursor: 'pointer'
-                  }
-                }}
-                onClick={() => handleOpenPendingDialog(row.original)}
-              />
-            );
-          } else {
-            return (
-              <Chip
-                color="success"
-                label={cabNo}
-                size="small"
-                variant="light"
-                sx={{
-                  ':hover': {
-                    backgroundColor: 'rgba(36, 140, 106 ,.5)',
-                    cursor: 'pointer'
-                  }
-                }}
-                onClick={() => handleOpenReassignDialog(row.original)}
-              />
+              <Typography>
+                <Link
+                  to={`/management/driver/overview/${row.original._id}${queryParams}`}
+                  // state={{ CabProvider: isCabProviderDriver > 0 }} // Correct way to pass state in v6
+                  onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  {formattedValue}
+                  {isCabProviderDriver > 0 && (
+                    <Tooltip title="Cabprovider" arrow>
+                      <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
+                    </Tooltip>
+                  )}
+                </Link>
+              </Typography>
             );
           }
-        }
-      },
-      {
-        Header: 'Created At',
-        accessor: 'createdAt',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          const { values } = row;
-          const time = values['createdAt'];
-          return (
-            <Typography
-              sx={{
-                width: 'fit-content', // Dynamically adjusts to the content
-                minWidth: '60px', // Ensures enough space for minimum display
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap' // Prevents text from wrapping
-              }}
-            >
-              {' '}
-              {time ? formattedDate(time, 'DD/MM/YYYY') : ''}
-            </Typography>
-          );
-        }
-      },
-      {
-        Header: 'Status',
-        accessor: 'isActive',
-        Cell: ({ row, value }) => {
-          const [status, setStatus] = useState(value);
-          const [openDialog, setOpenDialog] = useState(false); // To control the visibility of the dialog
-          const [newStatus, setNewStatus] = useState(null); // To store the status to be toggled
+        },
+        {
+          Header: 'Email',
+          accessor: 'userEmail',
+          disableSortBy: true
+        },
+        {
+          Header: 'Contact Number',
+          accessor: 'contactNumber',
+          disableSortBy: true
+        },
+        {
+          Header: 'Vehicles',
+          accessor: 'assignedVehicle',
+          Cell: ({ row }) => {
+            // console.log("row.original",row.original);
 
-          const handleToggleStatus = () => {
-            // Determine new status based on current status
-            const toggledStatus = status === 1 ? 0 : 1;
-            setNewStatus(toggledStatus);
-            setOpenDialog(true); // Open the confirmation dialog
-          };
+            const assignedVehicle = row.original.assignedVehicle;
+            const cabNo = assignedVehicle ? assignedVehicle.vehicleId.vehicleNumber : null; // accessing vehicleNumber if assigned
 
-          const handleConfirmStatusUpdate = async () => {
-            try {
-              // Make PUT request to update status
-              await axiosServices.put('/driver/updateActiveStatus', {
-                data: {
-                  driverId: row.original._id,
-                  status: newStatus
-                }
-              });
-
-              // Update local status
-              setStatus(newStatus);
-              setOpenDialog(false); // Close the dialog after successful update
-            } catch (error) {
-              console.error('Error updating status:', error);
-              dispatch(
-                openSnackbar({
-                  open: true,
-                  message: error.response.data?.error || 'Something went wrong',
-                  variant: 'alert',
-                  alert: {
-                    color: 'error'
-                  },
-                  close: true
-                })
+            if (!assignedVehicle) {
+              return (
+                <Chip
+                  color="error"
+                  variant="light"
+                  size="small"
+                  label="Not Assigned"
+                  sx={{
+                    ':hover': {
+                      backgroundColor: 'rgba(255, 0, 0, 0.3)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                  onClick={() => handleOpenPendingDialog(row.original)}
+                />
+              );
+            } else {
+              return (
+                <Chip
+                  color="success"
+                  label={cabNo}
+                  size="small"
+                  variant="light"
+                  sx={{
+                    ':hover': {
+                      backgroundColor: 'rgba(36, 140, 106 ,.5)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                  onClick={() => handleOpenReassignDialog(row.original)}
+                />
               );
             }
-          };
-
-          const handleCancel = () => {
-            setOpenDialog(false); // Close the dialog without making any change
-          };
-
-          return (
-            <>
-              <Chip
-                label={status === 1 ? 'Active' : 'Inactive'}
-                color={status === 1 ? 'success' : 'error'}
-                variant="light"
-                size="small"
-                onClick={handleToggleStatus}
+          }
+        },
+        {
+          Header: 'Created At',
+          accessor: 'createdAt',
+          disableSortBy: true,
+          Cell: ({ row }) => {
+            const { values } = row;
+            const time = values['createdAt'];
+            return (
+              <Typography
                 sx={{
-                  ':hover': {
-                    backgroundColor: status === 1 ? 'rgba(36, 140, 106, 0.5)' : 'rgba(255, 0, 0, 0.3)',
-                    cursor: 'pointer'
-                  }
+                  width: 'fit-content', // Dynamically adjusts to the content
+                  minWidth: '60px', // Ensures enough space for minimum display
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap' // Prevents text from wrapping
                 }}
-              />
+              >
+                {' '}
+                {time ? formattedDate(time, 'DD/MM/YYYY') : ''}
+              </Typography>
+            );
+          }
+        },
+        {
+          Header: 'Status',
+          accessor: 'isActive',
+          Cell: ({ row, value }) => {
+            const [status, setStatus] = useState(value);
+            const [openDialog, setOpenDialog] = useState(false); // To control the visibility of the dialog
+            const [newStatus, setNewStatus] = useState(null); // To store the status to be toggled
 
-              {/* Confirmation Dialog */}
-              <Dialog open={openDialog} onClose={handleCancel}>
-                <DialogTitle>Confirm Status Change</DialogTitle>
-                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this driver?</DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCancel} color="error">
-                    Cancel
-                  </Button>
-                  <Button onClick={handleConfirmStatusUpdate} variant="contained">
-                    Confirm
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
-          );
-        }
-      },
-      {
-        Header: 'Compliance Progress',
-        accessor: 'progress',
-        Cell: ({ row, value }) => {
-          const progessValue = Math.floor(Math.random() * 101);
-          return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
-        }
-      },
-      {
-        Header: 'Actions',
-        className: 'cell-center',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          const driverID = row.original._id;
-          const isCabProviderDriver = row.original.isCabProviderDriver;
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              {isCabProviderDriver === 1 && (
+            const handleToggleStatus = () => {
+              // Determine new status based on current status
+              const toggledStatus = status === 1 ? 0 : 1;
+              setNewStatus(toggledStatus);
+              setOpenDialog(true); // Open the confirmation dialog
+            };
+
+            const handleConfirmStatusUpdate = async () => {
+              try {
+                // Make PUT request to update status
+                await axiosServices.put('/driver/updateActiveStatus', {
+                  data: {
+                    driverId: row.original._id,
+                    status: newStatus
+                  }
+                });
+
+                // Update local status
+                setStatus(newStatus);
+                setOpenDialog(false); // Close the dialog after successful update
+              } catch (error) {
+                console.error('Error updating status:', error);
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: error.response.data?.error || 'Something went wrong',
+                    variant: 'alert',
+                    alert: {
+                      color: 'error'
+                    },
+                    close: true
+                  })
+                );
+              }
+            };
+
+            const handleCancel = () => {
+              setOpenDialog(false); // Close the dialog without making any change
+            };
+
+            return (
+              <>
+                <Chip
+                  label={status === 1 ? 'Active' : 'Inactive'}
+                  color={status === 1 ? 'success' : 'error'}
+                  variant="light"
+                  size="small"
+                  onClick={handleToggleStatus}
+                  sx={{
+                    ':hover': {
+                      backgroundColor: status === 1 ? 'rgba(36, 140, 106, 0.5)' : 'rgba(255, 0, 0, 0.3)',
+                      cursor: 'pointer'
+                    }
+                  }}
+                />
+
+                {/* Confirmation Dialog */}
+                <Dialog open={openDialog} onClose={handleCancel}>
+                  <DialogTitle>Confirm Status Change</DialogTitle>
+                  <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this driver?</DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleCancel} color="error">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleConfirmStatusUpdate} variant="contained">
+                      Confirm
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </>
+            );
+          }
+        },
+        {
+          Header: 'Compliance Progress',
+          accessor: 'progress',
+          Cell: ({ row, value }) => {
+            const progessValue = Math.floor(Math.random() * 101);
+            return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+          }
+        },
+        {
+          Header: 'Actions',
+          className: 'cell-center',
+          disableSortBy: true,
+          Cell: ({ row }) => {
+            const driverID = row.original._id;
+            const isCabProviderDriver = row.original.isCabProviderDriver;
+            return (
+              <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+                {isCabProviderDriver === 1 && (
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
+                      }
+                    }}
+                    title="View Rate"
+                  >
+                    <IconButton
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
+                      }}
+                    >
+                      <Eye />
+                    </IconButton>
+                  </Tooltip>
+                )}
+
                 <Tooltip
                   componentsProps={{
                     tooltip: {
@@ -357,73 +398,51 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                       }
                     }
                   }}
-                  title="View Rate"
+                  title="Edit"
                 >
                   <IconButton
-                    color="secondary"
+                    color="primary"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
+                      console.log('Id = ', row.values._id);
+                      dispatch(setSelectedID(row.values._id));
+                      navigate(`/management/driver/edit/${row.values._id}`);
                     }}
                   >
-                    <Eye />
+                    <Edit />
                   </IconButton>
                 </Tooltip>
-              )}
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Id = ', row.values._id);
-                    dispatch(setSelectedID(row.values._id));
-                    navigate(`/management/driver/edit/${row.values._id}`);
                   }}
+                  title="Delete"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="Delete"
-              >
-                <IconButton
-                  color="error"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log(`🚀 ~ row.values.id:`, row.values);
-                    dispatch(handleOpen(ACTION.DELETE));
-                    dispatch(setDeletedName(row.values['userName']));
-                    dispatch(setSelectedID(row.values._id)); //setDeletedName
-                  }}
-                >
-                  <Trash />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          );
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log(`🚀 ~ row.values.id:`, row.values);
+                      dispatch(handleOpen(ACTION.DELETE));
+                      dispatch(setDeletedName(row.values['userName']));
+                      dispatch(setSelectedID(row.values._id)); //setDeletedName
+                    }}
+                  >
+                    <Trash />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            );
+          }
         }
-      }
-    ],
+      ];
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [theme]
   );

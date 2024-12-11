@@ -69,6 +69,7 @@ import GenerateInvoiceAlert from './alerts/GenerateInvoiceAlert';
 import { ThemeMode } from 'config';
 import { USERTYPE } from 'constant';
 import TransitionsModal from './TripView';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
@@ -561,9 +562,11 @@ function ReactTable({
             <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <ChangeStatusButton selected={selectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
             <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
-              Add Trip
-            </Button>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
+                Add Trip
+              </Button>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
       </Box>
@@ -625,6 +628,168 @@ ReactTable.propTypes = {
 
 // ==============================|| TRIP - LIST ||============================== //
 
+const calculateTripStatsForCabProvider = (data) => {
+  const stats = {
+    completedTripsCount: 0,
+    completedTripsAmount: 0,
+    assignedTripsCount: 0,
+    assignedTripsAmount: 0,
+    canceledTripsCount: 0,
+    canceledTripsAmount: 0,
+    completedTripsPercentage: 0,
+    assignedTripsPercentage: 0,
+    canceledTripsPercentage: 0,
+    outgoingRate: 0
+  };
+
+  if (data && data.length > 0) {
+    const totalTrips = data.length;
+
+    data.forEach((trip) => {
+      const {
+        assignedStatus,
+        companyGuardPrice,
+        companyRate,
+        companyPenalty,
+        tollCharge,
+        mcdCharge,
+        addOnRate,
+        vendorRate,
+        driverRate,
+        vendorGuardPrice,
+        vendorPenalty,
+        driverGuardPrice,
+        driverPenalty
+      } = trip;
+
+      const tripAmount = companyGuardPrice + companyRate - companyPenalty;
+      const vendorRate1 = vendorRate + vendorGuardPrice - vendorPenalty;
+      const driverRate1 = driverRate + driverGuardPrice - driverPenalty;
+
+      console.log({ tripAmount, vendorRate1, driverRate1 });
+      const outGoingRateForTrip = vendorRate1 !== 0 ? vendorRate1 : driverRate1;
+      console.log({ outGoingRateForTrip });
+
+      stats.outgoingRate += outGoingRateForTrip;
+      const rateData = {
+        companyGuardPrice,
+        companyRate,
+        companyPenalty,
+        tollCharge,
+        mcdCharge,
+        addOnRate,
+        total: tripAmount
+      };
+
+      // Completed trips
+      if (assignedStatus === 2) {
+        stats.completedTripsCount += 1;
+        stats.completedTripsAmount += tripAmount;
+      }
+
+      // Assigned trips
+      if (assignedStatus === 1) {
+        stats.assignedTripsCount += 1;
+        stats.assignedTripsAmount += tripAmount;
+      }
+
+      // Canceled trips
+      if (assignedStatus === 3) {
+        stats.canceledTripsCount += 1;
+        stats.canceledTripsAmount += tripAmount;
+      }
+    });
+
+    // Calculate percentages
+    stats.completedTripsPercentage = ((stats.completedTripsCount / totalTrips) * 100).toFixed(2);
+    stats.assignedTripsPercentage = ((stats.assignedTripsCount / totalTrips) * 100).toFixed(2);
+    stats.canceledTripsPercentage = ((stats.canceledTripsCount / totalTrips) * 100).toFixed(2);
+  }
+
+  return stats;
+};
+
+const calculateTripStatsForVendor = (data) => {
+  const stats = {
+    completedTripsCount: 0,
+    completedTripsAmount: 0,
+    assignedTripsCount: 0,
+    assignedTripsAmount: 0,
+    canceledTripsCount: 0,
+    canceledTripsAmount: 0,
+    completedTripsPercentage: 0,
+    assignedTripsPercentage: 0,
+    canceledTripsPercentage: 0,
+    outgoingRate: 0
+  };
+
+  if (data && data.length > 0) {
+    const totalTrips = data.length;
+
+    data.forEach((trip) => {
+      const {
+        assignedStatus,
+        companyGuardPrice,
+        companyRate,
+        companyPenalty,
+        tollCharge,
+        mcdCharge,
+        addOnRate,
+        vendorRate,
+        driverRate,
+        vendorGuardPrice,
+        vendorPenalty,
+        driverGuardPrice,
+        driverPenalty
+      } = trip;
+
+      const tripAmount = vendorRate + vendorGuardPrice - vendorPenalty;
+      // const vendorRate1 = vendorRate + vendorGuardPrice - vendorPenalty;
+      // const driverRate1 = driverRate + driverGuardPrice - driverPenalty;
+
+      // console.log({ tripAmount, vendorRate1, driverRate1 });
+      // const outGoingRateForTrip = vendorRate1 !== 0 ? vendorRate1 : driverRate1;
+      // console.log({ outGoingRateForTrip });
+
+      // stats.outgoingRate += outGoingRateForTrip;
+      const rateData = {
+        companyGuardPrice,
+        companyRate,
+        companyPenalty,
+        tollCharge,
+        mcdCharge,
+        addOnRate,
+        total: tripAmount
+      };
+
+      // Completed trips
+      if (assignedStatus === 2) {
+        stats.completedTripsCount += 1;
+        stats.completedTripsAmount += tripAmount;
+      }
+
+      // Assigned trips
+      if (assignedStatus === 1) {
+        stats.assignedTripsCount += 1;
+        stats.assignedTripsAmount += tripAmount;
+      }
+
+      // Canceled trips
+      if (assignedStatus === 3) {
+        stats.canceledTripsCount += 1;
+        stats.canceledTripsAmount += tripAmount;
+      }
+    });
+
+    // Calculate percentages
+    stats.completedTripsPercentage = ((stats.completedTripsCount / totalTrips) * 100).toFixed(2);
+    stats.assignedTripsPercentage = ((stats.assignedTripsCount / totalTrips) * 100).toFixed(2);
+    stats.canceledTripsPercentage = ((stats.canceledTripsCount / totalTrips) * 100).toFixed(2);
+  }
+
+  return stats;
+};
+
 const TripList = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
@@ -646,6 +811,8 @@ const TripList = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState(null);
+
+  const userType = useSelector((state) => state.auth.userType);
 
   const handleCompanyClick = (tripId) => {
     setSelectedTripId(tripId);
@@ -672,91 +839,13 @@ const TripList = () => {
   });
 
   console.log({ tripStats });
+
   useEffect(() => {
-    const calculateTripStats = (data) => {
-      const stats = {
-        completedTripsCount: 0,
-        completedTripsAmount: 0,
-        assignedTripsCount: 0,
-        assignedTripsAmount: 0,
-        canceledTripsCount: 0,
-        canceledTripsAmount: 0,
-        completedTripsPercentage: 0,
-        assignedTripsPercentage: 0,
-        canceledTripsPercentage: 0,
-        outgoingRate: 0
-      };
+    const fn = userType === USERTYPE.iscabProvider ? calculateTripStatsForCabProvider : calculateTripStatsForVendor;
 
-      if (data && data.length > 0) {
-        const totalTrips = data.length;
-
-        data.forEach((trip) => {
-          const {
-            assignedStatus,
-            companyGuardPrice,
-            companyRate,
-            companyPenalty,
-            tollCharge,
-            mcdCharge,
-            addOnRate,
-            vendorRate,
-            driverRate,
-            vendorGuardPrice,
-            vendorPenalty,
-            driverGuardPrice,
-            driverPenalty
-          } = trip;
-
-          const tripAmount = companyGuardPrice + companyRate - companyPenalty;
-          const vendorRate1 = vendorRate + vendorGuardPrice - vendorPenalty;
-          const driverRate1 = driverRate + driverGuardPrice - driverPenalty;
-
-          console.log({ tripAmount, vendorRate1, driverRate1 });
-          const outGoingRateForTrip = vendorRate1 !== 0 ? vendorRate1 : driverRate1;
-          console.log({ outGoingRateForTrip });
-
-          stats.outgoingRate += outGoingRateForTrip;
-          const rateData = {
-            companyGuardPrice,
-            companyRate,
-            companyPenalty,
-            tollCharge,
-            mcdCharge,
-            addOnRate,
-            total: tripAmount
-          };
-
-          // Completed trips
-          if (assignedStatus === 2) {
-            stats.completedTripsCount += 1;
-            stats.completedTripsAmount += tripAmount;
-          }
-
-          // Assigned trips
-          if (assignedStatus === 1) {
-            stats.assignedTripsCount += 1;
-            stats.assignedTripsAmount += tripAmount;
-          }
-
-          // Canceled trips
-          if (assignedStatus === 3) {
-            stats.canceledTripsCount += 1;
-            stats.canceledTripsAmount += tripAmount;
-          }
-        });
-
-        // Calculate percentages
-        stats.completedTripsPercentage = ((stats.completedTripsCount / totalTrips) * 100).toFixed(2);
-        stats.assignedTripsPercentage = ((stats.assignedTripsCount / totalTrips) * 100).toFixed(2);
-        stats.canceledTripsPercentage = ((stats.canceledTripsCount / totalTrips) * 100).toFixed(2);
-      }
-
-      return stats;
-    };
-
-    const updatedStats = calculateTripStats(data);
+    const updatedStats = fn(data);
     setTripStats(updatedStats);
-  }, [data]);
+  }, [data, userType]);
 
   const widgetsData = [
     {
@@ -786,9 +875,6 @@ const TripList = () => {
   ];
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
-
-  const userType = useSelector((state) => state.auth.userType);
-  console.log(userType);
 
   const navigate = useNavigate();
 
@@ -925,28 +1011,30 @@ const TripList = () => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
+                <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
-                    }
-                  }}
-                  title="Edit"
-                >
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsOpen(true); // Open the dialog for editing
-                      setId(row.original._id);
                     }}
+                    title="Edit"
                   >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(true); // Open the dialog for editing
+                        setId(row.original._id);
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                </AccessControlWrapper>
               )}
               <Tooltip
                 componentsProps={{
@@ -1090,21 +1178,25 @@ const TripList = () => {
       //     return driverGuardPrice || vendorGuardPrice || 'Null';
       //   }
       // },
-      {
-        Header: 'Company Guard Price',
-        accessor: 'companyGuardPrice',
-        Cell: ({ value }) => value || 0
-      },
-      {
-        Header: 'Vendor Guard Price',
-        accessor: 'vendorGuardPrice',
-        Cell: ({ value }) => value || 0
-      },
-      {
-        Header: 'Driver Guard Price',
-        accessor: 'driverGuardPrice',
-        Cell: ({ value }) => value || 0
-      },
+
+      ...(userType === USERTYPE.iscabProvider
+        ? [
+            {
+              Header: 'Company Rates',
+              accessor: 'companyRate'
+            },
+            {
+              Header: 'Company Guard Price',
+              accessor: 'companyGuardPrice',
+              Cell: ({ value }) => value || 0
+            },
+            {
+              Header: 'Company Penalty',
+              accessor: 'companyPenalty',
+              Cell: ({ value }) => value || 0
+            }
+          ]
+        : []),
       {
         Header: 'Vehicle Rates',
         accessor: (row) => row.vendorRate ?? row.driverRate,
@@ -1114,16 +1206,8 @@ const TripList = () => {
         }
       },
       {
-        Header: 'Company Rates',
-        accessor: 'companyRate'
-      },
-      {
-        Header: 'Additional Rate',
-        accessor: 'addOnRate'
-      },
-      {
-        Header: 'Company Penalty',
-        accessor: 'companyPenalty',
+        Header: 'Vendor Guard Price',
+        accessor: 'vendorGuardPrice',
         Cell: ({ value }) => value || 0
       },
       {
@@ -1131,11 +1215,26 @@ const TripList = () => {
         accessor: 'vendorPenalty',
         Cell: ({ value }) => value || 0
       },
+      ...(userType === USERTYPE.iscabProvider
+        ? [
+            {
+              Header: 'Driver Penalty',
+              accessor: 'driverPenalty',
+              Cell: ({ value }) => value || 0
+            },
+            {
+              Header: 'Driver Guard Price',
+              accessor: 'driverGuardPrice',
+              Cell: ({ value }) => value || 0
+            }
+          ]
+        : []),
+
       {
-        Header: 'Driver Penalty',
-        accessor: 'driverPenalty',
-        Cell: ({ value }) => value || 0
+        Header: 'Additional Rate',
+        accessor: 'addOnRate'
       },
+
       {
         Header: 'Location',
         accessor: 'location',
@@ -1159,7 +1258,7 @@ const TripList = () => {
         Cell: ({ value }) => value || 'None'
       }
     ],
-    []
+    [userType]
   );
 
   const handleCloseModal = useCallback(() => {
@@ -1232,7 +1331,7 @@ const TripList = () => {
                   Outgoing
                 </Typography>
                 <Typography variant="body1" color="white">
-                  ₹ {(tripStats?.outgoingRate || 0).toFixed(2)}
+                  {userType === USERTYPE.iscabProvider ? <>₹ {(tripStats?.outgoingRate || 0).toFixed(2)}</> : <> ....</>}
                 </Typography>
               </Stack>
             </Stack>
@@ -1243,13 +1342,19 @@ const TripList = () => {
               </Typography>
 
               <Typography variant="body1" color="white">
-                ₹{' '}
-                {(
-                  (tripStats?.assignedTripsAmount || 0) +
-                  (tripStats?.completedTripsAmount || 0) -
-                  (tripStats?.canceledTripsAmount || 0) -
-                  (tripStats?.outgoingRate || 0)
-                ).toFixed(2)}
+                {userType === USERTYPE.iscabProvider ? (
+                  <>
+                    ₹{' '}
+                    {(
+                      (tripStats?.assignedTripsAmount || 0) +
+                      (tripStats?.completedTripsAmount || 0) -
+                      (tripStats?.canceledTripsAmount || 0) -
+                      (tripStats?.outgoingRate || 0)
+                    ).toFixed(2)}
+                  </>
+                ) : (
+                  <> ....</>
+                )}
               </Typography>
             </Stack>
             <Box sx={{ maxWidth: '100%' }}>
@@ -1274,7 +1379,14 @@ const TripList = () => {
       </Grid>
 
       {/* filter */}
-      <Stack direction="row" alignItems="center" justifyContent="space-evenly">
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+          gap: 2
+        }}
+      >
+        {/* Company Filter */}
         <CompanyFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1286,13 +1398,14 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '200px',
+            // width: '200px',
             pb: 1
           }}
           value={filterOptions.selectedCompany}
         />
 
-        {userType === USERTYPE.iscabProvider && (
+        {/* Vendor Filter */}
+        <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
           <VendorFilter
             setFilterOptions={setFilterOptions}
             sx={{
@@ -1304,12 +1417,14 @@ const TripList = () => {
               '& .MuiSelect-icon': {
                 color: '#fff' // Set the down arrow color to white
               },
-              width: '200px',
+              // width: '200px',
               pb: 1
             }}
             value={filterOptions.selectedVendor}
           />
-        )}
+        </AccessControlWrapper>
+
+        {/* Driver Filter */}
         <DriverFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1321,11 +1436,13 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '200px',
+            // width: '200px',
             pb: 1
           }}
           value={filterOptions.selectedDriver}
         />
+
+        {/* Vehicle Filter */}
         <VehicleFilter
           setFilterOptions={setFilterOptions}
           sx={{
@@ -1337,12 +1454,13 @@ const TripList = () => {
             '& .MuiSelect-icon': {
               color: '#fff' // Set the down arrow color to white
             },
-            width: '220px',
+            // width: '220px',
             pb: 1
           }}
           value={filterOptions.selectedVehicle}
         />
 
+        {/* Date Filter */}
         <DateRangeSelect
           startDate={startDate}
           endDate={endDate}
@@ -1352,7 +1470,7 @@ const TripList = () => {
           onRangeChange={handleRangeChange}
           showSelectedRangeLabel
         />
-      </Stack>
+      </Box>
 
       <Stack gap={2}>
         <MainCard content={false}>

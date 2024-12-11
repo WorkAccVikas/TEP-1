@@ -168,7 +168,7 @@ const DateRangeSelect = memo(
                 color: '#fff'
               },
               // mb: sx?.mb || 1,
-              width: sx?.width || '220px',
+              // width: sx?.width || '220px',
               height: sx?.height
             }}
             renderValue={() => (

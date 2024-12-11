@@ -18,6 +18,7 @@ import WrapperButton from 'components/common/guards/WrapperButton';
 import BulkUploadDialog from './bulkUpload/Dialog';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -229,23 +230,28 @@ const Driver = () => {
                 {loading ? 'Loading...' : 'Add Driver'}
               </Button>
             </WrapperButton>
-            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-              <Button
-                variant="contained"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-                onClick={() => navigate('/management/driver/add-driver-rate')}
-                size="small"
-                color="success"
-                disabled={loading} // Disable button while loading
-              >
-                {loading ? 'Loading...' : 'Add Driver Rate'}
-              </Button>
-            </WrapperButton>
-            <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-              <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
-                Upload Driver List
-              </Button>
-            </WrapperButton>
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                  onClick={() => navigate('/management/driver/add-driver-rate')}
+                  size="small"
+                  color="success"
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Add Driver Rate'}
+                </Button>
+              </WrapperButton>
+            </AccessControlWrapper>
+
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+                <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
+                  Upload Driver List
+                </Button>
+              </WrapperButton>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
         <DriverTable

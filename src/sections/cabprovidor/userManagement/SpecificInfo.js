@@ -98,7 +98,7 @@ const SpecificInfo = ({ handlePermission }) => {
               <MainCard title="Role Assignment">
                 {/* ROLE NAME */}
                 <Stack spacing={2}>
-                  <InputLabel>Role</InputLabel>
+                  <InputLabel required>Role</InputLabel>
                   <FormikAutocomplete
                     name="roleId"
                     options={roleOptions}
