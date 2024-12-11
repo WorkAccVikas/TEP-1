@@ -146,6 +146,7 @@ const CabProvidorRoutes = {
           )
         },
 
+        // Profile
         {
           path: 'profile-overview',
           element: <ProfileOverview />
@@ -253,10 +254,10 @@ const CabProvidorRoutes = {
                   element: (
                     <ProtectedRoute1
                       allowedPermission={{
-                        [MODULE.INVOICE_SETTING]: [PERMISSIONS.READ]
+                        [MODULE.INVOICE]: [PERMISSIONS.READ]
                       }}
                     >
-                      <AllRosters />
+                      <InvoiceList />
                     </ProtectedRoute1>
                   )
                 },
@@ -266,7 +267,7 @@ const CabProvidorRoutes = {
                   element: (
                     <ProtectedRoute1
                       allowedPermission={{
-                        [MODULE.INVOICE_SETTING]: [PERMISSIONS.CREATE]
+                        [MODULE.INVOICE]: [PERMISSIONS.CREATE]
                       }}
                     >
                       <Create />
@@ -278,7 +279,7 @@ const CabProvidorRoutes = {
                   element: (
                     <ProtectedRoute1
                       allowedPermission={{
-                        [MODULE.INVOICE_SETTING]: [PERMISSIONS.CREATE]
+                        [MODULE.INVOICE]: [PERMISSIONS.CREATE]
                       }}
                     >
                       <InvoiceCreate />
@@ -290,7 +291,7 @@ const CabProvidorRoutes = {
                   element: (
                     <ProtectedRoute1
                       allowedPermission={{
-                        [MODULE.INVOICE_SETTING]: [PERMISSIONS.READ]
+                        [MODULE.INVOICE]: [PERMISSIONS.READ]
                       }}
                     >
                       <InvoiceDetails />
@@ -302,7 +303,7 @@ const CabProvidorRoutes = {
                   element: (
                     <ProtectedRoute1
                       allowedPermission={{
-                        [MODULE.INVOICE_SETTING]: [PERMISSIONS.UPDATE]
+                        [MODULE.INVOICE]: [PERMISSIONS.UPDATE]
                       }}
                     >
                       <InvoiceEdit />
@@ -923,7 +924,6 @@ const CabProvidorRoutes = {
             // Invoice Settings
             {
               path: 'invoice',
-              // element: <InvoiceSettings />
               element: (
                 <ProtectedRoute1
                   allowedPermission={{

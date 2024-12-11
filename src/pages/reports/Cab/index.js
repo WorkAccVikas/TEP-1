@@ -16,6 +16,8 @@ import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CabReports = () => {
   const [cab, setCab] = useState(null);
@@ -84,17 +86,19 @@ const CabReports = () => {
             />
 
             {/* Download Report */}
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-              disabled={loading}
-            >
-              Download Report
-            </Button>
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

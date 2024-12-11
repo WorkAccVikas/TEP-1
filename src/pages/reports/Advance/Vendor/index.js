@@ -14,8 +14,9 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
-import { USERTYPE } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
+import WrapperButton from 'components/common/guards/WrapperButton';
 
 const AdvanceReportForVendor = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
@@ -112,17 +113,19 @@ const AdvanceReportForVendor = () => {
             />
 
             {/* Download Report */}
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-              disabled={loading}
-            >
-              Download Report
-            </Button>
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

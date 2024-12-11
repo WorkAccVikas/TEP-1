@@ -244,52 +244,56 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 </IconButton>
               </Tooltip> */}
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.READ}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="View Rate"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
                   }}
+                  title="View Rate"
                 >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+                    }}
+                  >
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.UPDATE}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const id = row.original.vendorId;
-                    console.log('Id = ', id);
-                    navigate(`/management/vendor/edit/${id}`);
-                    // dispatch(setSelectedID(row.values._id));
                   }}
+                  title="Edit"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const id = row.original.vendorId;
+                      console.log('Id = ', id);
+                      navigate(`/management/vendor/edit/${id}`);
+                      // dispatch(setSelectedID(row.values._id));
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {/* <Tooltip
                 componentsProps={{
@@ -450,7 +454,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             </WrapperButton>
 
             <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
                 <Button
                   variant="contained"
                   size="small"

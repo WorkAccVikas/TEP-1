@@ -14,8 +14,9 @@ import Analytic from './Analytic';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import Table from './Table';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
-import { USERTYPE } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
+import WrapperButton from 'components/common/guards/WrapperButton';
 
 const CompanyWiseReportForVendor = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
@@ -104,17 +105,19 @@ const CompanyWiseReportForVendor = () => {
             />
 
             {/* Download Report */}
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-              disabled={loading}
-            >
-              Download Report
-            </Button>
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 
@@ -132,4 +135,3 @@ const CompanyWiseReportForVendor = () => {
 };
 
 export default CompanyWiseReportForVendor;
-

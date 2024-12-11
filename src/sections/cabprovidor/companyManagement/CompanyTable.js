@@ -47,7 +47,6 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
-
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
   };
@@ -263,34 +262,36 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
               <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
-                    }
-                  }}
-                  title="Edit"
-                >
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const id = row.original._id;
-                      const isSubRow = !Array.isArray(row.original.Branches);
-                      console.log('row = ', row);
-                      if (isSubRow) {
-                        navigate(`/management/company/edit-company-branch/${id}`);
-                      } else {
-                        navigate(`/management/company/edit/${id}`);
+                <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.UPDATE}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
                     }}
+                    title="Edit"
                   >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const id = row.original._id;
+                        const isSubRow = !Array.isArray(row.original.Branches);
+                        console.log('row = ', row);
+                        if (isSubRow) {
+                          navigate(`/management/company/edit-company-branch/${id}`);
+                        } else {
+                          navigate(`/management/company/edit/${id}`);
+                        }
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
               </AccessControlWrapper>
             </Stack>
           );

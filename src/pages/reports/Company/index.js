@@ -16,6 +16,8 @@ import { minWidth } from '@mui/system';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { downloadCompanyWiseReport } from '../utils/DownloadCompanyWiseReport';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CompanyReports = () => {
   const [company, setCompany] = useState(null);
@@ -110,17 +112,19 @@ const CompanyReports = () => {
             />
 
             {/* Download Report */}
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-              disabled={loading}
-            >
-              Download Report
-            </Button>
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

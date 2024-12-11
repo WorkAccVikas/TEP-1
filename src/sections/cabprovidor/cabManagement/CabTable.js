@@ -29,6 +29,8 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { ThemeMode } from 'config';
 import { Edit } from 'iconsax-react';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
@@ -210,29 +212,31 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Cell: ({ row }) => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/cab/edit/${row.values._id}`);
-                    // dispatch(handleOpen(ACTION.EDIT));
-                    // dispatch(setSelectedID(row.values._id));
                   }}
+                  title="Edit"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/management/cab/edit/${row.values._id}`);
+                      // dispatch(handleOpen(ACTION.EDIT));
+                      // dispatch(setSelectedID(row.values._id));
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {/* <Tooltip
                   componentsProps={{

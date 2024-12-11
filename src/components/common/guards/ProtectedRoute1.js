@@ -5,8 +5,8 @@ import { useSelector } from 'store';
 
 export const ProtectedRoute1 = ({ children, allowedPermission, strategy = STRATEGY.ANY, redirect = '/home' }) => {
   console.log(`🚀 ~ ProtectedRoute1 ~ allowedPermission:`, allowedPermission);
-//   console.log(`🚀 ~ ProtectedRoute1 ~ strategy:`, strategy);
-//   console.log(`🚀 ~ ProtectedRoute1 ~ redirect:`, redirect);
+  //   console.log(`🚀 ~ ProtectedRoute1 ~ strategy:`, strategy);
+  //   console.log(`🚀 ~ ProtectedRoute1 ~ redirect:`, redirect);
   const { userPermissions } = useSelector((state) => state.auth);
   console.log(`🚀 ~ ProtectedRoute1 ~ userPermissions:`, userPermissions);
 
