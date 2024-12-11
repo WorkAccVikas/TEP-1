@@ -565,6 +565,26 @@ const List = () => {
                   <Eye />
                 </IconButton>
               </Tooltip>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                    }
+                  }
+                }}
+                title="Edit"
+              >
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/apps/invoices/edit', { state: { data: row.original } });
+                  }}
+                >
+                  <Edit />
+                </IconButton>
+              </Tooltip>
 
               {userType === USERTYPE.iscabProvider && (
                 <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
@@ -864,7 +884,7 @@ const List = () => {
           />
         </Stack>
 
-        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/test')}>
+        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
           Create Invoice
         </Button>
       </Stack>

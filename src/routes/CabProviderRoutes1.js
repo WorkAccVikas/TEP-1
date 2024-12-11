@@ -13,8 +13,11 @@ import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelist
 import TripView from 'pages/trips/TripView';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
 import ReportDriver from 'pages/reports/ReportDriver';
-import Create from 'pages/invoice/create/Create3';
 import TripReports from 'pages/reports/Trips';
+import Create from 'pages/apps/invoice/Create';
+import EditInvoice from 'pages/apps/invoice/Edit';
+// import Create from 'pages/invoice/create/Create';
+// import Edit from 'pages/invoice/edit/Edit';
 
 // import Roster from 'pages/apps/roster';
 
@@ -41,7 +44,7 @@ const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTrips
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
-const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
+// const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
 
 //Trip
 const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
@@ -155,35 +158,6 @@ const CabProvidorRoutes = {
                   path: 'assign-trip',
                   element: <AssignTripList />
                 },
-
-                // {
-                //   path: 'map-roster',
-                //   element: <MapRosterFile />
-                // },
-                // {
-                //   path: 'test-view',
-                //   element: <ViewRosterTest />
-                // },
-                // {
-                //   path: 'test-view-1',
-                //   element: <ViewRosterTest1 /> // Render Company only for base path
-                // },
-                // {
-                //   path: 'assign-trips',
-                //   element: <AssignTrips />
-                // },
-                // {
-                //   path: 'test-map',
-                //   element: <MapRosterFileTest />
-                // },
-                // {
-                //   path: 'test-view',
-                //   element: <ViewRoster /> // Render Company only for base path
-                // },
-                // {
-                //   path: 'all-roster',
-                //   element: <AllRosters />
-                // }
               ]
             },
 
@@ -199,22 +173,26 @@ const CabProvidorRoutes = {
                   path: 'list',
                   element: <InvoiceList />
                 },
+                // {
+                //   path: 'test',
+                //   element: <Create />
+                // },
                 {
-                  path: 'test',
+                  path: 'create',
                   element: <Create />
                 },
                 {
-                  path: 'create',
-                  element: <InvoiceCreate />
+                  path: 'edit',
+                  element: <EditInvoice />
                 },
                 {
                   path: 'details/:id',
                   element: <InvoiceDetails />
                 },
-                {
-                  path: 'edit/:id',
-                  element: <InvoiceEdit />
-                },
+                // {
+                //   path: 'edit/:id',
+                //   element: <InvoiceEdit />
+                // },
                 {
                   path: 'loans',
                   element: <Loans />

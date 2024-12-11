@@ -112,7 +112,6 @@ export const JWTProvider = ({ children }) => {
           setSession(serviceToken);
           const response = await axios.get('/user/view');
           // eslint-disable-next-line no-unused-vars
-          console.log(response.data);
           const { userData, userSpecificData } = response.data;
           // console.log(userData, userSpecificData, userPermissions)
           dispatch({

@@ -59,6 +59,7 @@ import CustomCircularLoader from 'components/CustomCircularLoader';
 import { USERTYPE } from 'constant';
 import axiosServices from 'utils/axios';
 import moment from 'moment';
+import InvoiceModal from '../components/InvoiceModal';
 
 const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/create',
@@ -127,7 +128,7 @@ const getInitialValues = (data, user, userSpecificData, invoiceData = null, cust
     invoice_id: Date.now(),
     status: 'Unpaid' || '',
     date: new Date(), // For Invoice Date
-    due_date: null, // For Invoice Due Date
+    due_date:  new Date(), // For Invoice Due Date
     start_date: servicePeriod ? new Date(servicePeriod.minDate) : null, // For Start Date
     end_date: servicePeriod ? new Date(servicePeriod.maxDate) : null, // For End Date
     cashierInfo: {
@@ -951,7 +952,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="Company Name"
-                                      value={formValues.cabProviderLegalName || 'N/A'}
+                                      value={formValues.cabProviderLegalName || ''}
                                       name="cabProviderLegalName"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -965,7 +966,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="Address"
-                                      value={formValues.address || 'N/A'}
+                                      value={formValues.address || ''}
                                       name="address"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -980,7 +981,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="City"
-                                      value={formValues.city || 'N/A'}
+                                      value={formValues.city || ''}
                                       name="city"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -994,7 +995,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="State"
-                                      value={formValues.state || 'N/A'}
+                                      value={formValues.state || ''}
                                       name="state"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -1009,7 +1010,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="Postal Code"
-                                      value={formValues.postal_code || 'N/A'}
+                                      value={formValues.postal_code || ''}
                                       name="postal_code"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -1023,7 +1024,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="GSTIN"
-                                      value={formValues.GSTIN || 'N/A'}
+                                      value={formValues.GSTIN || ''}
                                       name="GSTIN"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -1038,7 +1039,7 @@ const Create3 = () => {
                                   <Grid item xs={6}>
                                     <TextField
                                       label="PAN"
-                                      value={formValues.PAN || 'N/A'}
+                                      value={formValues.PAN || ''}
                                       name="PAN"
                                       onChange={handleChangeCashierDetails}
                                       fullWidth
@@ -1053,17 +1054,17 @@ const Create3 = () => {
                               </>
                             ) : (
                               <>
-                                <Typography variant="subtitle1">{formValues.cabProviderLegalName || 'N/A'}</Typography>
+                                <Typography variant="subtitle1">{formValues.cabProviderLegalName || ''}</Typography>
                                 <Typography color="secondary">
-                                  {`${formValues.address || 'N/A'}, ${formValues.city || 'N/A'}, ${formValues.state || 'N/A'}-${
-                                    formValues.postal_code || 'N/A'
+                                  {`${formValues.address || ''}, ${formValues.city || ''}, ${formValues.state || ''}-${
+                                    formValues.postal_code || ''
                                   }`}
                                 </Typography>
                                 <Typography color="secondary">
-                                  <strong>GSTIN:</strong> {formValues.GSTIN || 'N/A'}
+                                  <strong>GSTIN:</strong> {formValues.GSTIN || ''}
                                 </Typography>
                                 <Typography color="secondary">
-                                  <strong>PAN:</strong> {formValues.PAN || 'N/A'}
+                                  <strong>PAN:</strong> {formValues.PAN || ''}
                                 </Typography>
                               </>
                             )}
@@ -1909,7 +1910,7 @@ const Create3 = () => {
                 {/* Action Buttons */}
                 <Grid item xs={12} sm={6}>
                   <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={2} sx={{ height: '100%' }}>
-                    {/* <Button
+                    <Button
                       variant="outlined"
                       color="secondary"
                       disabled={values.status === '' || !isValid}
@@ -1923,7 +1924,7 @@ const Create3 = () => {
                       }
                     >
                       Preview
-                    </Button> */}
+                    </Button>
                     {/* save data to database */}
                     {/* <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }}>
                       Create
@@ -1932,6 +1933,27 @@ const Create3 = () => {
                     <Button color="primary" variant="contained" type="submit">
                       Create & Send
                     </Button>
+
+                    {/* <InvoiceModal
+                      isOpen={isOpen}
+                      setIsOpen={(value) =>
+                        dispatch(
+                          reviewInvoicePopup({
+                            isOpen: value
+                          })
+                        )
+                      }
+                      key={values.invoice_id}
+                      invoiceInfo={{
+                        ...values,
+                        subTotal,
+                        // taxRate,
+                        // discountRate,
+                        total
+                      }}
+                      items={values?.invoiceData}
+                      // onAddNextInvoice={addNextInvoiceHandler}
+                    /> */}
                   </Stack>
                 </Grid>
               </Grid>
@@ -1975,7 +1997,8 @@ function validateFields(fields) {
 
 const findMinMaxDates = (data, dateKey = 'tripDate') => {
   if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('Input data must be a non-empty array');
+    // throw new Error('Input data must be a non-empty array');
+    return;
   }
 
   // Filter valid dates using moment's validation
