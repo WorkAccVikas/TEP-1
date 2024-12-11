@@ -27,7 +27,7 @@ const Register = () => {
             <Typography variant="h3">Sign up</Typography>
             <Typography
               component={Link}
-              to={isLoggedIn ? '/dashboard' : '/auth'}
+              to={isLoggedIn ? '/home' : '/auth'}
               variant="body1"
               sx={{ textDecoration: 'none' }}
               color="primary"

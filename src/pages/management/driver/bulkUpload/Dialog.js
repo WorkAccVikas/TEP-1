@@ -274,7 +274,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
 function ChildModal() {
   const [open, setOpen] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
-  console.log('userType', userType);
+  // console.log('userType', userType);
   const handleOpen = useCallback(() => {
     setOpen(true);
   }, []);

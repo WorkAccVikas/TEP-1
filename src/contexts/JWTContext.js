@@ -16,6 +16,7 @@ import Loader from 'components/Loader';
 import { MODULE, PERMISSIONS } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
 import CustomCircularLoader from 'components/CustomCircularLoader';
+import { USERTYPE } from 'constant';
 
 // const x = {
 //   company: ['CREATE', 'edit'],
@@ -112,8 +113,8 @@ export const JWTProvider = ({ children }) => {
           setSession(serviceToken);
           const response = await axios.get('/user/view');
           // eslint-disable-next-line no-unused-vars
-          console.log(response.data);
-          const { userData, userSpecificData } = response.data;
+          // console.log(response.data);
+          const { userData, userSpecificData, userPermissions } = response.data;
           // console.log(userData, userSpecificData, userPermissions)
           dispatch({
             type: LOGIN,
@@ -121,8 +122,8 @@ export const JWTProvider = ({ children }) => {
               user: userData,
               userType: userData.userType,
               userSpecificData: userSpecificData,
-              // userPermissions: userPermissions
-              userPermissions: x
+              userPermissions: userPermissions
+              // userPermissions: x
             }
           });
         } else {
@@ -157,6 +158,7 @@ export const JWTProvider = ({ children }) => {
     const { userData, userSpecificData, userPermissions } = response.data;
 
     const userInfo = {
+      // userId: userData.userType === USERTYPE.iscabProviderUser ? userSpecificData.cabProviderId : userData._id,
       userId: userData._id,
       userType: userData.userType
     };

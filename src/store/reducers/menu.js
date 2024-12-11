@@ -5,7 +5,7 @@ import axios from 'utils/axios';
 
 // initial state
 const initialState = {
-  openItem: ['dashboard'],
+  openItem: ['home'],
   openComponent: 'buttons',
   selectedID: null,
   drawerOpen: false,

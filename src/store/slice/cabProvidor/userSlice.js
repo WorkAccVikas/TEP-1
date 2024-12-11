@@ -18,6 +18,12 @@ const API_URL = {
     SPECIFIC_DETAILS: {
       CREATE: '/vendorUser/add'
     }
+  },
+  [USERTYPE.iscabProviderUser]: {
+    GETALL: '/cabProviderUser/all',
+    SPECIFIC_DETAILS: {
+      CREATE: '/cabProviderUser/add'
+    }
   }
 };
 

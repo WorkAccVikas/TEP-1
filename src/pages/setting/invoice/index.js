@@ -123,6 +123,8 @@ const InvoiceSetting = ({ redirect, onClose }) => {
             close: true
           })
         );
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
