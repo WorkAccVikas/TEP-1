@@ -95,13 +95,15 @@ export const JWTProvider = ({ children }) => {
           // eslint-disable-next-line no-unused-vars
           // console.log(response.data);
           // if
-          const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting/`, {
+          const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
             headers: {
               'Authorization': `${serviceToken}` // Authorization header with token
             }
           });
+          console.log("accountSettingResponse",accountSettingResponse);
+          
           // console.log("accountSettingResponse",accountSettingResponse);
-          const accountSetting = accountSettingResponse.data.data;
+          const accountSetting = accountSettingResponse?.data?.data;
           console.log('accountSetting', accountSetting);
 
           const { userData, userSpecificData, userPermissions } = response.data;
@@ -150,14 +152,14 @@ export const JWTProvider = ({ children }) => {
 
     // const accountSettingResponse = await axios.get('/accountSetting/');
 
-    const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting/`, {
+    const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
       headers: {
         'Authorization': `${userData.token}` // Authorization header with token
       }
     });
     // c
     // console.log("accountSettingResponse",accountSettingResponse);
-    const accountSetting = accountSettingResponse.data.data;
+    const accountSetting = accountSettingResponse?.data?.data;
     console.log('accountSetting', accountSetting);
 
     const userInfo = {

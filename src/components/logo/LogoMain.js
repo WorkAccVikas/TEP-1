@@ -8,6 +8,9 @@ const LogoMain = () => {
   const { accountSetting } = useAuth();
 
   const { logo = samplelogo, name = 'logo',favIcon="",title="" } = accountSetting || {};
+  console.log("logo",logo);
+  console.log("accountSetting",accountSetting);
+  
 
   return <img src={logo} alt={name} width="100" />;
 };

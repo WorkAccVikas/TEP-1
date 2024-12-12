@@ -6,11 +6,12 @@ const Home = () => {
   const { accountSetting } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    if(!accountSetting._id){
-        navigate('/settings/account')
+  useEffect(() => {
+    if (!accountSetting || !accountSetting._id) {
+      navigate('/settings/account');
     }
-  },[accountSetting._id])
+  }, [accountSetting]);
+
   console.log('accountSetting', accountSetting);
 
   return <div></div>;
