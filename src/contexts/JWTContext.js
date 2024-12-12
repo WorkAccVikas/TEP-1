@@ -11,34 +11,14 @@ import { INITIALIZE, LOGIN, LOGOUT } from 'store/reducers/actions';
 
 // project-imports
 import axios from 'utils/axios';
+import axios1 from 'axios';
+
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from 'components/Loader';
 import { MODULE, PERMISSIONS } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
 import CustomCircularLoader from 'components/CustomCircularLoader';
 import { USERTYPE } from 'constant';
-
-// const x = {
-//   company: ['CREATE', 'edit'],
-//   vendor: ['CREATE', 'Read'],
-//   // vendor: ['Read'],
-//   driver: ['add', 'read'],
-//   invoice: ['add'],
-//   reports: ['add'],
-//   user: [''],
-//   roster: ['READ'],
-//   // role: ['READ', 'CREATE'],
-//   // role: ['READ'],
-//   // role: ['READ', 'UPDATE'],
-//   role: ['READ', 'DELETE'],
-//   // role: ['READ', 'CREATE', 'UPDATE'],
-//   zone: ['CREATE', 'UPDATE', 'DELETE', 'READ'],
-//   'cab-rate': ['read']
-// };
-
-// eslint-disable-next-line no-unused-vars
-
-/** */
 
 const x = {
   [MODULE.ROSTER]: [PERMISSIONS.CREATE],
@@ -114,6 +94,18 @@ export const JWTProvider = ({ children }) => {
           const response = await axios.get('/user/view');
           // eslint-disable-next-line no-unused-vars
           // console.log(response.data);
+          // if
+          const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
+            headers: {
+              'Authorization': `${serviceToken}` // Authorization header with token
+            }
+          });
+          console.log("accountSettingResponse",accountSettingResponse);
+          
+          // console.log("accountSettingResponse",accountSettingResponse);
+          const accountSetting = accountSettingResponse?.data?.data;
+          console.log('accountSetting', accountSetting);
+
           const { userData, userSpecificData, userPermissions } = response.data;
           // console.log(userData, userSpecificData, userPermissions)
           dispatch({
@@ -122,8 +114,9 @@ export const JWTProvider = ({ children }) => {
               user: userData,
               userType: userData.userType,
               userSpecificData: userSpecificData,
-              userPermissions: userPermissions
-              // userPermissions: x
+              userPermissions: userPermissions,
+              // userPermissions: x,
+              accountSetting: accountSetting
             }
           });
         } else {
@@ -157,6 +150,18 @@ export const JWTProvider = ({ children }) => {
     const response = await axios.post('/user/login', payload);
     const { userData, userSpecificData, userPermissions } = response.data;
 
+    // const accountSettingResponse = await axios.get('/accountSetting/');
+
+    const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
+      headers: {
+        'Authorization': `${userData.token}` // Authorization header with token
+      }
+    });
+    // c
+    // console.log("accountSettingResponse",accountSettingResponse);
+    const accountSetting = accountSettingResponse?.data?.data;
+    console.log('accountSetting', accountSetting);
+
     const userInfo = {
       // userId: userData.userType === USERTYPE.iscabProviderUser ? userSpecificData.cabProviderId : userData._id,
       userId: userData._id,
@@ -173,7 +178,8 @@ export const JWTProvider = ({ children }) => {
         userType: userData.userType,
         userSpecificData: userSpecificData,
         // userPermissions: x
-        userPermissions: userPermissions
+        userPermissions: userPermissions,
+        accountSetting: accountSetting
       }
     });
   };
@@ -181,11 +187,12 @@ export const JWTProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       // Recode this flow to ensure user verification logic
-      await axios.post('/user/register', formData, {
+      const response = await axios.post('/user/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
+      return response;
     } catch (error) {
       console.log('Error registering user:', error);
       throw error;
