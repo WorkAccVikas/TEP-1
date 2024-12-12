@@ -27,12 +27,6 @@ import { addAccountSetting, mutateAccountSettings } from 'store/slice/cabProvido
 import { useFilePreview } from 'hooks/useFilePreview';
 import axiosServices from 'utils/axios';
 
-// const MAX_LOGO_WIDTH = 100;
-// const MAX_LOGO_HEIGHT = 50;
-// const MAX_SMALL_LOGO_WIDTH = 50;
-// const MAX_SMALL_LOGO_HEIGHT = 25;
-// const MAX_FAV_ICON_WIDTH = 10;
-// const MAX_FAV_ICON_HEIGHT = 10;
 const MAX_LOGO_WIDTH = 170;
 const MAX_LOGO_HEIGHT = 50;
 const MAX_SMALL_LOGO_WIDTH = 40;
@@ -157,7 +151,7 @@ const validationSchema = Yup.object().shape({
   favIcon: createFileValidation(CONFIG.favIcon, 'Favicon')
 });
 
-const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
+const ManageAccountSettings = memo(({ initialValues, isFirstTime, userId }) => {
   console.log('ManageAccountSettings Render');
   console.log(initialValues);
 
@@ -165,9 +159,6 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
   const fileInputRef = useRef(null); // Create a ref for the file input
   const fileSmallInputRef = useRef(null);
   const faviconInputRef = useRef(null);
-  const userInfo = JSON.parse(localStorage.getItem('userInformation'));
-
-  const CabProviderId = userInfo.userId;
 
   const handleButtonClick = () => {
     // Trigger the hidden file input click
@@ -209,13 +200,10 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       try {
-        // alert('Form submitted');
-        console.log(values);
 
-        // TODO : API call FOR ADD/UPDATE (ONE API ONLY)
-
+        // Prepare the form data to send in the POST request
         const formData = new FormData();
-        formData.append('cabProviderId', CabProviderId);
+        formData.append('cabProviderId', userId);
         formData.append('name', values.name);
         formData.append('title', values.title);
         if (values.logo) formData.append('logo', values.logo);
@@ -223,26 +211,21 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
         if (values.smallLogo) formData.append('smallLogo', values.smallLogo);
 
         console.log(formData);
+        console.log(values);
 
-        // await new Promise((resolve) => setTimeout(resolve, 3000));
-
-        // const response = {
-        //   status: 200
-        // };
-
+        // Make the POST request using Axios
         const response = await axiosServices.post('/accountSetting/add', formData);
-        console.log(`🚀 ~ onSubmit: ~ response:`, response);
-        console.log(`🚀 ~ onSubmit: ~ response:`, response.status);
 
-        if (response.status === 201) {
-          window.location.reload();
-        }
+        console.log(`🚀 ~ onSubmit: ~ response:`, response);
 
         // if (response.status >= 200 && response.status < 300) {
+        //   // Assuming you have a Redux action to add the account setting
         //   dispatch(addAccountSetting(response.data));
 
+        //   // Reset the form after successful submission
         //   resetForm();
 
+        //   // Show success message via snackbar
         //   dispatch(
         //     openSnackbar({
         //       open: true,
@@ -255,8 +238,9 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
         //     })
         //   );
 
-          // navigate('/home', { replace: true });
-        
+        //   // Optionally navigate after success
+        //   navigate('/auth', { replace: true });
+        // }
       } catch (error) {
         console.log(error);
         dispatch(
@@ -290,15 +274,15 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
     handlePreviewChange: setSmallLogoPreview
   } = useFilePreview(CONFIG.smallLogo, 'smallLogo', formik, '');
 
-  useEffect(() => {
-    if (!isFirstTime) {
-      if (initialValues&&initialValues.logo) setLogoPreview(initialValues.logo);
+  //   useEffect(() => {
+  //     if (!isFirstTime) {
+  //       if (initialValues.logo) setLogoPreview(initialValues.logo);
 
-      if (initialValues&&initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+  //       if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
 
-      if (initialValues&&initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
-    }
-  }, [initialValues, isFirstTime]);
+  //       if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
+  //     }
+  //   }, [initialValues, isFirstTime]);
 
   return (
     <>
@@ -463,8 +447,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       <input
                         ref={faviconInputRef}
                         type="file"
-                        // accept=".ico,image/png,image/svg+xml"
-                        accept="image/*"
+                        accept=".ico,image/png,image/svg+xml"
                         hidden
                         onChange={handleFaviconChange}
                       />
@@ -569,7 +552,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
               <Divider />
 
               <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
-                <Button
+                {/* <Button
                   variant="outlined"
                   color="error"
                   onClick={() => {
@@ -578,14 +561,9 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                   title="Cancel"
                 >
                   Cancel
-                </Button>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  title={isFirstTime ? 'Save' : 'Update'}
-                  disabled={formik.isSubmitting || !formik.dirty}
-                >
-                  {isFirstTime ? 'Save' : 'Update'}
+                </Button> */}
+                <Button variant="contained" type="submit" title="Save" disabled={formik.isSubmitting || !formik.dirty}>
+                  Save
                 </Button>
               </Stack>
             </Stack>

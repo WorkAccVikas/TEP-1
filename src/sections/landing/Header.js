@@ -44,7 +44,7 @@ const HeaderPage = () => {
                     lineHeight: 1.2
                   }}
                 >
-                  <span>Beta Version 0.4 </span>
+                  <span>Beta Version 0.9 </span>
                   <br/>
                   <span>Roster management application</span>
                  
@@ -92,8 +92,8 @@ const HeaderPage = () => {
                 <Grid container spacing={2} justifyContent="center">
                   <Grid item>
                     <AnimateButton>
-                      <Button component={RouterLink} to="/auth" target="_blank" size="large" color="primary" variant="contained">
-                        Application Login
+                      <Button component={RouterLink} to="/subscription" target="_blank" size="large" color="primary" variant="contained">
+                        Register
                       </Button>
                     </AnimateButton>
                   </Grid>
