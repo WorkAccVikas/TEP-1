@@ -665,6 +665,7 @@ ReactTable.propTypes = {
   data: PropTypes.array
 };
 
+
 // ==============================|| TRIP - LIST ||============================== //
 
 const calculateTripStatsForCabProvider = (data) => {
