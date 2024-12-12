@@ -26,7 +26,7 @@ const App = () => {
               <>
                 <Notistack>
                   <DrawerProvider>
-                    <UpdateTitle />
+                    {/* <UpdateTitle /> */}
                     <Routes />
                     <ScrollToTop
                       smooth
