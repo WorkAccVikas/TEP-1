@@ -92,7 +92,7 @@ const HeaderPage = () => {
                 <Grid container spacing={2} justifyContent="center">
                   <Grid item>
                     <AnimateButton>
-                      <Button component={RouterLink} to="/auth" target="_blank" size="large" color="primary" variant="contained">
+                      <Button component={RouterLink} to="/subscription" target="_blank" size="large" color="primary" variant="contained">
                         Application Login
                       </Button>
                     </AnimateButton>

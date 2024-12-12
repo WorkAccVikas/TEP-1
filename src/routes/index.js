@@ -11,6 +11,7 @@ import { lazy } from 'react';
 import { useSelector } from 'react-redux';
 import { USERTYPE } from 'constant';
 import VendorRoutes from './VendorRoutes';
+import StepperSubscribe from 'pages/subscription/StepperSubscribe';
 
 const PagesLanding = Loadable(lazy(() => import('pages/Landing')));
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
@@ -33,7 +34,12 @@ export default function ThemeRoutes() {
         {
           path: '/',
           element: <PagesLanding />
-        }
+        },
+        
+        {
+          path: 'subscription',
+          element: <StepperSubscribe />
+        },
       ]
     },
     LoginRoutes,

@@ -13,9 +13,9 @@ import { CircularProgress } from '@mui/material';
 
 const LogoMain = () => {
   const theme = useTheme();
-  const logos = useSelector((state) => state.accountSettings.settings?.logo);
-  const name = useSelector((state) => state.accountSettings.settings?.name);
-  console.log(logos);
+  const logos = useSelector((state) => state.accountSettings?.settings?.logo);
+  const name = useSelector((state) => state.accountSettings?.settings?.name);
+  console.log("logos",logos);
   // return <img src={theme.palette.mode === ThemeMode.DARK ? logoDark : logo} alt="icon logo" width="100" />;
   // return <img src={logos || logo} alt="icon logo" width="100" />;
 

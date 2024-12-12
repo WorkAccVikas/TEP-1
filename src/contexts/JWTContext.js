@@ -113,6 +113,12 @@ export const JWTProvider = ({ children }) => {
           const response = await axios.get('/user/view');
           // eslint-disable-next-line no-unused-vars
           console.log(response.data);
+          // if
+          const accountSettingResponse = await axios.get('/accountSetting/');
+          // console.log("accountSettingResponse",accountSettingResponse);
+          const accountSetting = accountSettingResponse.data.data;
+          console.log("accountSetting",accountSetting);
+          
           const { userData, userSpecificData } = response.data;
           // console.log(userData, userSpecificData, userPermissions)
           dispatch({
@@ -122,7 +128,8 @@ export const JWTProvider = ({ children }) => {
               userType: userData.userType,
               userSpecificData: userSpecificData,
               // userPermissions: userPermissions
-              userPermissions: x
+              userPermissions: x,
+              accountSetting : accountSetting
             }
           });
         } else {
@@ -179,11 +186,12 @@ export const JWTProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       // Recode this flow to ensure user verification logic
-      await axios.post('/user/register', formData, {
+      const response = await axios.post('/user/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
+      return response;
     } catch (error) {
       console.log('Error registering user:', error);
       throw error;

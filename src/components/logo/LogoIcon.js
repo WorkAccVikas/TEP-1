@@ -15,6 +15,7 @@ const LogoIcon = () => {
   const name = useSelector((state) => state.accountSettings.settings?.name);
 
   console.log(`🚀 ~ LogoIcon ~ smallLogo:`, smallLogo);
+  console.log(`logoIcon`, logoIcon);
 
   // if (!smallLogo) {
   //   return <CircularProgress />;
