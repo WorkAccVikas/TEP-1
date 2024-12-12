@@ -5,6 +5,7 @@ import LoginRoutes from './LoginRoutes';
 // import CabProvidorRoutes from './CabProvidorRoutes';
 import CabProvidorRoutes from './CabProviderRoutes1';
 import CabProvidorUserRoutes from './CabProviderUserRoutes';
+import VendorUserRoutes from './VendorUserRoutes';
 
 import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
@@ -20,7 +21,8 @@ const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')))
 const ROUTES = {
   [USERTYPE.iscabProvider]: CabProvidorRoutes,
   [USERTYPE.isVendor]: VendorRoutes,
-  [USERTYPE.iscabProviderUser]: CabProvidorUserRoutes
+  [USERTYPE.iscabProviderUser]: CabProvidorUserRoutes,
+  [USERTYPE.isVendorUser]: VendorUserRoutes
 };
 
 export default function ThemeRoutes() {
