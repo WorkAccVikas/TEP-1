@@ -385,7 +385,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
   console.log({ invoiceTripData });
   const handleTripGeneration = () => {
     console.log({ selected });
-    navigate('/apps/invoices/test', { state: { tripData: invoiceTripData } });
+    navigate('/apps/invoices/create', { state: { tripData: invoiceTripData } });
   };
 
   const handleCloseForRemove = useCallback(() => {

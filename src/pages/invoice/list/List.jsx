@@ -888,7 +888,7 @@ const List = () => {
         </Stack>
 
         <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.CREATE}>
-          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/test')}>
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
             Create Invoice
           </Button>
         </WrapperButton>

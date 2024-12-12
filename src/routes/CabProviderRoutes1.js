@@ -13,8 +13,9 @@ import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelist
 import TripView from 'pages/trips/TripView';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
 import ReportDriver from 'pages/reports/ReportDriver';
-import Create from 'pages/invoice/create/Create3';
+// import Create from 'pages/invoice/create/Create3';
 import TripReports from 'pages/reports/Trips';
+import Create from 'pages/apps/invoice/Create';
 
 // import Roster from 'pages/apps/roster';
 
@@ -208,13 +209,13 @@ const CabProvidorRoutes = {
                   element: <InvoiceList />
                 },
                 {
-                  path: 'test',
+                  path: 'create',
                   element: <Create />
                 },
-                {
-                  path: 'create',
-                  element: <InvoiceCreate />
-                },
+                // {
+                //   path: 'create',
+                //   element: <InvoiceCreate />
+                // },
                 {
                   path: 'details/:id',
                   element: <InvoiceDetails />
