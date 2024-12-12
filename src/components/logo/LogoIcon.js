@@ -1,5 +1,5 @@
 
-import samplelogo from 'assets/images/logo_icon.png';
+import logo from 'assets/images/logo_icon.png';
 import useAuth from 'hooks/useAuth';
 
 // ==============================|| LOGO ICON SVG ||============================== //
@@ -7,7 +7,7 @@ import useAuth from 'hooks/useAuth';
 const LogoIcon = () => {
   const { accountSetting } = useAuth();
 
-  const { smallLogo = samplelogo, name = 'logo' } = accountSetting || {};
+  const { smallLogo = logo, name = 'logo' } = accountSetting || {};
 
   return <img src={smallLogo} alt={name} width="40" />;
 };
