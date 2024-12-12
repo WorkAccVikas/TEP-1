@@ -14,11 +14,8 @@ import axios from 'utils/axios';
 import axios1 from 'axios';
 
 import { useDispatch, useSelector } from 'react-redux';
-import Loader from 'components/Loader';
 import { MODULE, PERMISSIONS } from 'constant';
-import { openSnackbar } from 'store/reducers/snackbar';
 import CustomCircularLoader from 'components/CustomCircularLoader';
-import { USERTYPE } from 'constant';
 
 const x = {
   [MODULE.ROSTER]: [PERMISSIONS.CREATE],
@@ -95,7 +92,7 @@ export const JWTProvider = ({ children }) => {
           // eslint-disable-next-line no-unused-vars
           // console.log(response.data);
           // if
-          const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
+          const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
             headers: {
               'Authorization': `${serviceToken}` // Authorization header with token
             }
@@ -152,7 +149,7 @@ export const JWTProvider = ({ children }) => {
 
     // const accountSettingResponse = await axios.get('/accountSetting/');
 
-    const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}/accountSetting`, {
+    const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
       headers: {
         'Authorization': `${userData.token}` // Authorization header with token
       }
