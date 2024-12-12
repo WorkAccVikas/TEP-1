@@ -15,6 +15,7 @@ import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails'
 import ReportDriver from 'pages/reports/ReportDriver';
 import Create from 'pages/invoice/create/Create3';
 import TripReports from 'pages/reports/Trips';
+import Home from 'pages/Home';
 
 // import Roster from 'pages/apps/roster';
 
@@ -126,7 +127,7 @@ const CabProvidorRoutes = {
         // Home
         {
           path: 'home',
-          element: <UnderConstruction title="Home" />
+          element: <Home />
         },
         // Dashboard
         {
