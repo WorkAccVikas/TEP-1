@@ -8,12 +8,9 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import MainCard from 'components/MainCard';
 import Subscription from './Subscription';
 import Register from 'pages/auth/auth1/register';
-import AccountSettings from './setting';
 import { useNavigate } from 'react-router';
-import ManageAccountSettings from './setting/ManageAccountSettings';
-
 // step options
-const steps = ['Subscription', 'Register', 'Account Setting'];
+const steps = ['Subscription', 'Register'];
 
 const getStepContent = (
   step,
@@ -48,16 +45,6 @@ const getStepContent = (
           registerData={registerData}
           setRegisterData={setRegisterData}
           setUserId={setUserId}
-        />
-      );
-    case 2:
-      return (
-        <ManageAccountSettings
-          handleNext={handleNext}
-          handleBack={handleBack}
-          accountSettingData={accountSettingData}
-          setAccountSettingData={setAccountSettingData}
-          userId={userId}
         />
       );
     default:

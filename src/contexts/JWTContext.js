@@ -128,7 +128,7 @@ export const JWTProvider = ({ children }) => {
               user: userData,
               userType: userData.userType,
               userSpecificData: userSpecificData,
-              userPermissions: userPermissions
+              userPermissions: userPermissions,
               // userPermissions: x,
               accountSetting : accountSetting
             }
@@ -163,11 +163,16 @@ export const JWTProvider = ({ children }) => {
 
     const response = await axios.post('/user/login', payload);
     const { userData, userSpecificData, userPermissions } = response.data;
+    const accountSettingResponse = await axios.get('/accountSetting/');
+    // console.log("accountSettingResponse",accountSettingResponse);
+    const accountSetting = accountSettingResponse.data.data;
+    console.log("accountSetting",accountSetting);
+    
 
     const userInfo = {
       // userId: userData.userType === USERTYPE.iscabProviderUser ? userSpecificData.cabProviderId : userData._id,
       userId: userData._id,
-      userType: userData.userType
+      userType: userData.userType,
     };
 
     localStorage.setItem('userInformation', JSON.stringify(userInfo));
@@ -180,7 +185,9 @@ export const JWTProvider = ({ children }) => {
         userType: userData.userType,
         userSpecificData: userSpecificData,
         // userPermissions: x
-        userPermissions: userPermissions
+        userPermissions: userPermissions,
+      accountSetting:accountSetting
+
       }
     });
   };

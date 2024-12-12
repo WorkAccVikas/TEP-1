@@ -37,7 +37,7 @@ import { faker } from '@faker-js/faker';
 
 // ============================|| JWT - REGISTER ||============================ //
 
-const AuthRegister = ({handleNext, setUserId}) => {
+const AuthRegister = ({ setUserId}) => {
   // eslint-disable-next-line no-unused-vars
   const { register } = useAuth();
   const scriptedRef = useScriptRef();
@@ -114,8 +114,7 @@ const AuthRegister = ({handleNext, setUserId}) => {
                 })
               );
 
-              // navigate('/auth', { replace: true });
-              handleNext();
+              navigate('/auth', { replace: true });
             }
           } catch (err) {
             console.error('Error at AuthRegister = ', err);

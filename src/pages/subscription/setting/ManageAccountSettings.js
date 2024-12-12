@@ -32,7 +32,7 @@ const MAX_LOGO_HEIGHT = 50;
 const MAX_SMALL_LOGO_WIDTH = 40;
 const MAX_SMALL_LOGO_HEIGHT = 40;
 const MAX_FAV_ICON_WIDTH = 60;
-const MAX_FAV_ICON_HEIGHT =60;
+const MAX_FAV_ICON_HEIGHT = 60;
 
 // Function to calculate sizes in bytes
 function sizeInKB(value) {
@@ -200,8 +200,6 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime, userId }) => {
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       try {
-        alert('Form submitted');
-        console.log(values);
 
         // Prepare the form data to send in the POST request
         const formData = new FormData();
@@ -213,35 +211,36 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime, userId }) => {
         if (values.smallLogo) formData.append('smallLogo', values.smallLogo);
 
         console.log(formData);
+        console.log(values);
 
         // Make the POST request using Axios
         const response = await axiosServices.post('/accountSetting/add', formData);
 
         console.log(`🚀 ~ onSubmit: ~ response:`, response);
 
-        if (response.status >= 200 && response.status < 300) {
-          // Assuming you have a Redux action to add the account setting
-          dispatch(addAccountSetting(response.data));
+        // if (response.status >= 200 && response.status < 300) {
+        //   // Assuming you have a Redux action to add the account setting
+        //   dispatch(addAccountSetting(response.data));
 
-          // Reset the form after successful submission
-          resetForm();
+        //   // Reset the form after successful submission
+        //   resetForm();
 
-          // Show success message via snackbar
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: `Account details have been successfully ${isFirstTime ? 'created' : 'updated'}`,
-              variant: 'alert',
-              alert: {
-                color: 'success'
-              },
-              close: true
-            })
-          );
+        //   // Show success message via snackbar
+        //   dispatch(
+        //     openSnackbar({
+        //       open: true,
+        //       message: `Account details have been successfully ${isFirstTime ? 'created' : 'updated'}`,
+        //       variant: 'alert',
+        //       alert: {
+        //         color: 'success'
+        //       },
+        //       close: true
+        //     })
+        //   );
 
-          // Optionally navigate after success
-          // navigate('/dashboard', { replace: true });
-        }
+        //   // Optionally navigate after success
+        //   navigate('/auth', { replace: true });
+        // }
       } catch (error) {
         console.log(error);
         dispatch(
@@ -275,15 +274,15 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime, userId }) => {
     handlePreviewChange: setSmallLogoPreview
   } = useFilePreview(CONFIG.smallLogo, 'smallLogo', formik, '');
 
-//   useEffect(() => {
-//     if (!isFirstTime) {
-//       if (initialValues.logo) setLogoPreview(initialValues.logo);
+  //   useEffect(() => {
+  //     if (!isFirstTime) {
+  //       if (initialValues.logo) setLogoPreview(initialValues.logo);
 
-//       if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+  //       if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
 
-//       if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
-//     }
-//   }, [initialValues, isFirstTime]);
+  //       if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
+  //     }
+  //   }, [initialValues, isFirstTime]);
 
   return (
     <>
@@ -563,13 +562,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime, userId }) => {
                 >
                   Cancel
                 </Button> */}
-                <Button
-                  variant="contained"
-                  type="submit"
-                  title='Save'
-                  disabled={formik.isSubmitting || !formik.dirty}
-                  onClick={navigate('/auth')}
-                >
+                <Button variant="contained" type="submit" title="Save" disabled={formik.isSubmitting || !formik.dirty}>
                   Save
                 </Button>
               </Stack>

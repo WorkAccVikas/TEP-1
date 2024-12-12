@@ -59,9 +59,6 @@ const accountSettingSlice = createSlice({
     resetError: (state) => {
       state.error = null;
     },
-    addAccountSetting: (state, action) => {
-      state.settings = action.payload;
-    }
   },
   extraReducers: (builder) => {
     builder
@@ -83,5 +80,5 @@ const accountSettingSlice = createSlice({
   }
 });
 
-export const { reset, resetError, addAccountSetting } = accountSettingSlice.actions;
+export const { reset, resetError } = accountSettingSlice.actions;
 export const accountSettingsReducer = accountSettingSlice.reducer;
