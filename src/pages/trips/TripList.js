@@ -511,7 +511,7 @@ function ReactTable({
   const invoiceGroup = data.map((item) => item.invoiceId);
   const counts = {
     Pending: countGroup.filter((status) => status === TRIP_STATUS.PENDING).length,
-    Completed: countGroup.filter((status) => status === TRIP_STATUS.COMPLETED).length,
+    Completed: data.filter((item) => item.invoiceId === null && item.assignedStatus === TRIP_STATUS.COMPLETED).length,
     Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length,
     Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length,
     Invoice: invoiceGroup.filter((status) => status !== null).length
@@ -521,10 +521,10 @@ function ReactTable({
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
-  console.log('row = ', rows);
-  console.log('activeTab = ', activeTab);
-  console.log('pageIndex = ', pageIndex);
-  console.log('pageSize = ', pageSize);
+  // console.log('row = ', rows);
+  // console.log('activeTab = ', activeTab);
+  // console.log('pageIndex = ', pageIndex);
+  // console.log('pageSize = ', pageSize);
 
   const filterData = useMemo(() => {
     return rows.filter((row, index) => {
@@ -612,7 +612,7 @@ function ReactTable({
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef}>
         <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
           <Table {...getTableProps()}>
@@ -653,7 +653,7 @@ function ReactTable({
         </ScrollX>
 
         <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
     </>
@@ -1025,11 +1025,7 @@ const TripList = () => {
         title: 'Row Selection',
         Header: ({ getToggleAllPageRowsSelectedProps }) => <IndeterminateCheckbox indeterminate {...getToggleAllPageRowsSelectedProps()} />,
         accessor: 'selection',
-        Cell: ({ row }) => (
-          <IndeterminateCheckbox
-            {...row.getToggleRowSelectedProps()}
-          />
-        ),
+        Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />,
         disableSortBy: true,
         disableFilters: true
       },
