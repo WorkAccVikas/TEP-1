@@ -85,6 +85,9 @@ const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
 const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
 const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
 const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Advance/Vendor')));
+const CompanyWiseReportForDriver = Loadable(lazy(() => import('pages/reports/Company/Driver')));
+const CabReportsForDriver = Loadable(lazy(() => import('pages/reports/Cab/Driver')));
+const AdvanceReportsForDriver = Loadable(lazy(() => import('pages/reports/Advance/Driver')));
 
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));
@@ -465,6 +468,19 @@ const CabProvidorRoutes = {
             {
               path: 'vendor/cab-report',
               element: <CabReportsForVendor />
+            },
+            // Driver
+            {
+              path: 'driver/company-report',
+              element: <CompanyWiseReportForDriver />
+            },
+            {
+              path: 'driver/advance-report',
+              element: <AdvanceReportsForDriver />
+            },
+            {
+              path: 'driver/cab-report',
+              element: <CabReportsForDriver />
             }
           ]
         },

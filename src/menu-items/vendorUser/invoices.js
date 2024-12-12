@@ -40,7 +40,7 @@ const invoices = {
       title: <FormattedMessage id="advance" />,
       type: 'item',
       icon: icons.advance,
-      url: '/apps/invoices/advance'
+      url: '/apps/invoices/advance',
       // children: [
       //   {
       //     id: 'advance-type',

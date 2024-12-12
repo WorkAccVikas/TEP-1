@@ -10,7 +10,7 @@ import roster from './cabProvider/roster';
 import vendorMenuItems from './vendor';
 import cabProviderMenuItems from './cabProvider1';
 import cabProviderUserMenuItems from './cabProviderUser';
-
+import vendorUserMenuItems from './vendorUser';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
@@ -23,7 +23,8 @@ export default menuItems;
 const MENU_ITEM = {
   [USERTYPE.iscabProvider]: cabProviderMenuItems,
   [USERTYPE.isVendor]: vendorMenuItems,
-  [USERTYPE.iscabProviderUser]: cabProviderUserMenuItems
+  [USERTYPE.iscabProviderUser]: cabProviderUserMenuItems,
+  [USERTYPE.isVendorUser]: vendorUserMenuItems
 };
 
 export const getMenuItems = (userType) => {

@@ -141,9 +141,17 @@ export default function PermissionTable({ existedPermissions = {}, parentFunctio
       setSelectedPermissions(newPermissions);
       parentFunction(newPermissions);
     } else {
+      const nonSelected = rows
+        .map((n) => {
+          return n.moduleName;
+        })
+        .reduce((acc, curr) => {
+          acc[curr] = [];
+          return acc;
+        }, {});
       setSelected([]);
-      setSelectedPermissions({});
-      parentFunction({});
+      setSelectedPermissions(nonSelected);
+      parentFunction(nonSelected);
     }
   };
 
