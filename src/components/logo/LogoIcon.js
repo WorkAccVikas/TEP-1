@@ -9,7 +9,7 @@ const LogoIcon = () => {
 
   const { smallLogo = logo, name = 'logo' } = accountSetting || {};
 
-  return <img src={smallLogo} alt={name} width="40" />;
+  return <img src={smallLogo || logo} alt={name} width="40" />;
 };
 
 export default LogoIcon;
