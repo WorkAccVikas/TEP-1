@@ -123,6 +123,11 @@ const CabProvidorRoutes = {
         </AuthGuard>
       ),
       children: [
+        // Home
+        {
+          path: 'home',
+          element: <UnderConstruction title="Home" />
+        },
         // Dashboard
         {
           path: 'dashboard',

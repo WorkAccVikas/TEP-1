@@ -36,14 +36,14 @@ export const fetchCompanyWiseReports = createAsyncThunk(
       console.log('payload', payload);
       const state = getState();
       const userType = state.auth.userType;
-      console.log('userType', userType);
+      // console.log('userType', userType);
       // await new Promise((resolve) => setTimeout(resolve, 4000));
       const response = await axios.post(`/reports/company/wise/summary`, {
         data: {
           startDate: payload?.data?.startDate,
           endDate: payload?.data?.endDate,
           companyIDs: payload?.data?.companyId || [],
-          vendorIds : payload?.data?.vendorIds || []
+          vendorIds: payload?.data?.vendorIds || []
         }
       });
       return response.data.data;

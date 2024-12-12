@@ -5,7 +5,7 @@ import { commonInitialState, commonReducers } from 'store/slice/common';
 // Define the async thunk for fetching drivers
 export const fetchDrivers = createAsyncThunk(
   'drivers/fetchDrivers',
-  async ({ page = 1, limit = 10, driverType = 1, vendorID = null , query}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, driverType = 1, vendorID = null, query }, { rejectWithValue }) => {
     try {
       // Replace with your actual endpoint
       const queryParams = {
@@ -148,8 +148,6 @@ const initialState = {
   loading: false,
   error: null
 };
-
-console.log('tom = ', commonReducers);
 
 const driverSlice = createSlice({
   name: 'drivers',

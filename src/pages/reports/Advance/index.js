@@ -14,6 +14,8 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import { downloadAdvanceReport, downloadReport } from '../utils/DownloadAdvanceReport';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const AdvanceReports = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
@@ -94,17 +96,20 @@ const AdvanceReports = () => {
               onRangeChange={handleRangeChange}
               showSelectedRangeLabel
             />
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-              disabled={loading}
-            >
-              Download Report
-            </Button>
+
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

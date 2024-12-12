@@ -27,6 +27,8 @@ import { useDrawer } from 'contexts/DrawerContext';
 import RosterTemplateDialog from './dialog/RosterTemplateDialog';
 import { useTheme } from '@mui/material/styles';
 import { ThemeMode } from 'config';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, handleFileUploadOpen, fileData: fileInfo, openTemplate }) => {
   const navigate = useNavigate();
@@ -223,27 +225,32 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, han
         <>
           <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
             <Stack direction="row" alignItems="center" spacing={2}>
-              <Button
-                variant="contained"
-                startIcon={<Add />} // Show loading spinner if loading
-                onClick={handleFileUploadOpen}
-                size="small"
-                // color="info"
-                color="inherit"
-              >
-                {/* {loading ? 'Loading...' : 'Add Branch'} */}
-                {'Upload File'}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Add />} // Show loading spinner if loading
-                onClick={() => openDrawer()}
-                size="small"
-                color="success"
-              >
-                {/* {loading ? 'Loading...' : 'Add Branch'} */}
-                {'Create Template'}
-              </Button>
+              <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />} // Show loading spinner if loading
+                  onClick={handleFileUploadOpen}
+                  size="small"
+                  // color="info"
+                  color="inherit"
+                >
+                  {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                  {'Upload File'}
+                </Button>
+              </WrapperButton>
+
+              <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />} // Show loading spinner if loading
+                  onClick={() => openDrawer()}
+                  size="small"
+                  color="success"
+                >
+                  {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                  {'Create Template'}
+                </Button>
+              </WrapperButton>
             </Stack>
           </Stack>
           <MainCard content={false}>

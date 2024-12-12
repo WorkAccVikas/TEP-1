@@ -250,8 +250,8 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
         //     })
         //   );
 
-        //   // navigate('/dashboard', { replace: true });
-        // }
+          // navigate('/home', { replace: true });
+        }
       } catch (error) {
         console.log(error);
         dispatch(

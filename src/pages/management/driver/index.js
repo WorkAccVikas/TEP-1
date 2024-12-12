@@ -19,6 +19,8 @@ import BulkUploadDialog from './bulkUpload/Dialog';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { Wrapper } from 'components/common/guards/Wrapper';
+import { STRATEGY } from 'components/common/PermissionStrategies';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -245,12 +247,24 @@ const Driver = () => {
               </WrapperButton>
             </AccessControlWrapper>
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-                <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
-                  Upload Driver List
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.isVendor]}>
+              <Wrapper
+                allowedPermission={{
+                  [MODULE.DRIVER]: [PERMISSIONS.CREATE]
+                }}
+                strategy={STRATEGY.ALL}
+              >
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                  onClick={handleDriverBulkUploadOpen}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Upload Driver List'}
                 </Button>
-              </WrapperButton>
+              </Wrapper>
             </AccessControlWrapper>
           </Stack>
         </Stack>

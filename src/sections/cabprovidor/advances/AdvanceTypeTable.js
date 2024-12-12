@@ -209,7 +209,7 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
       <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
         <Stack direction={'row'} alignItems="center" spacing={2}>
           {USERTYPE.iscabProvider === userType && (
-            // <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.CREATE}>
+            <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.CREATE}>
               <Button
                 variant="contained"
                 startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
@@ -219,7 +219,7 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
               >
                 {loading ? 'Loading...' : 'Add Advance Type'}
               </Button>
-            // </WrapperButton>
+            </WrapperButton>
           )}
         </Stack>
       </Stack>

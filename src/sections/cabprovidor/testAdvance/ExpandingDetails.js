@@ -398,11 +398,12 @@ const ExpandingDetails = () => {
               onClick={handleAdvanceType}
               size="small"
               disabled={loading}
-              sx={{ height: '36px' }} 
+              sx={{ height: '36px' }}
             >
               {loading ? 'Loading...' : 'View Advance Type'}
             </Button>
           </WrapperButton>
+
           <DateRangeSelect
             startDate={startDate}
             endDate={endDate}
@@ -411,7 +412,7 @@ const ExpandingDetails = () => {
             setSelectedRange={setRange}
             onRangeChange={handleRangeChange}
             showSelectedRangeLabel
-            sx={{ height: '36px', width: '180px', mb: '0px' }} 
+            sx={{ height: '36px', width: '180px', mb: '0px' }}
           />
         </Stack>
       </Stack>

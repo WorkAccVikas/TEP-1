@@ -4,6 +4,7 @@ import { useRoutes } from 'react-router-dom';
 import LoginRoutes from './LoginRoutes';
 // import CabProvidorRoutes from './CabProvidorRoutes';
 import CabProvidorRoutes from './CabProviderRoutes1';
+import CabProvidorUserRoutes from './CabProviderUserRoutes';
 
 import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
@@ -19,7 +20,8 @@ const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')))
 
 const ROUTES = {
   [USERTYPE.iscabProvider]: CabProvidorRoutes,
-  [USERTYPE.isVendor]: VendorRoutes
+  [USERTYPE.isVendor]: VendorRoutes,
+  [USERTYPE.iscabProviderUser]: CabProvidorUserRoutes
 };
 
 export default function ThemeRoutes() {
