@@ -77,7 +77,8 @@ const TRIP_STATUS = {
   PENDING: 1,
   COMPLETED: 2,
   CANCELLED: 3,
-  UNATTENDED: 4
+  UNATTENDED: 4,
+  INVOICE: 101
 };
 
 const POPUP_TYPE = {
@@ -95,6 +96,8 @@ const getTabName = (status) => {
       return 'Cancelled';
     case TRIP_STATUS.UNATTENDED:
       return 'Unattended';
+    case TRIP_STATUS.INVOICE:
+      return 'Invoice';
     default:
       return 'All';
   }
@@ -501,23 +504,51 @@ function ReactTable({
 
   // ================ Tab ================
 
-  const groups = ['All', TRIP_STATUS.COMPLETED, TRIP_STATUS.PENDING, TRIP_STATUS.CANCELLED];
+  const groups = ['All', TRIP_STATUS.INVOICE, TRIP_STATUS.COMPLETED, TRIP_STATUS.PENDING, TRIP_STATUS.CANCELLED, TRIP_STATUS.UNATTENDED];
   // const groups = ['All', 'Pending', 'Completed', 'Cancelled'];
 
   const countGroup = data.map((item) => item.assignedStatus);
+  const invoiceGroup = data.map((item) => item.invoiceId);
   const counts = {
     Pending: countGroup.filter((status) => status === TRIP_STATUS.PENDING).length,
-    Completed: countGroup.filter((status) => status === TRIP_STATUS.COMPLETED).length,
+    Completed: data.filter((item) => item.invoiceId === null && item.assignedStatus === TRIP_STATUS.COMPLETED).length,
     Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length,
-    Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length
+    Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length,
+    Invoice: invoiceGroup.filter((status) => status !== null).length
   };
+
+  // console.log('counts = ', counts);
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
+  // console.log('row = ', rows);
+  // console.log('activeTab = ', activeTab);
+  // console.log('pageIndex = ', pageIndex);
+  // console.log('pageSize = ', pageSize);
+
+  const filterData = useMemo(() => {
+    return rows.filter((row, index) => {
+      // console.log('row i = ', row);
+      // console.log('index = ', index);
+      const { assignedStatus, invoiceId } = row.original;
+
+      if (activeTab === 'All') {
+        return true; // Show all rows
+      } else if (activeTab === TRIP_STATUS.INVOICE) {
+        // Ensure rows with COMPLETED status and a valid invoiceId are included
+        return assignedStatus === TRIP_STATUS.COMPLETED && invoiceId !== null;
+      } else {
+        // Other tabs: Match the assigned status and ensure no invoiceId
+        return assignedStatus === activeTab && invoiceId === null;
+      }
+    });
+  }, [rows, activeTab]);
+
+  console.log('filterData', filterData);
+
   useEffect(() => {
-    setFilter('status', activeTab === 'All' ? '' : activeTab === TRIP_STATUS.PENDING ? 1 : activeTab === TRIP_STATUS.COMPLETED ? 2 : 3);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+    setFilter('status', activeTab === 'All' ? '' : activeTab === TRIP_STATUS.INVOICE ? TRIP_STATUS.COMPLETED : activeTab);
+  }, [activeTab, setFilter]);
 
   return (
     <>
@@ -538,7 +569,11 @@ function ReactTable({
                         ? counts.Completed
                         : status === TRIP_STATUS.PENDING
                         ? counts.Pending
-                        : counts.Cancelled
+                        : status === TRIP_STATUS.CANCELLED
+                        ? counts.Cancelled
+                        : status === TRIP_STATUS.UNATTENDED
+                        ? counts.Unattended
+                        : counts.Invoice
                     }
                     color={
                       status === 'All'
@@ -547,7 +582,11 @@ function ReactTable({
                         ? 'success'
                         : status === TRIP_STATUS.PENDING
                         ? 'warning'
-                        : 'error'
+                        : status === TRIP_STATUS.CANCELLED
+                        ? 'error'
+                        : status === TRIP_STATUS.UNATTENDED
+                        ? 'secondary'
+                        : 'info'
                     }
                     variant="light"
                     size="small"
@@ -573,7 +612,7 @@ function ReactTable({
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef}>
         <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
           <Table {...getTableProps()}>
@@ -589,7 +628,7 @@ function ReactTable({
               ))}
             </TableHead>
             <TableBody {...getTableBodyProps()}>
-              {page.map((row, i) => {
+              {filterData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((row, i) => {
                 prepareRow(row);
                 return (
                   <Fragment key={i}>
@@ -614,7 +653,7 @@ function ReactTable({
         </ScrollX>
 
         <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
     </>
@@ -625,6 +664,7 @@ ReactTable.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array
 };
+
 
 // ==============================|| TRIP - LIST ||============================== //
 
@@ -874,7 +914,7 @@ const TripList = () => {
     }
   ];
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const navigate = useNavigate();
 

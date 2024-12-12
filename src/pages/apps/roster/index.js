@@ -53,6 +53,8 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import { formatDateUsingMoment } from 'utils/helper';
 import FileUploadDialog from './components/dialog/FileUploadDialog';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -183,7 +185,7 @@ const AllRosters = () => {
     setRefetch((prev) => !prev);
   }, []);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     dispatch(
@@ -326,43 +328,46 @@ const AllRosters = () => {
           if (isVisited === 1) {
             return (
               <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
+                <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.READ}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
-                    }
-                  }}
-                  title="View Roster"
-                >
-                  <IconButton color="secondary" onClick={() => handleViewClick(row.original)}>
-                    <Eye />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
-                    }
-                  }}
-                  title="Delete"
-                >
-                  <IconButton
-                    color="error"
-                    onClick={() => {
-                      setRemove(true);
-                      setDeleteID(row.original._id);
                     }}
+                    title="View Roster"
                   >
-                    <Trash />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton color="secondary" onClick={() => handleViewClick(row.original)}>
+                      <Eye />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
+                <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.DELETE}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
+                      }
+                    }}
+                    title="Delete"
+                  >
+                    <IconButton
+                      color="error"
+                      onClick={() => {
+                        setRemove(true);
+                        setDeleteID(row.original._id);
+                      }}
+                    >
+                      <Trash />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
               </Stack>
             );
           }
@@ -535,19 +540,23 @@ const AllRosters = () => {
 
         {/* Right-aligned buttons */}
         <Stack direction="row" gap={1}>
-          <Button variant="contained" size="medium" color="success" startIcon={<Add />} onClick={handleFileUploadOpen}>
-            Upload
-          </Button>
+          <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+            <Button variant="contained" size="medium" color="success" startIcon={<Add />} onClick={handleFileUploadOpen}>
+              Upload
+            </Button>
+          </WrapperButton>
 
-          <Button
-            variant="contained"
-            size="medium"
-            color="secondary"
-            startIcon={<DocumentUpload />}
-            onClick={() => navigate('/apps/roster/files')}
-          >
-            Files
-          </Button>
+          <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+            <Button
+              variant="contained"
+              size="medium"
+              color="secondary"
+              startIcon={<DocumentUpload />}
+              onClick={() => navigate('/apps/roster/files')}
+            >
+              Files
+            </Button>
+          </WrapperButton>
         </Stack>
       </Stack>
 
@@ -584,11 +593,7 @@ const AllRosters = () => {
         />
       )}
 
-      <FileUploadDialog
-        open={openFileUploadDialog}
-        handleOpen={handleFileUploadOpen}
-        handleClose={handleFileUploadClose}
-      />
+      <FileUploadDialog open={openFileUploadDialog} handleOpen={handleFileUploadOpen} handleClose={handleFileUploadClose} />
     </>
   );
 };

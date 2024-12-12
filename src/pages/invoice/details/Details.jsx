@@ -121,7 +121,7 @@ const InvoiceDetails = () => {
       <TableCell>{item.itemName}</TableCell>
       <TableCell>{item.rate}</TableCell>
       <TableCell>{item.quantity}</TableCell>
-      <TableCell>{item.itemTax}</TableCell>
+      <TableCell>{item.Tax_amount}</TableCell>
       <TableCell>{item.discount}</TableCell>
       <TableCell>{item.amount}</TableCell>
     </TableRow>
@@ -130,43 +130,20 @@ const InvoiceDetails = () => {
   const SummaryCard = ({ subTotal, discount, tax, grandTotal }) => (
     <Stack spacing={2}>
       <Stack direction="row" justifyContent="space-between">
-        <Typography >Total:</Typography>
-        <Typography  variant="h6" color={theme.palette.success.main}>{`₹ ${subTotal?.toFixed(2)}`}</Typography>
-      </Stack>
-      <Divider />
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>Penalties:</Typography>
-        <Typography  variant="h6" color={'error'}>{`₹ ${subTotal?.toFixed(2)}`}</Typography>
+        <Typography>Sub Total:</Typography>
+        <Typography>{`₹ ${subTotal?.toFixed(2)}`}</Typography>
       </Stack>
       <Stack direction="row" justifyContent="space-between">
         <Typography>Discount:</Typography>
-        <Typography  variant="h6" color={'error'}>{`₹ ${discount?.toFixed(2)}`}</Typography>
-      </Stack>
-      <Divider />
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>Sub Total:</Typography>
-        <Typography  variant="h6" color={theme.palette.success.main}>{`₹ ${tax?.toFixed(2)}`}</Typography>
+        <Typography variant="h6" color={theme.palette.success.main}>{`₹ ${discount?.toFixed(2)}`}</Typography>
       </Stack>
       <Stack direction="row" justifyContent="space-between">
-        <Typography>GST:</Typography>
+        <Typography>Tax:</Typography>
         <Typography>{`₹ ${tax?.toFixed(2)}`}</Typography>
       </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>MCD Charges:</Typography>
-        <Typography>{`₹ ${tax?.toFixed(2)}`}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>Toll Charges:</Typography>
-        <Typography>{`₹ ${tax?.toFixed(2)}`}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>Additional Charges:</Typography>
-        <Typography>{`₹ ${tax?.toFixed(2)}`}</Typography>
-      </Stack>
-      <Divider/>
       <Stack direction="row" justifyContent="space-between">
         <Typography variant="subtitle1">Grand Total:</Typography>
-        <Typography  variant="h6" color={theme.palette.success.main}>{`₹ ${grandTotalAmount?.toFixed(2) || grandTotal?.toFixed(2)}`}</Typography>
+        <Typography variant="subtitle1">{`₹ ${grandTotalAmount?.toFixed(2) || grandTotal?.toFixed(2)}`}</Typography>
       </Stack>
     </Stack>
   );

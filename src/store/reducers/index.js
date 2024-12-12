@@ -26,6 +26,7 @@ import { invoicesReducer } from 'store/slice/cabProvidor/invoiceSlice';
 import { accountSettingsReducer } from 'store/slice/cabProvidor/accountSettingSlice';
 import { tripReducer } from 'store/slice/cabProvidor/tripSlice';
 import { reportReducer } from 'store/slice/cabProvidor/reportSlice';
+import { subscriptionReducer } from 'store/slice/cabProvidor/subscriptionSlice';
 
 // ==============================|| COMBINE REDUCERS ||============================== //
 
@@ -53,7 +54,8 @@ const reducers = combineReducers({
   invoices: invoicesReducer,
   accountSettings: accountSettingsReducer,
   trip: tripReducer,
-  report: reportReducer
+  report: reportReducer,
+  subscription:subscriptionReducer
 });
 
 export default reducers;

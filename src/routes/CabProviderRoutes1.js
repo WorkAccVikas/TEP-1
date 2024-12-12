@@ -13,11 +13,10 @@ import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelist
 import TripView from 'pages/trips/TripView';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
 import ReportDriver from 'pages/reports/ReportDriver';
+// import Create from 'pages/invoice/create/Create3';
 import TripReports from 'pages/reports/Trips';
 import Create from 'pages/apps/invoice/Create';
-import EditInvoice from 'pages/apps/invoice/Edit';
-// import Create from 'pages/invoice/create/Create';
-// import Edit from 'pages/invoice/edit/Edit';
+import Home from 'pages/Home';
 
 // import Roster from 'pages/apps/roster';
 
@@ -44,7 +43,7 @@ const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTrips
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
-// const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
+const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
 
 //Trip
 const TripList = Loadable(lazy(() => import('pages/trips/TripList')));
@@ -83,6 +82,12 @@ const EditCompany = Loadable(lazy(() => import('pages/management/company/EditCom
 const CompanyReports = Loadable(lazy(() => import('pages/reports/Company')));
 const AdvanceReports = Loadable(lazy(() => import('pages/reports/Advance')));
 const CabReports = Loadable(lazy(() => import('pages/reports/Cab')));
+const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
+const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
+const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Advance/Vendor')));
+const CompanyWiseReportForDriver = Loadable(lazy(() => import('pages/reports/Company/Driver')));
+const CabReportsForDriver = Loadable(lazy(() => import('pages/reports/Cab/Driver')));
+const AdvanceReportsForDriver = Loadable(lazy(() => import('pages/reports/Advance/Driver')));
 
 const Loans = Loadable(lazy(() => import('pages/invoices/Loans')));
 const AdvanceType = Loadable(lazy(() => import('pages/invoices/advance/AdvanceType')));
@@ -123,6 +128,11 @@ const CabProvidorRoutes = {
         </AuthGuard>
       ),
       children: [
+        // Home
+        {
+          path: 'home',
+          element: <Home />
+        },
         // Dashboard
         {
           path: 'dashboard',
@@ -157,7 +167,36 @@ const CabProvidorRoutes = {
                 {
                   path: 'assign-trip',
                   element: <AssignTripList />
-                },
+                }
+
+                // {
+                //   path: 'map-roster',
+                //   element: <MapRosterFile />
+                // },
+                // {
+                //   path: 'test-view',
+                //   element: <ViewRosterTest />
+                // },
+                // {
+                //   path: 'test-view-1',
+                //   element: <ViewRosterTest1 /> // Render Company only for base path
+                // },
+                // {
+                //   path: 'assign-trips',
+                //   element: <AssignTrips />
+                // },
+                // {
+                //   path: 'test-map',
+                //   element: <MapRosterFileTest />
+                // },
+                // {
+                //   path: 'test-view',
+                //   element: <ViewRoster /> // Render Company only for base path
+                // },
+                // {
+                //   path: 'all-roster',
+                //   element: <AllRosters />
+                // }
               ]
             },
 
@@ -173,26 +212,22 @@ const CabProvidorRoutes = {
                   path: 'list',
                   element: <InvoiceList />
                 },
-                // {
-                //   path: 'test',
-                //   element: <Create />
-                // },
                 {
                   path: 'create',
                   element: <Create />
                 },
-                {
-                  path: 'edit',
-                  element: <EditInvoice />
-                },
+                // {
+                //   path: 'create',
+                //   element: <InvoiceCreate />
+                // },
                 {
                   path: 'details/:id',
                   element: <InvoiceDetails />
                 },
-                // {
-                //   path: 'edit/:id',
-                //   element: <InvoiceEdit />
-                // },
+                {
+                  path: 'edit/:id',
+                  element: <InvoiceEdit />
+                },
                 {
                   path: 'loans',
                   element: <Loans />
@@ -403,21 +438,49 @@ const CabProvidorRoutes = {
           path: 'reports',
           // element: <Reports />,
           children: [
+            // Cab Provider
             {
-              path: 'company-report',
+              path: 'cabProvider/company-report',
               element: <CompanyReports />
             },
             {
-              path: 'advance-report',
+              path: 'cabProvider/advance-report',
               element: <AdvanceReports />
             },
             {
-              path: 'cab-report',
+              path: 'cabProvider/cab-report',
               element: <CabReports />
             },
             {
-              path: 'trip-report',
+              path: 'cabProvider/trip-report',
               element: <TripReports />
+            },
+
+            // Vendor
+            {
+              path: 'vendor/company-report',
+              element: <CompanyWiseReportForVendor />
+            },
+            {
+              path: 'vendor/advance-report',
+              element: <AdvanceReportsForVendor />
+            },
+            {
+              path: 'vendor/cab-report',
+              element: <CabReportsForVendor />
+            },
+            // Driver
+            {
+              path: 'driver/company-report',
+              element: <CompanyWiseReportForDriver />
+            },
+            {
+              path: 'driver/advance-report',
+              element: <AdvanceReportsForDriver />
+            },
+            {
+              path: 'driver/cab-report',
+              element: <CabReportsForDriver />
             }
           ]
         },

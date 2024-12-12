@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { Grid, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'store';
-import { ApexPieChart } from '../components/ApexPieChart';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
+import { ApexPieChart } from 'pages/reports/components/ApexPieChart';
+import Badge from 'pages/reports/components/Badge';
+import Card from 'pages/reports/components/Card';
 
 const labels = [
   'Company Rate',
@@ -68,10 +68,8 @@ const Analytic = () => {
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
             acc.companyIncomingAmount + (item?.companyRate + (item?.companyGuardPrice || 0) - (item?.companyPenalty || 0)),
-          driverOutgoingAmount:
-            acc.driverOutgoingAmount + (item?.driverRate + (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
-          vendorOutgoingAmount:
-            acc.vendorOutgoingAmount + (item?.vendorRate + (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
+          driverOutgoingAmount: acc.driverOutgoingAmount + (item?.driverRate + (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
+          vendorOutgoingAmount: acc.vendorOutgoingAmount + (item?.vendorRate + (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
         }),
         {
           tripCount: 0,
@@ -113,7 +111,6 @@ const Analytic = () => {
       setData(chartValues);
     }
   }, [cabReportData]);
-
 
   return (
     <>

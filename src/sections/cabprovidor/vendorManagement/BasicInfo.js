@@ -101,7 +101,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
       contactNumber: basicInfo.contactNumber || '',
       alternateContactNumber: basicInfo.alternateContactNumber || '',
       vendorCompanyName: '',
-      officeChargeAmount: '',
+      officeChargeAmount: 0,
       // pinCode: basicInfo.pinCode || '',
       // city: basicInfo.city || '',
       // state: basicInfo.state || '',
@@ -135,7 +135,25 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
             data: {
               vendorId: response.data._id,
               vendorCompanyName: values.vendorCompanyName,
-              officeChargeAmount: values.officeChargeAmount
+              officeChargeAmount: values.officeChargeAmount,
+              contactPersonName: '',
+              PAN: '',
+              GSTIN: '',
+              workEmail: '',
+              workMobileNumber: '',
+              workLandLineNumber: '',
+              officePinCode: '',
+              officeCity: '',
+              officeState: '',
+              officeAddress: '',
+              bankName: '',
+              branchName: '',
+              IFSC_code: '',
+              accountNumber: '',
+              accountHolderName: '',
+              bankAddress: '',
+              ESI_Number: '',
+              PF_Number: ''
             }
           };
 
@@ -160,6 +178,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
           }
         }
       } catch (error) {
+        setErrorIndex(0);
         dispatch(
           openSnackbar({
             open: true,
@@ -189,7 +208,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         Basic Information
       </Typography>
-      <form onSubmit={formik.handleSubmit} id="validation-forms" autoComplete="off">
+      <form onSubmit={formik.handleSubmit} id="validation-forms" autoComplete="off" noValidate>
         <Grid container spacing={3}>
           {/* <Grid item xs={12}>
             <Grid container spacing={3}>
@@ -352,7 +371,13 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
                 helperText={formik.touched.officeChargeAmount && formik.errors.officeChargeAmount}
                 fullWidth
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">₹</InputAdornment>
+                  startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                  inputProps: {
+                    min: 0,
+                    className: 'hide-arrows', // LEARN : Hides arrows in some browsers,
+                    step: 5, // LEARN : Add step attribute for increment/decrement
+                    onFocus: (event) => event.target.select() // LEARN : Select content on focus
+                  }
                 }}
                 autoComplete="officeChargeAmount"
               />
@@ -508,7 +533,12 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
           <Grid item xs={12}>
             <Stack direction="row" justifyContent="flex-end">
               <AnimateButton>
-                <Button variant="contained" sx={{ my: 3, ml: 1 }} type="submit" onClick={() => setErrorIndex(0)}>
+                <Button
+                  variant="contained"
+                  sx={{ my: 3, ml: 1 }}
+                  type="submit"
+                  // onClick={() => setErrorIndex(0)}
+                >
                   Next
                 </Button>
               </AnimateButton>

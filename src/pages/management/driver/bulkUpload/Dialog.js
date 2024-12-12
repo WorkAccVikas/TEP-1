@@ -16,7 +16,7 @@ import {
 // project-imports
 import MainCard from 'components/MainCard';
 import { DocumentDownload, Warning2 } from 'iconsax-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 // import VendorSelection from './VendorSelection';
 import * as XLSX from 'xlsx';
@@ -25,6 +25,8 @@ import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { enqueueSnackbar, useSnackbar } from 'notistack';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -271,15 +273,17 @@ const BulkUploadDialog = ({ open, handleClose }) => {
 
 function ChildModal() {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => {
+  const userType = useSelector((state) => state.auth.userType);
+  // console.log('userType', userType);
+  const handleOpen = useCallback(() => {
     setOpen(true);
-  };
+  }, []);
   const handleClose = () => {
     setOpen(false);
   };
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     // Headers for "Driver Data" sheet
     const driverHeaders = ['ID', 'Name*', 'Email*', 'Phone*'];
     const driverData = []; // No data, just headers
@@ -313,10 +317,18 @@ function ChildModal() {
 
     // Export the Excel file
     XLSX.writeFile(workbook, 'BulkDriverUploadSheet.xlsx');
-  };
+  }, [selectedOptions]);
+
+  const handleClick = useCallback(() => {
+    if (userType === USERTYPE.iscabProvider) {
+      handleOpen();
+    } else {
+      handleDownload();
+    }
+  }, [handleOpen, handleDownload, userType]);
   return (
     <>
-      <Button onClick={handleOpen} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
+      <Button onClick={handleClick} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
         Download Template
       </Button>
       <Modal open={open} onClose={handleClose} aria-labelledby="child-modal-title" aria-describedby="child-modal-description">

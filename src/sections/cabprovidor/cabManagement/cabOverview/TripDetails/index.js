@@ -19,7 +19,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const TRIP_STATUS = {
     PENDING: 1,

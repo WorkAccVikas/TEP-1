@@ -25,13 +25,20 @@ import { FaRegUserCircle } from 'react-icons/fa';
 import { textAlign } from '@mui/system';
 import { addAccountSetting, mutateAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
 import { useFilePreview } from 'hooks/useFilePreview';
+import axiosServices from 'utils/axios';
 
-const MAX_LOGO_WIDTH = 100;
+// const MAX_LOGO_WIDTH = 100;
+// const MAX_LOGO_HEIGHT = 50;
+// const MAX_SMALL_LOGO_WIDTH = 50;
+// const MAX_SMALL_LOGO_HEIGHT = 25;
+// const MAX_FAV_ICON_WIDTH = 10;
+// const MAX_FAV_ICON_HEIGHT = 10;
+const MAX_LOGO_WIDTH = 170;
 const MAX_LOGO_HEIGHT = 50;
-const MAX_SMALL_LOGO_WIDTH = 50;
-const MAX_SMALL_LOGO_HEIGHT = 25;
-const MAX_FAV_ICON_WIDTH = 10;
-const MAX_FAV_ICON_HEIGHT = 10;
+const MAX_SMALL_LOGO_WIDTH = 40;
+const MAX_SMALL_LOGO_HEIGHT = 40;
+const MAX_FAV_ICON_WIDTH = 60;
+const MAX_FAV_ICON_HEIGHT = 60;
 
 // Function to calculate sizes in bytes
 function sizeInKB(value) {
@@ -158,6 +165,9 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
   const fileInputRef = useRef(null); // Create a ref for the file input
   const fileSmallInputRef = useRef(null);
   const faviconInputRef = useRef(null);
+  const userInfo = JSON.parse(localStorage.getItem('userInformation'));
+
+  const CabProviderId = userInfo.userId;
 
   const handleButtonClick = () => {
     // Trigger the hidden file input click
@@ -199,13 +209,13 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       try {
-        alert('Form submitted');
+        // alert('Form submitted');
         console.log(values);
 
         // TODO : API call FOR ADD/UPDATE (ONE API ONLY)
 
         const formData = new FormData();
-
+        formData.append('cabProviderId', CabProviderId);
         formData.append('name', values.name);
         formData.append('title', values.title);
         if (values.logo) formData.append('logo', values.logo);
@@ -220,28 +230,33 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
         //   status: 200
         // };
 
-        const response = await dispatch(mutateAccountSettings(formData)).unwrap();
+        const response = await axiosServices.post('/accountSetting/add', formData);
         console.log(`🚀 ~ onSubmit: ~ response:`, response);
+        console.log(`🚀 ~ onSubmit: ~ response:`, response.status);
 
-        if (response.status >= 200 && response.status < 300) {
-          dispatch(addAccountSetting(response.data));
-
-          resetForm();
-
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: `Account details have been successfully ${isFirstTime ? 'created' : 'updated'}`,
-              variant: 'alert',
-              alert: {
-                color: 'success'
-              },
-              close: true
-            })
-          );
-
-          // navigate('/dashboard', { replace: true });
+        if (response.status === 201) {
+          window.location.reload();
         }
+
+        // if (response.status >= 200 && response.status < 300) {
+        //   dispatch(addAccountSetting(response.data));
+
+        //   resetForm();
+
+        //   dispatch(
+        //     openSnackbar({
+        //       open: true,
+        //       message: `Account details have been successfully ${isFirstTime ? 'created' : 'updated'}`,
+        //       variant: 'alert',
+        //       alert: {
+        //         color: 'success'
+        //       },
+        //       close: true
+        //     })
+        //   );
+
+          // navigate('/home', { replace: true });
+        
       } catch (error) {
         console.log(error);
         dispatch(
@@ -277,11 +292,11 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
 
   useEffect(() => {
     if (!isFirstTime) {
-      if (initialValues.logo) setLogoPreview(initialValues.logo);
+      if (initialValues&&initialValues.logo) setLogoPreview(initialValues.logo);
 
-      if (initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+      if (initialValues&&initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
 
-      if (initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
+      if (initialValues&&initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
     }
   }, [initialValues, isFirstTime]);
 
@@ -448,7 +463,8 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       <input
                         ref={faviconInputRef}
                         type="file"
-                        accept=".ico,image/png,image/svg+xml"
+                        // accept=".ico,image/png,image/svg+xml"
+                        accept="image/*"
                         hidden
                         onChange={handleFaviconChange}
                       />

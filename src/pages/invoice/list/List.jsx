@@ -56,7 +56,7 @@ import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-re
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
 import FormDialog from 'components/alertDialog/FormDialog';
 import axiosServices from 'utils/axios';
-import { USERTYPE } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import CompanyFilter from 'pages/trips/filter/CompanyFilter';
 import VendorFilter from 'pages/trips/filter/VendorFilter';
 import DriverFilter from 'pages/trips/filter/DriverFilter';
@@ -66,6 +66,7 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import PaidModal from '../others/PaidModal';
+import WrapperButton from 'components/common/guards/WrapperButton';
 
 const avatarImage = require.context('assets/images/users', true);
 
@@ -251,7 +252,7 @@ function ReactTable({ columns, data }) {
             ))}
           </TableHead>
           <TableBody {...getTableBodyProps()}>
-            {filterData.map((row, i) => {
+            {filterData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((row, i) => {
               prepareRow(row);
               return (
                 <Fragment key={i}>
@@ -318,7 +319,7 @@ const List = () => {
     selectedCompany: {}
   });
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -564,47 +565,29 @@ const List = () => {
 
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.READ}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="View"
-              >
-                <IconButton
-                  color="success"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/apps/invoices/details/${row.original._id}`); // Use navigate for redirection
                   }}
+                  title="View"
                 >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                    }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/apps/invoices/edit', { state: { data: row.original } });
-                  }}
-                >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="success"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/apps/invoices/details/${row.original._id}`); // Use navigate for redirection
+                    }}
+                  >
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {userType === USERTYPE.iscabProvider && (
                 <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
@@ -904,9 +887,11 @@ const List = () => {
           />
         </Stack>
 
-        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
-          Create Invoice
-        </Button>
+        <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.CREATE}>
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
+            Create Invoice
+          </Button>
+        </WrapperButton>
       </Stack>
       <MainCard content={false}>
         <ScrollX>
