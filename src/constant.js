@@ -159,7 +159,10 @@ export const MODULE = {
 
   ROLE: 'Role',
   ZONE: 'Zone',
+<<<<<<< HEAD
   TRIP: 'Trip',
+=======
+>>>>>>> ea29b6523330957f881108190ce2a00083805be3
   ZONE_TYPE: 'ZoneType',
   STATE_TAX: 'stateTax',
   TAX_CHARGE: 'taxCharges',
@@ -176,6 +179,9 @@ export const MODULE = {
 
   USER_SETTING: 'userSettings',
   INVOICE_SETTING: 'invoiceSettings',
+<<<<<<< HEAD
   ROSTER_SETTING: 'rosterSettings',
+=======
+>>>>>>> ea29b6523330957f881108190ce2a00083805be3
   LOG: 'Logs'
 };

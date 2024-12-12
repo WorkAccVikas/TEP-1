@@ -443,6 +443,7 @@ export function filteredArrayOfObjectsByUserPermissions(options, userPermissions
         }, {});
     });
 }
+<<<<<<< HEAD
 
 /**
  * Filters out specified keys from an array of objects.
@@ -466,3 +467,5 @@ export function filterKeys(dataArray, ignoredKeys) {
     return Object.fromEntries(filteredEntries);
   });
 }
+=======
+>>>>>>> ea29b6523330957f881108190ce2a00083805be3

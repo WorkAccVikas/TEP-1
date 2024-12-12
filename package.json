@@ -1,6 +1,10 @@
 {
   "name": "trip-biller",
+<<<<<<< HEAD
   "version": "0.9",
+=======
+  "version": "0.7",
+>>>>>>> ea29b6523330957f881108190ce2a00083805be3
   "private": true,
   "dependencies": {
     "@emotion/cache": "^11.11.0",
