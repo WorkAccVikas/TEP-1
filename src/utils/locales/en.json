@@ -65,5 +65,6 @@
   "driver1": "Driver",
   "trip": "Trip",
   "vendor reports": "Vendor Reports",
-  "expense management": "Expense Management"
+  "expense management": "Expense Management",
+  "driver reports": "Driver Reports"
 }

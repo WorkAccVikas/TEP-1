@@ -12,7 +12,7 @@ const icons = {
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
 
 const report = {
-  id: 'group-application',
+  id: 'reports-application',
   title: <FormattedMessage id="reports" />,
   type: 'group',
   icon: icons.samplePage,
@@ -159,6 +159,44 @@ const report = {
           // type: 'collapse',
           type: 'item',
           url: '/reports/vendor/advance-report'
+          // icon: icons.samplePage
+        }
+      ]
+    },
+
+    // Report for driver
+    {
+      id: 'driver-reports',
+      title: <FormattedMessage id="driver reports" />,
+      type: 'collapse',
+      icon: icons.samplePage,
+      children: [
+        // Company
+        {
+          id: 'company3',
+          title: <FormattedMessage id="company1" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/driver/company-report'
+          // icon: icons.samplePage
+        },
+
+        {
+          id: 'cab-report3',
+          title: <FormattedMessage id="cab" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/driver/cab-report'
+          // icon: icons.samplePage
+        },
+
+        // Advance
+        {
+          id: 'advance3',
+          title: <FormattedMessage id="advance" />,
+          // type: 'collapse',
+          type: 'item',
+          url: '/reports/driver/advance-report'
           // icon: icons.samplePage
         }
       ]
