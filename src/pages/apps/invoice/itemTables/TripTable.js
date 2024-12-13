@@ -242,17 +242,18 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
       const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
       const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
 
-      const { totalTax1 } = itemData.reduce(
+      const { totalTax1,total } = itemData.reduce(
         (totals, item) => {
           const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
           const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
           const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
 
           return {
-            totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
+            totalTax1: totals.totalTax1 + (qty * price * tax) / 100 ,// Assuming tax is a percentage
+            total:totals.total+(qty * price )
           };
         },
-        { totalTax1: 0 }
+        { totalTax1: 0,total:0 }
       );
 
       const { totalDiscount1 } = itemData.reduce(
@@ -279,6 +280,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
       return {
         ...prev,
+        total:total,
         totalTax: finalTaxAmount,
         totalDiscount: finalDiscountAmount,
         subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
