@@ -7,9 +7,13 @@ import useAuth from 'hooks/useAuth';
 const LogoMain = () => {
   const { accountSetting } = useAuth();
 
-  const { logo = samplelogo, name = 'logo',favIcon="",title="" } = accountSetting || {};
+  const { logo = samplelogo, name = 'logo' } = accountSetting || {};
+  // console.log("logo",logo);
+  // console.log("accountSetting",accountSetting);
+  // console.log("samplelogo",samplelogo);
+  
 
-  return <img src={logo} alt={name} width="100" />;
+  return <img src={logo || samplelogo} alt={name} width="100" />;
 };
 
 LogoMain.propTypes = {

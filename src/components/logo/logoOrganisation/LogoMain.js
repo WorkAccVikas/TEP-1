@@ -5,7 +5,7 @@ import logo from 'assets/images/logo.png';
 
 const LogoMain = () => {
 
-  return <img src={logo} alt={name} width="100" />;
+  return <img src={logo} alt={"logo"} width="100" />;
 };
 
 LogoMain.propTypes = {
