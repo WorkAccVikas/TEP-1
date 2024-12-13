@@ -1,21 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'utils/axios'; 
+import axios from 'utils/axios';
 
 const initialState = {
-  settings: null,
+  subscriptionPlan: null,
+  metaData: {
+    totalCount: 0,
+    page: 1,
+    limit: 10,
+    lastPageNo: 1
+  },
   loading: false,
-  error: null,
-  userId : null
+  error: null
 };
 
-export const fetchSubscription = createAsyncThunk('subscription/fetchSubscription', async (_, { rejectWithValue }) => {
+export const fetchsubscriptionPlan = createAsyncThunk('subscription/fetchsubscriptionPlan', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get('/subscriptionPlan');
     console.log('response', response);
-    return response.data;
 
+    return response?.data;
   } catch (error) {
-    console.log('Error fetching account settings:', error);
+    return rejectWithValue(error.response ? error.response.data : error.message);
   }
 });
 
@@ -23,30 +28,24 @@ const subscriptionSlice = createSlice({
   name: 'subscription',
   initialState,
   reducers: {
-    addUserId: (value)=> {
-        state.userId = value
-    },
-    reset: () => initialState, // Reset state to initial state on logout
+    reset: () => initialState,
     resetError: (state) => {
       state.error = null;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSubscription.pending, (state) => {
+      .addCase(fetchsubscriptionPlan.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSubscription.fulfilled, (state, action) => {
-        console.log("action.payload",action.payload);
-
-        state.subscription = action.payload || null; // Handle empty result
-     
+      .addCase(fetchsubscriptionPlan.fulfilled, (state, action) => {
         state.loading = false;
+        state.subscriptionPlan = action.payload;
       })
-      .addCase(fetchSubscription.rejected, (state, action) => {
+      .addCase(fetchsubscriptionPlan.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
   }
 });
