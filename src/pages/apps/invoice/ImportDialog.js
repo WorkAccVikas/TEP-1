@@ -1,5 +1,5 @@
-import { Button, Divider, CardContent, Modal, Stack, Typography, Box } from '@mui/material';
-import { DateCalendar, LocalizationProvider, MonthCalendar, YearCalendar } from '@mui/x-date-pickers';
+import { Button, Divider, CardContent, Modal, Stack, Typography, Box, TextField } from '@mui/material';
+import { DateCalendar, DesktopDatePicker, LocalizationProvider, MobileDatePicker, MonthCalendar, YearCalendar } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 // project-imports
 import MainCard from 'components/MainCard';
@@ -7,37 +7,20 @@ import { useEffect, useState } from 'react';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axiosServices from 'utils/axios';
+import { addMonths, format } from 'date-fns';
+import { enGB } from 'date-fns/locale';
+import { formatDateUsingMoment } from 'utils/helper';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
 
 const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
-  const minDate = new Date('2023-01-01T00:00:00.000');
-  const maxDate = new Date('2034-01-01T00:00:00.000');
+  const [dateRange, setDateRange] = useState({
+    startDate: addMonths(new Date(), -1), // Default to today's date
+    endDate: new Date() // Default to 1 month after today's date
+  });
+  const userType = useSelector((state) => state.auth.userType);
 
-  const [date, setDate] = useState(new Date());
-  const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
-
-  const formatDateToStartAndEndDates = (inputDate) => {
-    // Convert the input to a Date object
-    const date = new Date(inputDate);
-
-    if (isNaN(date)) {
-      console.log({ date });
-      return { startDate: '2024-01-01', endDate: '2025-12-01' };
-    }
-
-    // Extract year and month
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // getMonth is zero-based
-
-    // Format startDate and endDate
-    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
-    const endDate = `${year}-${month.toString().padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
-
-    return { startDate, endDate };
-  };
-  useEffect(() => {
-    const { startDate, endDate } = formatDateToStartAndEndDates(date);
-    setDateRange({ startDate: startDate, endDate: endDate });
-  }, [date]);
+  console.log(formatDateUsingMoment(dateRange.endDate));
 
   const fetchTripData = async () => {
     try {
@@ -57,13 +40,28 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         return;
       }
 
-      const response = await axiosServices.get(
-        `/assignTrip/all/trips/cabProvider?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&companyID=${recieversDetails._id}`
-      );
+      // const response = await axiosServices.get(
+      //   `/assignTrip/all/trips/cabProvider?startDate=${formatDateUsingMoment(dateRange.startDate)}&endDate=${formatDateUsingMoment(
+      //     dateRange.endDate
+      //   )}&companyID=${recieversDetails._id}`
+      // );
 
+      const baseURL = `/assignTrip/all/trips/cabProvider`;
+      const queryParams = new URLSearchParams({
+        startDate: formatDateUsingMoment(dateRange.startDate),
+        endDate: formatDateUsingMoment(dateRange.endDate)
+      });
+
+      // Conditionally add `companyID` only if `userType` is 1 or 7
+      if (userType === USERTYPE.iscabProvider || userType === USERTYPE.iscabProviderUser) {
+        queryParams.append('companyID', recieversDetails._id);
+      }
+
+      const response = await axiosServices.get(`${baseURL}?${queryParams.toString()}`);
       // Log response for debugging
 
       // Update state with fetched data
+      console.log('response.data.data = ', response.data.data);
       setTripData(response.data.data);
       dispatch(
         openSnackbar({
@@ -91,6 +89,13 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
     }
   };
 
+  const handleStartChange = (newValue) => {
+    setDateRange((prev) => ({ ...prev, startDate: newValue }));
+  };
+  const handleEndChange = (newValue) => {
+    setDateRange((prev) => ({ ...prev, endDate: newValue }));
+  };
+
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="parent-modal-title" aria-describedby="parent-modal-description">
       <MainCard
@@ -107,10 +112,7 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         }}
       >
         <CardContent>
-          <Typography id="modal-modal-description">
-            Generate Monthly Trip Invoice, Select Month for which Invoice Needs to be Generated.
-          </Typography>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Stack spacing={3} direction={'row'} justifyContent="center" alignItems="center">
               <Box sx={{ maxWidth: 320 }}>
                 <YearCalendar
@@ -132,6 +134,22 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
                   sx={{ m: 'auto' }}
                 />
               </Box>
+            </Stack>
+          </LocalizationProvider> */}
+          <LocalizationProvider dateAdapter={AdapterDateFns} locale={enGB}>
+            <Stack spacing={3} direction={'row'}>
+              <DesktopDatePicker
+                format="dd/MM/yyyy"
+                value={dateRange.startDate}
+                onChange={handleStartChange}
+                slotProps={{ textField: { placeholder: 'Select Start Date', helperText: 'Select Start Date' } }}
+              />
+              <DesktopDatePicker
+                format="dd/MM/yyyy"
+                value={dateRange.endDate}
+                onChange={handleEndChange}
+                slotProps={{ textField: { placeholder: 'Select End Date', helperText: 'Select End Date' } }}
+              />
             </Stack>
           </LocalizationProvider>
         </CardContent>
