@@ -17,6 +17,7 @@ import ReportDriver from 'pages/reports/ReportDriver';
 import TripReports from 'pages/reports/Trips';
 import Create from 'pages/apps/invoice/Create';
 import Home from 'pages/Home';
+import Notifications from 'components/notification/Notifications';
 import Details from 'pages/apps/invoice/Details';
 
 // import Roster from 'pages/apps/roster';
@@ -114,6 +115,9 @@ const UserDashboard = Loadable(lazy(() => import('pages/dashboard/userDashboard/
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
 const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
 const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
+
+// Expense
+const Transaction = Loadable(lazy(() => import('pages/expense/Transaction')));
 
 const Temp1 = Loadable(lazy(() => import('temp1')));
 // ==============================|| MAIN ROUTES ||============================== //
@@ -243,6 +247,23 @@ const CabProvidorRoutes = {
               ]
             }
           ]
+        },
+
+         // Expenses
+         {
+          path: 'expense',
+          children: [
+            {
+              path: 'transaction',
+              element: <Transaction />
+            },
+          ]
+        },
+
+        //Notification
+        {
+          path: 'notification',
+          element: <Notifications />
         },
 
         // Management
