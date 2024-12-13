@@ -20,6 +20,8 @@ import { Add } from 'iconsax-react';
 import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
 
 // Helper function to extract the correct grouping key
 const getGroupKey = (item, key) => {
@@ -41,7 +43,7 @@ const getGroupKey = (item, key) => {
   return item[key];
 };
 
-const groupDataWithSuffix = (data, groupByKey) => {
+const groupDataWithSuffix = (data, groupByKey, userType) => {
   // Group the data
   const grouped = _.groupBy(data, (item) => {
     const primaryKey = getGroupKey(item, groupByKey);
@@ -59,11 +61,17 @@ const groupDataWithSuffix = (data, groupByKey) => {
     suffixCounts[primaryKey] = (suffixCounts[primaryKey] || 0) + 1;
 
     const ids = items.map((item) => item._id);
+    let priceRate = 0;
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      priceRate = items[0].companyRate;
+    } else {
+      priceRate = items[0].vendorRate;
+    }
     // Add the formatted object to the result
     result.push({
       id: UIDV4(),
       name: `${primaryKey}`,
-      price: secondaryKey || items[0].companyRate || 0,
+      price: secondaryKey || priceRate || 0,
       qty: items.length,
       ids: ids,
       description: `${items.length} items @  ${secondaryKey || items[0].companyRate || 0}`,
@@ -75,9 +83,16 @@ const groupDataWithSuffix = (data, groupByKey) => {
   return result;
 };
 
-const groupGuardRates = (tripData) => {
+const groupGuardRates = (tripData, userType) => {
   const groupedRates = tripData.reduce((acc, item) => {
-    const guardPrice = item.companyGuardPrice;
+    // const guardPrice = item.companyGuardPrice;
+    let guardPrice = 0;
+
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      guardPrice = item.companyGuardPrice;
+    } else {
+      guardPrice = item.vendorGuardPrice;
+    }
 
     // Skip items where the guard price is 0
     if (guardPrice === 0) return acc;
@@ -104,9 +119,15 @@ const groupGuardRates = (tripData) => {
   return Object.values(groupedRates);
 };
 
-const groupPenaltyRates = (tripData) => {
+const groupPenaltyRates = (tripData, userType) => {
   const groupedRates = tripData.reduce((acc, item) => {
-    const companyPenalty = item.companyPenalty;
+    // const companyPenalty = item.companyPenalty;
+    let companyPenalty = 0;
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      companyPenalty = item.companyPenalty;
+    } else {
+      companyPenalty = item.vendorPenalty;
+    }
 
     // Skip items where the guard price is 0
     if (companyPenalty === 0) return acc;
@@ -134,12 +155,14 @@ const groupPenaltyRates = (tripData) => {
 };
 
 const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountSummary, setAmountSummary, invoiceSetting }) => {
+  console.log('itemData', tripData);
   const theme = useTheme();
 
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
   const [inlineDiscountDeduction, setInlineDiscountDeduction] = useState(false);
   const [discountDeduction, setDiscountDeduction] = useState(false);
   const [discountByTax, setDiscountByTax] = useState(true);
+  const userType = useSelector((state) => state.auth.userType);
 
   const handleItemChange = (id, fieldName, value) => {
     setItemData((prevItemData) => prevItemData.map((item) => (item.id === id ? { ...item, [fieldName]: value } : item)));
@@ -191,9 +214,9 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
   useEffect(() => {
     if (tripData && tripData.length > 0) {
-      const mappedData = groupDataWithSuffix(tripData, groupByOption);
-      const guardItems = groupGuardRates(tripData);
-      const penaltyItems = groupPenaltyRates(tripData);
+      const mappedData = groupDataWithSuffix(tripData, groupByOption, userType);
+      const guardItems = groupGuardRates(tripData, userType);
+      const penaltyItems = groupPenaltyRates(tripData, userType);
 
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
@@ -235,25 +258,25 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
         grandTotal: total - prev.totalDiscount + prev.totalTax + mcdCharges + tollCharges + additonalRate
       }));
     }
-  }, [tripData, groupByOption]);
+  }, [tripData, groupByOption, userType]);
 
   useEffect(() => {
     setAmountSummary((prev) => {
       const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
       const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
 
-      const { totalTax1,total } = itemData.reduce(
+      const { totalTax1, total } = itemData.reduce(
         (totals, item) => {
           const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
           const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
           const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
 
           return {
-            totalTax1: totals.totalTax1 + (qty * price * tax) / 100 ,// Assuming tax is a percentage
-            total:totals.total+(qty * price )
+            totalTax1: totals.totalTax1 + (qty * price * tax) / 100, // Assuming tax is a percentage
+            total: totals.total + qty * price
           };
         },
-        { totalTax1: 0,total:0 }
+        { totalTax1: 0, total: 0 }
       );
 
       const { totalDiscount1 } = itemData.reduce(
@@ -264,9 +287,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
           console.log(qty * price - discount);
           return {
             // totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
-            totalDiscount1: discountByTax
-              ? totals.totalDiscount1 + (qty * price * discount) / 100
-              : totals.totalDiscount1 +discount  // Assuming tax is a percentage
+            totalDiscount1: discountByTax ? totals.totalDiscount1 + (qty * price * discount) / 100 : totals.totalDiscount1 + discount // Assuming tax is a percentage
           };
         },
         { totalDiscount1: 0 }
@@ -280,7 +301,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
       return {
         ...prev,
-        total:total,
+        total: total,
         totalTax: finalTaxAmount,
         totalDiscount: finalDiscountAmount,
         subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
