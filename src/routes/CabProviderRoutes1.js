@@ -17,6 +17,7 @@ import ReportDriver from 'pages/reports/ReportDriver';
 import TripReports from 'pages/reports/Trips';
 import Create from 'pages/apps/invoice/Create';
 import Home from 'pages/Home';
+import Details from 'pages/apps/invoice/Details';
 
 // import Roster from 'pages/apps/roster';
 
@@ -168,35 +169,6 @@ const CabProvidorRoutes = {
                   path: 'assign-trip',
                   element: <AssignTripList />
                 }
-
-                // {
-                //   path: 'map-roster',
-                //   element: <MapRosterFile />
-                // },
-                // {
-                //   path: 'test-view',
-                //   element: <ViewRosterTest />
-                // },
-                // {
-                //   path: 'test-view-1',
-                //   element: <ViewRosterTest1 /> // Render Company only for base path
-                // },
-                // {
-                //   path: 'assign-trips',
-                //   element: <AssignTrips />
-                // },
-                // {
-                //   path: 'test-map',
-                //   element: <MapRosterFileTest />
-                // },
-                // {
-                //   path: 'test-view',
-                //   element: <ViewRoster /> // Render Company only for base path
-                // },
-                // {
-                //   path: 'all-roster',
-                //   element: <AllRosters />
-                // }
               ]
             },
 
@@ -216,13 +188,19 @@ const CabProvidorRoutes = {
                   path: 'create',
                   element: <Create />
                 },
+                {
+                  path: 'details',
+                  element: <Details />
+                },
                 // {
                 //   path: 'create',
                 //   element: <InvoiceCreate />
                 // },
                 {
                   path: 'details/:id',
-                  element: <InvoiceDetails />
+                  element: <Details />
+                  // element: <InvoiceDetails />
+
                 },
                 {
                   path: 'edit/:id',
