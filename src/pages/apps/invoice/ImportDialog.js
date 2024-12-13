@@ -10,12 +10,16 @@ import axiosServices from 'utils/axios';
 import { addMonths, format } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import { formatDateUsingMoment } from 'utils/helper';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
 
 const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
   const [dateRange, setDateRange] = useState({
     startDate: addMonths(new Date(), -1), // Default to today's date
     endDate: new Date() // Default to 1 month after today's date
   });
+  const userType = useSelector((state) => state.auth.userType);
+
   console.log(formatDateUsingMoment(dateRange.endDate));
 
   const fetchTripData = async () => {
@@ -36,15 +40,28 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         return;
       }
 
-      const response = await axiosServices.get(
-        `/assignTrip/all/trips/cabProvider?startDate=${formatDateUsingMoment(dateRange.startDate)}&endDate=${formatDateUsingMoment(
-          dateRange.endDate
-        )}&companyID=${recieversDetails._id}`
-      );
+      // const response = await axiosServices.get(
+      //   `/assignTrip/all/trips/cabProvider?startDate=${formatDateUsingMoment(dateRange.startDate)}&endDate=${formatDateUsingMoment(
+      //     dateRange.endDate
+      //   )}&companyID=${recieversDetails._id}`
+      // );
 
+      const baseURL = `/assignTrip/all/trips/cabProvider`;
+      const queryParams = new URLSearchParams({
+        startDate: formatDateUsingMoment(dateRange.startDate),
+        endDate: formatDateUsingMoment(dateRange.endDate)
+      });
+
+      // Conditionally add `companyID` only if `userType` is 1 or 7
+      if (userType === USERTYPE.iscabProvider || userType === USERTYPE.iscabProviderUser) {
+        queryParams.append('companyID', recieversDetails._id);
+      }
+
+      const response = await axiosServices.get(`${baseURL}?${queryParams.toString()}`);
       // Log response for debugging
 
       // Update state with fetched data
+      console.log('response.data.data = ', response.data.data);
       setTripData(response.data.data);
       dispatch(
         openSnackbar({

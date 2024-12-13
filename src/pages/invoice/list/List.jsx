@@ -72,7 +72,9 @@ const avatarImage = require.context('assets/images/users', true);
 
 const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendor]: '/invoice/all/vendor'
+  [USERTYPE.isVendor]: '/invoice/all/vendor',
+  [USERTYPE.iscabProviderUser]: '/invoice/by/cabProviderId',
+  [USERTYPE.isVendorUser]: '/invoice/all/vendor',
 };
 
 const INVOICE_STATUS = {
@@ -329,8 +331,8 @@ const List = () => {
             // page: page,
             // limit: limit,
             invoiceStartDate: formatDateUsingMoment(startDate),
-            invoiceEndDate: formatDateUsingMoment(endDate),
-            companyId: filterOptions?.selectedCompany?._id
+            invoiceEndDate: formatDateUsingMoment(endDate)
+            // companyId: filterOptions?.selectedCompany?._id
           }
         });
         console.log('response', response);

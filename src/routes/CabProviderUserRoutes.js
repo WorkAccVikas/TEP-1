@@ -13,7 +13,7 @@ import VendorRatelisting from 'pages/management/vendor/vendorRate/VendorRatelist
 import TripView from 'pages/trips/TripView';
 import ExpandingDetails from 'sections/cabprovidor/testAdvance/ExpandingDetails';
 import ReportDriver from 'pages/reports/ReportDriver';
-import Create from 'pages/invoice/create/Create3';
+import Create from 'pages/apps/invoice/Create';
 import TripReports from 'pages/reports/Trips';
 import { element } from 'prop-types';
 import { ProtectedRoute1 } from 'components/common/guards/ProtectedRoute1';
@@ -42,7 +42,7 @@ const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTrips
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
-const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
+const InvoiceCreate = Loadable(lazy(() => import('pages/apps/invoice/Create')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
 const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
 
@@ -270,7 +270,7 @@ const CabProvidorRoutes = {
                         [MODULE.INVOICE]: [PERMISSIONS.CREATE]
                       }}
                     >
-                      <Create />
+                      <InvoiceCreate />
                     </ProtectedRoute1>
                   )
                 },
