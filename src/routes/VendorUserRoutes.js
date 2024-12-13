@@ -35,7 +35,7 @@ const Dashboard = Loadable(lazy(() => import('pages')));
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
-const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
+const InvoiceCreate = Loadable(lazy(() => import('pages/apps/invoice/Create')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
 const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3')));
 

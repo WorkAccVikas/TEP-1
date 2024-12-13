@@ -26,6 +26,7 @@ const AuthLogin = () => {
   const scriptedRef = useScriptRef();
 
   const [showPassword, setShowPassword] = useState(false);
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -53,6 +54,8 @@ const AuthLogin = () => {
             if (scriptedRef.current) {
               setStatus({ success: true });
               setSubmitting(false);
+
+              // alert('Login done');
             }
           } catch (err) {
             if (err.response.status === 400) {

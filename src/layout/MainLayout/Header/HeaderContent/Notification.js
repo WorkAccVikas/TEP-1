@@ -28,6 +28,7 @@ import { ThemeMode } from 'config';
 // assets
 import { Gift, MessageText1, Notification, Setting2 } from 'iconsax-react';
 import Avatar from 'components/@extended/Avatar';
+import { useNavigate } from 'react-router';
 
 const actionSX = {
   mt: '6px',
@@ -48,6 +49,13 @@ const NotificationPage = () => {
   const anchorRef = useRef(null);
   const [read] = useState(2);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    setOpen(false); // Close the NotificationPage
+    navigate('/notification');
+  };
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -233,7 +241,7 @@ const NotificationPage = () => {
                     </ListItemButton>
                   </List>
                   <Stack direction="row" justifyContent="center">
-                    <Link href="#" variant="h6" color="primary">
+                    <Link variant="h6" color="primary" onClick={handleClick}>
                       View all
                     </Link>
                   </Stack>
