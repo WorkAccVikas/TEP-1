@@ -16,6 +16,8 @@ import axios1 from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { MODULE, PERMISSIONS } from 'constant';
 import CustomCircularLoader from 'components/CustomCircularLoader';
+import { dispatch as reducerDispatch } from 'store';
+import { logoutActivity } from 'store/slice/cabProvidor/accountSettingSlice';
 
 const x = {
   [MODULE.ROSTER]: [PERMISSIONS.CREATE],
@@ -94,11 +96,11 @@ export const JWTProvider = ({ children }) => {
           // if
           const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
             headers: {
-              'Authorization': `${serviceToken}` // Authorization header with token
+              Authorization: `${serviceToken}` // Authorization header with token
             }
           });
-          console.log("accountSettingResponse",accountSettingResponse);
-          
+          console.log('accountSettingResponse', accountSettingResponse);
+
           // console.log("accountSettingResponse",accountSettingResponse);
           const accountSetting = accountSettingResponse?.data?.data;
           console.log('accountSetting', accountSetting);
@@ -151,7 +153,7 @@ export const JWTProvider = ({ children }) => {
 
     const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
       headers: {
-        'Authorization': `${userData.token}` // Authorization header with token
+        Authorization: `${userData.token}` // Authorization header with token
       }
     });
     // c
@@ -200,6 +202,7 @@ export const JWTProvider = ({ children }) => {
   const logout = () => {
     setSession(null);
     dispatch({ type: LOGOUT });
+    reducerDispatch(logoutActivity());
   };
 
   const OTPSend = async (email) => {
