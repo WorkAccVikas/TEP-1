@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useMemo, useEffect, Fragment, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { ThemeMode } from 'config';
 
 // material-ui
 import {
@@ -19,16 +18,6 @@ import {
   TableHead,
   TableRow,
   useMediaQuery,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Fade,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Dialog,
-  Button
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -36,64 +25,43 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 
 // project-imports
-import Loader from 'components/Loader';
 import ScrollX from 'components/ScrollX';
 import MainCard from 'components/MainCard';
-import Avatar from 'components/@extended/Avatar';
-import IconButton from 'components/@extended/IconButton';
 import InvoiceCard from 'components/cards/invoice/InvoiceCard';
-import InvoiceChart from 'components/cards/invoice/InvoiceChart';
-import { CSVExport, HeaderSort, IndeterminateCheckbox, TablePagination, TableRowSelection } from 'components/third-party/ReactTable';
-import AlertColumnDelete from 'sections/apps/kanban/Board/AlertColumnDelete';
+import { HeaderSort, IndeterminateCheckbox, TablePagination } from 'components/third-party/ReactTable';
 
-import { dispatch, useSelector } from 'store';
-import { openSnackbar } from 'store/reducers/snackbar';
-import { alertPopupToggle, getInvoiceDelete, getInvoiceList } from 'store/reducers/invoice';
-import { renderFilterTypes, GlobalFilter, DateColumnFilter } from 'utils/react-table';
+import { useSelector } from 'store';
+import { renderFilterTypes, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-react';
-import { formatDateUsingMoment, formattedDate } from 'utils/helper';
-import FormDialog from 'components/alertDialog/FormDialog';
+import { formatDateUsingMoment } from 'utils/helper';
 import axiosServices from 'utils/axios';
-import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
+import { USERTYPE } from 'constant';
 import CompanyFilter from 'pages/trips/filter/CompanyFilter';
-import VendorFilter from 'pages/trips/filter/VendorFilter';
-import DriverFilter from 'pages/trips/filter/DriverFilter';
-import VehicleFilter from 'pages/trips/filter/VehicleFilter';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
-import PaidModal from '../others/PaidModal';
-import WrapperButton from 'components/common/guards/WrapperButton';
-
-const avatarImage = require.context('assets/images/users', true);
+import VendorFilter from 'pages/trips/filter/VendorFilter';
+import DriverFilter from 'pages/trips/filter/DriverFilter';
 
 const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendor]: '/invoice/all/vendor',
-  [USERTYPE.iscabProviderUser]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendorUser]: '/invoice/all/vendor'
+  [USERTYPE.isVendor]: '/invoice/all/vendor'
 };
 
 const INVOICE_STATUS = {
   UNPAID: 0,
   PAID: 1,
-  CANCELLED: 2,
-  PENDING: 3
+  CANCELLED: 2
 };
 
 const getTabName = (status) => {
   switch (status) {
     case INVOICE_STATUS.PAID:
-      return 'Paid';
+      return 'Income';
     case INVOICE_STATUS.UNPAID:
-      return 'Unpaid';
-    case INVOICE_STATUS.CANCELLED:
-      return 'Cancelled';
-    case INVOICE_STATUS.PENDING:
-      return 'PENDING';
+      return 'Expense';
     default:
       return 'All';
   }
@@ -152,22 +120,30 @@ function ReactTable({ columns, data }) {
   // Map status codes to labels and colors
 
   // Create groups and counts
-  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED, INVOICE_STATUS.PENDING];
+  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID];
 
   const countGroup = data.map((item) => item.status);
+  console.log('rows', rows);
 
   const counts = {
-    Paid: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
-    Unpaid: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length,
-    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length,
-    Pending: countGroup.filter((status) => status === INVOICE_STATUS.PENDING).length
+    Income: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
+    Expense: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length
+    // Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length
   };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
   useEffect(() => {
+    console.log('x = ', activeTab);
+
     setFilter('status', activeTab === 'All' ? '' : activeTab);
   }, [activeTab, setFilter]);
+
+  // useEffect(() => {
+  //   console.log('x = ', activeTab);
+  //   setFilter('status', activeTab === 'All' ? '' : activeTab === INVOICE_STATUS.UNPAID ? 1 : activeTab === INVOICE_STATUS.PAID ? 2 : 3);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [activeTab]);
 
   const filterData = rows.filter((row) => {
     if (activeTab === 'All') {
@@ -176,6 +152,8 @@ function ReactTable({ columns, data }) {
       return row.original.status === activeTab;
     }
   });
+
+  console.log('filterData', filterData);
 
   return (
     <>
@@ -196,8 +174,6 @@ function ReactTable({ columns, data }) {
                         ? counts.Paid
                         : status === INVOICE_STATUS.UNPAID
                         ? counts.Unpaid
-                        : status === INVOICE_STATUS.PENDING
-                        ? counts.Pending
                         : counts.Cancelled
                     }
                     color={
@@ -207,8 +183,6 @@ function ReactTable({ columns, data }) {
                         ? 'success'
                         : status === INVOICE_STATUS.UNPAID
                         ? 'warning'
-                        : status === INVOICE_STATUS.PENDING
-                        ? 'info'
                         : 'error'
                     }
                     variant="light"
@@ -219,17 +193,6 @@ function ReactTable({ columns, data }) {
               />
             ))}
           </Tabs>
-          {/* <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-            <Button
-              variant="contained"
-              size="small"
-              color="secondary"
-              startIcon={<Add />}
-              onClick={() => navigate('/apps/invoices/create')}
-            >
-              Create Invoice
-            </Button>
-          </Stack> */}
         </Stack>
       </Box>
 
@@ -290,14 +253,12 @@ ReactTable.propTypes = {
   data: PropTypes.array
 };
 
-// ==============================|| INVOICE - LIST ||============================== //
+// ==============================||Transaction - LIST ||============================== //
 
-const List = () => {
-  const navigate = useNavigate();
-
+const Transaction = () => {
   const [loading, setLoading] = useState(true);
-  const { alertPopup } = useSelector((state) => state.invoice);
   const userType = useSelector((state) => state.auth.userType);
+  console.log(`🚀 ~ List ~ userType:`, userType);
 
   const [data, setData] = useState([]);
   const [metadata, setMetadata] = useState([]);
@@ -306,6 +267,8 @@ const List = () => {
   const handleRefetch = useCallback(() => {
     setRefetch((prev) => !prev);
   }, []);
+
+  console.log({ metadata });
 
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {}
@@ -321,10 +284,11 @@ const List = () => {
             // page: page,
             // limit: limit,
             invoiceStartDate: formatDateUsingMoment(startDate),
-            invoiceEndDate: formatDateUsingMoment(endDate)
-            // companyId: filterOptions?.selectedCompany?._id
+            invoiceEndDate: formatDateUsingMoment(endDate),
+            companyId: filterOptions?.selectedCompany?._id
           }
         });
+        console.log('response', response);
 
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
@@ -354,59 +318,69 @@ const List = () => {
         accessor: '',
         disableFilters: true,
         Cell: ({ row }) => {
-          const serialNo = row.index + 1; // The serial number will be the row index + 1
-          return (
-            <>
-              <Typography>{serialNo}</Typography>
-            </>
-          );
+          const serialNo = row.index + 1;
+          return <Typography>{serialNo}</Typography>;
         }
       },
       {
-        Header: 'Invoice Id',
-        accessor: 'invoiceNumber',
+        Header: 'Transaction ID',
+        accessor: 'transactionsId',
         disableFilters: true
       },
       {
-        Header: 'Billed To',
-        accessor: 'billedTo',
-        disableFilters: true,
-        Cell: ({ row }) => {
-          const { values } = row;
-
-          return (
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
-              <Stack spacing={0}>
-                <Typography variant="subtitle1">{values.billedTo.name}</Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {values.billedTo.company_email}
-                </Typography>
-              </Stack>
-            </Stack>
-          );
-        }
+        Header: 'Transaction Type',
+        accessor: 'transactionsType',
+        Cell: ({ value }) => <Chip label={value} color={value === 'INCOME' ? 'success' : 'error'} size="small" variant="light" />
       },
       {
-        Header: 'Invoice Date',
-        accessor: 'invoiceDate',
-        Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
-        }
+        Header: 'Received Amount',
+        accessor: 'receivedAmount',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
       },
       {
-        Header: 'Due Date',
-        accessor: 'dueDate',
-        Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
-        }
+        Header: 'TDS Rate',
+        accessor: 'TDSRate',
+        Cell: ({ value }) => <Typography>{value}%</Typography>
       },
       {
-        Header: 'Amount',
-        accessor: 'grandTotal',
-        Cell: ({ value }) => {
-          return <Typography>₹ {value}</Typography>;
-        }
+        Header: 'TDS Amount',
+        accessor: 'TDSAmount',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
+      },
+      {
+        Header: 'Total GST',
+        accessor: 'totalGST',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
+      },
+      {
+        Header: 'IGST',
+        accessor: 'IGST',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
+      },
+      {
+        Header: 'CGST',
+        accessor: 'CGST',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
+      },
+      {
+        Header: 'Payment To',
+        accessor: 'paymentTo',
+        Cell: ({ value }) => <Typography>{value}</Typography>
+      },
+      {
+        Header: 'Payment By',
+        accessor: 'paymentBy',
+        Cell: ({ value }) => <Typography>{value}</Typography>
+      },
+      {
+        Header: 'Invoice',
+        accessor: 'invoice',
+        Cell: ({ value }) => <Typography>{value}</Typography>
+      },
+      {
+        Header: 'Advance',
+        accessor: 'advance',
+        Cell: ({ value }) => <Typography>₹ {value}</Typography>
       },
       {
         Header: 'Status',
@@ -418,237 +392,12 @@ const List = () => {
           } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
           } else if (value === 0) {
-            return <Chip color="warning" label="Unpaid" size="small" variant="light" />;
-          } else if (value === 3) {
-            return <Chip color="info" label="Pending" size="small" variant="light" />;
+            return <Chip color="info" label="Unpaid" size="small" variant="light" />;
           }
-        }
-      },
-      {
-        Header: 'Actions',
-        disableSortBy: true,
-        Cell: ({ row }) => {
-          const [anchorEl, setAnchorEl] = useState(null);
-          const [dialogOpen, setDialogOpen] = useState(false);
-          const [formDialogOpen, setFormDialogOpen] = useState(false);
-          const [newStatus, setNewStatus] = useState(null);
-          const theme = useTheme();
-          const mode = theme.palette.mode;
-          const [paidModalOpen, setPaidModalOpen] = useState(false);
-          const [paidAmount, setPaidAmount] = useState(0);
-
-          const handleMenuClick = (event) => {
-            setAnchorEl(event.currentTarget);
-          };
-
-          const handleMenuClose = () => {
-            setAnchorEl(null);
-          };
-
-          const handleStatusChange = (status) => {
-            setNewStatus(status);
-            if (status === 2) {
-              setFormDialogOpen(true);
-            } else {
-              setDialogOpen(true); // Open confirmation dialog for other statuses
-            }
-          };
-
-          const handleDialogClose = () => {
-            setDialogOpen(false);
-          };
-
-          const handleFormDialogClose = () => {
-            setFormDialogOpen(false);
-          };
-
-          const handleTextChange = (event) => {
-            setRemarks(event.target.value);
-          };
-
-          const handleOpenPaidModal = useCallback((val) => {
-            setPaidAmount(val);
-            setPaidModalOpen(true);
-          }, []);
-
-          const handleClosePaidModal = useCallback(() => {
-            setPaidModalOpen(false);
-            setPaidAmount(0);
-          }, []);
-
-          const confirmStatusChange = async (type, data) => {
-            try {
-              const response = await axiosServices.put(`/invoice/update/paymentStatus`, {
-                data: {
-                  invoiceId: row.original._id,
-
-                  status: newStatus,
-                  remarks: newStatus === 2 ? remarks : undefined, // Include remarks if cancelled
-                  ...(type === 'Paid' && { ...data })
-                }
-
-                // data: {
-                //   invoiceId: row.original._id,
-                //   transactionsId: 'VADE0B248932',
-                //   transactionsType: 'EXPENSE',
-                //   receivedAmount: 5000,
-                //   TDSRate: 10,
-                //   TDSAmount: 500,
-                //   status: 0
-                // }
-              });
-
-              if (response.status >= 200 && response.status < 300) {
-                dispatch(
-                  openSnackbar({
-                    open: true,
-                    message: 'Invoice Status Changed',
-                    variant: 'alert',
-                    alert: {
-                      color: 'success'
-                    },
-                    close: true
-                  })
-                );
-
-                handleRefetch();
-              }
-
-              row.original.status = newStatus;
-              // fetchInvoice();
-            } catch (error) {
-              console.error('Failed to update status:', error);
-              dispatch(
-                openSnackbar({
-                  open: true,
-                  message: error.response.data?.error || 'Something went wrong',
-                  variant: 'alert',
-                  alert: {
-                    color: 'error'
-                  },
-                  close: true
-                })
-              );
-            }
-
-            setDialogOpen(false);
-            setFormDialogOpen(false);
-            handleClosePaidModal();
-            handleMenuClose();
-          };
-
-          const openMenu = Boolean(anchorEl);
-
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.READ}>
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
-                    }
-                  }}
-                  title="View"
-                >
-                  <IconButton
-                    color="success"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(`/apps/invoices/details/${row.original._id}`, '_blank', 'noopener,noreferrer');
-                    }}
-                  >
-                    <Eye />
-                  </IconButton>
-                </Tooltip>
-              </WrapperButton>
-
-              {userType === USERTYPE.iscabProvider && (
-                <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
-                  <More style={{ fontSize: '1.15rem' }} />
-                </IconButton>
-              )}
-
-              <Menu
-                id="fade-menu"
-                MenuListProps={{ 'aria-labelledby': 'fade-button' }}
-                anchorEl={anchorEl}
-                open={openMenu}
-                onClose={handleMenuClose}
-                TransitionComponent={Fade}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              >
-                <MenuItem onClick={() => handleStatusChange(0)}>Unpaid</MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleOpenPaidModal(row.original.grandTotal);
-                  }}
-                >
-                  Paid
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange(2)}>Cancelled</MenuItem>
-              </Menu>
-
-              {/* Confirmation Dialog */}
-              <Dialog
-                open={dialogOpen}
-                onClose={handleDialogClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-                <Box sx={{ p: 1, py: 1.5 }}>
-                  <DialogTitle id="alert-dialog-title">Confirm Status Change</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                      Are you sure you want to change the status to {newStatus === 0 ? 'Unpaid' : newStatus === 1 ? 'Paid' : 'Cancelled'}?
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button color="error" onClick={handleDialogClose}>
-                      Disagree
-                    </Button>
-                    <Button variant="contained" onClick={confirmStatusChange} autoFocus>
-                      Agree
-                    </Button>
-                  </DialogActions>
-                </Box>
-              </Dialog>
-
-              {/* FormDialog for "Cancelled" Status */}
-              <FormDialog
-                open={formDialogOpen}
-                handleClose={handleFormDialogClose}
-                handleConfirm={confirmStatusChange}
-                handleTextChange={handleTextChange}
-                title="Provide Remarks for Cancellation"
-                content="Please provide a reason for cancelling this invoice."
-                placeholder="Enter your remarks"
-                cancelledButtonTitle="Disagree"
-                confirmedButtonTitle="Confirm Cancellation"
-                showError
-              />
-
-              {paidModalOpen && (
-                <Dialog
-                  open={paidModalOpen}
-                  onClose={handleClosePaidModal}
-                  maxWidth="sm"
-                  fullWidth
-                  aria-labelledby="alert-dialog-title"
-                  aria-describedby="alert-dialog-description"
-                >
-                  <PaidModal open={paidModalOpen} amount={paidAmount} onClose={handleClosePaidModal} onConfirm={confirmStatusChange} />
-                </Dialog>
-              )}
-            </Stack>
-          );
         }
       }
     ],
-    [userType]
+    []
   );
 
   const theme = useTheme();
@@ -656,7 +405,7 @@ const List = () => {
 
   const widgetsData = [
     {
-      title: 'Paid',
+      title: 'Income',
       count: metadata?.paid?.paidCount ?? 0,
       amount: metadata?.paid?.paidAmount ?? 0,
       percentage: (
@@ -670,7 +419,7 @@ const List = () => {
       chartData: [] // Add your chart metadata if necessary
     },
     {
-      title: 'Unpaid',
+      title: 'Expense',
       count: metadata?.unpaid?.unpaidCount ?? 0,
       amount: metadata?.unpaid?.unpaidAmount ?? 0,
       percentage: (
@@ -684,7 +433,7 @@ const List = () => {
       chartData: [] // Add your chart metadata if necessary
     },
     {
-      title: 'Overdue',
+      title: 'Taxes',
       count: metadata?.overDue?.overDueCount ?? 0,
       amount: metadata?.overDue?.overDueAmount ?? 0,
       percentage: (
@@ -802,39 +551,39 @@ const List = () => {
             }}
             value={filterOptions.selectedCompany}
           />
-          {/* <VendorFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedVendor}
-        />
-        <DriverFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '200px',
-            pb: 1
-          }}
-          value={filterOptions.selectedDiver}
-        />
-        <VehicleFilter
+          <VendorFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedVendor}
+          />
+          <DriverFilter
+            setFilterOptions={setFilterOptions}
+            sx={{
+              color: '#fff',
+              '& .MuiSelect-select': {
+                padding: '0.5rem',
+                pr: '2rem'
+              },
+              '& .MuiSelect-icon': {
+                color: '#fff' // Set the down arrow color to white
+              },
+              width: '200px',
+              pb: 1
+            }}
+            value={filterOptions.selectedDiver}
+          />
+          {/* <VehicleFilter
           setFilterOptions={setFilterOptions}
           sx={{
             color: '#fff',
@@ -861,12 +610,6 @@ const List = () => {
             showSelectedRangeLabel
           />
         </Stack>
-
-        <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.CREATE}>
-          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
-            Create Invoice
-          </Button>
-        </WrapperButton>
       </Stack>
       <MainCard content={false}>
         <ScrollX>
@@ -884,7 +627,7 @@ const List = () => {
   );
 };
 
-List.propTypes = {
+Transaction.propTypes = {
   row: PropTypes.object,
   values: PropTypes.object,
   email: PropTypes.string,
@@ -917,4 +660,4 @@ LinearWithLabel.propTypes = {
   others: PropTypes.any
 };
 
-export default List;
+export default Transaction;
