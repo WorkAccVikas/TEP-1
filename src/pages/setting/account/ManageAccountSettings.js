@@ -205,7 +205,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
       smallLogo: null,
       favIcon: null
     },
-    validationSchema,
+    // validationSchema,
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       try {
