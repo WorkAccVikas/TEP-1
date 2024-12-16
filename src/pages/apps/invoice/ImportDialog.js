@@ -13,6 +13,25 @@ import { formatDateUsingMoment } from 'utils/helper';
 import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 
+const filterConfig = {
+  invoiceId: [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser],
+  vendorInvoiceId: [USERTYPE.isVendor, USERTYPE.isVendorUser]
+};
+
+// Define filter strategies for each userType
+const filterStrategies = {
+  invoiceId: (item) => !item.invoiceId,
+  vendorInvoiceId: (item) => !item.vendorInvoiceId
+};
+
+// Strategy resolver based on userType
+export const getFilterStrategy = (userType) => {
+  console.log('my userType', userType);
+  if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) return filterStrategies.invoiceId;
+  if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) return filterStrategies.vendorInvoiceId;
+  return () => true; // Default no filtering if userType doesn't match
+};
+
 const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
   const [dateRange, setDateRange] = useState({
     startDate: addMonths(new Date(), -1), // Default to today's date
@@ -62,11 +81,31 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
 
       // Update state with fetched data
       console.log('response.data.data = ', response.data.data);
-      setTripData(response.data.data);
+      const data = response.data.data;
+      console.log('tina = ', data);
+
+      // APPROACH 1 : Filter data based on userType
+      // // Find the key dynamically based on userType
+      // const filterKey = Object.keys(filterConfig).find((key) => filterConfig[key].includes(userType));
+      // console.log(`🚀 ~ fetchTripData ~ filterKey:`, filterKey);
+
+      // // Perform the dynamic filter
+      // const filteredData = data.filter((item) => !item[filterKey]);
+
+      // APPROACH 2 : Filter data based on userType
+      // Retrieve the filter strategy dynamically
+      const filterStrategy = getFilterStrategy(userType);
+
+      // Apply the filter
+      const filteredData = data.filter(filterStrategy);
+
+      // setTripData(response.data.data);
+      setTripData(filteredData);
       dispatch(
         openSnackbar({
           open: true,
-          message: `Data import successful! ${response.data.data.length} Trips fetched`,
+          // message: `Data import successful! ${response.data.data.length} Trips fetched`,
+          message: `Data import successful! ${filteredData.length} Trips fetched`,
           variant: 'alert',
           alert: { color: 'success' },
           close: true,

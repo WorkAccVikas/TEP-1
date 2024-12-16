@@ -1079,7 +1079,24 @@ const TripList = () => {
               return <Chip label="Pending" color="warning" variant="light" />;
             }
             case TRIP_STATUS.COMPLETED: {
-              return row.original.invoiceId && row.original.invoiceId !== null ? (
+              // Determine which ID to check based on userType
+              const { invoiceId, vendorInvoiceId } = row.original;
+
+              // const showInvoiceChip =
+              //   ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) && invoiceId && invoiceId !== null) ||
+              //   ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType) && vendorInvoiceId && vendorInvoiceId !== null);
+
+              let showInvoiceChip = false;
+
+              if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+                console.log('invoiceId ............');
+                showInvoiceChip = invoiceId && invoiceId !== null;
+              } else if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+                console.log('vendorInvoiceId ............');
+                showInvoiceChip = vendorInvoiceId && vendorInvoiceId !== null;
+              }
+
+              return showInvoiceChip ? (
                 <Chip
                   label="Invoice ✓"
                   color="info"

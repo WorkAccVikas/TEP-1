@@ -33,7 +33,7 @@ import DefaultItemTable from './itemTables';
 import TripItemTable from './itemTables/TripTable';
 import axiosServices from 'utils/axios';
 import { v4 as UIDV4 } from 'uuid';
-import TripImportDialog from './ImportDialog';
+import TripImportDialog, { getFilterStrategy } from './ImportDialog';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { useSelector } from 'store';
@@ -89,16 +89,29 @@ const fakeSetting = {
   __v: 0
 };
 
+const filterDataFn = (data, userType) => {
+  console.log('🚀 ~ filterDataFn ~ data:', data, userType);
+  // return data;
+  const filterStrategy = getFilterStrategy(userType);
+  console.log(`🚀 ~ filterDataFn ~ filterStrategy:`, filterStrategy);
+  // Apply the filter
+  const filteredData = data.filter(filterStrategy);
+
+  return filteredData;
+};
+
 const Create = () => {
   const theme = useTheme();
   const navigation = useNavigate();
   const { user, userSpecificData } = useAuth();
   const location = useLocation();
+  const userType = useSelector((state) => state.auth.userType);
   const { state } = location || {}; // Safeguard against undefined location
   const data = state?.tripData || [];
-  const [tripData, setTripData] = useState(data);
+  console.log(`🚀 ~ Create ~ data:`, data);
+  // const [tripData, setTripData] = useState(data);
+  const [tripData, setTripData] = useState(() => filterDataFn(data, userType), []);
   const [loading, setLoading] = useState(false);
-  const userType = useSelector((state) => state.auth.userType);
 
   const [settings, setSettings] = useState(fakeSetting);
 
