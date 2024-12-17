@@ -10,15 +10,39 @@ import axiosServices from 'utils/axios';
 import { addMonths, format } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import { formatDateUsingMoment } from 'utils/helper';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
+
+const filterConfig = {
+  invoiceId: [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser],
+  vendorInvoiceId: [USERTYPE.isVendor, USERTYPE.isVendorUser]
+};
+
+// Define filter strategies for each userType
+const filterStrategies = {
+  invoiceId: (item) => !item.invoiceId,
+  vendorInvoiceId: (item) => !item.vendorInvoiceId
+};
+
+// Strategy resolver based on userType
+export const getFilterStrategy = (userType) => {
+  if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) return filterStrategies.invoiceId;
+  if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) return filterStrategies.vendorInvoiceId;
+  return () => true; // Default no filtering if userType doesn't match
+};
 
 const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
   const [dateRange, setDateRange] = useState({
     startDate: addMonths(new Date(), -1), // Default to today's date
     endDate: new Date() // Default to 1 month after today's date
   });
+  const [loading, setLoading] = useState(false);
+  const userType = useSelector((state) => state.auth.userType);
+
   console.log(formatDateUsingMoment(dateRange.endDate));
 
   const fetchTripData = async () => {
+    setLoading(true);
     try {
       // Validate dateRange and recieversDetails._id
       if (!dateRange?.startDate || !dateRange?.endDate || !recieversDetails?._id) {
@@ -36,20 +60,36 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         return;
       }
 
-      const response = await axiosServices.get(
-        `/assignTrip/all/trips/cabProvider?startDate=${formatDateUsingMoment(dateRange.startDate)}&endDate=${formatDateUsingMoment(
-          dateRange.endDate
-        )}&companyID=${recieversDetails._id}`
-      );
 
-      // Log response for debugging
+      const baseURL = `/assignTrip/all/trips/cabProvider`;
+      const queryParams = new URLSearchParams({
+        startDate: formatDateUsingMoment(dateRange.startDate),
+        endDate: formatDateUsingMoment(dateRange.endDate)
+      });
 
-      // Update state with fetched data
-      setTripData(response.data.data);
+      // Conditionally add `companyID` only if `userType` is 1 or 7
+      if (userType === USERTYPE.iscabProvider || userType === USERTYPE.iscabProviderUser) {
+        queryParams.append('companyID', recieversDetails._id);
+      }
+
+      const response = await axiosServices.get(`${baseURL}?${queryParams.toString()}`);
+
+      const data = response.data.data;
+
+      const filterStrategy = getFilterStrategy(userType);
+      console.log({ filterStrategy });
+
+      // Apply the filter
+      const filteredData = data.filter(filterStrategy);
+      console.log({ filteredData });
+
+      // setTripData(response.data.data);
+      setTripData(filteredData);
       dispatch(
         openSnackbar({
           open: true,
-          message: `Data import successful! ${response.data.data.length} Trips fetched`,
+          // message: `Data import successful! ${response.data.data.length} Trips fetched`,
+          message: `Data import successful! ${filteredData.length} Trips fetched`,
           variant: 'alert',
           alert: { color: 'success' },
           close: true,
@@ -69,6 +109,8 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         })
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,7 +183,7 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           <Button color="error" size="small" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="success" size="small" variant="contained" onClick={fetchTripData}>
+          <Button color="success" size="small" variant="contained" onClick={fetchTripData} disabled={loading}>
             import
           </Button>
         </Stack>

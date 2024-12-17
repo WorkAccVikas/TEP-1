@@ -20,6 +20,8 @@ import { Add } from 'iconsax-react';
 import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
 
 // Helper function to extract the correct grouping key
 const getGroupKey = (item, key) => {
@@ -41,7 +43,7 @@ const getGroupKey = (item, key) => {
   return item[key];
 };
 
-const groupDataWithSuffix = (data, groupByKey) => {
+const groupDataWithSuffix = (data, groupByKey, userType) => {
   // Group the data
   const grouped = _.groupBy(data, (item) => {
     const primaryKey = getGroupKey(item, groupByKey);
@@ -59,11 +61,17 @@ const groupDataWithSuffix = (data, groupByKey) => {
     suffixCounts[primaryKey] = (suffixCounts[primaryKey] || 0) + 1;
 
     const ids = items.map((item) => item._id);
+    let priceRate = 0;
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      priceRate = items[0].companyRate;
+    } else {
+      priceRate = items[0].vendorRate;
+    }
     // Add the formatted object to the result
     result.push({
       id: UIDV4(),
       name: `${primaryKey}`,
-      price: secondaryKey || items[0].companyRate || 0,
+      price: secondaryKey || priceRate || 0,
       qty: items.length,
       ids: ids,
       description: `${items.length} items @  ${secondaryKey || items[0].companyRate || 0}`,
@@ -75,9 +83,16 @@ const groupDataWithSuffix = (data, groupByKey) => {
   return result;
 };
 
-const groupGuardRates = (tripData) => {
+const groupGuardRates = (tripData, userType) => {
   const groupedRates = tripData.reduce((acc, item) => {
-    const guardPrice = item.companyGuardPrice;
+    // const guardPrice = item.companyGuardPrice;
+    let guardPrice = 0;
+
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      guardPrice = item.companyGuardPrice;
+    } else {
+      guardPrice = item.vendorGuardPrice;
+    }
 
     // Skip items where the guard price is 0
     if (guardPrice === 0) return acc;
@@ -104,9 +119,15 @@ const groupGuardRates = (tripData) => {
   return Object.values(groupedRates);
 };
 
-const groupPenaltyRates = (tripData) => {
+const groupPenaltyRates = (tripData, userType) => {
   const groupedRates = tripData.reduce((acc, item) => {
-    const companyPenalty = item.companyPenalty;
+    // const companyPenalty = item.companyPenalty;
+    let companyPenalty = 0;
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      companyPenalty = item.companyPenalty;
+    } else {
+      companyPenalty = item.vendorPenalty;
+    }
 
     // Skip items where the guard price is 0
     if (companyPenalty === 0) return acc;
@@ -133,13 +154,50 @@ const groupPenaltyRates = (tripData) => {
   return Object.values(groupedRates);
 };
 
-const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountSummary, setAmountSummary, invoiceSetting }) => {
+const safeNumber = (value) => (isNaN(Number(value)) ? 0 : Number(value));
+
+const calculateTotals = (data) =>
+  data.reduce(
+    (totals, item) => ({
+      qty: totals.qty + safeNumber(item.qty),
+      price: totals.price + safeNumber(item.price),
+      tax: totals.tax + safeNumber(item.tax)
+    }),
+    { qty: 0, price: 0, tax: 0 }
+  );
+
+const calculateSums = (data, discountByTax) =>
+  data.reduce(
+    (totals, item) => {
+      const qtyPrice = safeNumber(item.qty) * safeNumber(item.price);
+      const discount = discountByTax ? (qtyPrice * safeNumber(item.discount)) / 100 : safeNumber(item.discount);
+
+      return {
+        total: totals.total + qtyPrice,
+        totalDiscount: totals.totalDiscount + discount,
+        totalTax: totals.totalTax + (qtyPrice * safeNumber(item.tax)) / 100
+      };
+    },
+    { total: 0, totalDiscount: 0, totalTax: 0 }
+  );
+
+const TripItemTable = ({
+  isSameState,
+  itemData,
+  setItemData,
+  tripData,
+  groupByOption,
+  amountSummary,
+  setAmountSummary,
+  invoiceSetting
+}) => {
   const theme = useTheme();
 
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
   const [inlineDiscountDeduction, setInlineDiscountDeduction] = useState(false);
   const [discountDeduction, setDiscountDeduction] = useState(false);
   const [discountByTax, setDiscountByTax] = useState(true);
+  const userType = useSelector((state) => state.auth.userType);
 
   const handleItemChange = (id, fieldName, value) => {
     setItemData((prevItemData) => prevItemData.map((item) => (item.id === id ? { ...item, [fieldName]: value } : item)));
@@ -148,6 +206,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
   const deleteItem = (id) => {
     setItemData((prevItemData) => prevItemData.filter((item) => item.id !== id));
   };
+
   const addItem = () => {
     const newItem = {
       id: UIDV4(),
@@ -173,8 +232,6 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
     // Update tax or discount based on the name of the input field
     if (name === 'tax' || name === 'discount') {
-      console.log({ name, value });
-
       setItemData((prevItemData) =>
         prevItemData.map((item) => ({
           ...item,
@@ -191,13 +248,17 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
   useEffect(() => {
     if (tripData && tripData.length > 0) {
-      const mappedData = groupDataWithSuffix(tripData, groupByOption);
-      const guardItems = groupGuardRates(tripData);
-      const penaltyItems = groupPenaltyRates(tripData);
+      const mappedData = groupDataWithSuffix(tripData, groupByOption, userType);
+      const guardItems = groupGuardRates(tripData, userType);
+      const penaltyItems = groupPenaltyRates(tripData, userType);
 
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
+    }
+  }, [tripData]);
 
+  useEffect(() => {
+    if (tripData && tripData.length > 0) {
       const { additonalRate, mcdCharges, tollCharges } = tripData.reduce(
         (totals, item) => {
           const addOnRate = isNaN(Number(item.addOnRate)) ? 0 : Number(item.addOnRate);
@@ -212,7 +273,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
         { additonalRate: 0, mcdCharges: 0, tollCharges: 0 }
       );
 
-      const { total, totalTax } = combinedData.reduce(
+      const { total } = itemData.reduce(
         (totals, item) => {
           const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
           const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
@@ -225,69 +286,63 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
         },
         { total: 0, totalTax: 0 }
       );
+
       setAmountSummary((prev) => ({
         ...prev,
         total: total,
-        subTotal: total - prev.totalDiscount,
+        subTotal: total,
         mcdCharges: mcdCharges,
         tollCharges: tollCharges,
         additionalCharges: additonalRate,
         grandTotal: total - prev.totalDiscount + prev.totalTax + mcdCharges + tollCharges + additonalRate
       }));
+
+      setAmountSummary((prev) => {
+        const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
+        const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
+
+        const { totalTax1 } = itemData.reduce(
+          (totals, item) => {
+            const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
+            const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
+            const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
+
+            return {
+              totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
+            };
+          },
+          { totalTax1: 0 }
+        );
+
+        const { totalDiscount1 } = itemData.reduce(
+          (totals, item) => {
+            const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
+            const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
+            const discount = isNaN(Number(item.discount)) ? 0 : Number(item.discount);
+            return {
+              // totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
+              totalDiscount1: discountByTax ? totals.totalDiscount1 + (qty * price * discount) / 100 : totals.totalDiscount1 + discount // Assuming tax is a percentage
+            };
+          },
+          { totalDiscount1: 0 }
+        );
+
+        let finalTaxAmount = inLineTaxDeduction ? totalTax1 : totalTax;
+        let finalDiscountAmount = inlineDiscountDeduction ? totalDiscount1 : totalDiscount;
+
+        const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
+        console.log('prev.total', prev.total);
+
+        return {
+          ...prev,
+          totalTax: finalTaxAmount,
+          totalDiscount: finalDiscountAmount,
+          subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
+          grandTotal
+        };
+      });
     }
-  }, [tripData, groupByOption]);
-
-  useEffect(() => {
-    setAmountSummary((prev) => {
-      const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
-      const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
-
-      const { totalTax1,total } = itemData.reduce(
-        (totals, item) => {
-          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
-          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
-          const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
-
-          return {
-            totalTax1: totals.totalTax1 + (qty * price * tax) / 100 ,// Assuming tax is a percentage
-            total:totals.total+(qty * price )
-          };
-        },
-        { totalTax1: 0,total:0 }
-      );
-
-      const { totalDiscount1 } = itemData.reduce(
-        (totals, item) => {
-          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
-          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
-          const discount = isNaN(Number(item.discount)) ? 0 : Number(item.discount);
-          console.log(qty * price - discount);
-          return {
-            // totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
-            totalDiscount1: discountByTax
-              ? totals.totalDiscount1 + (qty * price * discount) / 100
-              : totals.totalDiscount1 +discount  // Assuming tax is a percentage
-          };
-        },
-        { totalDiscount1: 0 }
-      );
-
-      let finalTaxAmount = inLineTaxDeduction ? totalTax1 : totalTax;
-      let finalDiscountAmount = inlineDiscountDeduction ? totalDiscount1 : totalDiscount;
-      console.log({ totalDiscount1, totalDiscount, finalDiscountAmount });
-
-      const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
-
-      return {
-        ...prev,
-        total:total,
-        totalTax: finalTaxAmount,
-        totalDiscount: finalDiscountAmount,
-        subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
-        grandTotal
-      };
-    });
-  }, [taxAndDiscount, itemData, inLineTaxDeduction, inlineDiscountDeduction]);
+  }, [itemData, tripData, groupByOption, userType]);
 
   useEffect(() => {
     if (invoiceSetting) {
@@ -301,8 +356,6 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
       setDiscountByTax(invoiceSetting && invoiceSetting.discount && invoiceSetting.discount.by !== 'Amount');
     }
   }, [invoiceSetting]);
-
-  console.log({ itemData });
 
   return (
     <Grid item xs={12}>
@@ -348,6 +401,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
         <Divider />
 
         <Grid container justifyContent="space-between">
+          {/* add item button */}
           <Grid item xs={12} md={8}>
             <Box sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}>
               <Button color="primary" startIcon={<Add />} onClick={addItem} variant="dashed" sx={{ bgcolor: 'transparent !important' }}>
@@ -356,8 +410,9 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
-            {}
+            {/* Group tax and discount */}
             <Grid container justifyContent="flex-end" spacing={2} sx={{ pt: 2.5, pb: 2.5 }}>
+              {/* Groupo Tax */}
               {discountDeduction && !inlineDiscountDeduction && (
                 <Grid item xs={6}>
                   <Stack spacing={1}>
@@ -397,6 +452,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                   </Stack>
                 </Grid>
               )}
+              {/* Group Discount */}
               {!inLineTaxDeduction && (
                 <Grid item xs={6}>
                   <Stack spacing={1}>
@@ -424,13 +480,17 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                 </Grid>
               )}
             </Grid>
+
+            {/* Ammount Summary */}
             <Grid item xs={12}>
               <Stack spacing={2}>
+                {/* Totoal */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Total:</Typography>
                   <Typography variant="h6">{`₹ ${amountSummary.total?.toFixed(2)}`}</Typography>
                 </Stack>
                 <Divider />
+                {/* Discount */}
                 {discountDeduction && (
                   <>
                     <Stack direction="row" justifyContent="space-between">
@@ -440,27 +500,51 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                     <Divider />
                   </>
                 )}
+                {/* Subtotal */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Sub Total:</Typography>
                   <Typography variant="h6">{`₹ ${amountSummary.subTotal?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Tax */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Total GST:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
                 </Stack>
+                {isSameState ? (
+                  <>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>CGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>SGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
+                    </Stack>
+                  </>
+                ) : (
+                  <Stack direction="row" justifyContent="flex-end" gap={30}>
+                    <Typography color={theme.palette.grey[500]}>IGST:</Typography>
+                    <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
+                  </Stack>
+                )}
+
+                {/* MCD */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>MCD Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.mcdCharges?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Toll */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Toll Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.tollCharges?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Addional Charge */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Additional Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.additionalCharges?.toFixed(2)}`}</Typography>
                 </Stack>
                 <Divider />
+                {/* Grand Total */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="subtitle1">Grand Total:</Typography>
                   <Typography variant="h5">{`₹ ${amountSummary.grandTotal?.toFixed(2)}`}</Typography>

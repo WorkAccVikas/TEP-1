@@ -33,31 +33,86 @@ import DefaultItemTable from './itemTables';
 import TripItemTable from './itemTables/TripTable';
 import axiosServices from 'utils/axios';
 import { v4 as UIDV4 } from 'uuid';
-import TripImportDialog from './ImportDialog';
+import TripImportDialog, { getFilterStrategy } from './ImportDialog';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { useSelector } from 'store';
+import { USERTYPE } from 'constant';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { checkGSTtype } from 'utils/helper';
 
 const customTextFieldStyle = {
   '& .MuiInputBase-input': {
     padding: '8px'
   }
 };
+
+const fakeSetting = {
+  invoice: {
+    prefix: 'CABINV',
+    invoiceNumber: 105
+  },
+  discount: {
+    apply: 'Individual',
+    by: 'Amount'
+  },
+  tax: {
+    apply: 'Individual'
+  },
+  _id: '6718c67f04743a895310dab9',
+  logo: '',
+  HSN_SAC_code: [
+    {
+      _id: '670f9a6002da42a5f8b37a5e',
+      Code: '101Test',
+      Rate: 100
+    },
+    {
+      _id: '670f9ab3bbff89d401398074',
+      Code: '101Test',
+      Rate: 100
+    },
+    {
+      _id: '670fa5f20d238dedc723a870',
+      Code: '102Test',
+      Rate: 1011
+    }
+  ],
+  terms: [''],
+  cabProviderId: '667944fed9d64e642ebf93c2',
+  additionalCharges: 0,
+  roundOff: 1,
+  header: 2,
+  subHeader: 2,
+  status: 0,
+  createdAt: '2024-10-23T09:48:47.756Z',
+  updatedAt: '2024-12-10T18:50:30.291Z',
+  __v: 0
+};
+
+const filterDataFn = (data, userType) => {
+  console.log('🚀 ~ filterDataFn ~ data:', data, userType);
+  // return data;
+  const filterStrategy = getFilterStrategy(userType);
+  console.log(`🚀 ~ filterDataFn ~ filterStrategy:`, filterStrategy);
+  // Apply the filter
+  const filteredData = data.filter(filterStrategy);
+
+  return filteredData;
+};
+
 const Create = () => {
   const theme = useTheme();
   const navigation = useNavigate();
   const { user, userSpecificData } = useAuth();
   const location = useLocation();
+  const userType = useSelector((state) => state.auth.userType);
   const { state } = location || {}; // Safeguard against undefined location
   const data = state?.tripData || [];
-  const [tripData, setTripData] = useState(data);
+  const [tripData, setTripData] = useState(() => filterDataFn(data, userType), []);
   const [loading, setLoading] = useState(false);
 
-  const [settings, setSettings] = useState({
-    invoice: {
-      prefix: 'INV-',
-      invoiceNumber: 1
-    }
-  });
+  const [settings, setSettings] = useState(fakeSetting);
 
   const [tempSettings, setTempSettings] = useState({
     invoice: { ...settings.invoice }
@@ -72,41 +127,53 @@ const Create = () => {
     setInvoiceIdDialog((prev) => !prev);
   };
 
-  // populate Invoice Setting
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchCabProviderDetails = async () => {
       try {
-        const cabProviderId = user._id;
-        const url = `/invoice/settings/list`;
-        const config = {
-          params: {
-            cabProviderId
-          }
+        // TODO : FETCH cab provider details from API
+        setLoading(true);
+
+        console.log('Api call for get cab provider details (At Invoice Creation) .........');
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const fakeResponse = {
+          _id: '667944fed9d64e642ebf93c2',
+          name: 'Amit',
+          email: 'amit.kanaujiya@techplek.in',
+          mobile: 9648352233,
+          PAN: 'ABCTY1234D',
+          GSTIN: '22AAAAA0000A1Z5',
+          postal_code: 700001,
+          address: 'Netaji Subhash Place Delhi,110035',
+          state: 'Andhra Pradesh'
         };
 
-        const response = await getApiResponse(url, config);
-
-        if (response.success) {
-          if (!response.data) {
-            alert('Invoice Settings Not Found');
-            navigation('/settings/invoice', {
-              replace: true
-            });
-            return;
-          }
-          const { invoiceSetting } = response.data;
-
-          setSettings(invoiceSetting);
-          setLoading(false);
+        if (userType === USERTYPE.iscabProviderUser) {
+          setSendersDetails(fakeResponse);
+        } else {
+          setRecieversDetails(fakeResponse);
         }
       } catch (error) {
-        console.log('Error fetching settings: (Invoice Creation)', error);
+        console.log('Error fetching cab provider details: (Invoice Creation)', error);
+        dispatch(
+          openSnackbar({
+            message: 'Error fetching cab provider details: (Invoice Creation)',
+            variant: 'error',
+            open: true,
+            // anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000,
+            close: true
+          })
+        );
       } finally {
         setLoading(false);
       }
     };
-    fetchSettings();
-  }, []);
+
+    if ([USERTYPE.iscabProviderUser, USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+      fetchCabProviderDetails();
+    }
+  }, [userType]);
 
   // Update invoiceId dynamically based on settings
   useEffect(() => {
@@ -139,15 +206,15 @@ const Create = () => {
   };
 
   const [sendersDetails, setSendersDetails] = useState({
-    _id: user._id || null,
-    name: userSpecificData.cabProviderLegalName || '',
-    email: user.userEmail || '',
-    mobile: user.contactNumber || '',
-    PAN: userSpecificData.PAN || '',
-    GSTIN: userSpecificData.GSTIN || '',
-    postal_code: user.pinCode || '',
-    address: user.address || '',
-    state: user.state || ''
+    _id: user?._id || null,
+    name: userSpecificData?.cabProviderLegalName || userSpecificData?.vendorCompanyName || '',
+    email: user?.userEmail || '',
+    mobile: user?.contactNumber || '',
+    PAN: userSpecificData?.PAN || '',
+    GSTIN: userSpecificData?.GSTIN || '',
+    postal_code: user?.pinCode || '',
+    address: user?.address || '',
+    state: user?.state || ''
   });
 
   const [senderEditMode, setSenderEditMode] = useState(false);
@@ -181,10 +248,10 @@ const Create = () => {
   const [groupByOption, setGroupByOption] = useState('Company Rate');
 
   const [sendersBankDetails, setSenderBankDetails] = useState({
-    accountHolderName: userSpecificData.accountHolderName,
-    bankName: userSpecificData.bankName,
-    ifscCode: userSpecificData.IFSC_code,
-    acountNumber: userSpecificData.accountNumber
+    accountHolderName: userSpecificData?.accountHolderName || '',
+    bankName: userSpecificData?.bankName || '',
+    ifscCode: userSpecificData?.IFSC_code || '',
+    acountNumber: userSpecificData?.accountNumber || ''
   });
 
   const handleChangesendersBankDetails = useCallback((e) => {
@@ -201,6 +268,7 @@ const Create = () => {
   };
   const [invoiceNotes, setInvoiceNotes] = useState('');
   const [invoiceTermsAndCondition, setInvoiceTermsAndCondition] = useState('');
+  const [isSameState, setIsSameState] = useState(true);
 
   useEffect(() => {
     const fetchRecieversDetails = async (companyId) => {
@@ -236,8 +304,9 @@ const Create = () => {
     };
     if (tripData.length > 0 && tripData[0].companyID) {
       fetchRecieversDetails(tripData[0].companyID._id);
+      const isSameState1 = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
+      setIsSameState(isSameState1);
     }
-    console.log({ tripData });
   }, [tripData]);
 
   const [itemData, setItemData] = useState([
@@ -270,17 +339,108 @@ const Create = () => {
 
   const handleCreateInvoice = async () => {
     setLoading(true);
-    // console.log({ settings });
-    // console.log({ invoiceId });
-    console.log({ dates });
-    // console.log({ sendersDetails });
-    // console.log({ recieversDetails });
-    // console.log({ groupByOption });
-    // console.log({ itemData });
-    // console.log({ invoiceTermsAndCondition });
-    // console.log({ invoiceNotes });
-    // console.log({ amountSummary });
-    // console.log({ sendersBankDetails });
+    const structuredItemData = itemData.map((item) => ({
+      itemName: item.name,
+      description: item.description,
+      rate: item.price,
+      quantity: item.qty,
+      HSN_SAC_code: null,
+      itemTax: item.tax,
+      itemDiscount: item.discount,
+      Tax_amount: (item.price * item.qty * item.tax) / 100,
+      amount: item.price * item.qty,
+      discount: null
+    }));
+    const linkedTripIds = itemData.flatMap((item) => (item.ids ? item.ids : []));
+
+    const linkedTripIds1 = itemData.map((item) => ({
+      ids: item.ids,
+      taxRate: item.tax
+    }));
+
+    function formatDate(timestamp) {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    const invoicePayload = {
+      data: {
+        companyId: recieversDetails._id,
+        cabProviderId: sendersDetails._id,
+        invoiceNumber: invoiceId,
+        invoiceDate: formatDate(dates.invoiceDate),
+        dueDate: formatDate(dates.invoiceDueDate),
+        servicePeriod: '14-11-2024 to 02-12-2024',
+        linkedTripIds1: linkedTripIds1,
+        linkedTripIds: linkedTripIds,
+        linkedTripIdsVendor: [],
+        linkedTripIdsDriver: [],
+        invoiceData: structuredItemData,
+        subTotal: amountSummary.subTotal,
+        totalAmount: amountSummary.total,
+        grandTotal: amountSummary.grandTotal,
+        totalDiscount: amountSummary.totalDiscount,
+        totalTax: amountSummary.totalTax,
+        CGST: isSameState ? amountSummary.totalTax / 2 : 0,
+        SGST: isSameState ? amountSummary.totalTax / 2 : 0,
+        IGST: isSameState ? 0 : amountSummary.totalTax,
+        MCDAmount: amountSummary.mcdCharges,
+        tollParkingCharges: amountSummary.tollCharges,
+        terms: invoiceTermsAndCondition,
+        billedTo: recieversDetails,
+        billedBy: sendersDetails,
+        bankDetails: sendersBankDetails,
+        settings: {
+          discount: settings.discount,
+          tax: settings.tax
+        }
+      }
+    };
+    console.log({ invoicePayload });
+
+    try {
+      const response = await axiosServices.post('/invoice/create', invoicePayload);
+
+      if (response.status === 201) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Invoice Generated Successfully',
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: true
+          })
+        );
+        navigation('/apps/invoices/list', {
+          replace: true
+        });
+      }
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error.response?.data?.message || 'Failed to generate invoice.',
+          variant: 'alert',
+          alert: {
+            color: 'error'
+          },
+          close: true
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCreateInvoiceVendor = async () => {
+    console.log('handleCreateInvoiceVendor');
+    setLoading(true);
 
     const structuredItemData = itemData.map((item) => ({
       itemName: item.name,
@@ -330,8 +490,8 @@ const Create = () => {
         dueDate: formatDate(dates.invoiceDate),
         servicePeriod: '14-11-2024 to 02-12-2024',
         linkedTripIds1: linkedTripIds1,
-        linkedTripIds: linkedTripIds,
-        linkedTripIdsVendor: [],
+        linkedTripIds: [],
+        linkedTripIdsVendor: linkedTripIds,
         linkedTripIdsDriver: [],
         invoiceData: structuredItemData,
         subTotal: amountSummary.subTotal,
@@ -433,7 +593,7 @@ const Create = () => {
       cabProviderId: sendersDetails._id,
       invoiceNumber: invoiceId,
       invoiceDate: dates.invoiceDate,
-      dueDate: dates.invoiceDate,
+      dueDate: dates.invoiceDueDate,
       servicePeriod: '14-11-2024 to 02-12-2024',
       linkedTripIds1: linkedTripIds1,
       linkedTripIds: linkedTripIds,
@@ -462,6 +622,14 @@ const Create = () => {
     navigation('/apps/invoices/details/', {
       state: { pageData: invoicePayload }
     });
+  };
+
+  const handleInvoiceCreation = () => {
+    if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+      handleCreateInvoice();
+    } else if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+      handleCreateInvoiceVendor();
+    }
   };
 
   return (
@@ -639,19 +807,22 @@ const Create = () => {
                     </Stack>
                   )}
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box textAlign="right" color="secondary.200">
-                    <Button
-                      size="small"
-                      startIcon={<Add />}
-                      color="secondary"
-                      variant="outlined"
-                      onClick={() => setRecieversModalOpen(true)}
-                    >
-                      Add
-                    </Button>
-                  </Box>
-                </Grid>
+
+                <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.iscabProviderUser]}>
+                  <Grid item xs={12} sm={4}>
+                    <Box textAlign="right" color="secondary.200">
+                      <Button
+                        size="small"
+                        startIcon={<Add />}
+                        color="secondary"
+                        variant="outlined"
+                        onClick={() => setRecieversModalOpen(true)}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Grid>
+                </AccessControlWrapper>
               </Grid>
             </MainCard>
           </Grid>
@@ -690,6 +861,7 @@ const Create = () => {
           {/* Particular Table (Invoice) */}
           {tripData.length > 0 ? (
             <TripItemTable
+              isSameState={isSameState}
               itemData={itemData}
               setItemData={setItemData}
               tripData={tripData}
@@ -700,6 +872,7 @@ const Create = () => {
             />
           ) : (
             <DefaultItemTable
+              isSameState={isSameState}
               recieversDetails={recieversDetails}
               invoiceSetting={settings}
               setTripData={setTripData}
@@ -854,10 +1027,15 @@ const Create = () => {
         {/* Action Buttons */}
         <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
           <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={2} sx={{ height: '100%' }}>
-            <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }} onClick={handlePreview}>
+            {/* <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }} onClick={handlePreview}>
               Preview
-            </Button>
-            <Button color="primary" variant="contained" onClick={handleCreateInvoice} disabled={loading || amountSummary.grandTotal <= 1 || !sendersDetails._id || !recieversDetails._id}>
+            </Button> */}
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={handleInvoiceCreation}
+              disabled={loading || amountSummary.grandTotal <= 1 || !sendersDetails._id || !recieversDetails._id}
+            >
               Create & Send
             </Button>
           </Stack>
@@ -952,11 +1130,14 @@ const Create = () => {
       </Dialog>
 
       <AddressModal
+        sendersDetails={sendersDetails}
         value={recieversDetails}
         setFilterOptions={setRecieversDetails}
         open={recieversModalOpen}
         setOpen={setRecieversModalOpen}
         setRecieversDetails={setRecieversDetails}
+        setTripData={setTripData}
+        setIsSameState={setIsSameState}
       />
 
       <TripImportDialog

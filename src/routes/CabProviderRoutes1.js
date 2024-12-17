@@ -17,6 +17,7 @@ import ReportDriver from 'pages/reports/ReportDriver';
 import TripReports from 'pages/reports/Trips';
 import Create from 'pages/apps/invoice/Create';
 import Home from 'pages/Home';
+import Notifications from 'components/notification/Notifications';
 import Details from 'pages/apps/invoice/Details';
 
 // import Roster from 'pages/apps/roster';
@@ -42,6 +43,8 @@ const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTrips
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
+const DriverInvoiceList = Loadable(lazy(() => import('pages/invoice/list/DriverInvoiceList')));
+const VendorInvoiceList = Loadable(lazy(() => import('pages/invoice/list/VendorInvoiceList')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
 const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
@@ -115,6 +118,9 @@ const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
 const RosterSetting = Loadable(lazy(() => import('pages/setting/roster')));
 const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 
+// Expense
+const Transaction = Loadable(lazy(() => import('pages/expense/Transaction')));
+
 const Temp1 = Loadable(lazy(() => import('temp1')));
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -181,8 +187,16 @@ const CabProvidorRoutes = {
                 //   element: <InvoiceDashboard />
                 // },
                 {
-                  path: 'list',
+                  path: 'company',
                   element: <InvoiceList />
+                },
+                {
+                  path: 'vendor',
+                  element: <VendorInvoiceList />
+                },
+                {
+                  path: 'driver',
+                  element: <DriverInvoiceList />
                 },
                 {
                   path: 'create',
@@ -200,7 +214,6 @@ const CabProvidorRoutes = {
                   path: 'details/:id',
                   element: <Details />
                   // element: <InvoiceDetails />
-
                 },
                 {
                   path: 'edit/:id',
@@ -243,6 +256,23 @@ const CabProvidorRoutes = {
               ]
             }
           ]
+        },
+
+        // Expenses
+        {
+          path: 'expense',
+          children: [
+            {
+              path: 'transaction',
+              element: <Transaction />
+            }
+          ]
+        },
+
+        //Notification
+        {
+          path: 'notification',
+          element: <Notifications />
         },
 
         // Management

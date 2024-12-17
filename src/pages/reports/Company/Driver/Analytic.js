@@ -7,29 +7,29 @@ import Badge from 'pages/reports/components/Badge';
 import Card from 'pages/reports/components/Card';
 
 const labels = [
-  //   'Company Rate',
-  //   'Company Guard Price',
+  //   'Company Amount',
+  //   'Company Guard Amount',
   //   'Company Penalty',
-  // 'Vendor Rate',
-  // 'Vendor Guard Price',
+  // 'Vendor Amount',
+  // 'Vendor Guard Amount',
   // 'Vendor Penalty',
-    'Driver Rate',
-    'Driver Guard Price',
-    'Driver Penalty',
+  'Driver Amount',
+  'Driver Guard Amount',
+  'Driver Penalty',
   'Add On Rate',
   'Toll Charge',
   'MCD Charge'
 ];
 
 const labelsMapping = {
-  'Company Rate': 'companyRate',
-  'Company Guard Price': 'companyGuardPrice',
+  'Company Amount': 'companyRate',
+  'Company Guard Amount': 'companyGuardPrice',
   'Company Penalty': 'companyPenalty',
-  'Driver Rate': 'driverRate',
-  'Driver Guard Price': 'driverGuardPrice',
+  'Driver Amount': 'driverRate',
+  'Driver Guard Amount': 'driverGuardPrice',
   'Driver Penalty': 'driverPenalty',
-  'Vendor Rate': 'vendorRate',
-  'Vendor Guard Price': 'vendorGuardPrice',
+  'Vendor Amount': 'vendorRate',
+  'Vendor Guard Amount': 'vendorGuardPrice',
   'Vendor Penalty': 'vendorPenalty',
   'Add On Rate': 'addOnRate',
   'Toll Charge': 'tollCharge',
@@ -122,11 +122,11 @@ const Analytic = () => {
         {/* <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
           {[
             { title: 'Total Trips', count: overAllData.tripCount },
-            { title: 'Income ', count: overAllData.companyIncomingAmount, currency: true },
+            { title: 'Total Revenue ', count: overAllData.companyIncomingAmount, currency: true },
             { title: 'Driver Expenses', count: overAllData.driverOutgoingAmount, currency: true },
             { title: 'Vendor Expenses', count: overAllData.vendorOutgoingAmount, currency: true },
             {
-              title: 'Total Revenue',
+              title: 'Income',
               count: overAllData.companyIncomingAmount - overAllData.driverOutgoingAmount - overAllData.vendorOutgoingAmount,
               currency: true
             }
