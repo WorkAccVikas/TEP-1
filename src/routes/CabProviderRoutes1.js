@@ -43,6 +43,8 @@ const AssignTripList = Loadable(lazy(() => import('pages/apps/roster/AssignTrips
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
+const DriverInvoiceList = Loadable(lazy(() => import('pages/invoice/list/DriverInvoiceList')));
+const VendorInvoiceList = Loadable(lazy(() => import('pages/invoice/list/VendorInvoiceList')));
 const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
 const InvoiceEdit = Loadable(lazy(() => import('pages/invoice/edit/Edit')));
@@ -185,8 +187,16 @@ const CabProvidorRoutes = {
                 //   element: <InvoiceDashboard />
                 // },
                 {
-                  path: 'list',
+                  path: 'company',
                   element: <InvoiceList />
+                },
+                {
+                  path: 'vendor',
+                  element: <VendorInvoiceList />
+                },
+                {
+                  path: 'driver',
+                  element: <DriverInvoiceList />
                 },
                 {
                   path: 'create',
@@ -204,7 +214,6 @@ const CabProvidorRoutes = {
                   path: 'details/:id',
                   element: <Details />
                   // element: <InvoiceDetails />
-
                 },
                 {
                   path: 'edit/:id',
@@ -249,14 +258,14 @@ const CabProvidorRoutes = {
           ]
         },
 
-         // Expenses
-         {
+        // Expenses
+        {
           path: 'expense',
           children: [
             {
               path: 'transaction',
               element: <Transaction />
-            },
+            }
           ]
         },
 

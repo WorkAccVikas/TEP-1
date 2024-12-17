@@ -73,7 +73,7 @@ import AccessControlWrapper from 'components/common/guards/AccessControlWrapper'
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-const TRIP_STATUS = {
+export const TRIP_STATUS = {
   PENDING: 1,
   COMPLETED: 2,
   CANCELLED: 3,

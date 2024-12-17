@@ -39,6 +39,7 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { checkGSTtype } from 'utils/helper';
 
 const customTextFieldStyle = {
   '& .MuiInputBase-input': {
@@ -305,6 +306,7 @@ const Create = () => {
   };
   const [invoiceNotes, setInvoiceNotes] = useState('');
   const [invoiceTermsAndCondition, setInvoiceTermsAndCondition] = useState('');
+  const [isSameState, setIsSameState] = useState(false);
 
   useEffect(() => {
     const fetchRecieversDetails = async (companyId) => {
@@ -341,6 +343,8 @@ const Create = () => {
     if (tripData.length > 0 && tripData[0].companyID) {
       fetchRecieversDetails(tripData[0].companyID._id);
     }
+    const isSameState1 = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
+    setIsSameState(isSameState1);
     console.log({ tripData });
   }, [tripData]);
 
@@ -412,19 +416,7 @@ const Create = () => {
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
-    function checkGSTtype(str1, str2) {
-      // Check if strings are null, undefined, or not of length 2
-      if (!str1 || !str2 || str1.length < 2 || str2.length < 2) {
-        return false;
-      }
 
-      // Compare the first two characters, ignoring case
-      const firstTwoStr1 = str1.substring(0, 2).toLowerCase();
-      const firstTwoStr2 = str2.substring(0, 2).toLowerCase();
-
-      return firstTwoStr1 === firstTwoStr2;
-    }
-    const isSameState = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
     const invoicePayload = {
       data: {
         companyId: recieversDetails._id,
@@ -932,6 +924,7 @@ const Create = () => {
           {/* Particular Table (Invoice) */}
           {tripData.length > 0 ? (
             <TripItemTable
+              isSameState={isSameState}
               itemData={itemData}
               setItemData={setItemData}
               tripData={tripData}
