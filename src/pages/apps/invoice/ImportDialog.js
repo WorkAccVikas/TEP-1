@@ -72,6 +72,7 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           close: true,
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' }
         })
+        
       );
       handleClose();
     } catch (error) {

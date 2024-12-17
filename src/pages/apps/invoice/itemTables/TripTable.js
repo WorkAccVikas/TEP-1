@@ -154,6 +154,33 @@ const groupPenaltyRates = (tripData, userType) => {
   return Object.values(groupedRates);
 };
 
+const safeNumber = (value) => (isNaN(Number(value)) ? 0 : Number(value));
+
+const calculateTotals = (data) =>
+  data.reduce(
+    (totals, item) => ({
+      qty: totals.qty + safeNumber(item.qty),
+      price: totals.price + safeNumber(item.price),
+      tax: totals.tax + safeNumber(item.tax)
+    }),
+    { qty: 0, price: 0, tax: 0 }
+  );
+
+const calculateSums = (data, discountByTax) =>
+  data.reduce(
+    (totals, item) => {
+      const qtyPrice = safeNumber(item.qty) * safeNumber(item.price);
+      const discount = discountByTax ? (qtyPrice * safeNumber(item.discount)) / 100 : safeNumber(item.discount);
+
+      return {
+        total: totals.total + qtyPrice,
+        totalDiscount: totals.totalDiscount + discount,
+        totalTax: totals.totalTax + (qtyPrice * safeNumber(item.tax)) / 100
+      };
+    },
+    { total: 0, totalDiscount: 0, totalTax: 0 }
+  );
+
 const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountSummary, setAmountSummary, invoiceSetting }) => {
   console.log('itemData', tripData);
   const theme = useTheme();
@@ -213,7 +240,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
   };
 
   useEffect(() => {
-    if (tripData && tripData.length > 0) {
+    if (tripData?.length) {
       const mappedData = groupDataWithSuffix(tripData, groupByOption, userType);
       const guardItems = groupGuardRates(tripData, userType);
       const penaltyItems = groupPenaltyRates(tripData, userType);
@@ -221,95 +248,63 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
 
-      const { additonalRate, mcdCharges, tollCharges } = tripData.reduce(
-        (totals, item) => {
-          const addOnRate = isNaN(Number(item.addOnRate)) ? 0 : Number(item.addOnRate);
-          const mcdCharge = isNaN(Number(item.mcdCharge)) ? 0 : Number(item.mcdCharge);
-          const tollCharge = isNaN(Number(item.tollCharge)) ? 0 : Number(item.tollCharge);
-          return {
-            additonalRate: totals.additonalRate + addOnRate,
-            mcdCharges: totals.mcdCharges + mcdCharge,
-            tollCharges: totals.tollCharges + tollCharge
-          };
-        },
-        { additonalRate: 0, mcdCharges: 0, tollCharges: 0 }
+      // Calculate additional charges
+      const chargeTotals = tripData.reduce(
+        (totals, item) => ({
+          additionalRate: totals.additionalRate + safeNumber(item.addOnRate),
+          mcdCharges: totals.mcdCharges + safeNumber(item.mcdCharge),
+          tollCharges: totals.tollCharges + safeNumber(item.tollCharge)
+        }),
+        { additionalRate: 0, mcdCharges: 0, tollCharges: 0 }
       );
 
+      // Calculate totals and taxes
       const { total, totalTax } = combinedData.reduce(
         (totals, item) => {
-          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
-          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
-          const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
-
+          const qtyPrice = safeNumber(item.qty) * safeNumber(item.price);
           return {
-            total: totals.total + qty * price,
-            totalTax: totals.totalTax + (qty * price) / tax
+            total: totals.total + qtyPrice,
+            totalTax: totals.totalTax + qtyPrice / safeNumber(item.tax)
           };
         },
         { total: 0, totalTax: 0 }
       );
+
       setAmountSummary((prev) => ({
         ...prev,
-        total: total,
+        total,
         subTotal: total - prev.totalDiscount,
-        mcdCharges: mcdCharges,
-        tollCharges: tollCharges,
-        additionalCharges: additonalRate,
-        grandTotal: total - prev.totalDiscount + prev.totalTax + mcdCharges + tollCharges + additonalRate
+        ...chargeTotals,
+        grandTotal:
+          total - prev.totalDiscount + prev.totalTax + chargeTotals.mcdCharges + chargeTotals.tollCharges + chargeTotals.additionalRate
       }));
     }
   }, [tripData, groupByOption, userType]);
 
   useEffect(() => {
     setAmountSummary((prev) => {
-      const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
-      const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
+      const { total, totalDiscount, totalTax } = calculateSums(itemData, discountByTax);
 
-      const { totalTax1, total } = itemData.reduce(
-        (totals, item) => {
-          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
-          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
-          const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
-
-          return {
-            totalTax1: totals.totalTax1 + (qty * price * tax) / 100, // Assuming tax is a percentage
-            total: totals.total + qty * price
-          };
-        },
-        { totalTax1: 0, total: 0 }
-      );
-
-      const { totalDiscount1 } = itemData.reduce(
-        (totals, item) => {
-          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
-          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
-          const discount = isNaN(Number(item.discount)) ? 0 : Number(item.discount);
-          console.log(qty * price - discount);
-          return {
-            // totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
-            totalDiscount1: discountByTax ? totals.totalDiscount1 + (qty * price * discount) / 100 : totals.totalDiscount1 + discount // Assuming tax is a percentage
-          };
-        },
-        { totalDiscount1: 0 }
-      );
-
-      let finalTaxAmount = inLineTaxDeduction ? totalTax1 : totalTax;
-      let finalDiscountAmount = inlineDiscountDeduction ? totalDiscount1 : totalDiscount;
-      console.log({ totalDiscount1, totalDiscount, finalDiscountAmount });
+      // Determine final tax and discount amounts
+      const finalTaxAmount = inLineTaxDeduction ? totalTax : (prev.total * taxAndDiscount.tax) / 100;
+      const finalDiscountAmount = inlineDiscountDeduction
+        ? totalDiscount
+        : discountByTax
+        ? (prev.total * taxAndDiscount.discount) / 100
+        : taxAndDiscount.discount;
 
       const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
 
       return {
         ...prev,
-        total: total,
+        total,
         totalTax: finalTaxAmount,
         totalDiscount: finalDiscountAmount,
-        subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
+        subTotal: prev.total - finalDiscountAmount,
         grandTotal
       };
     });
-  }, [taxAndDiscount, itemData, inLineTaxDeduction, inlineDiscountDeduction]);
-
+  }, [tripData, taxAndDiscount, itemData, inLineTaxDeduction, inlineDiscountDeduction]);
   useEffect(() => {
     if (invoiceSetting) {
       //   setInlineTaxDeduction(false);
@@ -322,8 +317,6 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
       setDiscountByTax(invoiceSetting && invoiceSetting.discount && invoiceSetting.discount.by !== 'Amount');
     }
   }, [invoiceSetting]);
-
-  console.log({ itemData });
 
   return (
     <Grid item xs={12}>
