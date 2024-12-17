@@ -181,8 +181,16 @@ const calculateSums = (data, discountByTax) =>
     { total: 0, totalDiscount: 0, totalTax: 0 }
   );
 
-const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountSummary, setAmountSummary, invoiceSetting }) => {
-  console.log('itemData', tripData);
+const TripItemTable = ({
+  isSameState,
+  itemData,
+  setItemData,
+  tripData,
+  groupByOption,
+  amountSummary,
+  setAmountSummary,
+  invoiceSetting
+}) => {
   const theme = useTheme();
 
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
@@ -198,6 +206,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
   const deleteItem = (id) => {
     setItemData((prevItemData) => prevItemData.filter((item) => item.id !== id));
   };
+
   const addItem = () => {
     const newItem = {
       id: UIDV4(),
@@ -223,8 +232,6 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
     // Update tax or discount based on the name of the input field
     if (name === 'tax' || name === 'discount') {
-      console.log({ name, value });
-
       setItemData((prevItemData) =>
         prevItemData.map((item) => ({
           ...item,
@@ -240,31 +247,41 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
   };
 
   useEffect(() => {
-    if (tripData?.length) {
+    if (tripData && tripData.length > 0) {
       const mappedData = groupDataWithSuffix(tripData, groupByOption, userType);
       const guardItems = groupGuardRates(tripData, userType);
       const penaltyItems = groupPenaltyRates(tripData, userType);
 
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
+    }
+  }, [tripData]);
 
-      // Calculate additional charges
-      const chargeTotals = tripData.reduce(
-        (totals, item) => ({
-          additionalRate: totals.additionalRate + safeNumber(item.addOnRate),
-          mcdCharges: totals.mcdCharges + safeNumber(item.mcdCharge),
-          tollCharges: totals.tollCharges + safeNumber(item.tollCharge)
-        }),
-        { additionalRate: 0, mcdCharges: 0, tollCharges: 0 }
+  useEffect(() => {
+    if (tripData && tripData.length > 0) {
+      const { additonalRate, mcdCharges, tollCharges } = tripData.reduce(
+        (totals, item) => {
+          const addOnRate = isNaN(Number(item.addOnRate)) ? 0 : Number(item.addOnRate);
+          const mcdCharge = isNaN(Number(item.mcdCharge)) ? 0 : Number(item.mcdCharge);
+          const tollCharge = isNaN(Number(item.tollCharge)) ? 0 : Number(item.tollCharge);
+          return {
+            additonalRate: totals.additonalRate + addOnRate,
+            mcdCharges: totals.mcdCharges + mcdCharge,
+            tollCharges: totals.tollCharges + tollCharge
+          };
+        },
+        { additonalRate: 0, mcdCharges: 0, tollCharges: 0 }
       );
 
-      // Calculate totals and taxes
-      const { total, totalTax } = combinedData.reduce(
+      const { total } = itemData.reduce(
         (totals, item) => {
-          const qtyPrice = safeNumber(item.qty) * safeNumber(item.price);
+          const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
+          const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
+          const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
+
           return {
-            total: totals.total + qtyPrice,
-            totalTax: totals.totalTax + qtyPrice / safeNumber(item.tax)
+            total: totals.total + qty * price,
+            totalTax: totals.totalTax + (qty * price) / tax
           };
         },
         { total: 0, totalTax: 0 }
@@ -272,39 +289,61 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
 
       setAmountSummary((prev) => ({
         ...prev,
-        total,
-        subTotal: total - prev.totalDiscount,
-        ...chargeTotals,
-        grandTotal:
-          total - prev.totalDiscount + prev.totalTax + chargeTotals.mcdCharges + chargeTotals.tollCharges + chargeTotals.additionalRate
+        total: total,
+        subTotal: total,
+        mcdCharges: mcdCharges,
+        tollCharges: tollCharges,
+        additionalCharges: additonalRate,
+        grandTotal: total - prev.totalDiscount + prev.totalTax + mcdCharges + tollCharges + additonalRate
       }));
+
+      setAmountSummary((prev) => {
+        const totalDiscount = discountByTax ? (prev.total * taxAndDiscount.discount) / 100 : prev.total - taxAndDiscount.discount;
+        const totalTax = ((prev.total - totalDiscount) * taxAndDiscount.tax) / 100;
+
+        const { totalTax1 } = itemData.reduce(
+          (totals, item) => {
+            const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
+            const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
+            const tax = isNaN(Number(item.tax)) ? 0 : Number(item.tax);
+
+            return {
+              totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
+            };
+          },
+          { totalTax1: 0 }
+        );
+
+        const { totalDiscount1 } = itemData.reduce(
+          (totals, item) => {
+            const qty = isNaN(Number(item.qty)) ? 0 : Number(item.qty);
+            const price = isNaN(Number(item.price)) ? 0 : Number(item.price);
+            const discount = isNaN(Number(item.discount)) ? 0 : Number(item.discount);
+            return {
+              // totalTax1: totals.totalTax1 + (qty * price * tax) / 100 // Assuming tax is a percentage
+              totalDiscount1: discountByTax ? totals.totalDiscount1 + (qty * price * discount) / 100 : totals.totalDiscount1 + discount // Assuming tax is a percentage
+            };
+          },
+          { totalDiscount1: 0 }
+        );
+
+        let finalTaxAmount = inLineTaxDeduction ? totalTax1 : totalTax;
+        let finalDiscountAmount = inlineDiscountDeduction ? totalDiscount1 : totalDiscount;
+
+        const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
+        console.log('prev.total', prev.total);
+
+        return {
+          ...prev,
+          totalTax: finalTaxAmount,
+          totalDiscount: finalDiscountAmount,
+          subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
+          grandTotal
+        };
+      });
     }
-  }, [tripData, groupByOption, userType]);
+  }, [itemData, tripData, groupByOption, userType]);
 
-  useEffect(() => {
-    setAmountSummary((prev) => {
-      const { total, totalDiscount, totalTax } = calculateSums(itemData, discountByTax);
-
-      // Determine final tax and discount amounts
-      const finalTaxAmount = inLineTaxDeduction ? totalTax : (prev.total * taxAndDiscount.tax) / 100;
-      const finalDiscountAmount = inlineDiscountDeduction
-        ? totalDiscount
-        : discountByTax
-        ? (prev.total * taxAndDiscount.discount) / 100
-        : taxAndDiscount.discount;
-
-      const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
-
-      return {
-        ...prev,
-        total,
-        totalTax: finalTaxAmount,
-        totalDiscount: finalDiscountAmount,
-        subTotal: prev.total - finalDiscountAmount,
-        grandTotal
-      };
-    });
-  }, [tripData, taxAndDiscount, itemData, inLineTaxDeduction, inlineDiscountDeduction]);
   useEffect(() => {
     if (invoiceSetting) {
       //   setInlineTaxDeduction(false);
@@ -362,6 +401,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
         <Divider />
 
         <Grid container justifyContent="space-between">
+          {/* add item button */}
           <Grid item xs={12} md={8}>
             <Box sx={{ pt: 2.5, pr: 2.5, pb: 2.5, pl: 0 }}>
               <Button color="primary" startIcon={<Add />} onClick={addItem} variant="dashed" sx={{ bgcolor: 'transparent !important' }}>
@@ -370,8 +410,9 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
-            {}
+            {/* Group tax and discount */}
             <Grid container justifyContent="flex-end" spacing={2} sx={{ pt: 2.5, pb: 2.5 }}>
+              {/* Groupo Tax */}
               {discountDeduction && !inlineDiscountDeduction && (
                 <Grid item xs={6}>
                   <Stack spacing={1}>
@@ -411,6 +452,7 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                   </Stack>
                 </Grid>
               )}
+              {/* Group Discount */}
               {!inLineTaxDeduction && (
                 <Grid item xs={6}>
                   <Stack spacing={1}>
@@ -438,13 +480,17 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                 </Grid>
               )}
             </Grid>
+
+            {/* Ammount Summary */}
             <Grid item xs={12}>
               <Stack spacing={2}>
+                {/* Totoal */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Total:</Typography>
                   <Typography variant="h6">{`₹ ${amountSummary.total?.toFixed(2)}`}</Typography>
                 </Stack>
                 <Divider />
+                {/* Discount */}
                 {discountDeduction && (
                   <>
                     <Stack direction="row" justifyContent="space-between">
@@ -454,42 +500,51 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                     <Divider />
                   </>
                 )}
+                {/* Subtotal */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Sub Total:</Typography>
                   <Typography variant="h6">{`₹ ${amountSummary.subTotal?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Tax */}
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Total GST:</Typography>
+                  <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
+                </Stack>
                 {isSameState ? (
                   <>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography>CGST:</Typography>
-                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2) / 2}`}</Typography>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>CGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
                     </Stack>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography>SGST:</Typography>
-                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2) / 2}`}</Typography>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>SGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
                     </Stack>
                   </>
                 ) : (
-                  <>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography>GST:</Typography>
-                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
-                    </Stack>
-                  </>
+                  <Stack direction="row" justifyContent="flex-end" gap={30}>
+                    <Typography color={theme.palette.grey[500]}>IGST:</Typography>
+                    <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
+                  </Stack>
                 )}
+
+                {/* MCD */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>MCD Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.mcdCharges?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Toll */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Toll Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.tollCharges?.toFixed(2)}`}</Typography>
                 </Stack>
+                {/* Addional Charge */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Additional Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.additionalCharges?.toFixed(2)}`}</Typography>
                 </Stack>
                 <Divider />
+                {/* Grand Total */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="subtitle1">Grand Total:</Typography>
                   <Typography variant="h5">{`₹ ${amountSummary.grandTotal?.toFixed(2)}`}</Typography>

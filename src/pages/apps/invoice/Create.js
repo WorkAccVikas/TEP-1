@@ -109,8 +109,6 @@ const Create = () => {
   const userType = useSelector((state) => state.auth.userType);
   const { state } = location || {}; // Safeguard against undefined location
   const data = state?.tripData || [];
-  console.log(`🚀 ~ Create ~ data:`, data);
-  // const [tripData, setTripData] = useState(data);
   const [tripData, setTripData] = useState(() => filterDataFn(data, userType), []);
   const [loading, setLoading] = useState(false);
 
@@ -128,42 +126,6 @@ const Create = () => {
     });
     setInvoiceIdDialog((prev) => !prev);
   };
-
-  // populate Invoice Setting
-  // useEffect(() => {
-  //   const fetchSettings = async () => {
-  //     try {
-  //       const cabProviderId = user._id;
-  //       const url = `/invoice/settings/list`;
-  //       const config = {
-  //         params: {
-  //           cabProviderId
-  //         }
-  //       };
-
-  //       const response = await getApiResponse(url);
-
-  //       if (response.success) {
-  //         if (!response.data) {
-  //           alert('Invoice Settings Not Found');
-  //           navigation('/settings/invoice', {
-  //             replace: true
-  //           });
-  //           return;
-  //         }
-  //         const { invoiceSetting } = response.data;
-
-  //         setSettings(invoiceSetting);
-  //         setLoading(false);
-  //       }
-  //     } catch (error) {
-  //       console.log('Error fetching settings: (Invoice Creation)', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchSettings();
-  // }, []);
 
   useEffect(() => {
     const fetchCabProviderDetails = async () => {
@@ -306,7 +268,7 @@ const Create = () => {
   };
   const [invoiceNotes, setInvoiceNotes] = useState('');
   const [invoiceTermsAndCondition, setInvoiceTermsAndCondition] = useState('');
-  const [isSameState, setIsSameState] = useState(false);
+  const [isSameState, setIsSameState] = useState(true);
 
   useEffect(() => {
     const fetchRecieversDetails = async (companyId) => {
@@ -342,10 +304,9 @@ const Create = () => {
     };
     if (tripData.length > 0 && tripData[0].companyID) {
       fetchRecieversDetails(tripData[0].companyID._id);
+      const isSameState1 = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
+      setIsSameState(isSameState1);
     }
-    const isSameState1 = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
-    setIsSameState(isSameState1);
-    console.log({ tripData });
   }, [tripData]);
 
   const [itemData, setItemData] = useState([
@@ -378,18 +339,6 @@ const Create = () => {
 
   const handleCreateInvoice = async () => {
     setLoading(true);
-    // console.log({ settings });
-    // console.log({ invoiceId });
-    console.log({ dates });
-    // console.log({ sendersDetails });
-    // console.log({ recieversDetails });
-    // console.log({ groupByOption });
-    // console.log({ itemData });
-    // console.log({ invoiceTermsAndCondition });
-    // console.log({ invoiceNotes });
-    // console.log({ amountSummary });
-    // console.log({ sendersBankDetails });
-
     const structuredItemData = itemData.map((item) => ({
       itemName: item.name,
       description: item.description,
@@ -492,18 +441,6 @@ const Create = () => {
   const handleCreateInvoiceVendor = async () => {
     console.log('handleCreateInvoiceVendor');
     setLoading(true);
-    // console.log({ settings });
-    // console.log({ invoiceId });
-    console.log({ dates });
-    // console.log({ sendersDetails });
-    // console.log({ recieversDetails });
-    // console.log({ groupByOption });
-    // console.log({ itemData });
-    // console.log({ invoiceTermsAndCondition });
-    // console.log({ invoiceNotes });
-    // console.log({ amountSummary });
-    // console.log({ sendersBankDetails });
-    console.log({ itemData });
 
     const structuredItemData = itemData.map((item) => ({
       itemName: item.name,
@@ -935,6 +872,7 @@ const Create = () => {
             />
           ) : (
             <DefaultItemTable
+              isSameState={isSameState}
               recieversDetails={recieversDetails}
               invoiceSetting={settings}
               setTripData={setTripData}
@@ -1089,9 +1027,9 @@ const Create = () => {
         {/* Action Buttons */}
         <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
           <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={2} sx={{ height: '100%' }}>
-            <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }} onClick={handlePreview}>
+            {/* <Button variant="outlined" color="secondary" sx={{ color: 'secondary.dark' }} onClick={handlePreview}>
               Preview
-            </Button>
+            </Button> */}
             <Button
               color="primary"
               variant="contained"
@@ -1192,11 +1130,14 @@ const Create = () => {
       </Dialog>
 
       <AddressModal
+        sendersDetails={sendersDetails}
         value={recieversDetails}
         setFilterOptions={setRecieversDetails}
         open={recieversModalOpen}
         setOpen={setRecieversModalOpen}
         setRecieversDetails={setRecieversDetails}
+        setTripData={setTripData}
+        setIsSameState={setIsSameState}
       />
 
       <TripImportDialog

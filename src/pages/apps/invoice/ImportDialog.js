@@ -26,7 +26,6 @@ const filterStrategies = {
 
 // Strategy resolver based on userType
 export const getFilterStrategy = (userType) => {
-  console.log('my userType', userType);
   if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) return filterStrategies.invoiceId;
   if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) return filterStrategies.vendorInvoiceId;
   return () => true; // Default no filtering if userType doesn't match
@@ -37,11 +36,13 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
     startDate: addMonths(new Date(), -1), // Default to today's date
     endDate: new Date() // Default to 1 month after today's date
   });
+  const [loading, setLoading] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
 
   console.log(formatDateUsingMoment(dateRange.endDate));
 
   const fetchTripData = async () => {
+    setLoading(true);
     try {
       // Validate dateRange and recieversDetails._id
       if (!dateRange?.startDate || !dateRange?.endDate || !recieversDetails?._id) {
@@ -59,11 +60,6 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         return;
       }
 
-      // const response = await axiosServices.get(
-      //   `/assignTrip/all/trips/cabProvider?startDate=${formatDateUsingMoment(dateRange.startDate)}&endDate=${formatDateUsingMoment(
-      //     dateRange.endDate
-      //   )}&companyID=${recieversDetails._id}`
-      // );
 
       const baseURL = `/assignTrip/all/trips/cabProvider`;
       const queryParams = new URLSearchParams({
@@ -77,27 +73,15 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
       }
 
       const response = await axiosServices.get(`${baseURL}?${queryParams.toString()}`);
-      // Log response for debugging
 
-      // Update state with fetched data
-      console.log('response.data.data = ', response.data.data);
       const data = response.data.data;
-      console.log('tina = ', data);
 
-      // APPROACH 1 : Filter data based on userType
-      // // Find the key dynamically based on userType
-      // const filterKey = Object.keys(filterConfig).find((key) => filterConfig[key].includes(userType));
-      // console.log(`🚀 ~ fetchTripData ~ filterKey:`, filterKey);
-
-      // // Perform the dynamic filter
-      // const filteredData = data.filter((item) => !item[filterKey]);
-
-      // APPROACH 2 : Filter data based on userType
-      // Retrieve the filter strategy dynamically
       const filterStrategy = getFilterStrategy(userType);
+      console.log({ filterStrategy });
 
       // Apply the filter
       const filteredData = data.filter(filterStrategy);
+      console.log({ filteredData });
 
       // setTripData(response.data.data);
       setTripData(filteredData);
@@ -111,7 +95,6 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           close: true,
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' }
         })
-        
       );
       handleClose();
     } catch (error) {
@@ -126,6 +109,8 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         })
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,7 +183,7 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
           <Button color="error" size="small" onClick={handleClose}>
             Cancel
           </Button>
-          <Button color="success" size="small" variant="contained" onClick={fetchTripData}>
+          <Button color="success" size="small" variant="contained" onClick={fetchTripData} disabled={loading}>
             import
           </Button>
         </Stack>
