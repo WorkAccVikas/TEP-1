@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
 import { commonInitialState, commonReducers } from 'store/slice/common';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching drivers
 export const fetchDrivers = createAsyncThunk(
@@ -241,7 +243,8 @@ const driverSlice = createSlice({
       .addCase(fetchDrivers1.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

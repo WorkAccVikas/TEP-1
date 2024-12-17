@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   subscriptionPlan: null,
@@ -46,7 +48,8 @@ const subscriptionSlice = createSlice({
       .addCase(fetchsubscriptionPlan.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

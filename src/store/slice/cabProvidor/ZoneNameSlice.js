@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching zone names
 export const fetchZoneNames = createAsyncThunk('zoneNames/fetchZoneNames', async (_, { rejectWithValue }) => {
@@ -118,7 +120,8 @@ const zoneNameSlice = createSlice({
       .addCase(deleteZoneName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

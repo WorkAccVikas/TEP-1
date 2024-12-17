@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
 import { commonInitialState, commonReducers } from '../common';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching vendors
 export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ page = 1, limit = 10, query }, { rejectWithValue }) => {
@@ -205,7 +207,8 @@ const vendorSlice = createSlice({
       .addCase(deleteVendor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 
