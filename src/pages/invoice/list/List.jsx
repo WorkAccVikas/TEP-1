@@ -77,14 +77,14 @@ const API_URL = {
   [USERTYPE.isVendorUser]: '/invoice/all/vendor'
 };
 
-const INVOICE_STATUS = {
+export const INVOICE_STATUS = {
   UNPAID: 0,
   PAID: 1,
   CANCELLED: 2,
   PENDING: 3
 };
 
-const getTabName = (status) => {
+export const getTabName = (status) => {
   switch (status) {
     case INVOICE_STATUS.PAID:
       return 'Paid';
