@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -29,6 +29,7 @@ import { ThemeMode } from 'config';
 import { Gift, MessageText1, Notification, Setting2 } from 'iconsax-react';
 import Avatar from 'components/@extended/Avatar';
 import { useNavigate } from 'react-router';
+import axiosServices from 'utils/axios';
 
 const actionSX = {
   mt: '6px',
@@ -41,7 +42,50 @@ const actionSX = {
 };
 
 // ==============================|| HEADER CONTENT - NOTIFICATION ||============================== //
+function formatDateTime(input) {
+  const now = new Date(); // Current date and time
+  const inputDate = new Date(input); // Input date
 
+  // Helper to add leading zero for single-digit numbers
+  const padZero = (num) => (num < 10 ? `0${num}` : num);
+
+  // Helper to format time with AM/PM
+  const formatTimeWithAmPm = (hours, minutes) => {
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+    return `${padZero(formattedHours)}:${padZero(minutes)} ${period}`;
+  };
+
+  // Get date differences
+  const isSameDay = now.toDateString() === inputDate.toDateString();
+  const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === inputDate.toDateString();
+
+  const hours = inputDate.getHours();
+  const minutes = inputDate.getMinutes();
+  const formattedTime = formatTimeWithAmPm(hours, minutes);
+
+  if (isSameDay) {
+    const diffMs = new Date() - inputDate; // Difference in milliseconds
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+
+    if (diffMins < 1) {
+      return { timeAgo: `${diffSecs} seconds ago`, time: formattedTime };
+    } else if (diffHours < 1) {
+      return { timeAgo: `${diffMins} minutes ago`, time: formattedTime };
+    } else {
+      return { timeAgo: `${diffHours} hours ago`, time: formattedTime };
+    }
+  } else if (isYesterday) {
+    const formattedDate = `${padZero(inputDate.getDate())}-${padZero(inputDate.getMonth() + 1)}-${inputDate.getFullYear()}`;
+    return { date: formattedDate, time: formattedTime };
+  } else {
+    // Fallback for other dates
+    const formattedDate = `${padZero(inputDate.getDate())}-${padZero(inputDate.getMonth() + 1)}-${inputDate.getFullYear()}`;
+    return { date: formattedDate, time: formattedTime };
+  }
+}
 const NotificationPage = () => {
   const theme = useTheme();
   const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
@@ -50,6 +94,7 @@ const NotificationPage = () => {
   const [read] = useState(2);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
 
   const handleClick = () => {
     setOpen(false); // Close the NotificationPage
@@ -70,6 +115,52 @@ const NotificationPage = () => {
   const iconBackColorOpen = theme.palette.mode === ThemeMode.DARK ? 'secondary.200' : 'secondary.200';
   const iconBackColor = theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'secondary.100';
 
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const response = await axiosServices.get('/notification/');
+      const notification = response.data.data;
+      console.log({ notification });
+      const filteredNotifications = notification.filter((item) => !item.is_read);
+      console.log({ filteredNotifications });
+      setNotifications(filteredNotifications);
+    };
+    fetchNotifications();
+  }, []);
+
+  function getIconByType(type) {
+    switch (type) {
+      case 'invoice':
+        return (
+          <Avatar type="filled">
+            <Gift size={20} variant="Bold" />
+          </Avatar>
+        );
+      case 'advance':
+        return (
+          <Avatar type="outlined">
+            <MessageText1 size={20} variant="Bold" />
+          </Avatar>
+        );
+      case 'roster':
+        return (
+          <Avatar>
+            <Setting2 size={20} variant="Bold" />
+          </Avatar>
+        );
+      case 'INVOICE':
+        return (
+          <ListItemAvatar>
+            <Avatar type="combined">IN</Avatar>
+          </ListItemAvatar>
+        );
+      default:
+        return (
+          <Avatar type="filled">
+            <Gift size={20} variant="Bold" /> {/* Default fallback */}
+          </Avatar>
+        );
+    }
+  }
   return (
     <Box sx={{ flexShrink: 0, ml: 0.5 }}>
       <IconButton
@@ -142,30 +233,36 @@ const NotificationPage = () => {
                       }
                     }}
                   >
-                    <ListItemButton>
-                      <ListItemAvatar>
-                        <Avatar type="filled">
-                          <Gift size={20} variant="Bold" />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            It&apos;s{' '}
-                            <Typography component="span" variant="subtitle1">
-                              Cristina danny&apos;s
-                            </Typography>{' '}
-                            birthday today.
-                          </Typography>
-                        }
-                        secondary="2 min ago"
-                      />
-                      <ListItemSecondaryAction>
-                        <Typography variant="caption" noWrap>
-                          3:00 AM
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
+                    {notifications.map((item) => {
+                      const { timeAgo, time } = formatDateTime(item.createdAt);
+                      return (
+                        <ListItemButton key={item._id}>
+                          <ListItemAvatar>
+                            {/* <Avatar type="filled">
+                              <Gift size={20} variant="Bold" />
+                            </Avatar> */}
+                            {getIconByType(item.notificationType)}
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="h6">
+                                It&apos;s{' '}
+                                <Typography component="span" variant="subtitle1">
+                                  Cristina danny&apos;s
+                                </Typography>{' '}
+                                birthday today.
+                              </Typography>
+                            }
+                            secondary={timeAgo}
+                          />
+                          <ListItemSecondaryAction>
+                            <Typography variant="caption" noWrap>
+                              {time}
+                            </Typography>
+                          </ListItemSecondaryAction>
+                        </ListItemButton>
+                      );
+                    })}
 
                     <ListItemButton>
                       <ListItemAvatar>
