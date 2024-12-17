@@ -27,7 +27,15 @@ import { useTheme } from '@mui/material/styles';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 
-const DefaultItemTable = ({ invoiceSetting, setAmountSummary, amountSummary, handleOpenDialog, recieversDetails, setTripData }) => {
+const DefaultItemTable = ({
+  isSameState,
+  invoiceSetting,
+  setAmountSummary,
+  amountSummary,
+  handleOpenDialog,
+  recieversDetails,
+  setTripData
+}) => {
   const theme = useTheme();
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
   const [inlineDiscountDeduction, setInlineDiscountDeduction] = useState(false);
@@ -311,6 +319,23 @@ const DefaultItemTable = ({ invoiceSetting, setAmountSummary, amountSummary, han
                   <Typography>Total GST:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
                 </Stack>
+                {isSameState ? (
+                  <>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>CGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="flex-end" gap={30}>
+                      <Typography color={theme.palette.grey[500]}>SGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${(amountSummary.totalTax / 2)?.toFixed(2)}`}</Typography>
+                    </Stack>
+                  </>
+                ) : (
+                  <Stack direction="row" justifyContent="flex-end" gap={30}>
+                    <Typography color={theme.palette.grey[500]}>IGST:</Typography>
+                    <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
+                  </Stack>
+                )}
                 {amountSummary.mcdCharges > 0 && (
                   <Stack direction="row" justifyContent="space-between">
                     <Typography>MCD Charges:</Typography>
