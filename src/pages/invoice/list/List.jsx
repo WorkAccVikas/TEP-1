@@ -74,16 +74,17 @@ const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
   [USERTYPE.isVendor]: '/invoice/all/vendor',
   [USERTYPE.iscabProviderUser]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendorUser]: '/invoice/all/vendor',
+  [USERTYPE.isVendorUser]: '/invoice/all/vendor'
 };
 
-const INVOICE_STATUS = {
+export const INVOICE_STATUS = {
   UNPAID: 0,
   PAID: 1,
-  CANCELLED: 2
+  CANCELLED: 2,
+  PENDING: 3
 };
 
-const getTabName = (status) => {
+export const getTabName = (status) => {
   switch (status) {
     case INVOICE_STATUS.PAID:
       return 'Paid';
@@ -91,6 +92,8 @@ const getTabName = (status) => {
       return 'Unpaid';
     case INVOICE_STATUS.CANCELLED:
       return 'Cancelled';
+    case INVOICE_STATUS.PENDING:
+      return 'PENDING';
     default:
       return 'All';
   }
@@ -149,34 +152,22 @@ function ReactTable({ columns, data }) {
   // Map status codes to labels and colors
 
   // Create groups and counts
-  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED];
+  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED, INVOICE_STATUS.PENDING];
 
   const countGroup = data.map((item) => item.status);
-  // console.log('countGroup', countGroup);
-  console.log('rows', rows);
 
   const counts = {
     Paid: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
     Unpaid: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length,
-    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length
+    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length,
+    Pending: countGroup.filter((status) => status === INVOICE_STATUS.PENDING).length
   };
-
-  // console.log('counts', counts);
-  // console.log('page = ', page);
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
   useEffect(() => {
-    console.log('x = ', activeTab);
-
     setFilter('status', activeTab === 'All' ? '' : activeTab);
   }, [activeTab, setFilter]);
-
-  // useEffect(() => {
-  //   console.log('x = ', activeTab);
-  //   setFilter('status', activeTab === 'All' ? '' : activeTab === INVOICE_STATUS.UNPAID ? 1 : activeTab === INVOICE_STATUS.PAID ? 2 : 3);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [activeTab]);
 
   const filterData = rows.filter((row) => {
     if (activeTab === 'All') {
@@ -185,8 +176,6 @@ function ReactTable({ columns, data }) {
       return row.original.status === activeTab;
     }
   });
-
-  console.log('filterData', filterData);
 
   return (
     <>
@@ -207,6 +196,8 @@ function ReactTable({ columns, data }) {
                         ? counts.Paid
                         : status === INVOICE_STATUS.UNPAID
                         ? counts.Unpaid
+                        : status === INVOICE_STATUS.PENDING
+                        ? counts.Pending
                         : counts.Cancelled
                     }
                     color={
@@ -216,6 +207,8 @@ function ReactTable({ columns, data }) {
                         ? 'success'
                         : status === INVOICE_STATUS.UNPAID
                         ? 'warning'
+                        : status === INVOICE_STATUS.PENDING
+                        ? 'info'
                         : 'error'
                     }
                     variant="light"
@@ -305,7 +298,6 @@ const List = () => {
   const [loading, setLoading] = useState(true);
   const { alertPopup } = useSelector((state) => state.invoice);
   const userType = useSelector((state) => state.auth.userType);
-  console.log(`🚀 ~ List ~ userType:`, userType);
 
   const [data, setData] = useState([]);
   const [metadata, setMetadata] = useState([]);
@@ -314,8 +306,6 @@ const List = () => {
   const handleRefetch = useCallback(() => {
     setRefetch((prev) => !prev);
   }, []);
-
-  console.log({ metadata });
 
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {}
@@ -335,7 +325,6 @@ const List = () => {
             // companyId: filterOptions?.selectedCompany?._id
           }
         });
-        console.log('response', response);
 
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
@@ -349,29 +338,6 @@ const List = () => {
 
     fetchInvoice();
   }, [userType, filterOptions, startDate, endDate, refetch]);
-
-  const handleClose = (status) => {
-    if (status) {
-      dispatch(getInvoiceDelete(invoiceId));
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Column deleted successfully',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false
-        })
-      );
-    }
-    dispatch(
-      alertPopupToggle({
-        alertToggle: false
-      })
-    );
-  };
 
   const columns = useMemo(
     () => [
@@ -407,11 +373,12 @@ const List = () => {
         disableFilters: true,
         Cell: ({ row }) => {
           const { values } = row;
+
           return (
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
               <Stack spacing={0}>
-                <Typography variant="subtitle1">{values.billedTo.company_name}</Typography>
+                <Typography variant="subtitle1">{values.billedTo.name}</Typography>
                 <Typography variant="caption" color="textSecondary">
                   {values.billedTo.company_email}
                 </Typography>
@@ -451,7 +418,9 @@ const List = () => {
           } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
           } else if (value === 0) {
-            return <Chip color="info" label="Unpaid" size="small" variant="light" />;
+            return <Chip color="warning" label="Unpaid" size="small" variant="light" />;
+          } else if (value === 3) {
+            return <Chip color="info" label="Pending" size="small" variant="light" />;
           }
         }
       },
@@ -463,11 +432,8 @@ const List = () => {
           const [dialogOpen, setDialogOpen] = useState(false);
           const [formDialogOpen, setFormDialogOpen] = useState(false);
           const [newStatus, setNewStatus] = useState(null);
-          const [remarks, setRemarks] = useState('');
-          const token = localStorage.getItem('serviceToken');
           const theme = useTheme();
           const mode = theme.palette.mode;
-          const navigate = useNavigate();
           const [paidModalOpen, setPaidModalOpen] = useState(false);
           const [paidAmount, setPaidAmount] = useState(0);
 
@@ -482,7 +448,6 @@ const List = () => {
           const handleStatusChange = (status) => {
             setNewStatus(status);
             if (status === 2) {
-              // Open FormDialog if "Cancelled"
               setFormDialogOpen(true);
             } else {
               setDialogOpen(true); // Open confirmation dialog for other statuses
@@ -498,7 +463,6 @@ const List = () => {
           };
 
           const handleTextChange = (event) => {
-            console.log(`🚀 ~ handleTextChange ~ event:`, event);
             setRemarks(event.target.value);
           };
 
@@ -514,21 +478,31 @@ const List = () => {
 
           const confirmStatusChange = async (type, data) => {
             try {
-              console.log('🚀 ~ confirmStatusChange ~ data:', data);
               const response = await axiosServices.put(`/invoice/update/paymentStatus`, {
                 data: {
                   invoiceId: row.original._id,
+
                   status: newStatus,
                   remarks: newStatus === 2 ? remarks : undefined, // Include remarks if cancelled
                   ...(type === 'Paid' && { ...data })
                 }
+
+                // data: {
+                //   invoiceId: row.original._id,
+                //   transactionsId: 'VADE0B248932',
+                //   transactionsType: 'EXPENSE',
+                //   receivedAmount: 5000,
+                //   TDSRate: 10,
+                //   TDSAmount: 500,
+                //   status: 0
+                // }
               });
 
               if (response.status >= 200 && response.status < 300) {
                 dispatch(
                   openSnackbar({
                     open: true,
-                    message: response.data.message,
+                    message: 'Invoice Status Changed',
                     variant: 'alert',
                     alert: {
                       color: 'success'
@@ -583,7 +557,7 @@ const List = () => {
                     color="success"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/apps/invoices/details/${row.original._id}`); // Use navigate for redirection
+                      window.open(`/apps/invoices/details/${row.original._id}`, '_blank', 'noopener,noreferrer');
                     }}
                   >
                     <Eye />
@@ -610,7 +584,6 @@ const List = () => {
                 <MenuItem onClick={() => handleStatusChange(0)}>Unpaid</MenuItem>
                 <MenuItem
                   onClick={() => {
-                    console.log('row = ', row.original);
                     handleOpenPaidModal(row.original.grandTotal);
                   }}
                 >

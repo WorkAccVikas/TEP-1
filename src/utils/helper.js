@@ -466,3 +466,15 @@ export function filterKeys(dataArray, ignoredKeys) {
     return Object.fromEntries(filteredEntries);
   });
 }
+export function checkGSTtype(str1, str2) {
+  // Check if strings are null, undefined, or not of length 2
+  if (!str1 || !str2 || str1.length < 2 || str2.length < 2) {
+    return false;
+  }
+
+  // Compare the first two characters, ignoring case
+  const firstTwoStr1 = str1.substring(0, 2).toLowerCase();
+  const firstTwoStr2 = str2.substring(0, 2).toLowerCase();
+
+  return firstTwoStr1 === firstTwoStr2;
+}
