@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   zoneTypes: [], // Empty array initially
@@ -86,7 +88,8 @@ const zoneTypeSlice = createSlice({
       .addCase(fetchAllZoneTypes.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

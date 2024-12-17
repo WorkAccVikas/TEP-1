@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { FAKE_ACCOUNT_SETTINGS, FAKE_ACCOUNT_SETTINGS_2 } from 'pages/setting/account';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   settings: null,
@@ -59,6 +60,10 @@ const accountSettingSlice = createSlice({
     resetError: (state) => {
       state.error = null;
     },
+    logoutActivity() {
+      console.log('authentication logout redux toolkit');
+      return initialState;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -67,18 +72,19 @@ const accountSettingSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAccountSettings.fulfilled, (state, action) => {
-        console.log("action.payload",action.payload.data.data);
+        console.log('action.payload', action.payload.data.data);
 
         state.settings = action.payload.data.data || null; // Handle empty result
-     
+
         state.loading = false;
       })
       .addCase(fetchAccountSettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 
-export const { reset, resetError } = accountSettingSlice.actions;
+export const { reset, resetError, logoutActivity } = accountSettingSlice.actions;
 export const accountSettingsReducer = accountSettingSlice.reducer;

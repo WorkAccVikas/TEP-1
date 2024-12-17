@@ -9,7 +9,7 @@ export const initialState = {
   userType: null,
   userSpecificData: null,
   userPermissions: null,
-  accountSetting:null
+  accountSetting: null
 };
 
 // ==============================|| AUTH REDUCER ||============================== //
@@ -24,7 +24,7 @@ const auth = (state = initialState, action) => {
       };
     }
     case LOGIN: {
-      const { user, userType, userSpecificData, userPermissions,accountSetting } = action.payload;
+      const { user, userType, userSpecificData, userPermissions, accountSetting } = action.payload;
       return {
         ...state,
         isLoggedIn: true,
@@ -43,7 +43,8 @@ const auth = (state = initialState, action) => {
         user: null,
         userType: null,
         userSpecificData: null,
-        userPermissions: null
+        userPermissions: null,
+        accountSetting: null
       };
     }
     case INITIALIZE: {
