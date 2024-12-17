@@ -49,11 +49,13 @@ function sizeInMB(value) {
   return sizeInKB(value) * 1024;
 }
 
-function Config(fileSize, fileFormat, width = null, height = null) {
+function Config(fileSize, fileFormat, width = null, height = null, isUsed = false) {
   this.fileSize = fileSize;
   this.fileFormat = fileFormat;
-  this.width = width;
-  this.height = height;
+  this.width = isUsed ? width : null;
+  this.height = isUsed ? height : null;
+  this.tempWidth = width;
+  this.tempHeight = height;
 }
 
 Config.prototype.getSizeString = function () {
@@ -69,8 +71,8 @@ Config.prototype.getSizeString = function () {
 };
 
 Config.prototype.getRecommendedSizeString = function () {
-  if (this.width && this.height) {
-    return `${this.width} x ${this.height} px`;
+  if (this.tempWidth && this.tempHeight) {
+    return `${this.tempWidth} x ${this.tempHeight} px`;
   }
   return 'No size recommendation';
 };
@@ -190,16 +192,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
 
   const formik = useFormik({
     initialValues: {
-      /*************  ✨ Codeium Command ⭐  *************/
-      /**
-       * Called when the image is loaded. Checks the dimensions of the image
-       * and validates them. If the dimensions are too large, it clears the
-       * logo field, sets the logoPreview to an empty string, marks the
-       * field as touched, and shows a snackbar with an error message.
-       * @function
-       * @param {Object} e - The event object
-       */
-      /******  3dcc8e55-3cb1-4c10-a174-fed6d5af0418  *******/ name: initialValues?.name || '',
+      name: initialValues?.name || '',
       title: initialValues?.title || '',
       logo: null,
       smallLogo: null,
@@ -255,8 +248,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
         //     })
         //   );
 
-          // navigate('/home', { replace: true });
-        
+        // navigate('/home', { replace: true });
       } catch (error) {
         console.log(error);
         dispatch(
@@ -292,11 +284,11 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
 
   useEffect(() => {
     if (!isFirstTime) {
-      if (initialValues&&initialValues.logo) setLogoPreview(initialValues.logo);
+      if (initialValues && initialValues.logo) setLogoPreview(initialValues.logo);
 
-      if (initialValues&&initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
+      if (initialValues && initialValues.favIcon) setFaviconPreview(initialValues.favIcon);
 
-      if (initialValues&&initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
+      if (initialValues && initialValues.smallLogo) setSmallLogoPreview(initialValues.smallLogo);
     }
   }, [initialValues, isFirstTime]);
 

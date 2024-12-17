@@ -9,6 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
   Fade,
+  Grid,
   IconButton,
   Menu,
   MenuItem,
@@ -47,25 +48,28 @@ import { DateColumnFilter, renderFilterTypes } from 'utils/react-table';
 import { useNavigate } from 'react-router';
 import PaginationBox from 'components/tables/Pagination';
 import { getTabName, INVOICE_STATUS } from './List';
+import InvoiceCard from 'components/cards/invoice/InvoiceCard';
+import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
+import usePagination1 from 'hooks/usePagination1';
+import VendorFilter from 'pages/trips/filter/VendorFilter';
 
 const API_URL = `/invoice/to/cabProviderId`;
 
 const VendorInvoiceList = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [lastPageIndex, setLastPageIndex] = useState(1);
+  const [metadata, setMetadata] = useState({});
+
+  const [filterOptions, setFilterOptions] = useState({
+    selectedVendor: {}
+  });
   const userType = useSelector((state) => state.auth.userType);
 
-  const handleLimitChange = useCallback((event) => {
-    setLimit(+event.target.value);
-    setPage(1);
-  }, []);
-
-  const handlePageChange = useCallback((value) => setPage(value), []);
+  const { page, limit, lastPageIndex, handlePageChange, handleLimitChange, handleLastPageIndexChange } = usePagination1();
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
@@ -73,12 +77,14 @@ const VendorInvoiceList = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const vendorId = filterOptions?.selectedVendor?._id;
         const response = await axios.get(API_URL, {
           params: {
             page,
             limit,
-            startDate: formatDateUsingMoment(startDate),
-            endDate: formatDateUsingMoment(endDate)
+            invoiceStartDate: formatDateUsingMoment(startDate),
+            invoiceEndDate: formatDateUsingMoment(endDate),
+            vendorId
           }
         });
 
@@ -90,8 +96,9 @@ const VendorInvoiceList = () => {
 
         const lastPageIndex = Math.ceil(total / limitṣ);
         console.log(`🚀 ~ fetchData ~ lastPageIndex:`, lastPageIndex);
+        setMetadata(response.data?.metaData || {});
 
-        setLastPageIndex(lastPageIndex);
+        handleLastPageIndexChange(lastPageIndex);
         setData(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -101,7 +108,7 @@ const VendorInvoiceList = () => {
     };
 
     fetchData();
-  }, [startDate, endDate, page, limit]);
+  }, [startDate, endDate, page, limit, handleLastPageIndexChange, filterOptions?.selectedVendor?._id]);
 
   const columns = useMemo(
     () => [
@@ -415,14 +422,159 @@ const VendorInvoiceList = () => {
     [userType]
   );
 
+  const widgetsData = [
+    {
+      title: 'Paid',
+      count: metadata?.paid?.paidCount ?? 0,
+      amount: metadata?.paid?.paidAmount ?? 0,
+      percentage: (
+        ((metadata?.paid?.paidCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
+        100
+      ).toFixed(2),
+      isLoss: false,
+      invoice: metadata?.paid?.paidCount ?? 0,
+      color: { main: '#4caf50' },
+      chartData: [] // Add your chart metadata if necessary
+    },
+    {
+      title: 'Unpaid',
+      count: metadata?.unpaid?.unpaidCount ?? 0,
+      amount: metadata?.unpaid?.unpaidAmount ?? 0,
+      percentage: (
+        ((metadata?.unpaid?.unpaidCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
+        100
+      ).toFixed(2),
+      isLoss: true,
+      invoice: metadata?.unpaid?.unpaidCount ?? 0,
+      color: { main: '#f44336' },
+      chartData: [] // Add your chart metadata if necessary
+    },
+    {
+      title: 'Overdue',
+      count: metadata?.overDue?.overDueCount ?? 0,
+      amount: metadata?.overDue?.overDueAmount ?? 0,
+      percentage: (
+        ((metadata?.overDue?.overDueCount ?? 0) /
+          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
+        100
+      ).toFixed(2),
+      isLoss: true,
+      invoice: metadata?.overDue?.overDueCount ?? 0,
+      color: { main: '#ff9800' },
+      chartData: [] // Add your chart metadata if necessary
+    }
+  ];
+
   return (
     <>
       <Stack gap={2}>
         {/* Widget */}
+        <Grid container direction={matchDownSM ? 'column' : 'row'} spacing={2} sx={{ pb: 2 }}>
+          <Grid item xs={12} md={8}>
+            <Grid container direction="row" spacing={2}>
+              {widgetsData.map((widget, index) => (
+                <Grid item sm={4} xs={12} key={index}>
+                  <MainCard>
+                    <InvoiceCard
+                      title={widget.title}
+                      count={widget.count}
+                      amount={widget.amount} // Pass amount if needed
+                      percentage={widget.percentage}
+                      isLoss={widget.isLoss}
+                      invoice={widget.invoice}
+                      color={widget.color.main}
+                    />
+                  </MainCard>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                background: `linear-gradient(to right, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                borderRadius: 1,
+                p: 1.75
+              }}
+            >
+              <Stack direction="row" alignItems="flex-end" justifyContent="space-between" spacing={1}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={1}>
+                    <Typography variant="body2" color="white">
+                      Total
+                    </Typography>
+                    <Typography variant="body1" color="white">
+                      ₹{' '}
+                      {parseFloat(
+                        (
+                          (metadata?.paid?.paidAmount ?? 0) +
+                          (metadata?.unpaid?.unpaidAmount ?? 0) +
+                          (metadata?.overDue?.overDueAmount ?? 0)
+                        ).toFixed(2)
+                      )}
+                    </Typography>
+                  </Stack>
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                  <Typography variant="body2" color="white">
+                    Pending
+                  </Typography>
+                  <Typography variant="body1" color="white">
+                    ₹ {parseFloat(((metadata?.unpaid?.unpaidAmount ?? 0) + (metadata?.overDue?.overDueAmount ?? 0)).toFixed(2))}
+                  </Typography>
+                </Stack>
+              </Stack>
+
+              <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
+                <Typography variant="body2" color="white">
+                  Recieved
+                </Typography>
+                <Typography variant="body1" color="white">
+                  ₹ {parseFloat((metadata?.paid?.paidAmount ?? 0).toFixed(2))}
+                </Typography>
+              </Stack>
+
+              <Box sx={{ maxWidth: '100%' }}>
+                <LinearWithLabel
+                  value={
+                    (
+                      ((metadata?.paid?.paidAmount ?? 0) /
+                        ((metadata?.paid?.paidAmount ?? 0) +
+                          (metadata?.unpaid?.unpaidAmount ?? 0) +
+                          (metadata?.overDue?.overDueAmount ?? 0) || 1)) *
+                      100
+                    ).toFixed(2) || 0
+                  }
+                />
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
 
         {/* filter */}
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" alignItems="center" justifyContent="flex-start" gap={1}>
+            {/* Vendor Filter */}
+            <VendorFilter
+              setFilterOptions={setFilterOptions}
+              sx={{
+                color: '#fff',
+                '& .MuiSelect-select': {
+                  padding: '0.5rem',
+                  pr: '2rem'
+                },
+                '& .MuiSelect-icon': {
+                  color: '#fff' // Set the down arrow color to white
+                },
+                width: '200px'
+              }}
+              value={filterOptions.selectedVendor}
+            />
+
+            {/* Date Filter */}
             <DateRangeSelect
               startDate={startDate}
               endDate={endDate}
@@ -463,6 +615,7 @@ const VendorInvoiceList = () => {
           </ScrollX>
         </MainCard>
 
+        {/* Pagination */}
         <Box>
           {data.length > 0 && (
             <PaginationBox
@@ -550,6 +703,14 @@ export function ReactTable({ columns, data }) {
     setFilter('status', activeTab === 'All' ? '' : activeTab);
   }, [activeTab, setFilter]);
 
+  const filterData = rows.filter((row) => {
+    if (activeTab === 'All') {
+      return true;
+    } else {
+      return row.original.status === activeTab;
+    }
+  });
+
   return (
     <>
       <Box sx={{ p: 1, pb: 0, width: '100%' }}>
@@ -609,7 +770,7 @@ export function ReactTable({ columns, data }) {
             ))}
           </TableHead>
           <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
+            {filterData.map((row, i) => {
               prepareRow(row);
               return (
                 <Fragment key={i}>
