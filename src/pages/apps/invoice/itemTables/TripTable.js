@@ -458,10 +458,25 @@ const TripItemTable = ({ itemData, setItemData, tripData, groupByOption, amountS
                   <Typography>Sub Total:</Typography>
                   <Typography variant="h6">{`₹ ${amountSummary.subTotal?.toFixed(2)}`}</Typography>
                 </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography>Total GST:</Typography>
-                  <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
-                </Stack>
+                {isSameState ? (
+                  <>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography>CGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2) / 2}`}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography>SGST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2) / 2}`}</Typography>
+                    </Stack>
+                  </>
+                ) : (
+                  <>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography>GST:</Typography>
+                      <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.totalTax?.toFixed(2)}`}</Typography>
+                    </Stack>
+                  </>
+                )}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>MCD Charges:</Typography>
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.mcdCharges?.toFixed(2)}`}</Typography>
