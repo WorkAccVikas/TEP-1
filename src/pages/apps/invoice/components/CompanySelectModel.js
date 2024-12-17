@@ -24,10 +24,11 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import CustomCircularLoader from 'components/CustomCircularLoader';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import { checkGSTtype } from 'utils/helper';
 
 // ==============================|| INVOICE - SELECT ADDRESS ||============================== //
 
-const AddressModal = ({ open: modelOpen, setOpen: setModelOpen, value, setFilterOptions,setRecieversDetails }) => {
+const AddressModal = ({ open: modelOpen, setOpen: setModelOpen, value, setFilterOptions, setIsSameState, sendersDetails }) => {
   function closeAddressModal() {
     setModelOpen(false);
   }
@@ -127,7 +128,14 @@ const AddressModal = ({ open: modelOpen, setOpen: setModelOpen, value, setFilter
           />
         </FormControl>
         <Stack spacing={2}>
-          <Address data={options} loading={loading} handlercompany={setFilterOptions}  />
+          <Address
+            sendersDetails={sendersDetails}
+            setIsSameState={setIsSameState}
+            data={options}
+            loading={loading}
+            handlercompany={setFilterOptions}
+            setModelOpen={setModelOpen}
+          />
         </Stack>
       </DialogContent>
       <Divider />
@@ -151,9 +159,8 @@ AddressModal.propTypes = {
 
 export default AddressModal;
 
-const Address = ({ handlercompany, data, loading }) => {
+const Address = ({ setIsSameState, handlercompany, data, loading, sendersDetails, setModelOpen }) => {
   const theme = useTheme();
-
   return (
     <>
       {loading ? (
@@ -176,6 +183,9 @@ const Address = ({ handlercompany, data, loading }) => {
                 address: company.address,
                 state: company.state
               });
+              const isSameState1 = checkGSTtype(sendersDetails.GSTIN, company.GSTIN);
+              setIsSameState(isSameState1);
+              setModelOpen(false);
             }}
             key={company._id}
             sx={{
