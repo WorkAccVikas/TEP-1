@@ -56,7 +56,7 @@ const VendorInvoiceList = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [lastPageIndex, setLastPageIndex] = useState(1);
   const userType = useSelector((state) => state.auth.userType);
 
@@ -84,10 +84,11 @@ const VendorInvoiceList = () => {
 
         console.log(`🚀 ~ fetchData ~ response:`, response);
         const data = response.data.data;
+        const total = response.data.totalCount;
         const limitṣ = Number(response.data.limit);
         console.table({ data, limitṣ });
 
-        const lastPageIndex = Math.ceil(data.length / limitṣ);
+        const lastPageIndex = Math.ceil(total / limitṣ);
         console.log(`🚀 ~ fetchData ~ lastPageIndex:`, lastPageIndex);
 
         setLastPageIndex(lastPageIndex);
@@ -470,7 +471,7 @@ const VendorInvoiceList = () => {
               pageSize={limit}
               setPageSize={handleLimitChange}
               lastPageIndex={lastPageIndex}
-              options={[1, 3, 5]}
+              // options={[1, 3, 5]}
             />
           )}
         </Box>
