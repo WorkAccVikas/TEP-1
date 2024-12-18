@@ -95,6 +95,12 @@ export const PAN_CARD_REGEX_PATTERN = /^[A-Z]{3}[CPHFATBLJG]{1}[A-Z]{1}[0-9]{4}[
 
 export const GSTIN_NUMBER_REGEX_PATTERN = /^[A-Z0-9]{15}$/;
 
+export const EMAIL_REGEX_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const PIN_CODE_REGEX_PATTERN = /^[1-9][0-9]{5}$/;
+
+export const MOBILE_NUMBER_REGEX_PATTERN = /^\d{10}$/; // Matches exactly 10 digits
+
 export const DOCUMENT_TITLE = {
   '/landing': 'Landing',
   '/login': 'Login',
