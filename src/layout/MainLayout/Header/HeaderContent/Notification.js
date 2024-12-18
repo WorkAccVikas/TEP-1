@@ -116,7 +116,7 @@ const NotificationPage = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fetch,setFetch] = useState(false);
+  const [fetch, setFetch] = useState(false);
 
   console.log('notifications', notifications);
   console.log('unreadCount', unreadCount);
@@ -172,7 +172,7 @@ const NotificationPage = () => {
 
     fetchNotifications();
   }, [fetch]);
-  
+
   // Handle Mark All Read
   const handleMarkAllRead = async () => {
     try {
@@ -192,7 +192,7 @@ const NotificationPage = () => {
           notificationIds.includes(notification._id) ? { ...notification, is_read: true } : notification
         )
       );
-      
+
       setFetch(true);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -230,6 +230,33 @@ const NotificationPage = () => {
         return null;
     }
   }
+
+// Function to handle navigation based on notification type
+const handleNotificationClick = (type, id) => {
+  let path = '';
+
+  // Define paths based on notification type
+  switch (type) {
+    case 'ADVANCE':
+      path = `/apps/invoices/advance`; // Example path for 'ADVANCE'
+      break;
+    case 'INVOICE':
+      path = `/apps/invoices/company`; // Example path for 'INVOICE'
+      break;
+    case 'TRIP':
+      path = `/apps/trips/list`; // Example path for 'TRIP'
+      break;
+    case 'TRANSACTION':
+      path = `/expense/transaction`; // Example path for 'TRANSACTION'
+      break;
+    default:
+      path = '/home'; // Default path if type is not recognized
+      break;
+  }
+
+  // Navigate to the determined path
+  navigate(path);
+};
 
   return (
     <Box sx={{ flexShrink: 0, ml: 0.5 }}>
@@ -314,7 +341,7 @@ const NotificationPage = () => {
                       notifications.slice(0, 5).map((item) => {
                         const { date, time } = formatDateTime(item.createdAt);
                         return (
-                          <ListItemButton key={item._id}>
+                          <ListItemButton key={item._id} onClick={() => handleNotificationClick(item.notificationType, item._id)}>
                             <ListItemAvatar>
                               {getIconByType(item.notificationType)} {/* Dynamic icon */}
                             </ListItemAvatar>
@@ -327,7 +354,7 @@ const NotificationPage = () => {
                               secondary={date}
                             />
                             <ListItemSecondaryAction>
-                              <Typography variant="caption" noWrap sx={{fontWeight:"bold"}}>
+                              <Typography variant="caption" noWrap sx={{ fontWeight: 'bold' }}>
                                 {time} {/* Display only the time */}
                               </Typography>
                             </ListItemSecondaryAction>
@@ -340,13 +367,12 @@ const NotificationPage = () => {
                       </Typography>
                     )}
                   </List>
-                  {notifications.length > 0 && (
-                    <Stack direction="row" justifyContent="center">
-                      <Link variant="h6" color="primary" onClick={handleClick}>
-                        View all
-                      </Link>
-                    </Stack>
-                  )}
+
+                  <Stack direction="row" justifyContent="center">
+                    <Link variant="h6" color="primary" onClick={handleClick}>
+                      View all
+                    </Link>
+                  </Stack>
                 </MainCard>
               </ClickAwayListener>
             </Paper>
