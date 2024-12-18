@@ -15,6 +15,7 @@ import EmptyTableDemo from 'components/tables/EmptyTable';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
+import TemplateSelectDialog from 'sections/rateUpload/companyRate/TemplateSelectDialog';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
@@ -65,7 +66,7 @@ const CompanyRateListing = ({ companyName, id }) => {
     <>
       {!showCompanyList ? ( // Conditional rendering based on showCompanyList state
         <Stack gap={1} spacing={1}>
-          <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} />
+          <Header OtherComp={({ loading }) => <ButtonComponent id={id} loading={loading} onAddRate={handleAddRate} />} />
 
           <MainCard title="Company Rates" content={false}>
             <ScrollX>
@@ -87,19 +88,6 @@ const CompanyRateListing = ({ companyName, id }) => {
               )}
             </ScrollX>
           </MainCard>
-
-          {/* {companyList.length !== 0 && (
-            <CompanyRateReactTable
-              data={companyList}
-              page={page}
-              setPage={setPage}
-              limit={limit}
-              setLimit={setLimit}
-              updateKey={updateKey}
-              setUpdateKey={setUpdateKey}
-              loading={loading}
-            />
-          )} */}
         </Stack>
       ) : (
         <CompanyRate id={id} companyName={companyName} onBackToList={handleBackToList} /> // Render CompanyList1 when the state is true
@@ -110,7 +98,16 @@ const CompanyRateListing = ({ companyName, id }) => {
 
 export default CompanyRateListing;
 
-const ButtonComponent = ({ loading, onAddRate }) => {
+const ButtonComponent = ({ id, loading, onAddRate }) => {
+  const [openCompanyRateUploadDialog, setOpenCompanyRateUploadDialog] = useState(false);
+
+  const handleCompanyRateUploadOpen = () => {
+    setOpenCompanyRateUploadDialog(true);
+  };
+  const handleCompanyRateUploadClose = () => {
+    setOpenCompanyRateUploadDialog(false);
+  };
+
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
@@ -123,7 +120,23 @@ const ButtonComponent = ({ loading, onAddRate }) => {
         >
           {loading ? 'Loading...' : ' Add Rate'}
         </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+          onClick={handleCompanyRateUploadOpen}
+          size="small"
+          disabled={loading}
+        >
+          {loading ? 'Loading...' : ' Upload'}
+        </Button>
       </AccessControlWrapper>
+      <TemplateSelectDialog
+        id={id}
+        open={openCompanyRateUploadDialog}
+        handleOpen={handleCompanyRateUploadOpen}
+        handleClose={handleCompanyRateUploadClose}
+      />
     </Stack>
   );
 };
