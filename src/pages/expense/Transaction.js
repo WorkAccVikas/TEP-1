@@ -18,6 +18,8 @@ import {
   TableHead,
   TableRow,
   useMediaQuery,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -28,15 +30,13 @@ import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, 
 import ScrollX from 'components/ScrollX';
 import MainCard from 'components/MainCard';
 import InvoiceCard from 'components/cards/invoice/InvoiceCard';
-import { HeaderSort, IndeterminateCheckbox, TablePagination } from 'components/third-party/ReactTable';
+import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
 
 import { useSelector } from 'store';
 import { renderFilterTypes, DateColumnFilter } from 'utils/react-table';
 
 // assets
-import { formatDateUsingMoment } from 'utils/helper';
 import axiosServices from 'utils/axios';
-import { USERTYPE } from 'constant';
 import CompanyFilter from 'pages/trips/filter/CompanyFilter';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
@@ -44,23 +44,20 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import VendorFilter from 'pages/trips/filter/VendorFilter';
 import DriverFilter from 'pages/trips/filter/DriverFilter';
+import { formatDateUsingMoment } from 'utils/helper';
+import { Eye } from 'iconsax-react';
+import { ThemeMode } from 'config';
 
-const API_URL = {
-  [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendor]: '/invoice/all/vendor'
+const TRANSACTION_TYPE = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
 };
 
-const INVOICE_STATUS = {
-  UNPAID: 0,
-  PAID: 1,
-  CANCELLED: 2
-};
-
-const getTabName = (status) => {
-  switch (status) {
-    case INVOICE_STATUS.PAID:
+const getTabName = (type) => {
+  switch (type) {
+    case TRANSACTION_TYPE.INCOME:
       return 'Income';
-    case INVOICE_STATUS.UNPAID:
+    case TRANSACTION_TYPE.EXPENSE:
       return 'Expense';
     default:
       return 'All';
@@ -76,7 +73,7 @@ function ReactTable({ columns, data }) {
   const filterTypes = useMemo(() => renderFilterTypes, []);
   const initialState = useMemo(
     () => ({
-      filters: [{ id: 'status', value: '' }],
+      filters: [{ id: 'transactionsType', value: '' }],
       hiddenColumns: ['avatar', 'email'],
       pageIndex: 0,
       pageSize: 5
@@ -115,76 +112,46 @@ function ReactTable({ columns, data }) {
   const componentRef = useRef(null);
   const navigate = useNavigate();
 
-  // ================ Tab ================
+  // =============================== Tab Logic ===============================
 
-  // Map status codes to labels and colors
+  // Create groups and counts based on transactionType
+  const groups = ['All', TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE];
 
-  // Create groups and counts
-  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID];
-
-  const countGroup = data.map((item) => item.status);
-  console.log('rows', rows);
+  const countGroup = data.map((item) => item.transactionsType);
 
   const counts = {
-    Income: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
-    Expense: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length
-    // Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length
+    Income: countGroup.filter((type) => type === TRANSACTION_TYPE.INCOME).length,
+    Expense: countGroup.filter((type) => type === TRANSACTION_TYPE.EXPENSE).length
   };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
   useEffect(() => {
-    console.log('x = ', activeTab);
-
-    setFilter('status', activeTab === 'All' ? '' : activeTab);
+    setFilter('transactionsType', activeTab === 'All' ? '' : activeTab);
   }, [activeTab, setFilter]);
-
-  // useEffect(() => {
-  //   console.log('x = ', activeTab);
-  //   setFilter('status', activeTab === 'All' ? '' : activeTab === INVOICE_STATUS.UNPAID ? 1 : activeTab === INVOICE_STATUS.PAID ? 2 : 3);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [activeTab]);
 
   const filterData = rows.filter((row) => {
     if (activeTab === 'All') {
       return true;
     } else {
-      return row.original.status === activeTab;
+      return row.original.transactionsType === activeTab;
     }
   });
-
-  console.log('filterData', filterData);
 
   return (
     <>
       <Box sx={{ p: 1, pb: 0, width: '100%' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            {groups.map((status, index) => (
+            {groups.map((type, index) => (
               <Tab
                 key={index}
-                label={getTabName(status)}
-                value={status}
+                label={getTabName(type)}
+                value={type}
                 icon={
                   <Chip
-                    label={
-                      status === 'All'
-                        ? data.length
-                        : status === INVOICE_STATUS.PAID
-                        ? counts.Paid
-                        : status === INVOICE_STATUS.UNPAID
-                        ? counts.Unpaid
-                        : counts.Cancelled
-                    }
-                    color={
-                      status === 'All'
-                        ? 'primary'
-                        : status === INVOICE_STATUS.PAID
-                        ? 'success'
-                        : status === INVOICE_STATUS.UNPAID
-                        ? 'warning'
-                        : 'error'
-                    }
+                    label={type === 'All' ? data.length : type === TRANSACTION_TYPE.INCOME ? counts.Income : counts.Expense}
+                    color={type === 'All' ? 'primary' : type === TRANSACTION_TYPE.INCOME ? 'success' : 'warning'}
                     variant="light"
                     size="small"
                   />
@@ -261,8 +228,14 @@ const Transaction = () => {
   console.log(`🚀 ~ List ~ userType:`, userType);
 
   const [data, setData] = useState([]);
+  const [incomeData, setIncomeData] = useState([]);
+  const [expenseData, setExpenseData] = useState([]);
   const [metadata, setMetadata] = useState([]);
   const [refetch, setRefetch] = useState(false);
+
+  console.log('data', data);
+  console.log('incomeData', incomeData);
+  console.log('expenseData', expenseData);
 
   const handleRefetch = useCallback(() => {
     setRefetch((prev) => !prev);
@@ -271,7 +244,9 @@ const Transaction = () => {
   console.log({ metadata });
 
   const [filterOptions, setFilterOptions] = useState({
-    selectedCompany: {}
+    selectedCompany: {},
+    selectedVendor: {},
+    selectedDriver: {}
   });
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
@@ -279,19 +254,22 @@ const Transaction = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axiosServices.get(API_URL[userType], {
+        const response = await axiosServices.get('/invoice/all/transactions', {
           params: {
             // page: page,
             // limit: limit,
-            invoiceStartDate: formatDateUsingMoment(startDate),
-            invoiceEndDate: formatDateUsingMoment(endDate),
-            companyId: filterOptions?.selectedCompany?._id
+            startDate: formatDateUsingMoment(startDate),
+            endDate: formatDateUsingMoment(endDate),
+            companyId: filterOptions.selectedCompany._id,
+            vendorId: filterOptions.selectedVendor._id,
+            driverId: filterOptions.selectedDriver._id
           }
         });
         console.log('response', response);
 
-        setData(response.data.data);
-        setMetadata(response.data?.metaData || {});
+        setData(response.data.data); // Assuming data comes in `response.data.data`
+        setIncomeData(response.data.incomeData);
+        setExpenseData(response.data.expenseData);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching invoices:', error);
@@ -301,18 +279,18 @@ const Transaction = () => {
     };
 
     fetchInvoice();
-  }, [userType, filterOptions, startDate, endDate, refetch]);
+  }, [refetch, startDate, endDate, filterOptions]);
 
   const columns = useMemo(
     () => [
-      {
-        title: 'Row Selection',
-        Header: ({ getToggleAllPageRowsSelectedProps }) => <IndeterminateCheckbox indeterminate {...getToggleAllPageRowsSelectedProps()} />,
-        accessor: 'selection',
-        Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />,
-        disableSortBy: true,
-        disableFilters: true
-      },
+      // {
+      //   title: 'Row Selection',
+      //   Header: ({ getToggleAllPageRowsSelectedProps }) => <IndeterminateCheckbox indeterminate {...getToggleAllPageRowsSelectedProps()} />,
+      //   accessor: 'selection',
+      //   Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />,
+      //   disableSortBy: true,
+      //   disableFilters: true
+      // },
       {
         Header: '#',
         accessor: '',
@@ -333,67 +311,53 @@ const Transaction = () => {
         Cell: ({ value }) => <Chip label={value} color={value === 'INCOME' ? 'success' : 'error'} size="small" variant="light" />
       },
       {
-        Header: 'Received Amount',
+        Header: 'Amount',
         accessor: 'receivedAmount',
         Cell: ({ value }) => <Typography>₹ {value}</Typography>
       },
       {
-        Header: 'TDS Rate',
-        accessor: 'TDSRate',
-        Cell: ({ value }) => <Typography>{value}%</Typography>
+        Header: 'Category', // This is the static header
+        accessor: (row) => row.invoiceId || row.advanceId, // This conditionally picks either invoiceId or advanceId
+        Cell: ({ value }) => <Typography>{value ? (value.includes('advance') ? 'Advance' : 'Invoice') : ''}</Typography>
       },
       {
-        Header: 'TDS Amount',
-        accessor: 'TDSAmount',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
-      },
-      {
-        Header: 'Total GST',
-        accessor: 'totalGST',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
-      },
-      {
-        Header: 'IGST',
-        accessor: 'IGST',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
-      },
-      {
-        Header: 'CGST',
-        accessor: 'CGST',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
-      },
-      {
-        Header: 'Payment To',
-        accessor: 'paymentTo',
-        Cell: ({ value }) => <Typography>{value}</Typography>
-      },
-      {
-        Header: 'Payment By',
-        accessor: 'paymentBy',
-        Cell: ({ value }) => <Typography>{value}</Typography>
-      },
-      {
-        Header: 'Invoice',
-        accessor: 'invoice',
-        Cell: ({ value }) => <Typography>{value}</Typography>
-      },
-      {
-        Header: 'Advance',
-        accessor: 'advance',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
-      },
-      {
-        Header: 'Status',
-        accessor: 'status',
-        disableFilters: true,
-        Cell: ({ value }) => {
-          if (value === 2) {
-            return <Chip color="error" label="Cancelled" size="small" variant="light" />;
-          } else if (value === 1) {
-            return <Chip color="success" label="Paid" size="small" variant="light" />;
-          } else if (value === 0) {
-            return <Chip color="info" label="Unpaid" size="small" variant="light" />;
+        Header: 'Actions',
+        disableSortBy: true,
+        className: 'cell-left',
+        Cell: ({ row }) => {
+          const theme = useTheme();
+          const mode = theme.palette.mode;
+
+          // Check if invoiceId exists
+          if (!row.original.invoiceId) {
+            return null; // Render nothing if invoiceId is not present
           }
+
+          return (
+            <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View"
+              >
+                <IconButton
+                  color="success"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`/apps/invoices/details/${row.original.invoiceId}`, '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
         }
       }
     ],
@@ -402,17 +366,15 @@ const Transaction = () => {
 
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
+  // Calculate total count
+  const totalCount = (incomeData?.totalCount ?? 0) + (expenseData?.totalCount ?? 0);
 
   const widgetsData = [
     {
-      title: 'Income',
-      count: metadata?.paid?.paidCount ?? 0,
-      amount: metadata?.paid?.paidAmount ?? 0,
-      percentage: (
-        ((metadata?.paid?.paidCount ?? 0) /
-          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
-        100
-      ).toFixed(2),
+      title: 'Revenue',
+      count: incomeData?.totalCount ?? 0,
+      amount: incomeData?.totalReceivedAmount ?? 0,
+      percentage: (((incomeData?.totalCount ?? 0) / (totalCount || 1)) * 100).toFixed(2),
       isLoss: false,
       invoice: metadata?.paid?.paidCount ?? 0,
       color: { main: '#4caf50' },
@@ -420,13 +382,9 @@ const Transaction = () => {
     },
     {
       title: 'Expense',
-      count: metadata?.unpaid?.unpaidCount ?? 0,
-      amount: metadata?.unpaid?.unpaidAmount ?? 0,
-      percentage: (
-        ((metadata?.unpaid?.unpaidCount ?? 0) /
-          ((metadata?.paid?.paidCount ?? 0) + (metadata?.unpaid?.unpaidCount ?? 0) + (metadata?.overDue?.overDueCount ?? 0) || 1)) *
-        100
-      ).toFixed(2),
+      count: expenseData?.totalCount ?? 0,
+      amount: expenseData?.totalReceivedAmount ?? 0,
+      percentage: (((expenseData?.totalCount ?? 0) / (totalCount || 1)) * 100).toFixed(2),
       isLoss: true,
       invoice: metadata?.unpaid?.unpaidCount ?? 0,
       color: { main: '#f44336' },
@@ -464,6 +422,7 @@ const Transaction = () => {
                     isLoss={widget.isLoss}
                     invoice={widget.invoice}
                     color={widget.color.main}
+                    subtitle={'payments'}
                   ></InvoiceCard>
                 </MainCard>
               </Grid>
@@ -482,50 +441,40 @@ const Transaction = () => {
               <Stack direction="row" spacing={1} alignItems="center">
                 <Stack direction="row" spacing={1}>
                   <Typography variant="body2" color="white">
-                    Total
+                    Revenue
                   </Typography>
                   <Typography variant="body1" color="white">
-                    ₹{' '}
-                    {parseFloat(
-                      (
-                        (metadata?.paid?.paidAmount ?? 0) +
-                        (metadata?.unpaid?.unpaidAmount ?? 0) +
-                        (metadata?.overDue?.overDueAmount ?? 0)
-                      ).toFixed(2)
-                    )}
+                    ₹ {parseFloat((incomeData?.totalReceivedAmount ?? 0).toFixed(2))}
                   </Typography>
                 </Stack>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Typography variant="body2" color="white">
-                  Pending
+                  Expense
                 </Typography>
                 <Typography variant="body1" color="white">
-                  ₹ {parseFloat(((metadata?.unpaid?.unpaidAmount ?? 0) + (metadata?.overDue?.overDueAmount ?? 0)).toFixed(2))}
+                  ₹ {parseFloat((expenseData?.totalReceivedAmount ?? 0).toFixed(2))}
                 </Typography>
               </Stack>
             </Stack>
 
             <Stack direction="row" spacing={1} sx={{ pt: 1, zIndex: 1 }}>
               <Typography variant="body2" color="white">
-                Recieved
+                Income
               </Typography>
               <Typography variant="body1" color="white">
-                ₹ {parseFloat((metadata?.paid?.paidAmount ?? 0).toFixed(2))}
+                ₹ {parseFloat(((incomeData?.totalReceivedAmount ?? 0) - (expenseData?.totalReceivedAmount ?? 0)).toFixed(2))}
               </Typography>
             </Stack>
 
             <Box sx={{ maxWidth: '100%' }}>
               <LinearWithLabel
-                value={
-                  (
-                    ((metadata?.paid?.paidAmount ?? 0) /
-                      ((metadata?.paid?.paidAmount ?? 0) +
-                        (metadata?.unpaid?.unpaidAmount ?? 0) +
-                        (metadata?.overDue?.overDueAmount ?? 0) || 1)) *
+                value={((incomeData?.totalReceivedAmount ?? 0) !== 0
+                  ? (((incomeData?.totalReceivedAmount ?? 0) - (expenseData?.totalReceivedAmount ?? 0)) /
+                      (incomeData?.totalReceivedAmount ?? 0)) *
                     100
-                  ).toFixed(2) || 0
-                }
+                  : 0
+                ).toFixed(2)}
               />
             </Box>
           </Box>
@@ -581,24 +530,8 @@ const Transaction = () => {
               width: '200px',
               pb: 1
             }}
-            value={filterOptions.selectedDiver}
+            value={filterOptions.selectedDriver}
           />
-          {/* <VehicleFilter
-          setFilterOptions={setFilterOptions}
-          sx={{
-            color: '#fff',
-            '& .MuiSelect-select': {
-              padding: '0.5rem',
-              pr: '2rem'
-            },
-            '& .MuiSelect-icon': {
-              color: '#fff' // Set the down arrow color to white
-            },
-            width: '220px',
-            pb: 1
-          }}
-          value={filterOptions.selectedVehicle}
-        /> */}
 
           <DateRangeSelect
             startDate={startDate}
