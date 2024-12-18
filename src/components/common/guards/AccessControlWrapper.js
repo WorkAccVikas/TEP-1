@@ -8,7 +8,7 @@ const AccessControlWrapper = ({ children, allowedUserTypes }) => {
   const { userType } = useSelector((state) => state.auth);
 
   const isSkip = SKIP_USER_TYPE.includes(userType);
-  console.log(`🚀 ~ AccessControlWrapper ~ isSkip:`, isSkip);
+  // console.log(`🚀 ~ AccessControlWrapper ~ isSkip:`, isSkip);
 
   if (isSkip) return children;
 

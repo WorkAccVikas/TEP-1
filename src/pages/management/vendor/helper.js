@@ -1,4 +1,4 @@
-import { EMAIL_REGEX_PATTERN, PIN_CODE_REGEX_PATTERN } from 'constant';
+import { EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN, PIN_CODE_REGEX_PATTERN } from 'constant';
 
 export const isRequiredString = (value) => typeof value === 'string' && value.trim() !== '';
 
@@ -6,13 +6,13 @@ export const isPositiveNumber = (value) => typeof value === 'number' && value > 
 
 export const isValidEmail = (value) => typeof value === 'string' && EMAIL_REGEX_PATTERN.test(value);
 
-export const isString = (value) => typeof value === 'string';
+export const isString = (value) => typeof value === 'string' || typeof value === 'undefined';
 
 export const isPinCode = (value) => typeof value === 'number' && PIN_CODE_REGEX_PATTERN.test(value.toString());
 
-export const isMobileNumber = (value) => typeof value === 'string' && REGEX.MOBILE_NUMBER.test(value); // Validates exactly 10-digit mobile number
+export const isMobileNumber = (value) => typeof value === 'number' && MOBILE_NUMBER_REGEX_PATTERN.test(value.toString()); // Validates exactly 10-digit mobile number
 
-export const isNumber = (value) => typeof value === 'number';
+export const isNumber = (value) => typeof value === 'number' || typeof value === 'undefined';
 
 // Function to validate an array item using rules
 export const validateArrayItem = (item, rules) => {

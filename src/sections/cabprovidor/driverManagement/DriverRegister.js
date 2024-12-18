@@ -57,11 +57,22 @@ const DriverRegister = ({
 
   const formikHandleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await onSubmit(values, isCreating);
+      const res = await onSubmit(values, isCreating);
+      console.log('res = ', res);
       resetForm();
       handleClose();
 
-      const message = isCreating ? 'Driver details have been successfully added' : 'Driver details have been successfully updated';
+      // const message = isCreating ? 'Driver details have been successfully added' : 'Driver details have been successfully updated';
+      let message;
+      if (!isCreating) {
+        message = 'Driver details have been successfully updated';
+      } else {
+        if (res?.status === 201) {
+          message = 'Driver details have been successfully added';
+        } else if (res?.status === 200) {
+          message = 'This driver is now registered with you and another cab provider';
+        }
+      }
 
       dispatch(
         openSnackbar({
@@ -69,7 +80,7 @@ const DriverRegister = ({
           message,
           variant: 'alert',
           alert: {
-            color: 'success'
+            color: isCreating && res?.status === 200 ? 'warning' : 'success'
           },
           close: true
         })
