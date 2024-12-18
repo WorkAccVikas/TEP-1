@@ -32,22 +32,38 @@ const CompanyRateListing = ({ companyName, id }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [updateKey, setUpdateKey] = useState(0);
-  const [loading, setLoading] = useState('true');
   const [showCompanyList, setShowCompanyList] = useState(false);
+  const [key, setKey] = useState(0);
 
   const userType = useSelector((state) => state.auth.userType);
-  console.log('🚀 ~ CompanyRateListing ~ userType:', userType);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchdata = async () => {
-      const response = await axiosServices.get(API[userType] + id);
-      setCompanyList(response.data.data);
-      setLoading(false);
-      console.log('response.data', response.data.data);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosServices.get(`${API[userType]}${id}`);
+
+        // Ensure the component is mounted before updating state
+        if (isMounted) {
+          setCompanyList(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
-    fetchdata();
-  }, [id, userType]);
+    let isMounted = true; // Guard for mounted state
+    fetchData();
+
+    return () => {
+      isMounted = false; // Cleanup on unmount
+    };
+  }, [id, userType, key]);
 
   const handleAddRate = () => {
     setShowCompanyList(true);
@@ -66,7 +82,7 @@ const CompanyRateListing = ({ companyName, id }) => {
     <>
       {!showCompanyList ? ( // Conditional rendering based on showCompanyList state
         <Stack gap={1} spacing={1}>
-          <Header OtherComp={({ loading }) => <ButtonComponent id={id} loading={loading} onAddRate={handleAddRate} />} />
+          <Header OtherComp={({ loading }) => <ButtonComponent id={id} loading={loading} onAddRate={handleAddRate} setKey={setKey} />} />
 
           <MainCard title="Company Rates" content={false}>
             <ScrollX>
@@ -98,7 +114,7 @@ const CompanyRateListing = ({ companyName, id }) => {
 
 export default CompanyRateListing;
 
-const ButtonComponent = ({ id, loading, onAddRate }) => {
+const ButtonComponent = ({ id, loading, onAddRate, setKey }) => {
   const [openCompanyRateUploadDialog, setOpenCompanyRateUploadDialog] = useState(false);
 
   const handleCompanyRateUploadOpen = () => {
@@ -136,6 +152,7 @@ const ButtonComponent = ({ id, loading, onAddRate }) => {
         open={openCompanyRateUploadDialog}
         handleOpen={handleCompanyRateUploadOpen}
         handleClose={handleCompanyRateUploadClose}
+        setKey={setKey}
       />
     </Stack>
   );
