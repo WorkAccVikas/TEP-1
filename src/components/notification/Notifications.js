@@ -8,6 +8,9 @@ import { Button, Stack, Box, CircularProgress } from '@mui/material';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import { APP_DEFAULT_PATH } from 'config';
+import { useNavigate } from 'react-router';
+import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 // adding styling according to icons
 const getNotificationColors = (type) => {
@@ -41,10 +44,18 @@ function getIconByType(type) {
   }
 }
 
-// formatting date to desired one for ex - Yesterday, 03:42 PM
+// formatting date to desired one for ex - Today - Wednesday, December 18, 2024
 function formatDateTime(input) {
   const now = new Date();
   const inputDate = new Date(input);
+
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayName = daysOfWeek[inputDate.getDay()];
+
+  const monthName = inputDate.toLocaleString('default', { month: 'long' });
+  const day = inputDate.getDate();
+  const year = inputDate.getFullYear();
+
   const padZero = (num) => (num < 10 ? `0${num}` : num);
   const formatTimeWithAmPm = (hours, minutes) => {
     const period = hours >= 12 ? 'PM' : 'AM';
@@ -59,11 +70,15 @@ function formatDateTime(input) {
   const minutes = inputDate.getMinutes();
   const formattedTime = formatTimeWithAmPm(hours, minutes);
 
-  if (isSameDay) return { date: 'Today', time: formattedTime };
-  if (isYesterday) return { date: 'Yesterday', time: formattedTime };
+  if (isSameDay) {
+    return { date: `Today - ${dayName}, ${monthName} ${day}, ${year}`, time: formattedTime };
+  }
+  if (isYesterday) {
+    return { date: `Yesterday - ${dayName}, ${monthName} ${day}, ${year}`, time: formattedTime };
+  }
 
   return {
-    date: `${inputDate.getDate()} ${inputDate.toLocaleString('default', { month: 'short' })}`,
+    date: `${dayName}, ${monthName} ${day}, ${year}`,
     time: formattedTime
   };
 }
@@ -74,6 +89,7 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetch, setFetch] = useState(false);
+  const navigate = useNavigate();
 
   // Group notifications by date
   const groupNotificationsByDate = (notifications) => {
@@ -85,14 +101,40 @@ export default function Notifications() {
     }, {});
   };
 
+  // Function to handle navigation based on notification type
+  const handleNotificationClick = (type, id) => {
+    let path = '';
+
+    // Define paths based on notification type
+    switch (type) {
+      case 'ADVANCE':
+        path = `/apps/invoices/advance`; // Example path for 'ADVANCE'
+        break;
+      case 'INVOICE':
+        path = `/apps/invoices/company`; // Example path for 'INVOICE'
+        break;
+      case 'TRIP':
+        path = `/apps/trips/list`; // Example path for 'TRIP'
+        break;
+      case 'TRANSACTION':
+        path = `/expense/transaction`; // Example path for 'TRANSACTION'
+        break;
+      default:
+        path = '/home'; // Default path if type is not recognized
+        break;
+    }
+
+    // Navigate to the determined path
+    navigate(path);
+  };
+
   // useEffect calling to get all notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const response = await axiosServices.get('/notification/');
         const notification = response.data.data;
-        const filteredNotifications = notification.filter((item) => !item.is_read);
-        setNotifications(filteredNotifications);
+        setNotifications(notification);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       } finally {
@@ -111,9 +153,17 @@ export default function Notifications() {
       await axiosServices.put('/notification/update/status', {
         data: { notificationIds, status: true }
       });
-
-      // Update local state to remove all unread notifications
-      setNotifications([]);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Notifications have been successfully marked as read!',
+          variant: 'alert',
+          alert: {
+            color: 'success'
+          },
+          close: false
+        })
+      );
       setFetch(true);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -205,14 +255,32 @@ export default function Notifications() {
               </Typography>
               {groupedNotifications[date].map((item, index) => {
                 const { time } = formatDateTime(item.createdAt);
+
                 return (
-                  <TimelineItem key={index}>
+                  <TimelineItem
+                    key={index}
+                    onClick={() => handleNotificationClick(item.notificationType, item._id)}
+                    sx={{
+                      cursor: 'pointer'
+                    }}
+                  >
                     <TimelineSeparator>
-                      <TimelineDot sx={getNotificationColors(item.notificationType)}>{getIconByType(item.notificationType)}</TimelineDot>
+                      <TimelineDot
+                        sx={{
+                          color: item.is_read ? 'primary.darker' : 'warning.darker',
+                          bgcolor: item.is_read ? 'primary.lighter' : 'warning.lighter'
+                        }}
+                      >
+                        {getIconByType(item.notificationType)}
+                      </TimelineDot>
                       {index !== groupedNotifications[date].length - 1 && <TimelineConnector />}
                     </TimelineSeparator>
-                    <TimelineContent>
-                      <Typography color="textSecondary">{item.content || 'No details provided.'}</Typography>
+                    <TimelineContent
+                      style={{
+                        backgroundColor: item.is_read ? '#F2F6FF' : '#FDF6ED'
+                      }}
+                    >
+                      <Typography>{item.content || 'No details provided.'}</Typography>
                       <Typography variant="body2" color="text.secondary" mt={0.5}>
                         {`${time}`}
                       </Typography>

@@ -159,10 +159,7 @@ const NotificationPage = () => {
 
         // Set the unread count dynamically
         setUnreadCount(unreadNotifications.length);
-
-        // Store notifications in state
-        const filteredNotifications = notificationData.filter((item) => !item.is_read);
-        setNotifications(filteredNotifications);
+        setNotifications(notificationData);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       } finally {

@@ -132,6 +132,8 @@ const Driver = () => {
     setOpenBulkUploadDialog(false);
   };
   const formikHandleSubmit = async (values, isCreating) => {
+    console.log('BIE');
+
     // eslint-disable-next-line no-useless-catch
     try {
       if (isCreating) {
@@ -152,6 +154,7 @@ const Driver = () => {
           setDriverType(1);
           dispatch(fetchDrivers({ page: 1, limit: 10, driverType: 1 }));
         }
+        return response;
       } else {
         // console.log('Update API call');
         // console.log({ selectedID });
