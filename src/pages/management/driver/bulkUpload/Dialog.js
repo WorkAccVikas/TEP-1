@@ -34,7 +34,7 @@ import {
   isString,
   isValidEmail,
   separateValidAndInvalidItems
-} from 'pages/management/vendor/helper';
+} from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -61,6 +61,22 @@ const OPTIONAL_HEADERS = [
   'IFSC Code',
   'Bank Address'
 ];
+
+// Add field mapping
+const fieldMapping = {
+  1: 'Name',
+  2: 'Email',
+  3: 'Phone',
+  4: 'Father Name',
+  5: 'Experience',
+  6: 'PAN',
+  7: 'Bank Name',
+  8: 'Branch Name',
+  9: 'Account Holder Name',
+  10: 'Account Number',
+  11: 'IFSC Code',
+  12: 'Bank Address'
+};
 
 const validationRules = {
   // 0: isString, // ID
@@ -128,12 +144,21 @@ const BulkUploadDialog = ({ open, handleClose }) => {
       // console.log(mappedData); // Log the mapped data
       // setDriverData(mappedData); // Set the mapped data to state
 
-      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules);
+      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
       console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
       console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
 
       if (invalidItems.length > 0) {
-        setInvalidData(invalidItems);
+        const items = invalidItems.map((entry) => {
+          const reasons = Object.entries(entry.errors)
+            .map(([field, message], index) => `${index + 1}. ${field} : ${message}`)
+            .join('\n');
+
+          return [...entry.item, `Reasons :\n${reasons}`];
+        });
+        console.log('items = ', items);
+
+        setInvalidData(items);
       }
 
       const mappedData = validItems.map((row) => {
@@ -201,13 +226,29 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     // Headers for "vehicle Data" sheet
     console.log(data);
 
-    const driverHeaders = ['ID', 'Name*', 'Email*', 'Phone*'];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
+
+    const HeaderLength = driverHeaders.length;
 
     let driverData = [];
 
     // Check if the data is not empty, then populate "ID Reference" data
     if (data && data.length > 0) {
-      driverData = data.map((item) => [item.data.vendorId, item.data.userName, item.data.userEmail, item.data.contactNumber]);
+      driverData = data.map((item) => [
+        item.vendorId,
+        item.userName,
+        item.userEmail,
+        item.contactNumber,
+        item.fatherName,
+        item.experience,
+        item.pan,
+        item.bankName,
+        item.branchName,
+        item.accountHolderName,
+        item.accountNumber,
+        item.ifscCode,
+        item.bankAddress
+      ]);
     }
 
     // Create the second sheet (headers + data if available)
@@ -227,7 +268,19 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     // alert(`handleViewClickForInvalid ${data.length}`);
     console.log('DATA = ', data);
 
-    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
+
+    const HeaderLength = driverHeaders.length;
+
+    const output = data.map((row) => {
+      // Add `null` to the end of the row until its length matches the required length
+      while (row.length < HeaderLength) {
+        row.splice(-1, 0, null); // Add nulls before the last item
+      }
+      return row;
+    });
+
+    console.log('output = ', output);
 
     // Create the second sheet (headers + data if available)
     const vendorSheet = XLSX.utils.aoa_to_sheet([
@@ -265,6 +318,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
 
   const handleSave = async () => {
     try {
+      console.log('driverData', driverData);
       if (!driverData || driverData.length === 0) {
         alert('Empty Excel Sheet');
         return;
@@ -278,7 +332,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
       // Loop through the driverData array and send the requests
       for (const item of driverData) {
         try {
-          const response = await axiosServices.post('/driver/register', item);
+          const response = await axiosServices.post('/driver/register', { data: item });
           console.log(response.data);
 
           // If the response indicates success, increment successCount
