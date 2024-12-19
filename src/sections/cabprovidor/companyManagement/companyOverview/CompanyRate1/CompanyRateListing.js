@@ -16,13 +16,10 @@ import AccessControlWrapper from 'components/common/guards/AccessControlWrapper'
 import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
 import TemplateSelectDialog from 'sections/rateUpload/companyRate/TemplateSelectDialog';
+import { fetchCompanyRates } from 'store/cacheSlice/companyRatesSlice';
+import { dispatch } from 'store';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
-
-const API = {
-  [USERTYPE.iscabProvider]: `/company/unwind/rates?companyId=`,
-  [USERTYPE.isVendor]: '/cabRateMaster/unwind/rate?companyID='
-};
 
 const CompanyRateListing = ({ companyName, id }) => {
   const [data, setData] = useState([]);
@@ -36,34 +33,23 @@ const CompanyRateListing = ({ companyName, id }) => {
   const [key, setKey] = useState(0);
 
   const userType = useSelector((state) => state.auth.userType);
-  const [loading, setLoading] = useState(true);
 
+  const { cache, loading, error } = useSelector((state) => state.companyRates); // Access Redux state
+  console.log({ cache });
+
+  // Fetch company rates based on selectedCompany
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosServices.get(`${API[userType]}${id}`);
+    if (id && !cache[id]) {
+      dispatch(fetchCompanyRates({ companyId: id, userType: userType }));
+    }
+  }, [userType, dispatch, id, cache]);
 
-        // Ensure the component is mounted before updating state
-        if (isMounted) {
-          setCompanyList(response.data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    let isMounted = true; // Guard for mounted state
-    fetchData();
-
-    return () => {
-      isMounted = false; // Cleanup on unmount
-    };
-  }, [id, userType, key]);
+  // Update local state when cache changes
+  useEffect(() => {
+    if (id && cache[id]) {
+      setCompanyList(cache[id]);
+    }
+  }, [userType, cache, id]);
 
   const handleAddRate = () => {
     setShowCompanyList(true);

@@ -37,7 +37,7 @@ import { faker } from '@faker-js/faker';
 
 // ============================|| JWT - REGISTER ||============================ //
 
-const AuthRegister = ({ setUserId}) => {
+const AuthRegister = () => {
   // eslint-disable-next-line no-unused-vars
   const { register } = useAuth();
   const scriptedRef = useScriptRef();
@@ -97,7 +97,7 @@ const AuthRegister = ({ setUserId}) => {
 
             const response = await register(formData);
             console.log("response", response);
-            setUserId(response.data.data?._id);
+            // setUserId(response.data.data?._id);
 
             if (scriptedRef.current) {
               setStatus({ success: true });

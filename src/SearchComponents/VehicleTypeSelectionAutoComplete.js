@@ -1,44 +1,26 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Autocomplete, Checkbox, Grid, List, ListItem, Typography } from '@mui/material';
+import { Autocomplete, Checkbox, Grid, List, ListItem, Skeleton, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import axiosServices from 'utils/axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { debounce } from 'lodash';
+import { dispatch } from 'store';
+import { fetchVehicleTypes } from 'store/cacheSlice/vehicleTypes';
 
 const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
-  const [options, setOptions] = useState([]); // Stores all fetched options
+  const { cache, loading } = useSelector((state) => state.vehicleType); // Access Redux state
+
   const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [open, setOpen] = useState(false); // Tracks dropdown open state
   const [query, setQuery] = useState(''); // Tracks search input
-  const [cache, setCache] = useState({}); // Cache for fetched results
   const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
 
-  // Fetch default options when dropdown is opened
+  // Fetch default options from Redux (using cached data or fetching from API)
   useEffect(() => {
-    const fetchDefaultOptions = async () => {
-      if (cache.default) {
-        setOptions(cache.default);
-        setFilteredOptions(cache.default);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const response = await axiosServices.get('/vehicleType');
-        const vehicles = response.data.data || [];
-        const mappedVehicleType = vehicles.map((item) => ({ _id: item._id, vehicleTypeName: item.vehicleTypeName }));
-        setOptions(mappedVehicleType);
-        setFilteredOptions(mappedVehicleType); // Initialize filtered options
-        setCache((prevCache) => ({ ...prevCache, default: mappedVehicleType })); // Cache default results
-      } catch (error) {
-        console.error('Error fetching default options:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (open) fetchDefaultOptions();
-  }, [open, cache.default]);
+    if (!cache.default) {
+      dispatch(fetchVehicleTypes()); // Fetch vehicle types if not cached
+    } else {
+      setFilteredOptions(cache.default); // Use cached vehicle types
+    }
+  }, [cache, dispatch]);
 
   // "Select All" Logic
   const handleSelectAllToggle = () => {
@@ -59,15 +41,28 @@ const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
   const filterOptions = useCallback(
     debounce((inputQuery) => {
       const lowerQuery = inputQuery.toLowerCase();
-      const filtered = options.filter((option) => option.vehicleTypeName.toLowerCase().includes(lowerQuery));
+      const filtered = cache.default.filter((option) => option.vehicleTypeName.toLowerCase().includes(lowerQuery));
       setFilteredOptions(filtered);
     }, 500),
-    [options]
+    [cache.default]
   );
 
   useEffect(() => {
-    filterOptions(query);
-  }, [query, filterOptions]);
+    if (query) {
+      filterOptions(query); // Filter options based on search input
+    } else {
+      setFilteredOptions(cache.default); // Reset filtered options when query is cleared
+    }
+  }, [query, filterOptions, cache.default]);
+
+  if (loading) {
+    return (
+      <Grid item xs={12}>
+        {/* Skeleton UI to show while loading */}
+        <Skeleton variant="rectangular" height={50} width="100%" sx={{ mb: 1 }} />
+      </Grid>
+    );
+  }
 
   return (
     <Grid item xs={12}>
@@ -76,9 +71,6 @@ const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
         id="vehicle-type-selection"
         options={filteredOptions} // Use filtered options
         disableCloseOnSelect
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
         getOptionLabel={(option) => option.vehicleTypeName}
         value={value}
         onChange={(event, newValue) => setSelectedOptions(newValue || [])} // Update selected options

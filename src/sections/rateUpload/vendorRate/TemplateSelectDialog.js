@@ -271,7 +271,7 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
               <VendorSelection
                 value={selectedVendors}
                 setSelectedOptions={setSelectedVendors}
-                sx={{ minWidth: '600px', maxWidth: '600px' }}
+                sx={{ minWidth: '600px', maxWidth: '600px',  maxHeight:'150px'}}
               />
             </Stack>
           </CardContent>
