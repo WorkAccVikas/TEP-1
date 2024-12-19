@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { useNavigate, useRoutes } from 'react-router-dom';
 
 // project-imports
 import LoginRoutes from './LoginRoutes';
@@ -28,12 +28,23 @@ const ROUTES = {
 };
 
 export default function ThemeRoutes() {
+  const navigate = useNavigate();
   const userType = useSelector((state) => state.auth.userType);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  // console.log(`🚀 ~ ThemeRoutes ~ isLoggedIn:`, isLoggedIn);
   // console.log(`🚀 ~ ThemeRoutes ~ userType:`, userType);
 
   const { accountSetting } = useAuth();
 
   const { favIcon = 'favicon.png', title = 'Trip Biller' } = accountSetting || {};
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/auth');
+    } else {
+      navigate('/home');
+    }
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const link = document.querySelector("link[rel~='icon']");
@@ -47,7 +58,7 @@ export default function ThemeRoutes() {
     }
 
     document.title = `Trip Biller - ${title}`;
-  }, [favIcon,title]);
+  }, [favIcon, title]);
 
   return useRoutes([
     {
@@ -58,11 +69,11 @@ export default function ThemeRoutes() {
           path: '/',
           element: <PagesLanding />
         },
-        
+
         {
           path: 'subscription',
           element: <StepperSubscribe />
-        },
+        }
       ]
     },
     LoginRoutes,

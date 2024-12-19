@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { lazy, Suspense } from 'react';
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 // material-ui
 import { Container, Toolbar } from '@mui/material';
@@ -41,6 +41,9 @@ const Loader = () => (
 
 const CommonLayout = ({ layout = 'blank' }) => {
   const { componentDrawerOpen } = useSelector((state) => state.menu);
+
+  const location = useLocation();
+  console.log(`🚀 ~ CommonLayout ~ location:`, location);
 
   const handleDrawerOpen = () => {
     dispatch(openComponentDrawer({ componentDrawerOpen: !componentDrawerOpen }));
