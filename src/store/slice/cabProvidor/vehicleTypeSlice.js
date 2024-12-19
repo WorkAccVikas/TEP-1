@@ -3,6 +3,7 @@ import axios from 'utils/axios'; // Adjust the import path according to your pro
 import { commonInitialState, commonReducers } from 'store/slice/common';
 import { logoutActivity } from './accountSettingSlice';
 import { handleReset } from 'utils/helper';
+import { USERTYPE } from 'constant';
 
 const initialState = {
   ...commonInitialState,
@@ -25,6 +26,13 @@ const API = {
   ALL: '/vehicleType'
 };
 
+const FETCH_API = {
+  [USERTYPE.iscabProvider]: '/vehicleType',
+  [USERTYPE.isVendor]: '/vehicleType/for/adding/vehicles',
+  [USERTYPE.iscabProviderUser]: '/vehicleType/for/adding/vehicles',
+  [USERTYPE.isVendorUser]: '/vehicleType/for/adding/vehicles'
+};
+
 export const fetchAllVehicleTypesForAll = createAsyncThunk('vehicleTypes/fetchAll1', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get('/vehicleType');
@@ -34,9 +42,11 @@ export const fetchAllVehicleTypesForAll = createAsyncThunk('vehicleTypes/fetchAl
   }
 });
 
-export const fetchAllVehicleTypes = createAsyncThunk('vehicleTypes/fetchAll', async (_, { rejectWithValue }) => {
+export const fetchAllVehicleTypes = createAsyncThunk('vehicleTypes/fetchAll', async (_, { rejectWithValue, getState }) => {
   try {
-    const response = await axios.get(API.ALL);
+    const state = getState();
+    const userType = state.auth.userType;
+    const response = await axios.get(FETCH_API[userType]);
     return response?.data?.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
