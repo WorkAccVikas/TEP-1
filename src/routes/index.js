@@ -15,6 +15,7 @@ import { USERTYPE } from 'constant';
 import VendorRoutes from './VendorRoutes';
 import StepperSubscribe from 'pages/subscription/StepperSubscribe';
 import useAuth from 'hooks/useAuth';
+import SuperAdminRoutes from './SuperAdminRoutes';
 
 const PagesLanding = Loadable(lazy(() => import('pages/Landing')));
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
@@ -24,7 +25,8 @@ const ROUTES = {
   [USERTYPE.iscabProvider]: CabProvidorRoutes,
   [USERTYPE.isVendor]: VendorRoutes,
   [USERTYPE.iscabProviderUser]: CabProvidorUserRoutes,
-  [USERTYPE.isVendorUser]: VendorUserRoutes
+  [USERTYPE.isVendorUser]: VendorUserRoutes,
+  [USERTYPE.superAdmin]: SuperAdminRoutes
 };
 
 export default function ThemeRoutes() {

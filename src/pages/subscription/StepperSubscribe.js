@@ -44,7 +44,7 @@ const getStepContent = (
           setErrorIndex={setErrorIndex}
           registerData={registerData}
           setRegisterData={setRegisterData}
-          setUserId={setUserId}
+          // setUserId={setUserId}
         />
       );
     default:
