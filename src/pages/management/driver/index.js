@@ -67,6 +67,7 @@ const Driver = () => {
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
+  
   const handleAdd = useCallback(() => {
     dispatch(handleOpen(ACTION.CREATE));
   }, []);
@@ -123,15 +124,6 @@ const Driver = () => {
       return;
     }
   }, []);
-
-  // const yupSchema = Yup.object().shape({
-  //   userName: Yup.string().required('User Name is required'),
-  //   userEmail: Yup.string().email('Enter a valid email').required('User Email is required'),
-  //   contactNumber: Yup.string().required('Contact Number is required'),
-  //   vendorId: [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)
-  //     ? Yup.string().required('Vendor is required')
-  //     : Yup.string()
-  // });
 
   const handleDriverBulkUploadOpen = () => {
     setOpenBulkUploadDialog(true);
