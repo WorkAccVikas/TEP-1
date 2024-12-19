@@ -27,6 +27,9 @@ import { accountSettingsReducer } from 'store/slice/cabProvidor/accountSettingSl
 import { tripReducer } from 'store/slice/cabProvidor/tripSlice';
 import { reportReducer } from 'store/slice/cabProvidor/reportSlice';
 import { subscriptionReducer } from 'store/slice/cabProvidor/subscriptionSlice';
+import { zoneCacheReducer } from 'store/cacheSlice/zoneCacheSlice';
+import { companyRatesReducer } from 'store/cacheSlice/companyRatesSlice';
+import { vehicleTypeReducer1 } from 'store/cacheSlice/vehicleTypes';
 
 // ==============================|| COMBINE REDUCERS ||============================== //
 
@@ -55,7 +58,10 @@ const reducers = combineReducers({
   accountSettings: accountSettingsReducer,
   trip: tripReducer,
   report: reportReducer,
-  subscription:subscriptionReducer
+  subscription: subscriptionReducer,
+  zoneCache: zoneCacheReducer,
+  companyRates: companyRatesReducer,
+  vehicleType: vehicleTypeReducer1
 });
 
 export default reducers;

@@ -32,6 +32,7 @@ import { dispatch } from 'store';
 import CompanyFilter from 'pages/trips/filter/CompanyFilter';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
+import { maxHeight } from '@mui/system';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -272,7 +273,7 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
               <DriverSelection
                 value={selectedVendors}
                 setSelectedOptions={setSelectedVendors}
-                sx={{ minWidth: '600px', maxWidth: '600px' }}
+                sx={{ minWidth: '600px', maxWidth: '600px', maxHeight:'150px' }}
               />
             </Stack>
           </CardContent>
