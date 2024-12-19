@@ -24,6 +24,8 @@ const UnderConstruction = Loadable(lazy(() => import('components/maintenance/Und
 
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
 
+// Home
+const Home = Loadable(lazy(() => import('pages/Home')));
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('pages')));
 // Roster
@@ -110,7 +112,8 @@ const VendorRoutes = {
         // Home
         {
           path: 'home',
-          element: <UnderConstruction title="Home" />
+          // element: <UnderConstruction title="Home" />
+          element: <Home />
         },
         // Dashboard
         {

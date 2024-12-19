@@ -29,6 +29,8 @@ import ZoneSelection from 'SearchComponents/ZoneSelectionAutocomplete';
 import VehicleTypeSelection from 'SearchComponents/VehicleTypeSelectionAutoComplete';
 import { StructurePayload } from '../utils/mapCompanyRateData';
 import { dispatch } from 'store';
+import CompanyFilter from 'pages/trips/filter/CompanyFilter';
+import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -131,6 +133,7 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
 
       // Remove duplicates if any
       const { error, data: filteredData, message } = removeDuplicates(mappedData);
+      console.log({ filteredData });
 
       // Handle the result
       if (error) {
@@ -173,27 +176,37 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
       alert('Empty Data Sheet');
       return;
     }
-
     setLoading(true);
 
     try {
       const { success, finalPayload } = await StructurePayload(driverData);
+      console.log({ filterOptions });
 
       if (!success) {
         showSnackbar('Encountered an Error, cross check name must match refernce names', 'error');
         return;
       }
-
-      const response = await axiosServices.post('/company/upload/company/rate', {
+      const vendorIDArray = selectedVendors.map((item) => item._id);
+      const payload = {
         data: {
-          companyID: id,
-          ratesForCompany: finalPayload
+          vendorId: vendorIDArray,
+          rateData: [
+            {
+              companyID: filterOptions.selectedCompany?._id,
+              billingCycle: '1 Month',
+              effectiveDate: '2025-03-01',
+              rateMaster: finalPayload
+            }
+          ]
         }
-      });
+      };
+      console.log({ finalPayload });
 
-      if (response.status === 200) {
-        setKey((prev) => prev + 1);
-        showSnackbar('Company Rates Uploaded Successfully');
+      const response = await axiosServices.post('/cabRateMaster/add', payload);
+      console.log('response.data', response);
+      if (response.status === 201) {
+        showSnackbar('Vendor Rates Added Successfully', 'success');
+        handleClose();
       }
     } catch (error) {
       console.error('Error uploading company rates:', error);
@@ -203,13 +216,19 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
     }
   };
 
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: null
+  });
+  const [selectedVendors, setSelectedVendors] = useState([]);
+
+  console.log({ selectedVendors });
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="parent-modal-title" aria-describedby="parent-modal-description">
       <MainCard
         title={
           <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-            <Typography variant="h5">Upload Company Rate</Typography>
-            <ChildModal id={id} />
+            <Typography variant="h5">Upload Vendor Rates</Typography>
+            {/* <ChildModal id={id} /> */}
           </Box>
         }
         modal
@@ -221,11 +240,19 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
       >
         <CardContent>
           <Typography id="modal-modal-description">
-            Upload Excel sheet with required headers to upload Company Rate.Download Excel Template to streamline the process.
+            Upload Excel sheet with required headers to upload Vendor Rate.Download Excel Template to streamline the process.
           </Typography>
 
           <Stack direction="row" spacing={1} justifyContent="center" sx={{ px: 2.5, py: 1 }}>
-            <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<FaCloudUploadAlt />}>
+            <CompanyFilter sx={{ minWidth: 250 }} value={filterOptions.selectedCompany} setFilterOptions={setFilterOptions} />
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              disabled={!filterOptions.selectedCompany}
+              tabIndex={-1}
+              startIcon={<FaCloudUploadAlt />}
+            >
               Upload files
               <VisuallyHiddenInput type="file" onChange={(event) => handleFileChange(event)} />
             </Button>
@@ -236,6 +263,19 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
             )}
           </Stack>
         </CardContent>
+
+        {files && filterOptions.selectedCompany && (
+          <CardContent>
+            <Stack direction="column" spacing={1} justifyContent="center" sx={{ px: 2.5, py: 1 }}>
+              <Typography id="modal-modal-description">Select Vendors for which these Rates are applicable</Typography>
+              <VendorSelection
+                value={selectedVendors}
+                setSelectedOptions={setSelectedVendors}
+                sx={{ minWidth: '600px', maxWidth: '600px' }}
+              />
+            </Stack>
+          </CardContent>
+        )}
         <Divider />
         <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ px: 2.5, py: 2 }}>
           <Button
@@ -248,7 +288,13 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
           >
             Cancel
           </Button>
-          <Button color="success" size="small" variant="contained" onClick={handleSave} disabled={!files || loading}>
+          <Button
+            color="success"
+            size="small"
+            variant="contained"
+            onClick={handleSave}
+            disabled={!files || loading || selectedVendors.length === 0}
+          >
             Save
           </Button>
         </Stack>
@@ -270,107 +316,6 @@ function ChildModal({ id }) {
   };
 
   const [loading, setLoading] = useState(false);
-  const [selectedZones, setSelectedZones] = useState([]);
-  const [selectedVehicleTypes, setSelectedVehicleTypes] = useState([]);
-  const [existingCompanyRates, setExistingCompanyRates] = useState([]);
-  console.log({ selectedVehicleTypes });
-
-  useEffect(() => {
-    const fetchExistingCompanyRates = async () => {
-      if (!id) return; // Avoid fetching if id is undefined/null
-      setLoading(true);
-      try {
-        const response = await axiosServices.get(`/company/unwind/rates?companyId=${id}`);
-        console.log('response.data.data', response.data);
-
-        const unwindedRates = response?.data?.data.map((item) => ({
-          ZONENAME: item.zoneNameID?.zoneName || '', // Safely access zoneName
-          ZONETYPE: item.zoneTypeID?.zoneTypeName || '', // Handle null zoneTypeID
-          VEHICLETYPE: item.VehicleTypeName?.vehicleTypeName || '', // Safely access vehicleTypeName
-          COMPANYRATE: item.cabAmount?.amount || '', // Safely access companyRate
-          DUALTRIPRATE: item.dualTripAmount?.amount || '', // Safely access dualTripRate
-          COMPANYGUARDRATE: item.guardPrice || '' // Default guardPrice if undefined
-        }));
-
-        console.log({ unwindedRates });
-
-        setExistingCompanyRates(unwindedRates);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching company rates:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExistingCompanyRates();
-  }, [id]);
-
-  const handleDownload = useCallback(() => {
-    // **Sheet 1: Company Rates Data**
-    const companyHeaders = [
-      'SNO',
-      'ZONENAME*',
-      'ZONETYPE',
-      'VEHICLETYPE*',
-      'RATE',
-      'DUALTRIPRATE',
-      'GUARDRATE'
-    ];
-    const companyData = existingCompanyRates.map((rate, index) => [
-      index + 1,
-      rate.ZONENAME || '',
-      rate.ZONETYPE || '',
-      rate.VEHICLETYPE || '',
-      rate.COMPANYRATE || '',
-      rate.DUALTRIPRATE || '',
-      rate.COMPANYGUARDRATE || ''
-    ]);
-    const companySheetData = [companyHeaders, ...companyData];
-    const companySheet = XLSX.utils.aoa_to_sheet(companySheetData);
-
-    // **Sheet 2: zoneType Data**
-    const zoneHeaders = ['SNO', 'ZONENAME', 'ZONETYPE'];
-
-    const zoneData = selectedZones
-      .map((zone, i) => {
-        // Ensure zone and zone.zoneTypes are valid, fallback to an empty array if null/undefined
-        const zoneName = zone?.zoneName || 'N/A'; // Use 'N/A' or another placeholder for null zoneName
-        const zoneTypes = Array.isArray(zone?.zoneTypes) && zone.zoneTypes.length > 0 ? zone.zoneTypes : [null]; // Include a single empty entry if zoneTypes is null or empty
-
-        // Flatten the zoneTypes array for each zoneName
-        return zoneTypes.map((zoneType, index) => [
-          index === 0 ? i + 1 : '', // Serial number for the first row
-          index === 0 ? zoneName : '', // Show ZONENAME only for the first zoneType
-          zoneType?.zoneTypeName || '' // Leave ZONETYPE empty if zoneTypeName is null/undefined
-        ]);
-      })
-      .flat();
-
-    const zoneSheetData = [zoneHeaders, ...zoneData];
-    const zoneSheet = XLSX.utils.aoa_to_sheet(zoneSheetData);
-
-    // **Sheet 3: VehicleType Data**
-    const VehicleTypeHeaders = ['SNO', 'VEHICLETYPE'];
-    const vehicleTypeData = selectedVehicleTypes.map((type, index) => [
-      index + 1,
-      type?.vehicleTypeName // Fallback to 'N/A' if vehicleTypeName is null/undefined
-    ]);
-    console.log({ selectedVehicleTypes });
-
-    console.log({ vehicleTypeData });
-
-    const vehicleTypeSheetData = [VehicleTypeHeaders, ...vehicleTypeData];
-    const vehicleTypeSheet = XLSX.utils.aoa_to_sheet(vehicleTypeSheetData);
-    // **Create Workbook and Append Sheets**
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, companySheet, 'Company Rate Data');
-    XLSX.utils.book_append_sheet(workbook, zoneSheet, 'Zone Data');
-    XLSX.utils.book_append_sheet(workbook, vehicleTypeSheet, 'Vehicle Type Data');
-
-    // **Export the Workbook**
-    XLSX.writeFile(workbook, 'CompanyRateUpload.xlsx');
-  }, [existingCompanyRates, selectedZones, selectedVehicleTypes]);
 
   const handleClick = useCallback(() => {
     if (userType === USERTYPE.iscabProvider) {
@@ -381,14 +326,6 @@ function ChildModal({ id }) {
   }, [handleOpen, handleDownload, userType]);
   return (
     <>
-      {/* <Stack direction={'row'} gap={1}>
-        <Button onClick={handleTemplateDownload} size="small" color={'error'} endIcon={<DocumentDownload />} variant="contained">
-          Driver/Vendor Template
-        </Button>
-        <Button onClick={handleClick} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
-          DownloadTemplate
-        </Button>
-      </Stack> */}
       <Button onClick={handleClick} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
         Download Template
       </Button>
@@ -397,14 +334,8 @@ function ChildModal({ id }) {
         <MainCard title="Download Template" modal darkTitle content={false}>
           <CardContent>
             <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
-              <Typography id="modal-modal-description">Select Zones </Typography>
-
-              <ZoneSelection sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />
-            </Stack>
-            <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
-              <Typography id="modal-modal-description">Select Vehicle Type </Typography>
-
-              <VehicleTypeSelection sx={{ minWidth: 250 }} value={selectedVehicleTypes} setSelectedOptions={setSelectedVehicleTypes} />
+              <Typography id="modal-modal-description">Select Company </Typography>
+              <CompanyFilter sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />
             </Stack>
           </CardContent>
           <Divider />
@@ -413,8 +344,6 @@ function ChildModal({ id }) {
               color="error"
               size="small"
               onClick={() => {
-                setSelectedVehicleTypes([]);
-                setSelectedZones([]);
                 handleClose();
               }}
             >

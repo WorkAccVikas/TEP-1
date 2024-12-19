@@ -11,6 +11,7 @@ import vendorMenuItems from './vendor';
 import cabProviderMenuItems from './cabProvider1';
 import cabProviderUserMenuItems from './cabProviderUser';
 import vendorUserMenuItems from './vendorUser';
+import superAdminMenuItems from './superAdmin';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
@@ -24,7 +25,8 @@ const MENU_ITEM = {
   [USERTYPE.iscabProvider]: cabProviderMenuItems,
   [USERTYPE.isVendor]: vendorMenuItems,
   [USERTYPE.iscabProviderUser]: cabProviderUserMenuItems,
-  [USERTYPE.isVendorUser]: vendorUserMenuItems
+  [USERTYPE.isVendorUser]: vendorUserMenuItems,
+  [USERTYPE.superAdmin]: superAdminMenuItems,
 };
 
 export const getMenuItems = (userType) => {

@@ -27,6 +27,14 @@ import { enqueueSnackbar, useSnackbar } from 'notistack';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
+import {
+  isMobileNumber,
+  isNumber,
+  isRequiredString,
+  isString,
+  isValidEmail,
+  separateValidAndInvalidItems
+} from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -40,10 +48,58 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 });
 
+const MANDATORY_HEADERS = ['ID', 'Name*', 'Email*', 'Phone*'];
+
+const OPTIONAL_HEADERS = [
+  'Father Name',
+  "Experience (In Year's)",
+  'PAN',
+  'Bank Name',
+  'Branch Name',
+  'Account Holder Name',
+  'Account Number',
+  'IFSC Code',
+  'Bank Address'
+];
+
+// Add field mapping
+const fieldMapping = {
+  1: 'Name',
+  2: 'Email',
+  3: 'Phone',
+  4: 'Father Name',
+  5: 'Experience',
+  6: 'PAN',
+  7: 'Bank Name',
+  8: 'Branch Name',
+  9: 'Account Holder Name',
+  10: 'Account Number',
+  11: 'IFSC Code',
+  12: 'Bank Address'
+};
+
+const validationRules = {
+  // 0: isString, // ID
+  1: isRequiredString, // Name*
+  2: (value) => isRequiredString(value) && isValidEmail(value), // Email*
+  3: isMobileNumber, // Phone*
+
+  4: isString, // Father Name
+  5: isNumber, // Experience (In Year's)
+  6: isString, // PAN
+  7: isString, // Bank Name
+  8: isString, // Branch Name
+  9: isString, // Account Holder Name
+  10: isNumber, // Account Number
+  11: isString, // IFSC Code
+  12: isString // Bank Address
+};
+
 const BulkUploadDialog = ({ open, handleClose }) => {
   const [files, setFiles] = useState(null);
   const [driverData, setDriverData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [invalidData, setInvalidData] = useState([]);
   const { closeSnackbar } = useSnackbar();
 
   const handleFileChange = (event) => {
@@ -70,21 +126,61 @@ const BulkUploadDialog = ({ open, handleClose }) => {
 
       // Convert the sheet data to JSON
       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      console.log(`🚀 ~ handleExcelDataExtraction ~ jsonData:`, jsonData);
 
-      // Map the data to the desired format
-      const mappedData = jsonData.slice(1).map((row) => {
-        const [id, name, email, phone] = row;
+      // // Map the data to the desired format
+      // const mappedData = jsonData.slice(1).map((row) => {
+      //   const [id, name, email, phone] = row;
+      //   return {
+      //     data: {
+      //       userName: name,
+      //       userEmail: email,
+      //       contactNumber: phone,
+      //       vendorId: id || null
+      //     }
+      //   };
+      // });
+
+      // console.log(mappedData); // Log the mapped data
+      // setDriverData(mappedData); // Set the mapped data to state
+
+      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
+
+      if (invalidItems.length > 0) {
+        const items = invalidItems.map((entry) => {
+          const reasons = Object.entries(entry.errors)
+            .map(([field, message], index) => `${index + 1}. ${field} : ${message}`)
+            .join('\n');
+
+          return [...entry.item, `Reasons :\n${reasons}`];
+        });
+        console.log('items = ', items);
+
+        setInvalidData(items);
+      }
+
+      const mappedData = validItems.map((row) => {
         return {
-          data: {
-            userName: name,
-            userEmail: email,
-            contactNumber: phone,
-            vendorId: id || null
-          }
+          vendorId: row[0],
+          userName: row[1],
+          userEmail: row[2],
+          contactNumber: row[3],
+
+          fatherName: row[4],
+          experience: row[5],
+          pan: row[6],
+          bankName: row[7],
+          branchName: row[8],
+          accountHolderName: row[9],
+          accountNumber: row[10],
+          ifscCode: row[11],
+          bankAddress: row[12]
         };
       });
 
-      console.log(mappedData); // Log the mapped data
+      console.log('mappedData = ', mappedData); // Log the mapped data
       setDriverData(mappedData); // Set the mapped data to state
 
       // Set loading to false after processing is done
@@ -130,13 +226,29 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     // Headers for "vehicle Data" sheet
     console.log(data);
 
-    const driverHeaders = ['ID', 'Name*', 'Email*', 'Phone*'];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
+
+    const HeaderLength = driverHeaders.length;
 
     let driverData = [];
 
     // Check if the data is not empty, then populate "ID Reference" data
     if (data && data.length > 0) {
-      driverData = data.map((item) => [item.data.vendorId, item.data.userName, item.data.userEmail, item.data.contactNumber]);
+      driverData = data.map((item) => [
+        item.vendorId,
+        item.userName,
+        item.userEmail,
+        item.contactNumber,
+        item.fatherName,
+        item.experience,
+        item.pan,
+        item.bankName,
+        item.branchName,
+        item.accountHolderName,
+        item.accountNumber,
+        item.ifscCode,
+        item.bankAddress
+      ]);
     }
 
     // Create the second sheet (headers + data if available)
@@ -152,76 +264,152 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     XLSX.writeFile(workbook, 'failedDriverData.xlsx');
   };
 
-  const handleSave = async () => {
-    if (!driverData || driverData.length === 0) {
-      alert('Empty Excel Sheet');
-      return;
-    }
-    setLoading(true);
+  const handleViewClickForInvalid = useCallback((data) => {
+    // alert(`handleViewClickForInvalid ${data.length}`);
+    console.log('DATA = ', data);
 
-    let successCount = 0;
-    let failureCount = 0;
-    let failureData = [];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
 
-    // Loop through the driverData array and send the requests
-    for (const item of driverData) {
-      try {
-        const response = await axiosServices.post('/driver/register', item);
-        console.log(response.data);
+    const HeaderLength = driverHeaders.length;
 
-        // If the response indicates success, increment successCount
-        if (response.status === 201) {
-          successCount++;
-        }
-      } catch (error) {
-        console.error('Error registering driver:', error);
-
-        // On failure, increment failureCount and add failure data
-        failureCount++;
-        failureData.push(item); // Store failed item
+    const output = data.map((row) => {
+      // Add `null` to the end of the row until its length matches the required length
+      while (row.length < HeaderLength) {
+        row.splice(-1, 0, null); // Add nulls before the last item
       }
-    }
-
-    setCount({
-      successCount,
-      failureCount,
-      failureData
+      return row;
     });
 
-    // Show success or failure messages based on results
-    if (successCount > 0) {
+    console.log('output = ', output);
+
+    // Create the second sheet (headers + data if available)
+    const vendorSheet = XLSX.utils.aoa_to_sheet([
+      driverHeaders,
+      ...data // Will be empty if no data
+    ]);
+    // Create a workbook and append the sheets
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Driver Data');
+
+    // Export the Excel file
+    XLSX.writeFile(workbook, 'InvalidDriverData.xlsx');
+  }, []);
+
+  const actionTaskForInvalidData = useCallback(
+    (snackbarId, data) => (
+      <Stack direction="row" spacing={0.5}>
+        <Button
+          size="small"
+          color="error"
+          variant="contained"
+          onClick={() => {
+            handleViewClickForInvalid(data);
+          }}
+        >
+          View Invalid Data
+        </Button>
+        <Button size="small" color="secondary" variant="contained" onClick={() => closeSnackbar(snackbarId)}>
+          Dismiss
+        </Button>
+      </Stack>
+    ),
+    [closeSnackbar, handleViewClickForInvalid]
+  );
+
+  const handleSave = async () => {
+    try {
+      console.log('driverData', driverData);
+      if (!driverData || driverData.length === 0) {
+        alert('Empty Excel Sheet');
+        return;
+      }
+      setLoading(true);
+
+      let successCount = 0;
+      let failureCount = 0;
+      let failureData = [];
+
+      // Loop through the driverData array and send the requests
+      for (const item of driverData) {
+        try {
+          const response = await axiosServices.post('/driver/register', { data: item });
+          console.log(response.data);
+
+          // If the response indicates success, increment successCount
+          if (response.status === 201) {
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Error registering driver:', error);
+
+          // On failure, increment failureCount and add failure data
+          failureCount++;
+          failureData.push(item); // Store failed item
+        }
+      }
+
+      setCount({
+        successCount,
+        failureCount,
+        failureData
+      });
+
+      // Show success or failure messages based on results
+      if (successCount > 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: `${successCount} Drivers Saved Successfully`,
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false,
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right'
+            }
+          })
+        );
+      }
+
+      if (failureCount > 0) {
+        enqueueSnackbar(`${failureCount} Drivers Failed to Save`, {
+          action: (key) => actionTask(key, failureData),
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        });
+      }
+
+      // Reset states and close dialog
+      setFiles(null);
+      setDriverData(null);
+      setLoading(false);
+      handleClose();
+    } catch (error) {
+      console.log('error', error);
       dispatch(
         openSnackbar({
           open: true,
-          message: `${successCount} Drivers Saved Successfully`,
+          message: error.message || 'Something went wrong',
           variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right'
-          }
+          alert: { color: 'error' },
+          close: true
         })
       );
+    } finally {
+      if (invalidData.length > 0) {
+        enqueueSnackbar(`${invalidData.length} Vendors Invalid Data`, {
+          action: (key) => actionTaskForInvalidData(key, invalidData),
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        });
+      }
     }
-
-    if (failureCount > 0) {
-      enqueueSnackbar(`${failureCount} Drivers Failed to Save`, {
-        action: (key) => actionTask(key, failureData),
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'right'
-        }
-      });
-    }
-
-    // Reset states and close dialog
-    setFiles(null);
-    setDriverData(null);
-    setLoading(false);
-    handleClose();
   };
 
   return (
@@ -285,7 +473,8 @@ function ChildModal() {
 
   const handleDownload = useCallback(() => {
     // Headers for "Driver Data" sheet
-    const driverHeaders = ['ID', 'Name*', 'Email*', 'Phone*'];
+    // const driverHeaders = ['ID', 'Name*', 'Email*', 'Phone*'];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
     const driverData = []; // No data, just headers
 
     // Create the first sheet (headers only)
