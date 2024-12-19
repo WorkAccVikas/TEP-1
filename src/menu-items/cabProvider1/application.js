@@ -52,7 +52,7 @@ const roster = {
           title: <FormattedMessage id="company1" />,
           type: 'item',
           url: '/apps/invoices/company',
-          icon: icons.view
+          // icon: icons.view
         },
         // Vendor Invoice
         {
@@ -60,7 +60,7 @@ const roster = {
           title: <FormattedMessage id="vendor1" />,
           type: 'item',
           url: '/apps/invoices/vendor',
-          icon: icons.view
+          // icon: icons.view
         },
         // Driver Invoice
         {
@@ -68,7 +68,7 @@ const roster = {
           title: <FormattedMessage id="driver1" />,
           type: 'item',
           url: '/apps/invoices/driver',
-          icon: icons.view
+          // icon: icons.view
         }
       ]
     }

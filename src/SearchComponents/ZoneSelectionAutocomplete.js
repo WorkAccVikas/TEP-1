@@ -1,26 +1,39 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Autocomplete, Checkbox, Grid, List, ListItem, Skeleton, Typography } from '@mui/material';
-import TextField from '@mui/material/TextField';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Autocomplete, Checkbox, CircularProgress, Grid, List, ListItem, Skeleton, Typography } from '@mui/material';
+import TextField from '@mui/material/TextField';
 import { debounce } from 'lodash';
+import { fetchZoneData } from 'store/cacheSlice/zoneCacheSlice';
 import { dispatch } from 'store';
-import { fetchVehicleTypes } from 'store/cacheSlice/vehicleTypes';
 
-const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
-  const { cache, loading } = useSelector((state) => state.vehicleType); // Access Redux state
-
-  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
+const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
+  const { cache, loading } = useSelector((state) => state.zoneCache); // Access Redux state
+  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options for search
   const [query, setQuery] = useState(''); // Tracks search input
   const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
 
-  // Fetch default options from Redux (using cached data or fetching from API)
+  // Fetch zones on open if not already in cache
   useEffect(() => {
     if (!cache.default) {
-      dispatch(fetchVehicleTypes()); // Fetch vehicle types if not cached
+      dispatch(fetchZoneData());
     } else {
-      setFilteredOptions(cache.default); // Use cached vehicle types
+      setFilteredOptions(cache.default);
     }
-  }, [cache, dispatch]);
+  }, [cache.default, dispatch]);
+
+  // Update filtered options when search query changes
+  const filterOptions = useCallback(
+    debounce((inputQuery) => {
+      const lowerQuery = inputQuery.toLowerCase();
+      const filtered = (cache.default || []).filter((option) => option.zoneName.toLowerCase().includes(lowerQuery));
+      setFilteredOptions(filtered);
+    }, 500),
+    [cache.default]
+  );
+
+  useEffect(() => {
+    filterOptions(query);
+  }, [query, filterOptions]);
 
   // "Select All" Logic
   const handleSelectAllToggle = () => {
@@ -37,54 +50,38 @@ const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
     setSelectAllChecked(value.length === filteredOptions.length && filteredOptions.length > 0);
   }, [value, filteredOptions]);
 
-  // Debounced Search for Filtering
-  const filterOptions = useCallback(
-    debounce((inputQuery) => {
-      const lowerQuery = inputQuery.toLowerCase();
-      const filtered = cache.default.filter((option) => option.vehicleTypeName.toLowerCase().includes(lowerQuery));
-      setFilteredOptions(filtered);
-    }, 500),
-    [cache.default]
-  );
-
-  useEffect(() => {
-    if (query) {
-      filterOptions(query); // Filter options based on search input
-    } else {
-      setFilteredOptions(cache.default); // Reset filtered options when query is cleared
-    }
-  }, [query, filterOptions, cache.default]);
-
-  if (loading) {
-    return (
-      <Grid item xs={12}>
-        {/* Skeleton UI to show while loading */}
-        <Skeleton variant="rectangular" height={50} width="100%" sx={{ mb: 1 }} />
-      </Grid>
-    );
-  }
-
   return (
     <Grid item xs={12}>
       <Autocomplete
         multiple
-        id="vehicle-type-selection"
+        id="zone-selection"
         options={filteredOptions} // Use filtered options
         disableCloseOnSelect
-        getOptionLabel={(option) => option.vehicleTypeName}
+        openOnFocus
+        getOptionLabel={(option) => option.zoneName}
         value={value}
+        loading={loading} // Show loading indicator
         onChange={(event, newValue) => setSelectedOptions(newValue || [])} // Update selected options
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.vehicleTypeName}
+            {option.zoneName}
           </li>
         )}
         renderInput={(params) => (
           <TextField
             {...params}
-            placeholder="Search or Select Vehicle Types"
+            placeholder="Search or Select Zones"
             onChange={(e) => setQuery(e.target.value)} // Update search query
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
           />
         )}
         ListboxComponent={(listboxProps) => {
@@ -123,4 +120,4 @@ const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
   );
 };
 
-export default VehicleTypeSelection;
+export default ZoneSelection;

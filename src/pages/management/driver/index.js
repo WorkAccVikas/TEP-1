@@ -67,6 +67,7 @@ const Driver = () => {
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
+  
   const handleAdd = useCallback(() => {
     dispatch(handleOpen(ACTION.CREATE));
   }, []);
@@ -124,15 +125,6 @@ const Driver = () => {
     }
   }, []);
 
-  // const yupSchema = Yup.object().shape({
-  //   userName: Yup.string().required('User Name is required'),
-  //   userEmail: Yup.string().email('Enter a valid email').required('User Email is required'),
-  //   contactNumber: Yup.string().required('Contact Number is required'),
-  //   vendorId: [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)
-  //     ? Yup.string().required('Vendor is required')
-  //     : Yup.string()
-  // });
-
   const handleDriverBulkUploadOpen = () => {
     setOpenBulkUploadDialog(true);
   };
@@ -140,6 +132,8 @@ const Driver = () => {
     setOpenBulkUploadDialog(false);
   };
   const formikHandleSubmit = async (values, isCreating) => {
+    console.log('BIE');
+
     // eslint-disable-next-line no-useless-catch
     try {
       if (isCreating) {
@@ -160,6 +154,7 @@ const Driver = () => {
           setDriverType(1);
           dispatch(fetchDrivers({ page: 1, limit: 10, driverType: 1 }));
         }
+        return response;
       } else {
         // console.log('Update API call');
         // console.log({ selectedID });

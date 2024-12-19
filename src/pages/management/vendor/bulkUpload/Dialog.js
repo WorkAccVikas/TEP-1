@@ -28,6 +28,7 @@ import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import { registerUser } from 'store/slice/cabProvidor/userSlice';
 import { addSpecialDetails } from 'store/slice/cabProvidor/vendorSlice';
+import { isNumber, isPinCode, isPositiveNumber, isRequiredString, isString, isValidEmail, separateValidAndInvalidItems } from '../helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -41,11 +42,60 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 });
 
+const MANDATORY_HEADERS = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+
+const OPTIONAL_HEADERS = [
+  'Contact Person Name',
+  'PAN',
+  'GSTIN',
+  'Office Address',
+  'Office City',
+  'Office State',
+  'Office Pincode',
+  'Work Email',
+  'Work Mobile Number',
+  'Work Landline Number',
+  'Bank Name',
+  'Account Number',
+  'Account Holder Name',
+  'Branch Name',
+  'IFSC Code',
+  'Bank Address',
+  'ESI Number',
+  'PF Number'
+];
+
+// Validation rules for specific indices
+const validationRules = {
+  0: isRequiredString,
+  // 1: isRequiredString,
+  1: (value) => isRequiredString(value) && isValidEmail(value), // userEmail,
+  2: isRequiredString,
+  3: isRequiredString,
+  4: isPositiveNumber,
+  5: isString,
+  6: isString,
+  7: isString,
+  8: isString,
+  9: isString,
+  10: isString,
+  11: isPinCode,
+  12: isValidEmail,
+  15: isString,
+  16: isNumber,
+  17: isString,
+  18: isString,
+  19: isString,
+  20: isString,
+  21: isNumber,
+  22: isString
+};
+
 export const BulkUploadDialog = ({ open, handleClose }) => {
   const [files, setFiles] = useState(null);
   const [basicData, setBasicData] = useState(null);
-  const [specificData, setSpecificData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [invalidData, setInvalidData] = useState([]);
   const { closeSnackbar } = useSnackbar();
   const [count, setCount] = useState({
     successCount: 0,
@@ -80,31 +130,61 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
 
       console.log('jsonData', jsonData);
 
-      // Map the data to the desired format
-      const mappedDataForBasic = jsonData.slice(1).map((row) => {
-        const [userName, email, password, vendorLegalName, officeChargeAmount] = row;
+      // // Map the data to the desired format
+      // const mappedDataForBasic = jsonData.slice(1).map((row) => {
+      //   const [userName, email, password, vendorLegalName, officeChargeAmount] = row;
+      //   return {
+      //     userName,
+      //     userEmail: email,
+      //     userPassword: password,
+      //     vendorLegalName,
+      //     officeChargeAmount
+      //   };
+      // });
+
+      // console.log(mappedDataForBasic); // Log the mapped data
+      // setBasicData(mappedDataForBasic); // Set the mapped data to state
+
+      // Execute and log the results
+      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
+
+      if (invalidItems.length > 0) {
+        setInvalidData(invalidItems);
+      }
+
+      const mappedDataForBasic = validItems.map((row) => {
         return {
-          userName,
-          userEmail: email,
-          userPassword: password,
-          vendorLegalName,
-          officeChargeAmount
+          userName: row[0],
+          userEmail: row[1],
+          userPassword: row[2],
+          vendorLegalName: row[3],
+          officeChargeAmount: row[4],
+
+          contactPersonName: row[5] || '',
+          PAN: row[6] || '',
+          GSTIN: row[7] || '',
+          officeAddress: row[8] || '',
+          officeCity: row[9] || '',
+          officeState: row[10] || '',
+          officePinCode: row[11] || '',
+          workEmail: row[12] || '',
+          workMobileNumber: row[13] || '',
+          workLandLineNumber: row[14] || '',
+          bankName: row[15] || '',
+          accountNumber: row[16] || '',
+          accountHolderName: row[17] || '',
+          branchName: row[18] || '',
+          IFSC_code: row[19] || '',
+          bankAddress: row[20] || '',
+          ESI_Number: row[21] || '',
+          PF_Number: row[22] || ''
         };
       });
 
       console.log(mappedDataForBasic); // Log the mapped data
       setBasicData(mappedDataForBasic); // Set the mapped data to state
-
-      const mappedDataForSpecific = jsonData.slice(1).map((row) => {
-        const [, , , vendorLegalName, officeChargeAmount] = row;
-        return {
-          vendorLegalName,
-          officeChargeAmount
-        };
-      });
-
-      console.log(mappedDataForSpecific); // Log the mapped data
-      setSpecificData(mappedDataForSpecific); // Set the mapped data to state
 
       // Set loading to false after processing is done
       setLoading(false);
@@ -121,7 +201,8 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
 
   const handleDownload = useCallback(() => {
     // Headers for "Vendor Data" sheet
-    const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+    // const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+    const vendorHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
     // Create the first sheet (headers only)
     const vendorSheet = XLSX.utils.aoa_to_sheet([vendorHeaders]);
     const workbook = XLSX.utils.book_new();
@@ -133,7 +214,8 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
     // Headers for "vendor Data" sheet
     console.log(data);
 
-    const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+    // const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+    const vendorHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
 
     let vendorData = [];
 
@@ -176,11 +258,51 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
     [closeSnackbar, handleViewClick]
   );
 
+  const handleViewClickForInvalid = useCallback((data) => {
+    // alert(`handleViewClickForInvalid ${data.length}`);
+    console.log('DATA = ', data);
+
+    // const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+    const vendorHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
+
+    // Create the second sheet (headers + data if available)
+    const vendorSheet = XLSX.utils.aoa_to_sheet([
+      vendorHeaders,
+      ...data // Will be empty if no data
+    ]);
+    // Create a workbook and append the sheets
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Vendor Data');
+
+    // Export the Excel file
+    XLSX.writeFile(workbook, 'InvalidVendorData.xlsx');
+  }, []);
+
+  const actionTaskForInvalidData = useCallback(
+    (snackbarId, data) => (
+      <Stack direction="row" spacing={0.5}>
+        <Button
+          size="small"
+          color="error"
+          variant="contained"
+          onClick={() => {
+            handleViewClickForInvalid(data);
+          }}
+        >
+          View Invalid Data
+        </Button>
+        <Button size="small" color="secondary" variant="contained" onClick={() => closeSnackbar(snackbarId)}>
+          Dismiss
+        </Button>
+      </Stack>
+    ),
+    [closeSnackbar, handleViewClickForInvalid]
+  );
+
   const handleSave = useCallback(async () => {
     try {
       console.log('handleSave called');
       console.log('basicData', basicData);
-      console.log('specificData', specificData);
       if (!basicData || basicData.length === 0) {
         alert('Empty Excel Sheet');
         return;
@@ -209,24 +331,24 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
                 vendorId: response.data._id,
                 vendorCompanyName: item.vendorLegalName,
                 officeChargeAmount: item.officeChargeAmount,
-                contactPersonName: '',
-                PAN: '',
-                GSTIN: '',
-                workEmail: '',
-                workMobileNumber: '',
-                workLandLineNumber: '',
-                officePinCode: '',
-                officeCity: '',
-                officeState: '',
-                officeAddress: '',
-                bankName: '',
-                branchName: '',
-                IFSC_code: '',
-                accountNumber: '',
-                accountHolderName: '',
-                bankAddress: '',
-                ESI_Number: '',
-                PF_Number: ''
+                contactPersonName: item.contactPersonName || '',
+                PAN: item.PAN || '',
+                GSTIN: item.GSTIN || '',
+                workEmail: item.workEmail || '',
+                workMobileNumber: item.workMobileNumber || '',
+                workLandLineNumber: item.workLandLineNumber || '',
+                officePinCode: item.officePinCode || '',
+                officeCity: item.officeCity || '',
+                officeState: item.officeState || '',
+                officeAddress: item.officeAddress || '',
+                bankName: item.bankName || '',
+                branchName: item.branchName || '',
+                IFSC_code: item.IFSC_code || '',
+                accountNumber: item.accountNumber || '',
+                accountHolderName: item.accountHolderName || '',
+                bankAddress: item.bankAddress || '',
+                ESI_Number: item.ESI_Number || '',
+                PF_Number: item.PF_Number || ''
               }
             };
 
@@ -282,7 +404,6 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
       // Reset states and close dialog
       setFiles(null);
       setBasicData(null);
-      setSpecificData(null);
       setLoading(false);
       handleClose();
     } catch (error) {
@@ -298,8 +419,17 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
       );
     } finally {
       setLoading(false);
+      if (invalidData.length > 0) {
+        enqueueSnackbar(`${invalidData.length} Vendors Invalid Data`, {
+          action: (key) => actionTaskForInvalidData(key, invalidData),
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        });
+      }
     }
-  }, [basicData, specificData, handleClose, actionTask]);
+  }, [basicData, handleClose, actionTask, actionTaskForInvalidData, invalidData]);
 
   return (
     <>
@@ -358,4 +488,3 @@ BulkUploadDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired
 };
-
