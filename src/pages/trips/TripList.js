@@ -489,7 +489,7 @@ function ReactTable({
         }
 
         // Eligible for changing status when status is 1, 2, or 3
-        if ((assignedStatus === 1 || assignedStatus === 2 || assignedStatus === 3) && !invoiceId) {
+        if ( !invoiceId) {
           SelectedchangeStatusRow.push(row.original);
         }
       });

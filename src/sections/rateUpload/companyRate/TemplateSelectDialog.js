@@ -11,7 +11,8 @@ import {
   Alert,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Skeleton
 } from '@mui/material';
 // project-imports
 import MainCard from 'components/MainCard';
@@ -22,13 +23,14 @@ import { FaCloudUploadAlt } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { useSnackbar } from 'notistack';
 import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import ZoneSelection from 'SearchComponents/ZoneSelectionAutocomplete';
 import VehicleTypeSelection from 'SearchComponents/VehicleTypeSelectionAutoComplete';
 import { StructurePayload } from '../utils/mapCompanyRateData';
 import { dispatch } from 'store';
+import { fetchCompanyRates } from 'store/cacheSlice/companyRatesSlice';
+import { useDispatch } from 'react-redux';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -260,6 +262,8 @@ const TemplateSelectDialog = ({ id, open, handleClose, setKey }) => {
 function ChildModal({ id }) {
   const [open, setOpen] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
+  console.log({ open, userType });
+  const dispatch = useDispatch();
   // console.log('userType', userType);
   const handleOpen = useCallback(() => {
     setOpen(true);
@@ -269,54 +273,36 @@ function ChildModal({ id }) {
     setOpen(false);
   };
 
-  const [loading, setLoading] = useState(false);
   const [selectedZones, setSelectedZones] = useState([]);
   const [selectedVehicleTypes, setSelectedVehicleTypes] = useState([]);
   const [existingCompanyRates, setExistingCompanyRates] = useState([]);
-  console.log({ selectedVehicleTypes });
+  const { cache, loading, error } = useSelector((state) => state.companyRates); // Access Redux state
+  const { loading: vehicleTypeLoading } = useSelector((state) => state.vehicleType); // Access Redux state
 
   useEffect(() => {
-    const fetchExistingCompanyRates = async () => {
-      if (!id) return; // Avoid fetching if id is undefined/null
-      setLoading(true);
-      try {
-        const response = await axiosServices.get(`/company/unwind/rates?companyId=${id}`);
-        console.log('response.data.data', response.data);
+    if (id && !cache[id]) {
+      dispatch(fetchCompanyRates({ companyId: id, userType: userType }));
+    }
+  }, [dispatch, id, cache]);
 
-        const unwindedRates = response?.data?.data.map((item) => ({
-          ZONENAME: item.zoneNameID?.zoneName || '', // Safely access zoneName
-          ZONETYPE: item.zoneTypeID?.zoneTypeName || '', // Handle null zoneTypeID
-          VEHICLETYPE: item.VehicleTypeName?.vehicleTypeName || '', // Safely access vehicleTypeName
-          COMPANYRATE: item.cabAmount?.amount || '', // Safely access companyRate
-          DUALTRIPRATE: item.dualTripAmount?.amount || '', // Safely access dualTripRate
-          COMPANYGUARDRATE: item.guardPrice || '' // Default guardPrice if undefined
-        }));
+  useEffect(() => {
+    if (id && cache[id]) {
+      const unwindedRates = cache[id].map((item) => ({
+        ZONENAME: item.zoneNameID?.zoneName || '', // Safely access zoneName
+        ZONETYPE: item.zoneTypeID?.zoneTypeName || '', // Handle null zoneTypeID
+        VEHICLETYPE: item.VehicleTypeName?.vehicleTypeName || '', // Safely access vehicleTypeName
+        COMPANYRATE: item.cabAmount?.amount || '', // Safely access companyRate
+        DUALTRIPRATE: item.dualTripAmount?.amount || '', // Safely access dualTripRate
+        COMPANYGUARDRATE: item.guardPrice || '' // Default guardPrice if undefined
+      }));
 
-        console.log({ unwindedRates });
-
-        setExistingCompanyRates(unwindedRates);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching company rates:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExistingCompanyRates();
-  }, [id]);
+      setExistingCompanyRates(unwindedRates);
+    }
+  }, [cache, id]);
 
   const handleDownload = useCallback(() => {
     // **Sheet 1: Company Rates Data**
-    const companyHeaders = [
-      'SNO',
-      'ZONENAME*',
-      'ZONETYPE',
-      'VEHICLETYPE*',
-      'RATE',
-      'DUALTRIPRATE',
-      'GUARDRATE'
-    ];
+    const companyHeaders = ['SNO', 'ZONENAME*', 'ZONETYPE', 'VEHICLETYPE*', 'RATE', 'DUALTRIPRATE', 'GUARDRATE'];
     const companyData = existingCompanyRates.map((rate, index) => [
       index + 1,
       rate.ZONENAME || '',
@@ -379,16 +365,9 @@ function ChildModal({ id }) {
       handleDownload();
     }
   }, [handleOpen, handleDownload, userType]);
+
   return (
     <>
-      {/* <Stack direction={'row'} gap={1}>
-        <Button onClick={handleTemplateDownload} size="small" color={'error'} endIcon={<DocumentDownload />} variant="contained">
-          Driver/Vendor Template
-        </Button>
-        <Button onClick={handleClick} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
-          DownloadTemplate
-        </Button>
-      </Stack> */}
       <Button onClick={handleClick} size="small" color="secondary" endIcon={<DocumentDownload />} variant="contained">
         Download Template
       </Button>
@@ -398,13 +377,15 @@ function ChildModal({ id }) {
           <CardContent>
             <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
               <Typography id="modal-modal-description">Select Zones </Typography>
-
-              <ZoneSelection sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />
+              {<ZoneSelection sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />}
             </Stack>
             <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
               <Typography id="modal-modal-description">Select Vehicle Type </Typography>
-
-              <VehicleTypeSelection sx={{ minWidth: 250 }} value={selectedVehicleTypes} setSelectedOptions={setSelectedVehicleTypes} />
+              {vehicleTypeLoading ? (
+                <Skeleton variant="rectangular" height={50} width="100%" sx={{ mb: 1 }} />
+              ) : (
+                <VehicleTypeSelection sx={{ minWidth: 250 }} value={selectedVehicleTypes} setSelectedOptions={setSelectedVehicleTypes} />
+              )}
             </Stack>
           </CardContent>
           <Divider />
