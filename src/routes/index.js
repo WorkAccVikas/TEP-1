@@ -1,4 +1,4 @@
-import { useNavigate, useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes } from 'react-router-dom';
 
 // project-imports
 import LoginRoutes from './LoginRoutes';
@@ -7,15 +7,15 @@ import CabProvidorRoutes from './CabProviderRoutes1';
 import CabProvidorUserRoutes from './CabProviderUserRoutes';
 import VendorUserRoutes from './VendorUserRoutes';
 
-import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
+import { USERTYPE } from 'constant';
+import useAuth from 'hooks/useAuth';
+import CommonLayout from 'layout/CommonLayout';
+import StepperSubscribe from 'pages/subscription/StepperSubscribe';
 import { lazy, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { USERTYPE } from 'constant';
-import VendorRoutes from './VendorRoutes';
-import StepperSubscribe from 'pages/subscription/StepperSubscribe';
-import useAuth from 'hooks/useAuth';
 import SuperAdminRoutes from './SuperAdminRoutes';
+import VendorRoutes from './VendorRoutes';
 
 const PagesLanding = Loadable(lazy(() => import('pages/Landing')));
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
@@ -30,23 +30,12 @@ const ROUTES = {
 };
 
 export default function ThemeRoutes() {
-  const navigate = useNavigate();
   const userType = useSelector((state) => state.auth.userType);
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  // console.log(`🚀 ~ ThemeRoutes ~ isLoggedIn:`, isLoggedIn);
   // console.log(`🚀 ~ ThemeRoutes ~ userType:`, userType);
 
   const { accountSetting } = useAuth();
 
   const { favIcon = 'favicon.png', title = 'Trip Biller' } = accountSetting || {};
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/auth');
-    } else {
-      navigate('/home');
-    }
-  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const link = document.querySelector("link[rel~='icon']");
