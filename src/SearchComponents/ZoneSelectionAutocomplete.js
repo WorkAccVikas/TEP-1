@@ -1,44 +1,39 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Autocomplete, Checkbox, Grid, List, ListItem, Typography } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Autocomplete, Checkbox, CircularProgress, Grid, List, ListItem, Skeleton, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import axiosServices from 'utils/axios';
 import { debounce } from 'lodash';
+import { fetchZoneData } from 'store/cacheSlice/zoneCacheSlice';
+import { dispatch } from 'store';
 
 const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
-  const [options, setOptions] = useState([]); // Stores all fetched options
-  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [open, setOpen] = useState(false); // Tracks dropdown open state
+  const { cache, loading } = useSelector((state) => state.zoneCache); // Access Redux state
+  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options for search
   const [query, setQuery] = useState(''); // Tracks search input
-  const [cache, setCache] = useState({}); // Cache for fetched results
   const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
 
-  // Fetch default options when dropdown is opened
+  // Fetch zones on open if not already in cache
   useEffect(() => {
-    const fetchDefaultOptions = async () => {
-      if (cache.default) {
-        setOptions(cache.default);
-        setFilteredOptions(cache.default);
-        return;
-      }
+    if (!cache.default) {
+      dispatch(fetchZoneData());
+    } else {
+      setFilteredOptions(cache.default);
+    }
+  }, [cache.default, dispatch]);
 
-      setLoading(true);
-      try {
-        const response = await axiosServices.get('/zoneType/zoneType/zone/wise');
-        const zones = response.data.data || [];
-        console.log(response.data.data);
-        setOptions(zones);
-        setFilteredOptions(zones); // Initialize filtered options
-        setCache((prevCache) => ({ ...prevCache, default: zones })); // Cache default results
-      } catch (error) {
-        console.error('Error fetching default options:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Update filtered options when search query changes
+  const filterOptions = useCallback(
+    debounce((inputQuery) => {
+      const lowerQuery = inputQuery.toLowerCase();
+      const filtered = (cache.default || []).filter((option) => option.zoneName.toLowerCase().includes(lowerQuery));
+      setFilteredOptions(filtered);
+    }, 500),
+    [cache.default]
+  );
 
-    if (open) fetchDefaultOptions();
-  }, [open, cache.default]);
+  useEffect(() => {
+    filterOptions(query);
+  }, [query, filterOptions]);
 
   // "Select All" Logic
   const handleSelectAllToggle = () => {
@@ -55,20 +50,6 @@ const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
     setSelectAllChecked(value.length === filteredOptions.length && filteredOptions.length > 0);
   }, [value, filteredOptions]);
 
-  // Debounced Search for Filtering
-  const filterOptions = useCallback(
-    debounce((inputQuery) => {
-      const lowerQuery = inputQuery.toLowerCase();
-      const filtered = options.filter((option) => option.zoneName.toLowerCase().includes(lowerQuery));
-      setFilteredOptions(filtered);
-    }, 500),
-    [options]
-  );
-
-  useEffect(() => {
-    filterOptions(query);
-  }, [query, filterOptions]);
-
   return (
     <Grid item xs={12}>
       <Autocomplete
@@ -76,11 +57,10 @@ const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
         id="zone-selection"
         options={filteredOptions} // Use filtered options
         disableCloseOnSelect
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
+        openOnFocus
         getOptionLabel={(option) => option.zoneName}
         value={value}
+        loading={loading} // Show loading indicator
         onChange={(event, newValue) => setSelectedOptions(newValue || [])} // Update selected options
         renderOption={(props, option, { selected }) => (
           <li {...props}>
@@ -93,6 +73,15 @@ const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
             {...params}
             placeholder="Search or Select Zones"
             onChange={(e) => setQuery(e.target.value)} // Update search query
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
           />
         )}
         ListboxComponent={(listboxProps) => {
