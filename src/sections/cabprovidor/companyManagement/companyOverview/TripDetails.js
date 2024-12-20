@@ -218,7 +218,9 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
             {loading ? (
               <TableSkeleton rows={10} columns={8} />
             ) : data?.length > 0 ? (
-              <ReactTable columns={columns} data={data} loading={loading} />
+              <>
+                <ReactTable columns={columns} data={data} loading={loading} />
+              </>
             ) : (
               <EmptyTableDemo />
             )}
