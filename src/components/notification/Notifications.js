@@ -12,22 +12,6 @@ import { useNavigate } from 'react-router';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
 
-// adding styling according to icons
-const getNotificationColors = (type) => {
-  switch (type) {
-    case 'ADVANCE':
-      return { color: 'primary.darker', bgcolor: 'primary.lighter' };
-    case 'INVOICE':
-      return { color: 'success.darker', bgcolor: 'success.lighter' };
-    case 'TRIP':
-      return { color: 'warning.darker', bgcolor: 'warning.lighter' };
-    case 'TRANSACTION':
-      return { color: 'error.darker', bgcolor: 'error.lighter' };
-    default:
-      return { color: 'grey.800', bgcolor: 'grey.300' }; // Default color
-  }
-};
-
 // picking icons according to notification type
 function getIconByType(type) {
   switch (type) {

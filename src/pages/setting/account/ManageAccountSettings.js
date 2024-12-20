@@ -80,8 +80,8 @@ Config.prototype.getRecommendedSizeString = function () {
 // Configuration object using size functions
 const CONFIG = {
   logo: new Config(sizeInMB(2), ['image/jpeg', 'image/png'], MAX_LOGO_WIDTH, MAX_LOGO_HEIGHT),
-  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png'], MAX_SMALL_LOGO_WIDTH, MAX_SMALL_LOGO_HEIGHT),
-  favIcon: new Config(sizeInKB(512), ['image/x-icon', 'image/png', 'image/svg+xml'], MAX_FAV_ICON_WIDTH, MAX_FAV_ICON_HEIGHT)
+  smallLogo: new Config(sizeInMB(1), ['image/jpeg', 'image/png'], MAX_SMALL_LOGO_WIDTH, MAX_SMALL_LOGO_HEIGHT)
+  // favIcon: new Config(sizeInKB(512), ['image/x-icon', 'image/png', 'image/svg+xml'], MAX_FAV_ICON_WIDTH, MAX_FAV_ICON_HEIGHT)
 };
 
 // const validationSchema = Yup.object().shape({
@@ -155,8 +155,8 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   title: Yup.string().required('Title is required'),
   logo: createFileValidation(CONFIG.logo, 'Logo'),
-  smallLogo: createFileValidation(CONFIG.smallLogo, 'Small logo'),
-  favIcon: createFileValidation(CONFIG.favIcon, 'Favicon')
+  smallLogo: createFileValidation(CONFIG.smallLogo, 'Small logo')
+  // favIcon: createFileValidation(CONFIG.favIcon, 'Favicon')
 });
 
 const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
@@ -192,11 +192,11 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
 
   const formik = useFormik({
     initialValues: {
-      name: initialValues?.name || '',
+      // name: initialValues?.name || '',
       title: initialValues?.title || '',
       logo: null,
-      smallLogo: null,
-      favIcon: null
+      smallLogo: null
+      // favIcon: null
     },
     // validationSchema,
     enableReinitialize: true,
@@ -300,135 +300,156 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
             <Stack gap={2}>
               <Grid container spacing={3}>
                 {/* Logo */}
-                <Grid item xs={12} md={6}>
-                  <MainCard
-                    title="Logo"
-                    sx={{
-                      '& .MuiCardHeader-root': {
-                        textAlign: 'center'
-                      }
-                    }}
-                  >
-                    <Grid container spacing={2}>
-                      {/* Big Logo */}
-                      <Grid item xs={6}>
-                        <Stack direction="column" alignItems="center" spacing={2}>
-                          {/* Title */}
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            Upload Logo
-                          </Typography>
-
-                          {/* Drag and Drop Zone */}
-                          <div
-                            onClick={handleButtonClick}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              const file = e.dataTransfer.files[0];
-                              handleLogoChange({ target: { files: [file] } });
-                            }}
-                            style={{
-                              width: 150,
-                              height: 150,
-                              border: logoPreview ? 'none' : '2px dashed #1976d2',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              cursor: 'pointer',
-                              position: 'relative',
-                              background: logoPreview ? `url(${logoPreview}) no-repeat center / cover` : '#f0f0f0',
-                              overflow: 'hidden'
-                            }}
-                            title="Click or drag an image to upload"
-                          >
-                            {/* Default Icon */}
-                            {!logoPreview && <FaRegUserCircle style={{ fontSize: 50, color: '#90caf9' }} />}
-
-                            {/* Hidden File Input */}
-                            <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleLogoChange} />
-                          </div>
-
-                          {/* Validation Feedback */}
-                          {formik.touched.logo && formik.errors.logo ? (
-                            <Typography variant="body2" color="error">
-                              {formik.errors.logo}
+                <Grid item xs={12}>
+                  <Stack gap={2}>
+                    {/* Logo's */}
+                    <MainCard
+                      title="Logo"
+                      sx={{
+                        '& .MuiCardHeader-root': {
+                          textAlign: 'center'
+                        }
+                      }}
+                    >
+                      <Grid container spacing={2}>
+                        {/* Big Logo */}
+                        <Grid item xs={6}>
+                          <Stack direction="column" alignItems="center" spacing={2}>
+                            {/* Title */}
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              Upload Logo
                             </Typography>
-                          ) : (
-                            <Stack gap={1}>
-                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                                * Accepts JPEG/PNG formats up to {CONFIG.logo.getSizeString()}.
+
+                            {/* Drag and Drop Zone */}
+                            <div
+                              onClick={handleButtonClick}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const file = e.dataTransfer.files[0];
+                                handleLogoChange({ target: { files: [file] } });
+                              }}
+                              style={{
+                                width: 150,
+                                height: 150,
+                                border: logoPreview ? 'none' : '2px dashed #1976d2',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                background: logoPreview ? `url(${logoPreview}) no-repeat center / cover` : '#f0f0f0',
+                                overflow: 'hidden'
+                              }}
+                              title="Click or drag an image to upload"
+                            >
+                              {/* Default Icon */}
+                              {!logoPreview && <FaRegUserCircle style={{ fontSize: 50, color: '#90caf9' }} />}
+
+                              {/* Hidden File Input */}
+                              <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleLogoChange} />
+                            </div>
+
+                            {/* Validation Feedback */}
+                            {formik.touched.logo && formik.errors.logo ? (
+                              <Typography variant="body2" color="error">
+                                {formik.errors.logo}
                               </Typography>
-                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                                * Recommended image size: {CONFIG.logo.getRecommendedSizeString()}.
-                              </Typography>
-                            </Stack>
-                          )}
-                        </Stack>
-                      </Grid>
+                            ) : (
+                              <Stack gap={1}>
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                  * Accepts JPEG/PNG formats up to {CONFIG.logo.getSizeString()}.
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                  * Recommended image size: {CONFIG.logo.getRecommendedSizeString()}.
+                                </Typography>
+                              </Stack>
+                            )}
+                          </Stack>
+                        </Grid>
 
-                      {/* Small Logo */}
-                      <Grid item xs={6}>
-                        <Stack direction="column" alignItems="center" spacing={2}>
-                          {/* Title */}
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            Upload Small Logo
-                          </Typography>
-
-                          {/* Drag and Drop Zone */}
-                          <div
-                            onClick={handleSmallLogoButtonClick}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              const file = e.dataTransfer.files[0];
-                              handleSmallLogoChange({ target: { files: [file] } });
-                            }}
-                            style={{
-                              width: 150,
-                              height: 150,
-                              border: smallLogoPreview ? 'none' : '2px dashed #1976d2',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              cursor: 'pointer',
-                              position: 'relative',
-                              background: smallLogoPreview ? `url(${smallLogoPreview}) no-repeat center / cover` : '#f0f0f0',
-                              overflow: 'hidden'
-                            }}
-                            title="Click or drag an image to upload"
-                          >
-                            {/* Default Icon */}
-                            {!smallLogoPreview && <FaRegUserCircle style={{ fontSize: 50, color: '#90caf9' }} />}
-
-                            {/* Hidden File Input */}
-                            <input ref={fileSmallInputRef} type="file" accept="image/*" hidden onChange={handleSmallLogoChange} />
-                          </div>
-
-                          {/* Validation Feedback */}
-                          {formik.touched.smallLogo && formik.errors.smallLogo ? (
-                            <Typography variant="body2" color="error">
-                              {formik.errors.smallLogo}
+                        {/* Small Logo */}
+                        <Grid item xs={6}>
+                          <Stack direction="column" alignItems="center" spacing={2}>
+                            {/* Title */}
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              Upload Small Logo
                             </Typography>
-                          ) : (
-                            <Stack gap={1}>
-                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                                * Accepts JPEG/PNG formats up to {CONFIG.smallLogo.getSizeString()}.
+
+                            {/* Drag and Drop Zone */}
+                            <div
+                              onClick={handleSmallLogoButtonClick}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const file = e.dataTransfer.files[0];
+                                handleSmallLogoChange({ target: { files: [file] } });
+                              }}
+                              style={{
+                                width: 150,
+                                height: 150,
+                                border: smallLogoPreview ? 'none' : '2px dashed #1976d2',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                background: smallLogoPreview ? `url(${smallLogoPreview}) no-repeat center / cover` : '#f0f0f0',
+                                overflow: 'hidden'
+                              }}
+                              title="Click or drag an image to upload"
+                            >
+                              {/* Default Icon */}
+                              {!smallLogoPreview && <FaRegUserCircle style={{ fontSize: 50, color: '#90caf9' }} />}
+
+                              {/* Hidden File Input */}
+                              <input ref={fileSmallInputRef} type="file" accept="image/*" hidden onChange={handleSmallLogoChange} />
+                            </div>
+
+                            {/* Validation Feedback */}
+                            {formik.touched.smallLogo && formik.errors.smallLogo ? (
+                              <Typography variant="body2" color="error">
+                                {formik.errors.smallLogo}
                               </Typography>
-                              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
-                                * Recommended image size: {CONFIG.smallLogo.getRecommendedSizeString()}.
-                              </Typography>
-                            </Stack>
-                          )}
-                        </Stack>
+                            ) : (
+                              <Stack gap={1}>
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                  * Accepts JPEG/PNG formats up to {CONFIG.smallLogo.getSizeString()}.
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray' }}>
+                                  * Recommended image size: {CONFIG.smallLogo.getRecommendedSizeString()}.
+                                </Typography>
+                              </Stack>
+                            )}
+                          </Stack>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </MainCard>
+                    </MainCard>
+
+                    {/* Title */}
+                    <Stack spacing={1}>
+                      <InputLabel htmlFor="title" sx={{ fontWeight: 600 }}>
+                        Title
+                      </InputLabel>
+                      <TextField
+                        fullWidth
+                        {...formik.getFieldProps('title')}
+                        id="title"
+                        type="text"
+                        // label="Title"
+                        placeholder="Title"
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.title && Boolean(formik.errors.title)}
+                        helperText={formik.touched.title && formik.errors.title}
+                      />
+                    </Stack>
+                  </Stack>
                 </Grid>
 
                 {/* Fav Icon */}
-                <Grid item xs={12} md={6}>
+                {/* <Grid item xs={12} md={6}>
                   <MainCard title="Favicon" sx={{ textAlign: 'center', padding: 3 }}>
                     <Stack direction="column" alignItems="center" spacing={2}>
                       <Typography variant="body1" color="textSecondary">
@@ -478,10 +499,10 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       </FormControl>
                     </Stack>
                   </MainCard>
-                </Grid>
+                </Grid> */}
 
                 {/* Name */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Stack spacing={1}>
                     <InputLabel htmlFor="name" sx={{ fontWeight: 600 }}>
                       Name
@@ -498,10 +519,10 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       helperText={formik.touched.name && formik.errors.name}
                     />
                   </Stack>
-                </Grid>
+                </Grid> */}
 
                 {/* Title */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Stack spacing={1}>
                     <InputLabel htmlFor="title" sx={{ fontWeight: 600 }}>
                       Title
@@ -518,7 +539,7 @@ const ManageAccountSettings = memo(({ initialValues, isFirstTime }) => {
                       helperText={formik.touched.title && formik.errors.title}
                     />
                   </Stack>
-                </Grid>
+                </Grid> */}
 
                 {/* Favicon */}
                 {/* <Grid item xs={12} sm={6}>

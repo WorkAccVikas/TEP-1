@@ -7,20 +7,19 @@ import { dispatch } from 'store';
 import { fetchVehicleTypes } from 'store/cacheSlice/vehicleTypes';
 
 const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
-  const { cache, loading } = useSelector((state) => state.vehicleType); // Access Redux state
+  const { initialized, cache, loading } = useSelector((state) => state.vehicleType); // Access Redux state
 
   const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
   const [query, setQuery] = useState(''); // Tracks search input
   const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
 
-  // Fetch default options from Redux (using cached data or fetching from API)
   useEffect(() => {
-    if (!cache.default) {
-      dispatch(fetchVehicleTypes()); // Fetch vehicle types if not cached
-    } else {
-      setFilteredOptions(cache.default); // Use cached vehicle types
+    if (!initialized) {
+      dispatch(fetchVehicleTypes()); // Only fetch if not initialized
+    } else if (cache.default.length > 0) {
+      setFilteredOptions(cache.default); // Use cached data
     }
-  }, [cache, dispatch]);
+  }, [initialized, cache, dispatch]);
 
   // "Select All" Logic
   const handleSelectAllToggle = () => {
@@ -54,14 +53,8 @@ const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
       setFilteredOptions(cache.default); // Reset filtered options when query is cleared
     }
   }, [query, filterOptions, cache.default]);
-
-  if (loading) {
-    return (
-      <Grid item xs={12}>
-        {/* Skeleton UI to show while loading */}
-        <Skeleton variant="rectangular" height={50} width="100%" sx={{ mb: 1 }} />
-      </Grid>
-    );
+  if (!initialized) {
+    return <>Loading component</>;
   }
 
   return (

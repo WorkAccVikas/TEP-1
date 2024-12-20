@@ -1,4 +1,4 @@
-import { useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes } from 'react-router-dom';
 
 // project-imports
 import LoginRoutes from './LoginRoutes';
@@ -7,14 +7,15 @@ import CabProvidorRoutes from './CabProviderRoutes1';
 import CabProvidorUserRoutes from './CabProviderUserRoutes';
 import VendorUserRoutes from './VendorUserRoutes';
 
-import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
+import { USERTYPE } from 'constant';
+import useAuth from 'hooks/useAuth';
+import CommonLayout from 'layout/CommonLayout';
+import StepperSubscribe from 'pages/subscription/StepperSubscribe';
 import { lazy, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { USERTYPE } from 'constant';
+import SuperAdminRoutes from './SuperAdminRoutes';
 import VendorRoutes from './VendorRoutes';
-import StepperSubscribe from 'pages/subscription/StepperSubscribe';
-import useAuth from 'hooks/useAuth';
 
 const PagesLanding = Loadable(lazy(() => import('pages/Landing')));
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
@@ -24,7 +25,8 @@ const ROUTES = {
   [USERTYPE.iscabProvider]: CabProvidorRoutes,
   [USERTYPE.isVendor]: VendorRoutes,
   [USERTYPE.iscabProviderUser]: CabProvidorUserRoutes,
-  [USERTYPE.isVendorUser]: VendorUserRoutes
+  [USERTYPE.isVendorUser]: VendorUserRoutes,
+  [USERTYPE.superAdmin]: SuperAdminRoutes
 };
 
 export default function ThemeRoutes() {
@@ -47,7 +49,7 @@ export default function ThemeRoutes() {
     }
 
     document.title = `Trip Biller - ${title}`;
-  }, [favIcon,title]);
+  }, [favIcon, title]);
 
   return useRoutes([
     {
@@ -58,11 +60,11 @@ export default function ThemeRoutes() {
           path: '/',
           element: <PagesLanding />
         },
-        
+
         {
           path: 'subscription',
           element: <StepperSubscribe />
-        },
+        }
       ]
     },
     LoginRoutes,

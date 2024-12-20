@@ -49,7 +49,7 @@ const ZoneSelection = ({ sx, value = [], setSelectedOptions }) => {
   useEffect(() => {
     setSelectAllChecked(value.length === filteredOptions.length && filteredOptions.length > 0);
   }, [value, filteredOptions]);
-
+  
   return (
     <Grid item xs={12}>
       <Autocomplete
