@@ -45,9 +45,8 @@ const HeaderPage = () => {
                   }}
                 >
                   <span>Beta Version 0.9 </span>
-                  <br/>
+                  <br />
                   <span>Roster management application</span>
-                 
                 </Typography>
               </motion.div>
             </Grid>
@@ -71,10 +70,7 @@ const HeaderPage = () => {
                       fontWeight: 400,
                       lineHeight: { xs: 1.4, md: 1.4 }
                     }}
-                  >
-                    {/* Able Pro is the one of the Featured admin dashboard template in Envato Marketplace and used by over 2.5K+ Customers
-                    wordwide. */}
-                  </Typography>
+                  ></Typography>
                 </motion.div>
               </Grid>
             </Grid>
@@ -295,11 +291,7 @@ const HeaderPage = () => {
               }}
             >
               <Tooltip title="Figma Design System">
-                <Link
-                  component={Link}
-                  href=""
-                  target="_blank"
-                >
+                <Link component={Link} href="" target="_blank">
                   <CardMedia component="img" image={techFigma} sx={{ width: 'auto' }} />
                 </Link>
               </Tooltip>

@@ -14,7 +14,7 @@ import FirebaseRegister from 'sections/auth/auth-forms/AuthRegister';
 
 // ================================|| REGISTER ||================================ //
 
-const Register = ({handleNext,setUserId}) => {
+const Register = ({handleNext}) => {
   const { isLoggedIn } = useAuth();
 
   return (
@@ -38,7 +38,7 @@ const Register = ({handleNext,setUserId}) => {
           </Stack>
         </Grid>
         <Grid item xs={12}>
-          <FirebaseRegister handleNext={handleNext} setUserId={setUserId}/>
+          <FirebaseRegister handleNext={handleNext}/>
         </Grid>
       </Grid>
     </AuthWrapper>
