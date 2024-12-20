@@ -2,35 +2,34 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosServices from 'utils/axios';
 
 // Async thunk to fetch vehicle types with dynamic cache key
-export const fetchVehicleTypes = createAsyncThunk('vehicleType/fetchVehicleTypes', async (_, { getState, rejectWithValue }) => {
-  const { vehicleType } = getState();
-
-  // Check if the vehicle types are already cached
-  if (vehicleType.cache.default) {
-    return vehicleType.cache.default;
-  }
-
-  // Fetch vehicle types from API if not cached
+export const fetchVehicleTypes = createAsyncThunk('vehicleType/fetchVehicleTypes', async (_, { rejectWithValue }) => {
   try {
     const response = await axiosServices.get('/vehicleType');
     const vehicles = response.data.data || [];
-    const mappedVehicleType = vehicles.map((item) => ({ _id: item._id, vehicleTypeName: item.vehicleTypeName }));
-    return mappedVehicleType;
+    return vehicles.map((item) => ({
+      _id: item._id,
+      vehicleTypeName: item.vehicleTypeName
+    }));
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Failed to fetch vehicle types');
   }
 });
 
+
 const vehicleTypeSlice = createSlice({
   name: 'vehicleType',
   initialState: {
-    cache: {}, // Stores cached vehicle types
-    loading: false, // Tracks loading state
-    error: null // Tracks error state
+    cache: { default: [] },
+    loading: false,
+    initialized: false, // Added initialized state
+    error: null
   },
   reducers: {
-    clearVehicleTypeCache: (state) => {
-      state.cache = {};
+    resetState(state) {
+      state.cache = { default: [] };
+      state.loading = false;
+      state.initialized = false; // Reset initialized
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -41,14 +40,16 @@ const vehicleTypeSlice = createSlice({
       })
       .addCase(fetchVehicleTypes.fulfilled, (state, action) => {
         state.loading = false;
-        state.cache.default = action.payload; // Cache the fetched vehicle types
+        state.initialized = true; // Mark as initialized on success
+        state.cache.default = action.payload;
       })
       .addCase(fetchVehicleTypes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.error.message;
       });
   }
 });
 
-export const { clearVehicleTypeCache } = vehicleTypeSlice.actions;
+
+export const { resetState } = vehicleTypeSlice.actions;
 export const vehicleTypeReducer1 = vehicleTypeSlice.reducer;
