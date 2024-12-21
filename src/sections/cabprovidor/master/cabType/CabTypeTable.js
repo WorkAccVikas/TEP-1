@@ -42,7 +42,7 @@ const CabTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo,loading
       {
         Header: 'Vehicle Type',
         accessor: 'vehicleTypeName',
-        disableSortBy: true
+        // disableSortBy: true
       },
       {
         Header: 'Description',
@@ -56,7 +56,7 @@ const CabTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo,loading
       {
         Header: 'Fuel Type',
         accessor: 'fuelType',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row }) => {
           const { values } = row;
           const fuelType = values['fuelType'];

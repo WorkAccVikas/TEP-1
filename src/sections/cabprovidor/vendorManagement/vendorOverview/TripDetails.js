@@ -17,7 +17,7 @@ import {
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useTable } from 'react-table';
+import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
 import axiosServices from 'utils/axios';
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
@@ -25,7 +25,7 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
-import { TablePagination } from 'components/third-party/ReactTable';
+import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
 
 const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vendorId }) => {
   const theme = useTheme();
@@ -265,6 +265,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -275,12 +276,23 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
       <Stack spacing={3}>
         <ScrollX>
           <Table {...getTableProps()}>
-            <TableHead>
+            {/* <TableHead>
               {headerGroups.map((headerGroup) => (
                 <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
                   {headerGroup.headers.map((column) => (
                     <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
                       {column.render('Header')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead> */}
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
                     </TableCell>
                   ))}
                 </TableRow>

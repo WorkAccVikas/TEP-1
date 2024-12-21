@@ -20,7 +20,7 @@ import PaginationBox from 'components/tables/Pagination';
 import PropTypes from 'prop-types';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import axiosServices from 'utils/axios';
 import { Add, Eye, Trash } from 'iconsax-react';
 import { useDrawer } from 'contexts/DrawerContext';
@@ -29,6 +29,7 @@ import { useTheme } from '@mui/material/styles';
 import { ThemeMode } from 'config';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, handleFileUploadOpen, fileData: fileInfo, openTemplate }) => {
   const navigate = useNavigate();
@@ -292,17 +293,29 @@ function ReactTable({ columns: userColumns, data }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>

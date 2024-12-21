@@ -16,7 +16,7 @@ import {
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
 import { ThemeMode } from 'config';
 import { PopupTransition } from 'components/@extended/Transitions';
@@ -31,6 +31,7 @@ import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import { useSelector } from 'react-redux';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, updateKey, setUpdateKey, loading }) => {
   const theme = useTheme();
@@ -128,6 +129,7 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
         Header: '#',
         accessor: 'id',
         className: 'cell-center',
+        disableSortBy: true,
         Cell: ({ row }) => <span>{row.index + 1}</span> // Use row.index to display incremental number
       },
       {
@@ -144,7 +146,7 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
         disableSortBy: true,
         Cell: ({ row }) => {
           return (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+            <Stack direction="row" alignItems="left" justifyContent="left" spacing={0}>
               <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.UPDATE}>
                 <Tooltip
                   componentsProps={{
@@ -290,17 +292,29 @@ function ReactTable({ columns: userColumns, data }) {
         hiddenColumns: ['_id']
       }
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>
