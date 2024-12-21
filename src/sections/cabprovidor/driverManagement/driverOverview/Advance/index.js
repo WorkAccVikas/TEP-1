@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 
 // third-party
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 
 // project-imports
 import MainCard from 'components/MainCard';
@@ -44,6 +44,7 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import { formatDateUsingMoment } from 'utils/helper';
 import AdvanceForm from 'sections/cabprovidor/advances/AdvanceForm';
 import ExpandingUserDetail from 'sections/cabprovidor/testAdvance/ExpandingUserDetail';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -68,12 +69,13 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent, page, s
         hiddenColumns: ['requestedById._id']
       }
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
@@ -83,7 +85,18 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent, page, s
             ))}
           </TableRow>
         ))}
-      </TableHead>
+      </TableHead> */}
+       <TableHead>
+                {headerGroups.map((headerGroup) => (
+                  <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                    {headerGroup.headers.map((column) => (
+                      <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                        <HeaderSort column={column} sort />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHead>
       <TableBody {...getTableBodyProps()}>
         {rows.map((row, i) => {
           prepareRow(row);
@@ -165,6 +178,7 @@ const AdvanceDriver = ({driverId}) => {
       {
         Header: () => null,
         id: 'expander',
+        disableSortBy: true,
         className: 'cell-center',
         Cell: ({ row }) => {
           const collapseIcon = row.isExpanded ? <ArrowDown2 size={14} /> : <ArrowRight2 size={14} />;

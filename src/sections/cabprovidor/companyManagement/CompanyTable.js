@@ -25,7 +25,7 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Add, ArrowDown2, ArrowRight2, Edit } from 'iconsax-react';
 import { Fragment, useCallback, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import WrapperButton from 'components/common/guards/WrapperButton';
@@ -40,6 +40,7 @@ import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompany
 import CompanyFilter1 from 'pages/trips/filter/CompanyFilter1';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const theme = useTheme();
@@ -66,6 +67,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         Header: () => null,
         id: 'expander',
         className: 'cell-center',
+        disableSortBy: true,
         Cell: ({ row }) => {
           const collapseIcon = row.isExpanded ? <ArrowDown2 size={14} /> : <ArrowRight2 size={14} />;
           let branch = row.original.Branches;
@@ -551,13 +553,14 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <>
       <Table {...getTableProps()}>
-        <TableHead>
+        {/* <TableHead>
           {headerGroups.map((headerGroup) => (
             <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
@@ -567,7 +570,20 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
               ))}
             </TableRow>
           ))}
+        </TableHead> */}
+
+        <TableHead>
+          {headerGroups.map((headerGroup) => (
+            <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+              {headerGroup.headers.map((column) => (
+                <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                  <HeaderSort column={column} sort />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableHead>
+
         <TableBody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);

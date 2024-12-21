@@ -1,9 +1,23 @@
 import PropTypes from 'prop-types';
-import { alpha, Chip, Link, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Chip,
+  Link,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useTable } from 'react-table';
+import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
 import axiosServices from 'utils/axios';
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
@@ -11,7 +25,7 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
-import { TablePagination } from 'components/third-party/ReactTable';
+import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
 
 const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vendorId }) => {
   const theme = useTheme();
@@ -201,9 +215,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vendorId }) =>
             {loading ? (
               <TableSkeleton rows={10} columns={8} />
             ) : data?.length > 0 ? (
-              <ScrollX>
-                <ReactTable columns={columns} data={data} loading={loading} />
-              </ScrollX>
+              <ReactTable columns={columns} data={data} loading={loading} />
             ) : (
               <EmptyTableDemo />
             )}
@@ -253,6 +265,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -261,57 +274,69 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
   return (
     <>
       <Stack spacing={3}>
-        <Table {...getTableProps()}>
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
-                    {column.render('Header')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row);
-              const rowProps = row.getRowProps();
+        <ScrollX>
+          <Table {...getTableProps()}>
+            {/* <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
+                      {column.render('Header')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead> */}
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, i) => {
+                prepareRow(row);
+                const rowProps = row.getRowProps();
 
-              return (
-                <Fragment key={i}>
-                  <TableRow
-                    {...row.getRowProps()}
-                    onClick={() => {
-                      row.toggleRowSelected();
-                    }}
-                    sx={{
-                      bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
-                    }}
-                  >
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
-                        {cell.render('Cell')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.isExpanded &&
-                    renderRowSubComponent({
-                      row,
-                      rowProps,
-                      visibleColumns,
-                      expanded
-                    })}
-                </Fragment>
-              );
-            })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2 }} colSpan={10}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                return (
+                  <Fragment key={i}>
+                    <TableRow
+                      {...row.getRowProps()}
+                      onClick={() => {
+                        row.toggleRowSelected();
+                      }}
+                      sx={{
+                        bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
+                      }}
+                    >
+                      {row.cells.map((cell) => (
+                        <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {row.isExpanded &&
+                      renderRowSubComponent({
+                        row,
+                        rowProps,
+                        visibleColumns,
+                        expanded
+                      })}
+                  </Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollX>
+
+        <Box sx={{ p: 2, pt: 0 }}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </Box>
       </Stack>
     </>
   );

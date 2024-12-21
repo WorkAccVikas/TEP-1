@@ -218,7 +218,9 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
             {loading ? (
               <TableSkeleton rows={10} columns={8} />
             ) : data?.length > 0 ? (
-              <ReactTable columns={columns} data={data} loading={loading} />
+              <>
+                <ReactTable columns={columns} data={data} loading={loading} />
+              </>
             ) : (
               <EmptyTableDemo />
             )}
@@ -268,6 +270,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -278,12 +281,23 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
       <Stack>
         <ScrollX>
           <Table {...getTableProps()}>
-            <TableHead>
+            {/* <TableHead>
               {headerGroups.map((headerGroup) => (
                 <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
                   {headerGroup.headers.map((column) => (
                     <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
                       {column.render('Header')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead> */}
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
                     </TableCell>
                   ))}
                 </TableRow>

@@ -62,7 +62,7 @@ const ZoneTypeTable = ({ data, updateKey, setUpdateKey, loading }) => {
       setAlertOpen(false);
       if (deleteZoneType.fulfilled.match(resultAction)) {
         // If the action was fulfilled
-        setUpdateKey(updateKey + 1);
+        // setUpdateKey(updateKey + 1);
         dispatch(
           openSnackbar({
             open: true,
