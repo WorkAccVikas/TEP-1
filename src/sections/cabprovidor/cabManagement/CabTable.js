@@ -55,7 +55,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Cab Name',
         accessor: 'vehicleName',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row, value }) => {
           const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
           return (
@@ -78,7 +78,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Cab Number',
         accessor: 'vehicleNumber',
-        disableSortBy: true
+        // disableSortBy: true
       },
       {
         Header: 'Driver',
@@ -109,7 +109,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Created At',
         accessor: 'createdAt',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
@@ -200,6 +200,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Compliance Progress',
         accessor: 'progress',
+        disableSortBy: true,
         Cell: ({ row, value }) => {
           const progessValue = Math.floor(Math.random() * 101);
           return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;

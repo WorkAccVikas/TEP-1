@@ -194,12 +194,12 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         {
           Header: 'Email',
           accessor: 'userEmail',
-          disableSortBy: true
+          // disableSortBy: true
         },
         {
           Header: 'Contact Number',
           accessor: 'contactNumber',
-          disableSortBy: true
+          // disableSortBy: true
         },
         {
           Header: 'Vehicles',
@@ -248,7 +248,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         {
           Header: 'Created At',
           accessor: 'createdAt',
-          disableSortBy: true,
+          // disableSortBy: true,
           Cell: ({ row }) => {
             const { values } = row;
             const time = values['createdAt'];
