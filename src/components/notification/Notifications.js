@@ -23,6 +23,8 @@ function getIconByType(type) {
       return <Car size={24} variant="Bold" />;
     case 'TRANSACTION':
       return <WalletMoney size={24} variant="Bold" />;
+    case 'VEHICLE':
+      return <Car size={24} variant="Bold" />;
     default:
       return null;
   }
@@ -102,6 +104,9 @@ export default function Notifications() {
         break;
       case 'TRANSACTION':
         path = `/expense/transaction`; // Example path for 'TRANSACTION'
+        break;
+      case 'VEHICLE':
+        path = `/management/cab/view`; // Example path for 'VEHICLE'
         break;
       default:
         path = '/home'; // Default path if type is not recognized

@@ -223,37 +223,46 @@ const NotificationPage = () => {
             <WalletMoney size={20} variant="Bold" />
           </Avatar>
         );
+      case 'VEHICLE':
+        return (
+          <Avatar type="filled">
+            <Car size={20} variant="Bold" />
+          </Avatar>
+        );
       default:
         return null;
     }
   }
 
-// Function to handle navigation based on notification type
-const handleNotificationClick = (type, id) => {
-  let path = '';
+  // Function to handle navigation based on notification type
+  const handleNotificationClick = (type, id) => {
+    let path = '';
 
-  // Define paths based on notification type
-  switch (type) {
-    case 'ADVANCE':
-      path = `/apps/invoices/advance`; // Example path for 'ADVANCE'
-      break;
-    case 'INVOICE':
-      path = `/apps/invoices/company`; // Example path for 'INVOICE'
-      break;
-    case 'TRIP':
-      path = `/apps/trips/list`; // Example path for 'TRIP'
-      break;
-    case 'TRANSACTION':
-      path = `/expense/transaction`; // Example path for 'TRANSACTION'
-      break;
-    default:
-      path = '/home'; // Default path if type is not recognized
-      break;
-  }
+    // Define paths based on notification type
+    switch (type) {
+      case 'ADVANCE':
+        path = `/apps/invoices/advance`; // Example path for 'ADVANCE'
+        break;
+      case 'INVOICE':
+        path = `/apps/invoices/company`; // Example path for 'INVOICE'
+        break;
+      case 'TRIP':
+        path = `/apps/trips/list`; // Example path for 'TRIP'
+        break;
+      case 'TRANSACTION':
+        path = `/expense/transaction`; // Example path for 'TRANSACTION'
+        break;
+      case 'VEHICLE':
+        path = `/management/cab/view`; // Example path for 'VEHICLE'
+        break;
+      default:
+        path = '/home'; // Default path if type is not recognized
+        break;
+    }
 
-  // Navigate to the determined path
-  navigate(path);
-};
+    // Navigate to the determined path
+    navigate(path);
+  };
 
   return (
     <Box sx={{ flexShrink: 0, ml: 0.5 }}>

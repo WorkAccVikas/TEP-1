@@ -22,7 +22,7 @@ import {
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
@@ -39,6 +39,7 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { BulkUploadDialog } from 'pages/management/vendor/bulkUpload/Dialog';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
@@ -518,17 +519,29 @@ function ReactTable({ columns: userColumns, data }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>
