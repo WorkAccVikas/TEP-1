@@ -95,7 +95,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
                 // onClick={(e) => e.stopPropagation()}
                 style={{ textDecoration: 'none' }}
               >
-                {userName}
+                {userName || 'N/A'}
               </Link>
             </Typography>
           );
@@ -108,7 +108,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].ROLE_NAME;
           const key = row.original[val];
           const roleName = key?.['role_name'];
-          return <>{roleName}</>;
+          return <>{roleName || 'N/A'}</>;
         }
       },
       // {
@@ -146,7 +146,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].CREATED_AT;
           const key = row.original[val];
           const time = key?.['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -157,7 +157,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].UPDATED_AT;
           const key = row.original[val];
           const time = key?.['updatedAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {

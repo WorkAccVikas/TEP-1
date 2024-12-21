@@ -180,7 +180,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                   style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                  {formattedValue}
+                  {formattedValue  || 'N/A'}
                   {isCabProviderDriver > 0 && (
                     <Tooltip title="Cabprovider" arrow>
                       <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
@@ -194,11 +194,13 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         {
           Header: 'Email',
           accessor: 'userEmail',
+          Cell: ({ value }) => value || 'N/A'
           // disableSortBy: true
         },
         {
           Header: 'Contact Number',
           accessor: 'contactNumber',
+          Cell: ({ value }) => value || 'N/A'
           // disableSortBy: true
         },
         {
@@ -263,7 +265,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 }}
               >
                 {' '}
-                {time ? formattedDate(time, 'DD/MM/YYYY') : ''}
+                {time ? formattedDate(time, 'DD/MM/YYYY') : 'N/A'}
               </Typography>
             );
           }

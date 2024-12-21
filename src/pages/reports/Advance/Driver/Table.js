@@ -39,7 +39,7 @@ const Table = () => {
       {
         Header: 'Contact Number',
         accessor: 'requestedById.contactNumber',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Vehicle Number',
@@ -61,7 +61,7 @@ const Table = () => {
       {
         Header: 'Advance Type',
         accessor: 'advanceTypeId.advanceTypeName',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Interest Rate',
@@ -72,7 +72,8 @@ const Table = () => {
       },
       {
         Header: 'Requested Amount',
-        accessor: 'requestedAmount'
+        accessor: 'requestedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Requested Interest',
@@ -85,7 +86,8 @@ const Table = () => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approvedAmount'
+        accessor: 'approvedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Approved Interest',
@@ -98,13 +100,13 @@ const Table = () => {
       },
       {
         Header: 'Approved By',
-        accessor: 'approvedBy.userName'
+        accessor: 'approvedBy.userName',
+        Cell: ({ value }) => value || 'N/A'
       }
     ],
     []
   );
 
-  console.log({ advanceReportData });
   return (
     <>
       {advanceReportData && advanceReportData.length > 0 ? (

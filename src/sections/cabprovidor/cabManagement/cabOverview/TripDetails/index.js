@@ -97,7 +97,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
               onClick={(e) => e.stopPropagation()}
               style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
             >
-              {value}
+              {value || 'N/A'}
             </Link>
           </Typography>
         )
@@ -105,34 +105,39 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
       {
         Header: 'Trip Date',
         accessor: 'tripDate',
-        Cell: ({ value }) => formattedDate(value, 'DD/MM/YYYY')
+        Cell: ({ value }) => formattedDate(value || 'N/A', 'DD/MM/YYYY')
       },
       {
         Header: 'Trip Time',
-        accessor: 'tripTime'
+        accessor: 'tripTime',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneNameID.zoneName'
+        accessor: 'zoneNameID.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneTypeID.zoneTypeName'
+        accessor: 'zoneTypeID.zoneTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab',
-        accessor: 'vehicleNumber.vehicleNumber'
+        accessor: 'vehicleNumber.vehicleNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeID.vehicleTypeName'
+        accessor: 'vehicleTypeID.vehicleTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Vehicle Guard Price',
         accessor: 'guardPrice', // This can be any key; we won't directly use it.
         Cell: ({ row }) => {
           const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
+          return driverGuardPrice || vendorGuardPrice || 'N/A';
         }
       },
       {
@@ -140,22 +145,23 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
         accessor: (row) => row.vendorRate ?? row.driverRate,
         Cell: ({ row }) => {
           const { vendorRate, driverRate } = row.original;
-          return vendorRate ?? driverRate ?? 'Null';
+          return vendorRate ?? driverRate ?? 'N/A';
         }
       },
       {
         Header: 'Additional Rate',
-        accessor: 'addOnRate'
+        accessor: 'addOnRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Penalty',
         accessor: 'penalty',
-        Cell: ({ value }) => value || 'Null'
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Location',
         accessor: 'location',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Type',
@@ -172,7 +178,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, vehicleId }) =
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       }
     ],
     []
