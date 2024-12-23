@@ -106,7 +106,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -115,12 +115,12 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'Address',
         accessor: 'address',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'City',
         accessor: 'city',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'State',
@@ -133,20 +133,22 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         //     .join(' ');
         // }
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Total Vehicle',
-        accessor: 'totalVehicles'
+        accessor: 'totalVehicles',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Total Income',
-        accessor: 'totalEarnedIncome'
+        accessor: 'totalEarnedIncome',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Amount Receivable',
         accessor: 'stateTaxAmount',
-        Cell: ({ value }) => value || 'None'
+       Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Status',

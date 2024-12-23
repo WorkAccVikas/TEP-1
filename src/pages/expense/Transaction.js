@@ -303,7 +303,8 @@ const Transaction = () => {
       {
         Header: 'Transaction ID',
         accessor: 'transactionsId',
-        disableFilters: true
+        disableFilters: true,
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Transaction Type',
@@ -313,12 +314,12 @@ const Transaction = () => {
       {
         Header: 'Amount',
         accessor: 'receivedAmount',
-        Cell: ({ value }) => <Typography>₹ {value}</Typography>
+        Cell: ({ value }) => <Typography>₹ {(value === null || value === undefined ? 'N/A' : value)}</Typography>
       },
       {
         Header: 'Category', // This is the static header
         accessor: (row) => row.invoiceId || row.advanceId, // This conditionally picks either invoiceId or advanceId
-        Cell: ({ value }) => <Typography>{value ? (value.includes('advance') ? 'Advance' : 'Invoice') : ''}</Typography>
+        Cell: ({ value }) => <Typography>{value ? (value.includes('advance') ? 'Advance' : 'Invoice') : 'N/A'}</Typography>
       },
       {
         Header: 'Actions',

@@ -65,27 +65,27 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, han
           Header: 'Company Name',
           accessor: 'companyId',
           Cell: ({ row }) => {
-            return <Typography>{row.original.companyId?.company_name}</Typography>;
+            return <Typography>{row.original.companyId?.company_name || 'N/A'}</Typography>;
           }
         },
         {
           Header: 'Start Date',
-          accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'End Date',
-          accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'Added By',
           accessor: 'addedBy',
           Cell: ({ row }) => {
-            return <Typography>{row.original.addedBy?.userName}</Typography>;
+            return <Typography>{row.original.addedBy?.userName || 'N/A'}</Typography>;
           }
         },
         {
           Header: 'Upload Date',
-          accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'sTATUS',
