@@ -97,7 +97,8 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
       {
         Header: 'Invoice Id',
         accessor: 'invoiceNumber',
-        disableFilters: true
+        disableFilters: true,
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Billed To',
@@ -109,9 +110,9 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
               <Stack spacing={0}>
-                <Typography variant="subtitle1">{values.billedTo.company_name}</Typography>
+                <Typography variant="subtitle1">{values.billedTo.company_name || 'N/A'}</Typography>
                 <Typography variant="caption" color="textSecondary">
-                  {values.billedTo.company_email}
+                  {values.billedTo.company_email || 'N/A'}
                 </Typography>
               </Stack>
             </Stack>
@@ -122,21 +123,21 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
         Header: 'Invoice Date',
         accessor: 'invoiceDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Due Date',
         accessor: 'dueDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Amount',
         accessor: 'grandTotal',
         Cell: ({ value }) => {
-          return <Typography>₹ {value}</Typography>;
+          return <Typography>₹ {(value === null || value === undefined ? 'N/A' : value)}</Typography>;
         }
       },
       {

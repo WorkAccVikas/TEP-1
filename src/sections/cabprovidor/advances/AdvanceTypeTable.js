@@ -134,11 +134,13 @@ const AdvanceTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo, up
       },
       {
         Header: 'Advance Type',
-        accessor: 'advanceTypeName'
+        accessor: 'advanceTypeName',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Interest Rate',
-        accessor: 'interestRate'
+        accessor: 'interestRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Actions',

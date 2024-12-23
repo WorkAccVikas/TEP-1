@@ -20,19 +20,23 @@ const Transaction = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
       },
       {
         Header: 'Date',
-        accessor: 'startDate'
+        accessor: 'startDate',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Invoice Number',
-        accessor: 'invoiceNumber'
+        accessor: 'invoiceNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Amount',
-        accessor: 'amount'
+        accessor: 'amount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Balance Due',
-        accessor: 'balanceDue'
+        accessor: 'balanceDue',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Status',
