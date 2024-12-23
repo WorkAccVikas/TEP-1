@@ -65,7 +65,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -73,11 +73,13 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeName'
+        accessor: 'vehicleTypeName',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Number',
         accessor: 'vehicleNumber',
+        Cell: ({ value }) => value || 'N/A'
         // disableSortBy: true
       },
       {
@@ -113,7 +115,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {

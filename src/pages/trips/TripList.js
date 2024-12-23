@@ -1143,7 +1143,7 @@ const TripList = () => {
                 }}
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
-                {row.original.companyID.company_name}
+                {row.original.companyID.company_name || 'N/A'}
               </Link>
             </Typography>
           );
@@ -1154,37 +1154,43 @@ const TripList = () => {
         accessor: 'tripDate',
         disableFilters: true,
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Trip Time',
-        accessor: 'tripTime'
+        accessor: 'tripTime',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Id',
-        accessor: 'rosterTripId'
+        accessor: 'rosterTripId',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneNameID.zoneName'
+        accessor: 'zoneNameID.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneTypeID.zoneTypeName'
+        accessor: 'zoneTypeID.zoneTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab',
-        accessor: 'vehicleNumber.vehicleNumber'
+        accessor: 'vehicleNumber.vehicleNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeID.vehicleTypeName'
+        accessor: 'vehicleTypeID.vehicleTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Driver',
         accessor: 'driverId.userName',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       ...(userType === USERTYPE.iscabProvider
         ? [
@@ -1209,7 +1215,7 @@ const TripList = () => {
         accessor: (row) => row.vendorRate ?? row.driverRate,
         Cell: ({ row }) => {
           const { vendorRate, driverRate } = row.original;
-          return vendorRate ?? driverRate ?? 'Null';
+          return vendorRate ?? driverRate ?? 'N/A';
         }
       },
       {
@@ -1239,13 +1245,14 @@ const TripList = () => {
 
       {
         Header: 'Additional Rate',
-        accessor: 'addOnRate'
+        accessor: 'addOnRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
 
       {
         Header: 'Location',
         accessor: 'location',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Type',
@@ -1254,15 +1261,17 @@ const TripList = () => {
           switch (value) {
             case 1: // For Pick Up
               return <Chip label="Pick Up" color="warning" variant="light" />;
-            case 2: // For Pick Drop
+            case 2: // For Drop
               return <Chip label="Drop" color="success" variant="light" />;
+            default: // Default case for other values or undefined
+              return <Chip label="N/A" color="info" variant="light" />;
           }
         }
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       }
     ],
     [userType]
