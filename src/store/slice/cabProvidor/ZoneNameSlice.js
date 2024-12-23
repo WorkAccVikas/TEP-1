@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
 import { logoutActivity } from './accountSettingSlice';
 import { handleReset } from 'utils/helper';
+import { filterByKey } from 'store/utils/helper';
 
 // Define the async thunk for fetching zone names
 export const fetchZoneNames = createAsyncThunk('zoneNames/fetchZoneNames', async (_, { getState, rejectWithValue }) => {
@@ -150,7 +151,3 @@ const zoneNameSlice = createSlice({
 // Export the reducer and actions
 export const { reset, resetError } = zoneNameSlice.actions;
 export const zoneNameReducer = zoneNameSlice.reducer;
-
-export const filterByKey = (array, key, value) => {
-  return array.filter((item) => item[key] !== value);
-};
