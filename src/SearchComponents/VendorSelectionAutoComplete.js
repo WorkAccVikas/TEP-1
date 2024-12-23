@@ -26,9 +26,11 @@ const VendorSelection = ({ sx, value = [], setSelectedOptions }) => {
       try {
         const response = await axiosServices.get('/vendor/list?page=1&limit=50');
         const vendors = response.data.data.results || [];
+
         const vendorList = vendors.map((item) => ({
           _id: item._id,
-          vendorCompanyName: item.vendorCompanyName
+          vendorCompanyName: item.vendorCompanyName,
+          workMobileNumber: item.workMobileNumber
         }));
         setOptions(vendorList);
         setFilteredOptions(vendorList); // Initialize filtered options
@@ -88,7 +90,13 @@ const VendorSelection = ({ sx, value = [], setSelectedOptions }) => {
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.vendorCompanyName}
+            <div>
+              {option.vendorCompanyName}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>
+                {option?.workMobileNumber ? `+91-${option.workMobileNumber}` : 'N/A'}
+              </span>
+            </div>
           </li>
         )}
         renderInput={(params) => (

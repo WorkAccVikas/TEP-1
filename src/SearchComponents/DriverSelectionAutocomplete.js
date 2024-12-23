@@ -28,7 +28,8 @@ const DriverSelection = ({ sx, value = [], setSelectedOptions }) => {
         const drivers = response.data.data.result || [];
         const driverList = drivers.map((item) => ({
           _id: item._id,
-          userName: item.userName
+          userName: item.userName,
+          contactNumber: item.contactNumber
         }));
         setOptions(driverList);
         setFilteredOptions(driverList); // Initialize filtered options
@@ -88,7 +89,11 @@ const DriverSelection = ({ sx, value = [], setSelectedOptions }) => {
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.userName}
+            <div>
+              {option.userName}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.contactNumber ? `+91-${option.contactNumber}` : 'N/A'}</span>
+            </div>
           </li>
         )}
         renderInput={(params) => (
