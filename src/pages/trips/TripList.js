@@ -609,7 +609,7 @@ function ReactTable({
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef}>
-        <Box sx={{ p: 1 }}>
+        <Box sx={{ p: 2 }}>
           <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
@@ -650,7 +650,7 @@ function ReactTable({
           </Table>
         </ScrollX>
 
-        <Box sx={{ p: 1 }}>
+        <Box sx={{ p: 2 }}>
           <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
