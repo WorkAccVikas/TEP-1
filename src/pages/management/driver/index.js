@@ -51,7 +51,8 @@ const getInitialValues = (data) => {
       userName: '',
       userEmail: '',
       contactNumber: '',
-      vendorId: ''
+      vendorId: '',
+      officeChargeAmount: '',
     };
   }
 };
@@ -142,6 +143,7 @@ const Driver = () => {
             userName: values.userName,
             userEmail: values.userEmail,
             contactNumber: values.contactNumber,
+            officeChargeAmount: values.officeChargeAmount,
             // vendorId: values.vendorId
             ...([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(1) && values.vendorId && { vendorId: values.vendorId })
           }
@@ -286,7 +288,7 @@ const Driver = () => {
           onSubmit={formikHandleSubmit}
         />
       )}
-      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
+      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} setUpdateKey={setUpdateKey}/>
     </>
   );
 };

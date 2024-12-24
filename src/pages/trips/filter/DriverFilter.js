@@ -11,6 +11,7 @@ const DriverFilter = ({ setFilterOptions, sx, value }) => {
   const [open, setOpen] = useState(false); // Tracks dropdown open state
   const [query, setQuery] = useState(''); // Tracks input query
   const [cache, setCache] = useState({}); // Cache for query results
+  
   // Fetch default options when the dropdown is opened
   useEffect(() => {
     const fetchDefaultOptions = async () => {
@@ -106,6 +107,15 @@ const DriverFilter = ({ setFilterOptions, sx, value }) => {
               )
             }}
           />
+        )}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <div>
+              {option.userName || 'N/A'}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.contactNumber ? `+91-${option.contactNumber}` : 'N/A'}</span>
+            </div>
+          </li>
         )}
       />
     </Grid>

@@ -45,7 +45,7 @@ const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3'
 const User = Loadable(lazy(() => import('pages/management/user')));
 const AddUser = Loadable(lazy(() => import('pages/management/user/AddUser')));
 // Vendor
-const Vendor = Loadable(lazy(() => import('pages/management/vendor')));
+const Vendor = Loadable(lazy(() => import('sections/vendor/management/vendor')));
 const AddVendor = Loadable(lazy(() => import('pages/management/vendor/AddVendor')));
 const VendorOverview = Loadable(lazy(() => import('pages/overview/VendorOverview')));
 
@@ -234,6 +234,16 @@ const VendorRoutes = {
                   element: <CompanyOverview />
                   //   element: <ProtectedRoute element={CompanyOverview} moduleName={MODULE.COMPANY} permission={PERMISSIONS.READ} />
                 }
+              ]
+            },
+            //  Vendor
+             {
+              path: 'vendor',
+              children: [
+                {
+                  path: 'view',
+                  element: <Vendor />
+                },
               ]
             },
             // Driver
