@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 // project-imports
 import MainCard from 'components/MainCard';
-import { DocumentDownload, Warning2 } from 'iconsax-react';
+import { DocumentDownload } from 'iconsax-react';
 import { useCallback, useEffect, useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 // import VendorSelection from './VendorSelection';
@@ -51,6 +51,7 @@ const VisuallyHiddenInput = styled('input')({
 const MANDATORY_HEADERS = ['ID', 'Name*', 'Email*', 'Phone*'];
 
 const OPTIONAL_HEADERS = [
+  'Office Charge',
   'Father Name',
   "Experience (In Year's)",
   'PAN',
@@ -67,15 +68,16 @@ const fieldMapping = {
   1: 'Name',
   2: 'Email',
   3: 'Phone',
-  4: 'Father Name',
-  5: 'Experience',
-  6: 'PAN',
-  7: 'Bank Name',
-  8: 'Branch Name',
-  9: 'Account Holder Name',
-  10: 'Account Number',
-  11: 'IFSC Code',
-  12: 'Bank Address'
+  4: 'Office Charge',
+  5: 'Father Name',
+  6: 'Experience',
+  7: 'PAN',
+  8: 'Bank Name',
+  9: 'Branch Name',
+  10: 'Account Holder Name',
+  11: 'Account Number',
+  12: 'IFSC Code',
+  13: 'Bank Address'
 };
 
 const validationRules = {
@@ -83,19 +85,19 @@ const validationRules = {
   1: isRequiredString, // Name*
   2: (value) => isRequiredString(value) && isValidEmail(value), // Email*
   3: isMobileNumber, // Phone*
-
-  4: isString, // Father Name
-  5: isNumber, // Experience (In Year's)
-  6: isString, // PAN
-  7: isString, // Bank Name
-  8: isString, // Branch Name
-  9: isString, // Account Holder Name
-  10: isNumber, // Account Number
-  11: isString, // IFSC Code
-  12: isString // Bank Address
+  4: isNumber, //Office Charge
+  5: isString, // Father Name
+  6: isNumber, // Experience (In Year's)
+  7: isString, // PAN
+  8: isString, // Bank Name
+  9: isString, // Branch Name
+  10: isString, // Account Holder Name
+  11: isNumber, // Account Number
+  12: isString, // IFSC Code
+  13: isString // Bank Address
 };
 
-const BulkUploadDialog = ({ open, handleClose }) => {
+const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
   const [files, setFiles] = useState(null);
   const [driverData, setDriverData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -167,16 +169,16 @@ const BulkUploadDialog = ({ open, handleClose }) => {
           userName: row[1],
           userEmail: row[2],
           contactNumber: row[3],
-
-          fatherName: row[4],
-          experience: row[5],
-          pan: row[6],
-          bankName: row[7],
-          branchName: row[8],
-          accountHolderName: row[9],
-          accountNumber: row[10],
-          ifscCode: row[11],
-          bankAddress: row[12]
+          officeChargeAmount: row[4],
+          fatherName: row[5],
+          experience: row[6],
+          pan: row[7],
+          bankName: row[8],
+          branchName: row[9],
+          accountHolderName: row[10],
+          accountNumber: row[11],
+          ifscCode: row[12],
+          bankAddress: row[13]
         };
       });
 
@@ -239,6 +241,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
         item.userName,
         item.userEmail,
         item.contactNumber,
+        item.officeChargeAmount,
         item.fatherName,
         item.experience,
         item.pan,
@@ -320,7 +323,17 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     try {
       console.log('driverData', driverData);
       if (!driverData || driverData.length === 0) {
-        alert('Empty Excel Sheet');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: `Empty Excel Sheet`,
+            variant: 'alert',
+            alert: {
+              color: 'error'
+            },
+            close: true
+          })
+        );
         return;
       }
       setLoading(true);
@@ -371,6 +384,8 @@ const BulkUploadDialog = ({ open, handleClose }) => {
             }
           })
         );
+        // Trigger table refresh
+        setUpdateKey((prevKey) => prevKey + 1);
       }
 
       if (failureCount > 0) {
