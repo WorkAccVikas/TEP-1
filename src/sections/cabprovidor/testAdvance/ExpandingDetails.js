@@ -206,24 +206,28 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Requested By',
-        accessor: 'requestedById.userName'
+        accessor: 'requestedById.userName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Requested Amount',
-        accessor: 'requestedAmount'
+        accessor: 'requestedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Advance Type',
-        accessor: 'advanceTypeId.advanceTypeName'
+        accessor: 'advanceTypeId.advanceTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Interest Rate',
-        accessor: 'advanceTypeId.interestRate'
+        accessor: 'advanceTypeId.interestRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Status',
@@ -242,7 +246,8 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approvedAmount'
+        accessor: 'approvedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       // {
       //   Header: 'Actions',

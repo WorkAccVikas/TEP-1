@@ -271,23 +271,23 @@ const AttachedCompany = ({ driverId }) => {
       {
         Header: 'Company Name',
         accessor: 'company_name',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Company Email',
         accessor: 'company_email',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
 
       {
         Header: 'Mobile Number',
         accessor: 'mobile',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Address',
         accessor: 'address',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'View Rate',

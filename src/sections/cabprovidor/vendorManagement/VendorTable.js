@@ -84,7 +84,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -92,19 +92,23 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
       },
       {
         Header: 'Address',
-        accessor: 'officeAddress'
+        accessor: 'officeAddress',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'State',
-        accessor: 'officeState'
+        accessor: 'officeState',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Vehicles',
-        accessor: 'totalVehicle'
+        accessor: 'totalVehicle',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Drivers',
-        accessor: 'totalDrivers'
+        accessor: 'totalDrivers',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Status',
