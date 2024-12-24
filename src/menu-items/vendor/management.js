@@ -66,13 +66,13 @@ const management = {
     },
 
     // Vendor
-    // {
-    //   id: 'vendor',
-    //   title: <FormattedMessage id="vendor" />,
-    //   type: 'item',
-    //   url: '/management/vendor/view',
-    //   icon: icons.vendor
-    // },
+    {
+      id: 'vendor',
+      title: <FormattedMessage id="vendor" />,
+      type: 'item',
+      url: '/management/vendor/view',
+      icon: icons.vendor
+    },
 
     // Driver
     {

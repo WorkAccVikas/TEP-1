@@ -30,6 +30,16 @@ export const fetchAllVendors = createAsyncThunk('vendors/fetchAllVendors', async
   }
 });
 
+// fetch all vendors without pagination for vendor
+export const fetchVendor1 = createAsyncThunk('vendors/fetchVendor1', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get('/vendor/cab/providers/details');
+    return response.data.data; // Ensure the API response is in this format
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
 // Define the async thunk for adding a vendor
 export const addVendor = createAsyncThunk('vendors/addVendor', async (vendor, { rejectWithValue }) => {
   try {
@@ -117,6 +127,7 @@ const initialState = {
   ...commonInitialState,
   vendors: [],
   allVendors: [],
+  vendor1 : [],
   metaData: {
     totalCount: 0,
     page: 1,
@@ -166,6 +177,18 @@ const vendorSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchAllVendors.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      .addCase(fetchVendor1.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchVendor1.fulfilled, (state, action) => {
+        state.vendor1 = action.payload || [];
+        state.loading = false;
+      })
+      .addCase(fetchVendor1.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
