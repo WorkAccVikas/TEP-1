@@ -62,6 +62,9 @@ const CabProviderSelection = ({ open: modelOpen, setOpen: setModelOpen, setFilte
         <DialogTitle>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h5">Select CabProvider</Typography>
+            <Button color="error" onClick={closeAddressModal}>
+              Cancel
+            </Button>
           </Stack>
         </DialogTitle>
 
@@ -146,14 +149,14 @@ const CabProviderSelection = ({ open: modelOpen, setOpen: setModelOpen, setFilte
           </Stack>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2.5 }}>
+        {/* <DialogActions sx={{ p: 2.5 }}>
           <Button color="error" onClick={closeAddressModal}>
             Cancel
           </Button>
           <Button onClick={closeAddressModal} color="primary" variant="contained" disabled={loading}>
             Add
           </Button>
-        </DialogActions>
+        </DialogActions> */}
       </Dialog>
     </>
   );

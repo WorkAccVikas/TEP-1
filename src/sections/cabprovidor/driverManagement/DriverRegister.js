@@ -12,7 +12,8 @@ import {
   Grid,
   InputLabel,
   Stack,
-  TextField
+  TextField,
+  Typography
 } from '@mui/material';
 
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -113,7 +114,7 @@ const DriverRegister = ({
 
   const { handleSubmit, isSubmitting, values } = formik;
 
-  const style = [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) ? 6 : 4;
+  const style = [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) ? 4 : 4;
 
   return (
     <>
@@ -136,7 +137,12 @@ const DriverRegister = ({
                   {/* Username */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>Username</InputLabel>
+                      <InputLabel>
+                        Username
+                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
+                          *
+                        </Typography>
+                      </InputLabel>
 
                       <FormikTextField name="userName" placeholder="Enter Username" fullWidth />
                     </Stack>
@@ -145,8 +151,12 @@ const DriverRegister = ({
                   {/* Email */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>Email</InputLabel>
-
+                      <InputLabel>
+                        Email
+                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
+                          *
+                        </Typography>
+                      </InputLabel>
                       <FormikTextField name="userEmail" placeholder="Enter Email" fullWidth />
                     </Stack>
                   </Grid>
@@ -154,9 +164,39 @@ const DriverRegister = ({
                   {/* Contact Number */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>Contact Number</InputLabel>
+                      <InputLabel>
+                        Contact Number
+                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
+                          *
+                        </Typography>
+                      </InputLabel>
 
                       <FormikTextField name="contactNumber" placeholder="Enter Contact Number" fullWidth />
+                    </Stack>
+                  </Grid>
+
+                  {/* Office Charge */}
+                  <Grid item xs={12} sm={style}>
+                    <Stack spacing={1}>
+                      <InputLabel>Office Charge</InputLabel>
+
+                      <FormikTextField
+                        name="officeChargeAmount"
+                        type="number"
+                        placeholder="Enter Office Charge"
+                        fullWidth
+                        InputProps={{
+                          // readOnly: true,
+
+                          inputProps: {
+                            sx: {
+                              '::-webkit-outer-spin-button': { display: 'none' },
+                              '::-webkit-inner-spin-button': { display: 'none' },
+                              '-moz-appearance': 'textfield' // Firefox
+                            }
+                          }
+                        }}
+                      />
                     </Stack>
                   </Grid>
 
