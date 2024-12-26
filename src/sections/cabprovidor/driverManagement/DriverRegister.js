@@ -25,11 +25,22 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { USERTYPE } from 'constant';
 import { useDispatch } from 'react-redux';
 
-const validationSchema = Yup.object().shape({
-  userName: Yup.string().required('Username is required'),
-  userEmail: Yup.string().email('Invalid email format').required('Email is required'),
-  contactNumber: Yup.string().required('Contact Number is required').min(10, 'Contact Number must be at least 10 characters')
-});
+const validationSchema = Yup.object()
+  .shape({
+    userName: Yup.string().required('Username is required'),
+    userEmail: Yup.string().email('Invalid email address'),
+    contactNumber: Yup.string().matches(/^[0-9]{10}$/, 'Contact Number must be exactly 10 digits')
+  })
+  .test('email-or-phone', 'Either email or phone is required', function (values) {
+    const { userEmail, contactNumber } = values;
+    if (!userEmail && !contactNumber) {
+      return this.createError({
+        path: 'userEmail',
+        message: 'Either email or phone is required'
+      });
+    }
+    return true;
+  });
 
 const DriverRegister = ({
   open,
@@ -151,12 +162,7 @@ const DriverRegister = ({
                   {/* Email */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>
-                        Email
-                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
-                          *
-                        </Typography>
-                      </InputLabel>
+                      <InputLabel>Email</InputLabel>
                       <FormikTextField name="userEmail" placeholder="Enter Email" fullWidth />
                     </Stack>
                   </Grid>
@@ -164,12 +170,7 @@ const DriverRegister = ({
                   {/* Contact Number */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>
-                        Contact Number
-                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
-                          *
-                        </Typography>
-                      </InputLabel>
+                      <InputLabel>Contact Number</InputLabel>
 
                       <FormikTextField name="contactNumber" placeholder="Enter Contact Number" fullWidth />
                     </Stack>

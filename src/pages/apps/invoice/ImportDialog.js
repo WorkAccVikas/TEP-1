@@ -33,13 +33,15 @@ export const getFilterStrategy = (userType) => {
 
 const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
   const [dateRange, setDateRange] = useState({
-    startDate: addMonths(new Date(), -1), // Default to today's date
-    endDate: new Date() // Default to 1 month after today's date
+    // startDate: addMonths(new Date(), -1), // Default to today's date
+    // endDate: new Date() // Default to 1 month after today's date
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1, 1)), // Start of the previous month
+    endDate: new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0)) // End of the previous month
   });
   const [loading, setLoading] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
 
-  console.log(formatDateUsingMoment(dateRange.endDate));
+  // console.log(formatDateUsingMoment(dateRange.endDate));
 
   const fetchTripData = async () => {
     setLoading(true);
@@ -60,7 +62,6 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
         return;
       }
 
-
       const baseURL = `/assignTrip/all/trips/cabProvider`;
       const queryParams = new URLSearchParams({
         startDate: formatDateUsingMoment(dateRange.startDate),
@@ -77,11 +78,11 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
       const data = response.data.data;
 
       const filterStrategy = getFilterStrategy(userType);
-      console.log({ filterStrategy });
+      // console.log({ filterStrategy });
 
       // Apply the filter
       const filteredData = data.filter(filterStrategy);
-      console.log({ filteredData });
+      // console.log({ filteredData });
 
       // setTripData(response.data.data);
       setTripData(filteredData);
@@ -168,12 +169,14 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
                 value={dateRange.startDate}
                 onChange={handleStartChange}
                 slotProps={{ textField: { placeholder: 'Select Start Date', helperText: 'Select Start Date' } }}
+                maxDate={new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0))}
               />
               <DesktopDatePicker
                 format="dd/MM/yyyy"
                 value={dateRange.endDate}
                 onChange={handleEndChange}
                 slotProps={{ textField: { placeholder: 'Select End Date', helperText: 'Select End Date' } }}
+                maxDate={new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0))}
               />
             </Stack>
           </LocalizationProvider>

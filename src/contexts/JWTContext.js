@@ -144,9 +144,9 @@ export const JWTProvider = ({ children }) => {
         if (serviceToken && verifyToken(serviceToken)) {
           setSession(serviceToken);
           const response = await axios.get('/user/view');
-          
+
           const { userData, userSpecificData, userPermissions } = response.data;
-  
+
           // Skip account settings for superAdmin
           let accountSetting = null;
           if (userData.userType !== USERTYPE.superAdmin) {
@@ -158,7 +158,7 @@ export const JWTProvider = ({ children }) => {
             console.log('accountSettingResponse', accountSettingResponse);
             accountSetting = accountSettingResponse?.data?.data;
           }
-  
+
           dispatch({
             type: LOGIN,
             payload: {
@@ -185,7 +185,7 @@ export const JWTProvider = ({ children }) => {
         });
       }
     };
-  
+
     init();
   }, [dispatch]);
 
@@ -234,17 +234,14 @@ export const JWTProvider = ({ children }) => {
   //   });
   // };
 
-  const login = async (email, password) => {
+  const login = async (receivedPayload) => {
     const payload = {
-      data: {
-        userEmail: email,
-        userPassword: password
-      }
+      data: receivedPayload
     };
-  
+
     const response = await axios.post('/user/login', payload);
     const { userData, userSpecificData, userPermissions } = response.data;
-  
+
     // Skip account settings for superAdmin
     let accountSetting = null;
     if (userData.userType !== USERTYPE.superAdmin) {
@@ -256,14 +253,14 @@ export const JWTProvider = ({ children }) => {
       console.log('accountSettingResponse', accountSettingResponse);
       accountSetting = accountSettingResponse?.data?.data;
     }
-  
+
     const userInfo = {
       userId: userData._id,
       userType: userData.userType
     };
-  
+
     localStorage.setItem('userInformation', JSON.stringify(userInfo));
-  
+
     setSession(userData.token);
     dispatch({
       type: LOGIN,
