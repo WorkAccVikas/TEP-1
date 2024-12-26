@@ -179,6 +179,7 @@ const AdvanceVendor = ({ vendorId }) => {
         Header: () => null,
         id: 'expander',
         className: 'cell-center',
+        disableSortBy: true,
         Cell: ({ row }) => {
           const collapseIcon = row.isExpanded ? <ArrowDown2 size={14} /> : <ArrowRight2 size={14} />;
           return (
@@ -192,21 +193,22 @@ const AdvanceVendor = ({ vendorId }) => {
       {
         Header: 'Advance Type',
         accessor: 'advanceTypeId.advanceTypeName',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Requested Amount',
-        accessor: 'requestedAmount'
+        accessor: 'requestedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Interest Rate',
         accessor: 'advanceTypeId.interestRate',
-        Cell: ({ value }) => value || 'Null'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Status',
@@ -225,7 +227,8 @@ const AdvanceVendor = ({ vendorId }) => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approvedAmount'
+        accessor: 'approvedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       // {
       //   Header: 'Actions',

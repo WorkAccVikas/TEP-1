@@ -193,21 +193,22 @@ const AdvanceDriver = ({driverId}) => {
       {
         Header: 'Advance Type',
         accessor: 'advanceTypeId.advanceTypeName',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Requested Amount',
-        accessor: 'requestedAmount'
+        accessor: 'requestedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Interest Rate',
         accessor: 'advanceTypeId.interestRate',
-        Cell: ({ value }) => (value || 'Null')
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Status',
@@ -226,7 +227,8 @@ const AdvanceDriver = ({driverId}) => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approvedAmount'
+        accessor: 'approvedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       // {
       //   Header: 'Actions',
