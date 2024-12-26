@@ -36,6 +36,7 @@ const DefaultItemTable = ({
   recieversDetails,
   setTripData
 }) => {
+  console.log('DefaultItemTable render .............');
   const theme = useTheme();
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
   const [inlineDiscountDeduction, setInlineDiscountDeduction] = useState(false);
@@ -165,7 +166,7 @@ const DefaultItemTable = ({
         total: total,
         totalTax: finalTaxAmount,
         totalDiscount: finalDiscountAmount,
-        subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
+        subTotal: total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
         grandTotal
       };
     });

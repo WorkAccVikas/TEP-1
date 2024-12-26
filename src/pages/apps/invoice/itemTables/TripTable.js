@@ -189,8 +189,13 @@ const TripItemTable = ({
   groupByOption,
   amountSummary,
   setAmountSummary,
-  invoiceSetting
+  invoiceSetting,
+  advanceData,
+  officeCharge
 }) => {
+  console.log('TripItemTable render .............');
+  console.log('advanceData', advanceData);
+
   const theme = useTheme();
 
   const [inLineTaxDeduction, setInlineTaxDeduction] = useState(false);
@@ -337,12 +342,15 @@ const TripItemTable = ({
           ...prev,
           totalTax: finalTaxAmount,
           totalDiscount: finalDiscountAmount,
-          subTotal: prev.total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
-          grandTotal
+          subTotal: total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
+          ...(typeof advanceData !== 'object' ? { advanceAmount: advanceData } : {}),
+          ...(typeof officeCharge !== 'object' ? { officeCharge } : {}),
+          ...(typeof officeCharge !== 'object' ? { grandTotal: grandTotal - advanceData - officeCharge } : { grandTotal })
+          // grandTotal
         };
       });
     }
-  }, [itemData, tripData, groupByOption, userType]);
+  }, [itemData, tripData, groupByOption, userType, advanceData, officeCharge]);
 
   useEffect(() => {
     if (invoiceSetting) {
@@ -544,10 +552,28 @@ const TripItemTable = ({
                   <Typography color={theme.palette.success.main}>{`₹ ${amountSummary.additionalCharges?.toFixed(2)}`}</Typography>
                 </Stack>
                 <Divider />
+                {/* Office Charge Amount */}
+                {typeof officeCharge === 'number' && officeCharge > 0 && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography>Office Charge:</Typography>
+                    <Typography color={theme.palette.error.main}>{`₹ ${amountSummary.officeCharge?.toFixed(2)}`}</Typography>
+                  </Stack>
+                )}
+                {/* Advance Amount */}
+                {typeof advanceData === 'number' && advanceData > 0 && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography>Advance:</Typography>
+                    <Typography color={theme.palette.error.main}>{`₹ ${amountSummary.advanceAmount?.toFixed(2)}`}</Typography>
+                  </Stack>
+                )}
+                <Divider />
                 {/* Grand Total */}
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="subtitle1">Grand Total:</Typography>
-                  <Typography variant="h5">{`₹ ${amountSummary.grandTotal?.toFixed(2)}`}</Typography>
+                  <Typography
+                    variant="h5"
+                    color={amountSummary.grandTotal?.toFixed(2) < 0 && 'error'}
+                  >{`₹ ${amountSummary.grandTotal?.toFixed(2)}`}</Typography>
                 </Stack>
               </Stack>
             </Grid>
