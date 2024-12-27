@@ -376,7 +376,7 @@ function ChildModal({ id }) {
           <CardContent>
             <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
               <Typography id="modal-modal-description">Select Zones </Typography>
-              {/* {<ZoneSelection sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />} */}
+              {<ZoneSelection sx={{ minWidth: 250 }} value={selectedZones} setSelectedOptions={setSelectedZones} />}
             </Stack>
             <Stack direction="row" spacing={1} alignItems={'center'} justifyContent="space-around" sx={{ py: 1, mb: 1 }}>
               <Typography id="modal-modal-description">Select Vehicle Type </Typography>
