@@ -31,7 +31,8 @@ const AdvanceReportForVendor = () => {
       data: {
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        searchByUids: [...selectedDriver, ...selectedVendor]
+        // searchByUids: [...selectedDriver, ...selectedVendor]
+        searchByUids: USERTYPE.iscabProvider ? [...selectedDriver, ...selectedVendor] : undefined
       }
     };
 
@@ -80,13 +81,13 @@ const AdvanceReportForVendor = () => {
         <Stack direction={'row'} justifyContent={'space-between'} gap={2} alignItems={'center'}>
           <Stack direction={'row'} gap={2} alignItems={'center'}>
             {/* Driver Filter */}
-            <Box sx={{ minWidth: '300px' }}>
+            {/* <Box sx={{ minWidth: '300px' }}>
               <DriverSelection
                 value={selectedDriver}
                 setSelectedOptions={setSelectedDriver}
                 sx={{ minWidth: '300px', maxWidth: '600px' }}
               />
-            </Box>
+            </Box> */}
 
             <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
               {/* Vendor Filter */}

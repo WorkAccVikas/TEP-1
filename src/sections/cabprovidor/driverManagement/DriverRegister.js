@@ -12,7 +12,8 @@ import {
   Grid,
   InputLabel,
   Stack,
-  TextField
+  TextField,
+  Typography
 } from '@mui/material';
 
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -24,11 +25,22 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { USERTYPE } from 'constant';
 import { useDispatch } from 'react-redux';
 
-const validationSchema = Yup.object().shape({
-  userName: Yup.string().required('Username is required'),
-  userEmail: Yup.string().email('Invalid email format').required('Email is required'),
-  contactNumber: Yup.string().required('Contact Number is required').min(10, 'Contact Number must be at least 10 characters')
-});
+const validationSchema = Yup.object()
+  .shape({
+    userName: Yup.string().required('Username is required'),
+    userEmail: Yup.string().email('Invalid email address'),
+    contactNumber: Yup.string().matches(/^[0-9]{10}$/, 'Contact Number must be exactly 10 digits')
+  })
+  .test('email-or-phone', 'Either email or phone is required', function (values) {
+    const { userEmail, contactNumber } = values;
+    if (!userEmail && !contactNumber) {
+      return this.createError({
+        path: 'userEmail',
+        message: 'Either email or phone is required'
+      });
+    }
+    return true;
+  });
 
 const DriverRegister = ({
   open,
@@ -113,7 +125,7 @@ const DriverRegister = ({
 
   const { handleSubmit, isSubmitting, values } = formik;
 
-  const style = [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) ? 6 : 4;
+  const style = [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) ? 4 : 4;
 
   return (
     <>
@@ -136,7 +148,12 @@ const DriverRegister = ({
                   {/* Username */}
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
-                      <InputLabel>Username</InputLabel>
+                      <InputLabel>
+                        Username
+                        <Typography component="span" sx={{ color: 'red', marginLeft: '4px' }}>
+                          *
+                        </Typography>
+                      </InputLabel>
 
                       <FormikTextField name="userName" placeholder="Enter Username" fullWidth />
                     </Stack>
@@ -146,7 +163,6 @@ const DriverRegister = ({
                   <Grid item xs={12} sm={style}>
                     <Stack spacing={1}>
                       <InputLabel>Email</InputLabel>
-
                       <FormikTextField name="userEmail" placeholder="Enter Email" fullWidth />
                     </Stack>
                   </Grid>
@@ -157,6 +173,31 @@ const DriverRegister = ({
                       <InputLabel>Contact Number</InputLabel>
 
                       <FormikTextField name="contactNumber" placeholder="Enter Contact Number" fullWidth />
+                    </Stack>
+                  </Grid>
+
+                  {/* Office Charge */}
+                  <Grid item xs={12} sm={style}>
+                    <Stack spacing={1}>
+                      <InputLabel>Office Charge</InputLabel>
+
+                      <FormikTextField
+                        name="officeChargeAmount"
+                        type="number"
+                        placeholder="Enter Office Charge"
+                        fullWidth
+                        InputProps={{
+                          // readOnly: true,
+
+                          inputProps: {
+                            sx: {
+                              '::-webkit-outer-spin-button': { display: 'none' },
+                              '::-webkit-inner-spin-button': { display: 'none' },
+                              '-moz-appearance': 'textfield' // Firefox
+                            }
+                          }
+                        }}
+                      />
                     </Stack>
                   </Grid>
 

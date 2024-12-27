@@ -118,8 +118,8 @@ const NotificationPage = () => {
   const [loading, setLoading] = useState(true);
   const [fetch, setFetch] = useState(false);
 
-  console.log('notifications', notifications);
-  console.log('unreadCount', unreadCount);
+  // console.log('notifications', notifications);
+  // console.log('unreadCount', unreadCount);
 
   const handleClick = () => {
     setOpen(false); // Close the NotificationPage

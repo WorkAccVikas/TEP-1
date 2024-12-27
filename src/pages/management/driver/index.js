@@ -51,7 +51,8 @@ const getInitialValues = (data) => {
       userName: '',
       userEmail: '',
       contactNumber: '',
-      vendorId: ''
+      vendorId: '',
+      officeChargeAmount: ''
     };
   }
 };
@@ -67,7 +68,7 @@ const Driver = () => {
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
-  
+
   const handleAdd = useCallback(() => {
     dispatch(handleOpen(ACTION.CREATE));
   }, []);
@@ -140,8 +141,9 @@ const Driver = () => {
         const payload = {
           data: {
             userName: values.userName,
-            userEmail: values.userEmail,
+            userEmail: values.userEmail || `tripBiller-${values.contactNumber}@gmail.com`,
             contactNumber: values.contactNumber,
+            officeChargeAmount: values.officeChargeAmount,
             // vendorId: values.vendorId
             ...([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(1) && values.vendorId && { vendorId: values.vendorId })
           }
@@ -286,7 +288,14 @@ const Driver = () => {
           onSubmit={formikHandleSubmit}
         />
       )}
-      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
+      {openBulkUploadDialog && (
+        <BulkUploadDialog
+          open={openBulkUploadDialog}
+          handleOpen={handleDriverBulkUploadOpen}
+          handleClose={handleDriverBulkUploadClose}
+          setUpdateKey={setUpdateKey}
+        />
+      )}
     </>
   );
 };

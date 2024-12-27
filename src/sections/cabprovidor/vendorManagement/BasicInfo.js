@@ -35,38 +35,47 @@ import { addSpecialDetails } from 'store/slice/cabProvidor/vendorSlice';
 
 //Validation Schema for formData
 
-const validationSchema = yup.object({
-  // files: yup.mixed().required('File is required'),
-  userName: yup.string().required('Username is required').min(3, 'Username must be at least 3 characters'), //
-  userEmail: yup.string().email('Invalid email address').required('Email is required'), //
-  password: yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'), //
-  confirmpassword: yup
-    .string()
-    .required('Confirm Password is required')
-    .oneOf([yup.ref('password'), null], 'Passwords must match'),
-  vendorCompanyName: yup.string().required('Cab Provider Name is required'),
-  officeChargeAmount: yup
-    .number()
-    .typeError('Office Charge Amount must be a number')
-    .required('Office Charge Amount is required')
-    .positive('Office Charge Amount must be a positive number')
-  // contactNumber: yup
-  //   .string()
-  //   .required('Contact Number is required')
-  //   .matches(/^[0-9]{10}$/, 'Contact Number must be exactly 10 digits'),
-  // alternateContactNumber: yup
-  //   .string()
-  //   .matches(/^[0-9]{10}$/, 'Alternate Contact Number must be exactly 10 digits')
-  //   .required('Alternate Contact Number is required'),
-  // pinCode: yup
-  //   .string()
-  //   .required('Pin Code is required')
-  //   .matches(/^[0-9]{6}$/, 'Pin Code must be exactly 6 digits'),
-  // city: yup.string().required('City is required').min(2, 'City must be at least 2 characters'),
-  // state: yup.string().required('State is required').min(2, 'State must be at least 2 characters'),
-  // address: yup.string().required('Address is required').min(10, 'Address must be at least 10 characters'),
-  // userType: yup.string().required('User Type is required')
-});
+const validationSchema = yup
+  .object()
+  .shape({
+    // files: yup.mixed().required('File is required'),
+    userName: yup.string().required('Username is required').min(3, 'Username must be at least 3 characters'), //
+    userEmail: yup.string().email('Invalid email address'), //
+    password: yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'), //
+    confirmpassword: yup
+      .string()
+      .required('Confirm Password is required')
+      .oneOf([yup.ref('password'), null], 'Passwords must match'),
+    vendorCompanyName: yup.string().required('Cab Provider Name is required'),
+    officeChargeAmount: yup
+      .number()
+      .typeError('Office Charge Amount must be a number')
+      .required('Office Charge Amount is required')
+      .positive('Office Charge Amount must be a positive number'),
+    contactNumber: yup.string().matches(/^[0-9]{10}$/, 'Contact Number must be exactly 10 digits')
+    // alternateContactNumber: yup
+    //   .string()
+    //   .matches(/^[0-9]{10}$/, 'Alternate Contact Number must be exactly 10 digits')
+    //   .required('Alternate Contact Number is required'),
+    // pinCode: yup
+    //   .string()
+    //   .required('Pin Code is required')
+    //   .matches(/^[0-9]{6}$/, 'Pin Code must be exactly 6 digits'),
+    // city: yup.string().required('City is required').min(2, 'City must be at least 2 characters'),
+    // state: yup.string().required('State is required').min(2, 'State must be at least 2 characters'),
+    // address: yup.string().required('Address is required').min(10, 'Address must be at least 10 characters'),
+    // userType: yup.string().required('User Type is required')
+  })
+  .test('email-or-phone', 'Either email or phone is required', function (values) {
+    const { userEmail, contactNumber } = values;
+    if (!userEmail && !contactNumber) {
+      return this.createError({
+        path: 'userEmail',
+        message: 'Either email or phone is required'
+      });
+    }
+    return true;
+  });
 
 //Cab Provider adding vendor user
 const AvailableUserTypeOptions = {
@@ -115,11 +124,11 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
         const formData = new FormData();
         // formData.append('userImage', values.files[0]);
         formData.append('userName', values.userName);
-        formData.append('userEmail', values.userEmail);
+        formData.append('userEmail', values.userEmail || `tripBiller-${values.contactNumber}@gmail.com`);
         formData.append('userPassword', values.password);
         formData.append('contactNumber', values.contactNumber);
         formData.append('alternateContactNumber', values.alternateContactNumber);
-        formData.append('userType', 2);
+        formData.append('userType', USERTYPE.isVendor);
         // formData.append('pinCode', values.pinCode);
         // formData.append('city', values.city);
         // formData.append('state', values.state);
@@ -257,7 +266,7 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
           {/* Email */}
           <Grid item xs={12} sm={3}>
             <Stack spacing={1}>
-              <InputLabel required>Email</InputLabel>
+              <InputLabel>Email</InputLabel>
               <TextField
                 id="userEmail"
                 name="userEmail"
@@ -266,7 +275,9 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
                 value={formik.values.userEmail}
                 onChange={formik.handleChange}
                 error={formik.touched.userEmail && Boolean(formik.errors.userEmail)}
-                helperText={formik.touched.userEmail && formik.errors.userEmail}
+                helperText={
+                  formik.touched.userEmail && formik.errors.userEmail ? formik.errors.userEmail : 'Enter your email or phone number'
+                }
                 fullWidth
                 inputProps={{ autoComplete: 'off' }}
               />
@@ -405,7 +416,11 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
                   }
                 }}
                 error={formik.touched.contactNumber && Boolean(formik.errors.contactNumber)}
-                helperText={formik.touched.contactNumber && formik.errors.contactNumber}
+                helperText={
+                  formik.touched.contactNumber && formik.errors.contactNumber
+                    ? formik.errors.contactNumber
+                    : 'Enter your phone number if email is not provided'
+                }
                 fullWidth
                 autoComplete="off"
               />
