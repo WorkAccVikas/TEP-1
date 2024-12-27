@@ -51,7 +51,7 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 });
 
-const MANDATORY_HEADERS = ['ID', 'Name*', 'Email*', 'Phone*'];
+const MANDATORY_HEADERS = ['vendorName', 'Name*', 'Email*', 'Phone*'];
 
 const OPTIONAL_HEADERS = [
   'Office Charge',
@@ -164,34 +164,30 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
       // Parse the file with XLSX
       const workbook = XLSX.read(data, { type: 'binary' });
 
-      // Get the first sheet (assuming it's "Driver Data")
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
+      // Read Sheet 1 (Main Data)
+      const sheet1Name = workbook.SheetNames[0];
+      const sheet1 = workbook.Sheets[sheet1Name];
+      const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1 });
 
-      // Convert the sheet data to JSON
-      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      console.log(`🚀 ~ handleExcelDataExtraction ~ jsonData:`, jsonData);
+      // Read Sheet 2 (Mapping Data)
+      const sheet2Name = workbook.SheetNames[1];
+      const sheet2 = workbook.Sheets[sheet2Name];
+      const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1 });
 
-      // // Map the data to the desired format
-      // const mappedData = jsonData.slice(1).map((row) => {
-      //   const [id, name, email, phone] = row;
-      //   return {
-      //     data: {
-      //       userName: name,
-      //       userEmail: email,
-      //       contactNumber: phone,
-      //       vendorId: id || null
-      //     }
-      //   };
-      // });
+      // Create a mapping of vendorName -> vendorId from Sheet 2
+      const vendorMapping = {};
+      sheet2Data.slice(1).forEach((row) => {
+        const [id, vendorName] = row;
+        vendorMapping[vendorName] = id;
+      });
 
-      // console.log(mappedData); // Log the mapped data
-      // setDriverData(mappedData); // Set the mapped data to state
+      console.log('Vendor Mapping:', vendorMapping);
 
-      // const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
-      const { validItems, invalidItems } = separateValidAndInvalidItemsWithGenericDependencies(jsonData.slice(1), fieldMapping);
-      console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
-      console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
+      // Process Sheet 1 data
+      const { validItems, invalidItems } = separateValidAndInvalidItemsWithGenericDependencies(sheet1Data.slice(1), fieldMapping);
+
+      console.log('Invalid Items:', invalidItems);
+      console.log('Valid Items:', validItems);
 
       if (invalidItems.length > 0) {
         const items = invalidItems.map((entry) => {
@@ -201,16 +197,20 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
 
           return [...entry.item, `Reasons :\n${reasons}`];
         });
-        console.log('items = ', items);
+        console.log('Invalid Items with Reasons:', items);
 
         setInvalidData(items);
       }
 
       const mappedData = validItems.map((row) => {
+        const vendorName = row[0]; // Assuming vendorName is in the second column
+        console.log({ vendorName });
+
+        const vendorId = vendorMapping[vendorName] || null; // Get vendorId from the mapping
         return {
-          vendorId: row[0],
+          vendorId: vendorId,
           userName: row[1],
-          userEmail: row[2] || `tripBiller-${row[3]}@gmail.com`,
+          userEmail: row[2] || `smapleEmail-${row[3]}@tripBiller.com`,
           contactNumber: row[3] || null,
           officeChargeAmount: row[4] || 0,
           fatherName: row[5] || null,
@@ -529,6 +529,7 @@ function ChildModal() {
     setOpen(false);
   };
   const [selectedOptions, setSelectedOptions] = useState([]);
+  console.log({ selectedOptions });
 
   const handleDownload = useCallback(() => {
     // Headers for "Driver Data" sheet
@@ -545,7 +546,7 @@ function ChildModal() {
 
     // Check if the data is not empty, then populate "ID Reference" data
     if (selectedOptions && selectedOptions.length > 0) {
-      idReferenceData = selectedOptions.map((item) => [item.vendorId, item.vendorCompanyName, item.workMobileNumber]);
+      idReferenceData = selectedOptions.map((item) => [item._id, item.vendorCompanyName, item.workMobileNumber]);
     }
 
     // Create the second sheet (headers + data if available)
