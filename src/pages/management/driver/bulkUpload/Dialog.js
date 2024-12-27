@@ -29,11 +29,14 @@ import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import {
   isMobileNumber,
+  isMobileNumberOptional,
   isNumber,
   isRequiredString,
   isString,
   isValidEmail,
-  separateValidAndInvalidItems
+  isValidEmailOptional,
+  separateValidAndInvalidItems,
+  separateValidAndInvalidItemsWithGenericDependencies
 } from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
@@ -63,38 +66,77 @@ const OPTIONAL_HEADERS = [
   'Bank Address'
 ];
 
-// Add field mapping
-const fieldMapping = {
-  1: 'Name',
-  2: 'Email',
-  3: 'Phone',
-  4: 'Office Charge',
-  5: 'Father Name',
-  6: 'Experience',
-  7: 'PAN',
-  8: 'Bank Name',
-  9: 'Branch Name',
-  10: 'Account Holder Name',
-  11: 'Account Number',
-  12: 'IFSC Code',
-  13: 'Bank Address'
-};
+// // Add field mapping
+// const fieldMapping = {
+//   1: 'Name',
+//   2: 'Email',
+//   3: 'Phone',
+//   4: 'Office Charge',
+//   5: 'Father Name',
+//   6: 'Experience',
+//   7: 'PAN',
+//   8: 'Bank Name',
+//   9: 'Branch Name',
+//   10: 'Account Holder Name',
+//   11: 'Account Number',
+//   12: 'IFSC Code',
+//   13: 'Bank Address'
+// };
 
-const validationRules = {
-  // 0: isString, // ID
-  1: isRequiredString, // Name*
-  2: (value) => isRequiredString(value) && isValidEmail(value), // Email*
-  3: isMobileNumber, // Phone*
-  4: isNumber, //Office Charge
-  5: isString, // Father Name
-  6: isNumber, // Experience (In Year's)
-  7: isString, // PAN
-  8: isString, // Bank Name
-  9: isString, // Branch Name
-  10: isString, // Account Holder Name
-  11: isNumber, // Account Number
-  12: isString, // IFSC Code
-  13: isString // Bank Address
+// const validationRules = {
+//   // 0: isString, // ID
+//   1: isRequiredString, // Name*
+//   2: (value) => isRequiredString(value) && isValidEmail(value), // Email*
+//   3: isMobileNumber, // Phone*
+//   4: isNumber, // Office Charge
+//   5: isString, // Father Name
+//   6: isNumber, // Experience (In Year's)
+//   7: isString, // PAN
+//   8: isString, // Bank Name
+//   9: isString, // Branch Name
+//   10: isString, // Account Holder Name
+//   11: isNumber, // Account Number
+//   12: isString, // IFSC Code
+//   13: isString // Bank Address
+// };
+
+// Field mapping with dependency specified
+const fieldMapping = {
+  1: { name: 'Name', validation: isRequiredString },
+  2: { name: 'Email', validation: isValidEmailOptional },
+  3: { name: 'Phone', validation: isMobileNumberOptional },
+  4: { name: 'Office Charge', validation: isNumber },
+  5: { name: 'Father Name', validation: isString },
+  6: { name: 'Experience', validation: isNumber },
+  7: { name: 'PAN', validation: isString },
+  8: { name: 'Bank Name', validation: isString },
+  9: { name: 'Branch Name', validation: isString },
+  10: { name: 'Account Holder Name', validation: isString },
+  11: { name: 'Account Number', validation: isNumber },
+  12: { name: 'IFSC Code', validation: isString },
+  13: { name: 'Bank Address', validation: isString },
+  dependencies: [
+    {
+      fields: [2, 3], // Email and Phone
+      validation: ([email, phone]) => {
+        console.log(`🚀 ~ email:`, email);
+        console.log(`🚀 ~ phone:`, phone);
+        // const emailValid =
+        //   typeof email === "string" && EMAIL_REGEX_PATTERN.test(email);
+        // const phoneValid =
+        //   typeof phone === "string" && MOBILE_NUMBER_REGEX_PATTERN.test(phone);
+
+        if (!email && !phone) {
+          throw new Error('Either Email or Phone is required');
+        }
+        // if (emailValid || phoneValid) {
+        else if (!email || !phone) {
+          return true; // At least one of Email or Phone is valid
+        }
+      },
+      errorField: 'Email/Phone'
+    }
+  ]
 };
 
 const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
@@ -146,7 +188,8 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
       // console.log(mappedData); // Log the mapped data
       // setDriverData(mappedData); // Set the mapped data to state
 
-      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
+      // const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
+      const { validItems, invalidItems } = separateValidAndInvalidItemsWithGenericDependencies(jsonData.slice(1), fieldMapping);
       console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
       console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
 
@@ -167,9 +210,9 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
         return {
           vendorId: row[0],
           userName: row[1],
-          userEmail: row[2],
+          userEmail: row[2] || `tripBiller-${row[3]}@gmail.com`,
           contactNumber: row[3],
-          officeChargeAmount: row[4],
+          officeChargeAmount: row[4] || 0,
           fatherName: row[5],
           experience: row[6],
           pan: row[7],
@@ -349,7 +392,7 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
           console.log(response.data);
 
           // If the response indicates success, increment successCount
-          if (response.status === 201) {
+          if (response.status >= 200 && response.status < 300) {
             successCount++;
           }
         } catch (error) {

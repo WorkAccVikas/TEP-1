@@ -1,13 +1,19 @@
 import { EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN, PIN_CODE_REGEX_PATTERN } from 'constant';
-import moment from 'moment';
-
 // Modified validation functions to include detailed error messages
 export const isRequiredString = (value) => {
   if (typeof value === 'string' && value.trim() !== '') return true;
-  throw new Error('Expected a non-empty string');
+  throw new Error('This field is required');
 };
 
 export const isValidEmail = (value) => {
+  if (typeof value === 'string' && EMAIL_REGEX_PATTERN.test(value)) return true;
+  throw new Error('Expected a valid email format');
+};
+
+export const isValidEmailOptional = (value) => {
+  // Skip validation for undefined
+  if (typeof value === 'undefined' || value === null) return true;
+
   if (typeof value === 'string' && EMAIL_REGEX_PATTERN.test(value)) return true;
   throw new Error('Expected a valid email format');
 };
@@ -17,17 +23,33 @@ export const isMobileNumber = (value) => {
   throw new Error('Expected a 10-digit mobile number');
 };
 
+export const isMobileNumberOptional = (value) => {
+  // Skip validation for undefined
+  if (typeof value === 'undefined' || value === null) return true;
+
+  // Guard clause: Check if the value is a number or a string
+  if (typeof value !== 'number' && typeof value !== 'string') {
+    throw new Error('Expected a 10-digit mobile number');
+  }
+
+  // Guard clause: Check if the value matches the regex pattern
+  if (!MOBILE_NUMBER_REGEX_PATTERN.test(value.toString())) {
+    throw new Error('Expected a 10-digit mobile number');
+  }
+
+  return true; // Return true if all conditions are satisfied
+};
+
 export const isString = (value) => {
-  if (typeof value === 'string' || typeof value === 'undefined') return true;
-  throw new Error('Expected a string or undefined');
+  if (typeof value === 'string' || typeof value === 'undefined' || value === null) return true;
+  throw new Error('Value should be a string or left empty');
 };
 
 export const isNumber = (value) => {
-  if (typeof value === 'number' || typeof value === 'undefined') return true;
-  throw new Error('Expected a number or undefined');
+  if (typeof value === 'number' || typeof value === 'undefined' || value === null) return true;
+  throw new Error('Value should be a number or left empty');
 };
 
-// Validation function for date
 // Validation function for date
 export const isValidDate = (value) => {
   // If the value is undefined, consider it valid
@@ -80,7 +102,6 @@ export const isValueInExpectedValues = (value, expectedValues) => {
   // If value is valid, return true
   return true;
 };
-
 // Validation function for array items
 export const validateArrayItem = (item, rules, fieldMapping) => {
   const errors = {};
@@ -103,6 +124,50 @@ export const separateValidAndInvalidItems = (data, rules, fieldMapping) => {
 
   data.forEach((item) => {
     const errors = validateArrayItem(item, rules, fieldMapping);
+    if (!errors) {
+      validItems.push(item);
+    } else {
+      invalidItems.push({ item, errors });
+    }
+  });
+
+  return { validItems, invalidItems };
+};
+
+const validateArrayItemWithGenericDependencies = (item, fieldMapping) => {
+  const errors = {};
+
+  // Validate individual fields
+  Object.entries(fieldMapping).forEach(([key, { validation, name }]) => {
+    if (key === 'dependencies') return; // Skip dependencies
+    try {
+      validation(item[Number(key)]);
+    } catch (error) {
+      errors[name] = error.message;
+    }
+  });
+
+  // Validate dependencies
+  if (fieldMapping.dependencies) {
+    fieldMapping.dependencies.forEach(({ fields, validation, errorField }) => {
+      const values = fields.map((index) => item[index]);
+      try {
+        validation(values);
+      } catch (error) {
+        errors[errorField] = error.message;
+      }
+    });
+  }
+
+  return Object.keys(errors).length === 0 ? null : errors;
+};
+
+export const separateValidAndInvalidItemsWithGenericDependencies = (data, fieldMapping) => {
+  const validItems = [];
+  const invalidItems = [];
+
+  data.forEach((item) => {
+    const errors = validateArrayItemWithGenericDependencies(item, fieldMapping);
     if (!errors) {
       validItems.push(item);
     } else {
