@@ -288,12 +288,14 @@ const Driver = () => {
           onSubmit={formikHandleSubmit}
         />
       )}
-      <BulkUploadDialog
-        open={openBulkUploadDialog}
-        handleOpen={handleDriverBulkUploadOpen}
-        handleClose={handleDriverBulkUploadClose}
-        setUpdateKey={setUpdateKey}
-      />
+      {openBulkUploadDialog && (
+        <BulkUploadDialog
+          open={openBulkUploadDialog}
+          handleOpen={handleDriverBulkUploadOpen}
+          handleClose={handleDriverBulkUploadClose}
+          setUpdateKey={setUpdateKey}
+        />
+      )}
     </>
   );
 };
