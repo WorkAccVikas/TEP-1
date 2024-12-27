@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import useAuth from 'hooks/useAuth';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiResponse } from 'utils/axiosHelper';
 import { useLocation, useNavigate } from 'react-router';
 import { Add, Edit } from 'iconsax-react';
@@ -28,6 +28,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { addMonths, isValid } from 'date-fns';
 import AddressModal from './components/CompanySelectModel';
+import CabProviderAddressModal from './components/CabProviderSelection';
 import GenericSelect from 'components/select/GenericSelect';
 import DefaultItemTable from './itemTables';
 import TripItemTable from './itemTables/TripTable';
@@ -40,6 +41,7 @@ import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { checkGSTtype } from 'utils/helper';
+import moment from 'moment';
 
 const customTextFieldStyle = {
   '& .MuiInputBase-input': {
@@ -170,7 +172,7 @@ const Create = () => {
       }
     };
 
-    if ([USERTYPE.iscabProviderUser, USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+    if ([USERTYPE.iscabProviderUser].includes(userType)) {
       fetchCabProviderDetails();
     }
   }, [userType]);
@@ -184,9 +186,14 @@ const Create = () => {
 
   const [invoiceStatus, setInvoiceStatus] = useState('Unpaid');
 
+  const [advanceData, setAdvanceData] = useState(null);
+  const [officeCharge, setOfficeCharge] = useState(null);
+
   const [dates, setDates] = useState({
-    invoiceDate: new Date(), // Default to today's date
-    invoiceDueDate: addMonths(new Date(), 1) // Default to 1 month after today's date
+    // invoiceDate: new Date(), // Default to today's date
+    // invoiceDueDate: addMonths(new Date(), 1) // Default to 1 month after today's date
+    invoiceDate: new Date(new Date().setMonth(new Date().getMonth() - 1, 1)), // Start of the previous month
+    invoiceDueDate: new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0)) // End of the previous month
   });
 
   // Handler for updating dates
@@ -244,6 +251,7 @@ const Create = () => {
   });
 
   const [recieversModalOpen, setRecieversModalOpen] = useState(false);
+  const [cabProviderReceiversModalOpen, setCabProviderReceiversModalOpen] = useState(false);
 
   const [groupByOption, setGroupByOption] = useState('Company Rate');
 
@@ -302,12 +310,14 @@ const Create = () => {
         setLoading(false);
       }
     };
-    if (tripData.length > 0 && tripData[0].companyID) {
+
+    const isVendor = [USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType);
+    if (!isVendor && tripData.length > 0 && tripData[0].companyID) {
       fetchRecieversDetails(tripData[0].companyID._id);
       const isSameState1 = checkGSTtype(sendersDetails.GSTIN, recieversDetails.GSTIN);
       setIsSameState(isSameState1);
     }
-  }, [tripData]);
+  }, [tripData, userType]);
 
   const [itemData, setItemData] = useState([
     {
@@ -632,6 +642,62 @@ const Create = () => {
     }
   };
 
+  useEffect(() => {
+    const getAdvanceDetails = async () => {
+      try {
+        const baseURL = `/advance/total/advance`;
+        let queryParams;
+
+        if (userType === USERTYPE.isVendor || userType === USERTYPE.isVendorUser) {
+          queryParams = {
+            cabProviderId: recieversDetails._id
+          };
+        }
+
+        const response = await axiosServices.get(baseURL, { params: queryParams });
+        const data = response.data.data;
+        console.log('data', data);
+
+        const totalSum = data.reduce((sum, item) => {
+          const { approvedAmount, advanceTypeId } = item;
+          const interestRate = advanceTypeId.interestRate;
+          const calculatedValue = approvedAmount + (approvedAmount * interestRate) / 100;
+          return sum + calculatedValue;
+        }, 0);
+
+        console.log('totalSum', totalSum);
+
+        setAdvanceData(totalSum);
+      } catch (error) {
+        console.log('Error fetching advance details:', error);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Error fetching advance details',
+            variant: 'alert',
+            alert: {
+              color: 'error'
+            },
+            close: true
+          })
+        );
+      }
+    };
+
+    // TODO : fetch advance details from API for vendor & vendor user
+    if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType) && tripData.length > 0) {
+      getAdvanceDetails();
+    }
+
+    if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+      setOfficeCharge(userSpecificData?.officeChargeAmount || 0);
+    }
+  }, [userType, recieversDetails, tripData, userSpecificData]);
+
+  const isCabProvider = useMemo(() => {
+    return [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType);
+  }, [userType]);
+
   return (
     <>
       <MainCard>
@@ -686,6 +752,7 @@ const Create = () => {
                     format="dd/MM/yyyy"
                     value={dates.invoiceDate}
                     onChange={(newValue) => handleDateChange('invoiceDate', newValue)}
+                    maxDate={new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0))}
                   />
                 </LocalizationProvider>
               </FormControl>
@@ -701,6 +768,7 @@ const Create = () => {
                     format="dd/MM/yyyy"
                     value={dates.invoiceDueDate}
                     onChange={(newValue) => handleDateChange('invoiceDueDate', newValue)}
+                    maxDate={new Date(new Date().setMonth(new Date().getMonth() - 1 + 1, 0))}
                   />
                 </LocalizationProvider>
               </FormControl>
@@ -784,9 +852,10 @@ const Create = () => {
             <MainCard sx={{ minHeight: 180 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={8}>
-                  {recieversDetails._id && (
-                    <Stack spacing={2}>
-                      <Typography variant="h5">To:</Typography>
+                  <Stack spacing={2}>
+                    <Typography variant="h5">To:</Typography>
+
+                    {recieversDetails._id && (
                       <Stack sx={{ width: '100%' }}>
                         <Typography variant="subtitle1">{recieversDetails.name}</Typography>
                         <Typography color="secondary">
@@ -804,11 +873,13 @@ const Create = () => {
                           <strong>PAN:</strong> {recieversDetails.PAN}
                         </Typography>
                       </Stack>
-                    </Stack>
-                  )}
+                    )}
+                  </Stack>
                 </Grid>
 
-                <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.iscabProviderUser]}>
+                <AccessControlWrapper
+                  allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.iscabProviderUser, USERTYPE.isVendor, USERTYPE.isVendorUser]}
+                >
                   <Grid item xs={12} sm={4}>
                     <Box textAlign="right" color="secondary.200">
                       <Button
@@ -816,7 +887,8 @@ const Create = () => {
                         startIcon={<Add />}
                         color="secondary"
                         variant="outlined"
-                        onClick={() => setRecieversModalOpen(true)}
+                        onClick={() => (isCabProvider ? setRecieversModalOpen(true) : setCabProviderReceiversModalOpen(true))}
+                        title={isCabProvider ? 'Add Company Receiver' : 'Add Cab Provider Receiver'}
                       >
                         Add
                       </Button>
@@ -869,6 +941,8 @@ const Create = () => {
               amountSummary={amountSummary}
               setAmountSummary={setAmountSummary}
               invoiceSetting={settings}
+              advanceData={advanceData}
+              officeCharge={officeCharge}
             />
           ) : (
             <DefaultItemTable
@@ -1139,6 +1213,19 @@ const Create = () => {
         setTripData={setTripData}
         setIsSameState={setIsSameState}
       />
+
+      {cabProviderReceiversModalOpen && (
+        <CabProviderAddressModal
+          open={cabProviderReceiversModalOpen}
+          setOpen={setCabProviderReceiversModalOpen}
+          sendersDetails={sendersDetails}
+          value={recieversDetails}
+          setFilterOptions={setRecieversDetails}
+          setRecieversDetails={setRecieversDetails}
+          setTripData={setTripData}
+          setIsSameState={setIsSameState}
+        />
+      )}
 
       <TripImportDialog
         open={importTripDialogOpen}
