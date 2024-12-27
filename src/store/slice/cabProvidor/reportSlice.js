@@ -40,7 +40,7 @@ export const fetchCompanyWiseReports = createAsyncThunk(
       const userType = state.auth.userType;
       // console.log('userType', userType);
       // await new Promise((resolve) => setTimeout(resolve, 4000));
-      const response = await axios.post(`/reports/company/wise/summary`, {
+      const response = await axios.post(API_URL[userType].COMPANY_WISE_REPORTS, {
         data: {
           startDate: payload?.data?.startDate,
           endDate: payload?.data?.endDate,
@@ -56,11 +56,13 @@ export const fetchCompanyWiseReports = createAsyncThunk(
   }
 );
 
-export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports', async (payload, { rejectWithValue }) => {
+export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports', async (payload, { rejectWithValue, getState }) => {
   try {
     console.log('payload', payload);
+    const state = getState();
+    const userType = state.auth.userType;
     // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.post(`/reports/cab/wise/summary`, payload);
+    const response = await axios.post(API_URL[userType].CAB_WISE_REPORTS, payload);
     console.log('payload', response.data);
 
     return response.data.data;
@@ -68,11 +70,13 @@ export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
 });
-export const fetchAdvanceReports = createAsyncThunk('reports/fetchAdvanceReports', async (payload, { rejectWithValue }) => {
+export const fetchAdvanceReports = createAsyncThunk('reports/fetchAdvanceReports', async (payload, { rejectWithValue, getState }) => {
   try {
     console.log('payload', payload);
+    const state = getState();
+    const userType = state.auth.userType;
     // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.post(`/reports/advance/summary`, payload);
+    const response = await axios.post(API_URL[userType].ADVANCE_REPORTS, payload);
     console.log('response.data.data', response.data.data);
     return response.data.data;
   } catch (error) {
