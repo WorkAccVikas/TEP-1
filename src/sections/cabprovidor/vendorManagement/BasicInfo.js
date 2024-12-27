@@ -126,9 +126,9 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
         formData.append('userName', values.userName);
         formData.append('userEmail', values.userEmail || `tripBiller-${values.contactNumber}@gmail.com`);
         formData.append('userPassword', values.password);
-        values.contactNumber && formData.append('contactNumber', values.contactNumber);
+        formData.append('contactNumber', values.contactNumber);
         formData.append('alternateContactNumber', values.alternateContactNumber);
-        formData.append('userType', 2);
+        formData.append('userType', USERTYPE.isVendor);
         // formData.append('pinCode', values.pinCode);
         // formData.append('city', values.city);
         // formData.append('state', values.state);

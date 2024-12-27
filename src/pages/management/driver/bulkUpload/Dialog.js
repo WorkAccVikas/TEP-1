@@ -211,17 +211,17 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
           vendorId: row[0],
           userName: row[1],
           userEmail: row[2] || `tripBiller-${row[3]}@gmail.com`,
-          contactNumber: row[3],
+          contactNumber: row[3] || null,
           officeChargeAmount: row[4] || 0,
-          fatherName: row[5],
-          experience: row[6],
-          pan: row[7],
-          bankName: row[8],
-          branchName: row[9],
-          accountHolderName: row[10],
-          accountNumber: row[11],
-          ifscCode: row[12],
-          bankAddress: row[13]
+          fatherName: row[5] || null,
+          experience: row[6] || null,
+          pan: row[7] || null,
+          bankName: row[8] || null,
+          branchName: row[9] || null,
+          accountHolderName: row[10] || null,
+          accountNumber: row[11] || null,
+          ifscCode: row[12] || null,
+          bankAddress: row[13] || null
         };
       });
 
@@ -388,6 +388,7 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
       // Loop through the driverData array and send the requests
       for (const item of driverData) {
         try {
+          console.log('item = ', item);
           const response = await axiosServices.post('/driver/register', { data: item });
           console.log(response.data);
 
