@@ -77,10 +77,12 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         accessor: 'cabProviderLegalName',
         Cell: ({ row, value }) => {
         //   const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+        console.log("row.original",row.original);
+        
           return (
             <Typography>
               <Link
-                // to={`/management/vendor/overview/${row.original.vendorId}`}
+                to={`/management/vendor/overview/${row.original.vendorId}`}
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
