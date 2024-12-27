@@ -145,6 +145,7 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
   const [loading, setLoading] = useState(false);
   const [invalidData, setInvalidData] = useState([]);
   const { closeSnackbar } = useSnackbar();
+  console.log({ driverData });
 
   const handleFileChange = (event) => {
     const selectedFiles = event.target.files;
@@ -546,7 +547,7 @@ function ChildModal() {
 
     // Check if the data is not empty, then populate "ID Reference" data
     if (selectedOptions && selectedOptions.length > 0) {
-      idReferenceData = selectedOptions.map((item) => [item._id, item.vendorCompanyName, item.workMobileNumber]);
+      idReferenceData = selectedOptions.map((item) => [item.vendorId, item.vendorCompanyName, item.workMobileNumber]);
     }
 
     // Create the second sheet (headers + data if available)
