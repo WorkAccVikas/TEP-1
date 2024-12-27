@@ -9,9 +9,8 @@ import OverviewGraph from './OverviewGraph';
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 
-const Overview = ({ data, data1, vendorCompanyName }) => {
+const Overview = ({ data, name }) => {
   console.log("data",data);
-  console.log("data1",data1);
   
   return (
     <Grid container spacing={2}>
@@ -22,10 +21,10 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={data?.userImage} />
+                    <Avatar alt="Avatar 1" size="xl" src={data?.userImage || ''} />
                     <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">{data?.userName || "N/A"}</Typography>
-                      <Typography color="secondary">{data?.userEmail || "N/A"}</Typography>
+                      <Typography variant="h5">{data?.cabProviderLegalName || "N/A"}</Typography>
+                      <Typography color="secondary">{data?.workEmail || "N/A"}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -37,7 +36,9 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                         Billing Address
                       </Typography>
                       <Typography color="secondary">
-                      {data?.address || "N/A"}
+                       {data?.officeAddress && data?.officeCity && data?.officeState && data?.officePinCode
+                          ? `${data.officeAddress}, ${data.officeCity}, ${data.officeState} - ${data.officePinCode}`
+                          : 'N/A'}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -49,7 +50,9 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                         Shipping Address
                       </Typography>
                       <Typography color="secondary">
-                      {data?.address || "N/A"}
+                      {data?.officeAddress && data?.officeCity && data?.officeState && data?.officePinCode
+                          ? `${data.officeAddress}, ${data.officeCity}, ${data.officeState} - ${data.officePinCode}`
+                          : 'N/A'}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -114,7 +117,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.GSTIN || "N/A"}</Typography>
+                                  <Typography>{data?.GSTIN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -128,7 +131,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.PAN || "N/A"}</Typography>
+                                  <Typography>{data?.PAN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -149,7 +152,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.bankName || "N/A"}</Typography>
+                                  <Typography>{data?.bankName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -163,7 +166,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.accountHolderName || "N/A"}</Typography>
+                                  <Typography>{data?.accountHolderName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -177,7 +180,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.branchName || "N/A"}</Typography>
+                                  <Typography>{data?.branchName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -191,7 +194,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.IFSC_code || "N/A"}</Typography>
+                                  <Typography>{data?.IFSC_code || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -209,7 +212,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
       <Grid item xs={12} sm={6} md={6} xl={6}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <OverviewGraph vendorCompanyName={vendorCompanyName}/>
+            <OverviewGraph name={name}/>
           </Grid>
         </Grid>
       </Grid>

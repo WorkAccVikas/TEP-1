@@ -245,7 +245,7 @@ const VendorRoutes = {
                   element: <Vendor />
                 },
                 {
-                  path: 'overview/:id',
+                  path: 'overview',
                   element: <VendorOverview />
                 },
               ]
