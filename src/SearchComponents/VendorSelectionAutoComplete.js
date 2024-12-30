@@ -32,9 +32,9 @@ const VendorSelection = ({ sx, value = [], setSelectedOptions }) => {
           vendorCompanyName: item.vendorCompanyName,
           workMobileNumber: item.workMobileNumber
         }));
-        setOptions(vendorList);
-        setFilteredOptions(vendorList); // Initialize filtered options
-        setCache((prevCache) => ({ ...prevCache, default: vendorList })); // Cache default results
+        setOptions(vendors);
+        setFilteredOptions(vendors); // Initialize filtered options
+        setCache((prevCache) => ({ ...prevCache, default: vendors })); // Cache default results
       } catch (error) {
         console.error('Error fetching default options:', error);
       } finally {
