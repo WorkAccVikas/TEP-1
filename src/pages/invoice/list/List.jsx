@@ -381,7 +381,7 @@ const List = () => {
               <Stack spacing={0}>
                 <Typography variant="subtitle1">{values.billedTo.name || 'N/A'}</Typography>
                 <Typography variant="caption" color="textSecondary">
-                  {values.billedTo.company_email || 'N/A'}
+                  {values.billedTo.email || 'N/A'}
                 </Typography>
               </Stack>
             </Stack>
