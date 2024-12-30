@@ -61,11 +61,11 @@ const Analytic = () => {
 
   const [data, setData] = useState([]);
 
-  const { companyReportData } = useSelector((state) => state.report);
+  const { companyReportDriverData } = useSelector((state) => state.report);
 
   useEffect(() => {
-    if (companyReportData) {
-      const totals = companyReportData.reduce(
+    if (companyReportDriverData) {
+      const totals = companyReportDriverData.reduce(
         (acc, item) => ({
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
@@ -83,7 +83,7 @@ const Analytic = () => {
 
       setOverAllData(totals);
 
-      const chartDataTotals = companyReportData.reduce(
+      const chartDataTotals = companyReportDriverData.reduce(
         (acc, item) => {
           Object.keys(labelsMapping).forEach((label) => {
             const key = labelsMapping[label];
@@ -112,9 +112,7 @@ const Analytic = () => {
       const chartValues = labels.map((label) => chartDataTotals[labelsMapping[label]]);
       setData(chartValues);
     }
-  }, [companyReportData]);
-
-  console.log({ labels, data });
+  }, [companyReportDriverData]);
 
   return (
     <>

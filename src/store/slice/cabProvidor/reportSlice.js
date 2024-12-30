@@ -6,6 +6,7 @@ import { handleReset } from 'utils/helper';
 
 const initialState = {
   companyReportData: null,
+  companyReportDriverData: null,
   cabReportData: null,
   advanceReportData: null,
   metaData: {
@@ -49,6 +50,27 @@ export const fetchCompanyWiseReports = createAsyncThunk(
           driverIds: payload?.data?.driverIds || []
         }
       });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
+
+//Companywise reports for drivers at CP level
+export const fetchCompanyWiseReportsDriver = createAsyncThunk(
+  'reports/fetchCompanyWiseReportsDriver',
+  async (payload, { rejectWithValue}) => {
+    try {
+      console.log('payload', payload);
+      const response = await axios.post('/reports/company/wise/summary/driver', {
+        data: {
+          startDate: payload?.data?.startDate,
+          endDate: payload?.data?.endDate,
+          companyIDs: payload?.data?.companyId || []
+        }
+      });
+      
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : error.message);
@@ -104,6 +126,18 @@ const reportSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchCompanyWiseReports.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      .addCase(fetchCompanyWiseReportsDriver.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanyWiseReportsDriver.fulfilled, (state, action) => {
+        state.companyReportDriverData = action.payload || []; // Handle empty result
+        state.loading = false;
+      })
+      .addCase(fetchCompanyWiseReportsDriver.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
