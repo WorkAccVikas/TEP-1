@@ -10,18 +10,10 @@ import { useCallback, useMemo } from 'react';
 import { useSelector } from 'store';
 
 const Table = () => {
-  const { cabReportData } = useSelector((state) => state.report);
+  const { monthlyReportData } = useSelector((state) => state.report);
 
   const columns = useMemo(
     () => [
-      // {
-      //   title: 'Row Selection',
-      //   Header: ({ getToggleAllPageRowsSelectedProps }) => <IndeterminateCheckbox indeterminate {...getToggleAllPageRowsSelectedProps()} />,
-      //   accessor: 'selection',
-      //   Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />,
-      //   disableSortBy: true,
-      //   disableFilters: true
-      // },
       {
         Header: '#',
         accessor: 'id',
@@ -29,92 +21,56 @@ const Table = () => {
         Cell: ({ row }) => <span>{row.index + 1}</span> // Use row.index to display incremental number
       },
       {
-        Header: 'Vehicle Name',
-        accessor: 'vehicleName',
-         Cell: ({ value }) => value || 'N/A'
+        Header: 'Driver Name',
+        accessor: 'driverName',
+        Cell: ({ value }) => value || 'N/A'
         // disableSortBy: true
       },
       {
-        Header: 'Vehicle Number',
-        accessor: 'vehicleNumber',
+        Header: 'Total Trip Completed',
+        accessor: 'totalTripCompleted',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'Vehicle Holder Name',
-        accessor: 'vehicleHolderName',
-         Cell: ({ value }) => value || 'N/A'
-        // disableSortBy: true
-      },
-      {
-        Header: 'Trip Count',
-        accessor: 'tripCount',
-        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
-        // disableSortBy: true
-      },
-      //   {
-      //     Header: 'Company Guard Price',
-      //     accessor: 'companyGuardPrice'
-      //     // disableSortBy: true
-      //   },
-      //   {
-      //     Header: 'Company Rate',
-      //     accessor: 'companyRate'
-      //     // disableSortBy: true
-      //   },
-      //   {
-      //     Header: 'Company Penalty',
-      //     accessor: 'companyPenalty'
-      //     // disableSortBy: true
-      //   },
-      // {
-      //   Header: 'Vendor Rate',
-      //   accessor: 'vendorRate'
-      //   // disableSortBy: true
-      // },
-      // {
-      //   Header: 'Vendor Guard Price',
-      //   accessor: 'vendorGuardPrice'
-      //   // disableSortBy: true
-      // },
-      // {
-      //   Header: 'Vendor Penalty',
-      //   accessor: 'vendorPenalty'
-      //   // disableSortBy: true
-      // },
-      {
-        Header: 'Driver Rate',
-        accessor: 'driverRate',
+        Header: 'Total Advances',
+        accessor: 'totalAdvances',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'Driver Guard Price',
-        accessor: 'driverGuardPrice',
+        Header: 'Advance Interest',
+        accessor: 'advanceInterest',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'Driver Penalty',
-        accessor: 'driverPenalty',
+        Header: 'MCD/Toll Charge',
+        accessor: 'totalMCDAndTollCharge',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'Add On Rate',
-        accessor: 'addOnRate',
+        Header: 'Total Penalty',
+        accessor: 'totalPenalty',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'MCD Charge',
-        accessor: 'mcdCharge',
+        Header: 'Total Office Charge Amount',
+        accessor: 'totalOfficeChargeAmount',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
-        Header: 'Toll Charge',
-        accessor: 'tollCharge',
+        Header: 'Total Guard Amount',
+        accessor: 'totalDriverGuardAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
+        // disableSortBy: true
+      },
+      {
+        Header: 'Total Amount',
+        accessor: 'totalAmount',
         Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       }
@@ -124,10 +80,10 @@ const Table = () => {
 
   return (
     <>
-      {cabReportData && cabReportData.length > 0 ? (
+      {monthlyReportData && monthlyReportData.length > 0 ? (
         <MainCard content={false}>
           <Stack gap={2}>
-            <ReactTable columns={columns} data={cabReportData} />
+            <ReactTable columns={columns} data={monthlyReportData} pagesize={10}/>
           </Stack>
         </MainCard>
       ) : (

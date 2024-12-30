@@ -8,7 +8,9 @@ const initialState = {
   companyReportData: null,
   companyReportDriverData: null,
   cabReportData: null,
+  monthlyReportData: null,
   advanceReportData: null,
+  driverAdvanceReportData: null,
   metaData: {
     totalCount: 0,
     page: 1,
@@ -36,11 +38,8 @@ export const fetchCompanyWiseReports = createAsyncThunk(
   'reports/fetchCompanyWiseReports',
   async (payload, { rejectWithValue, getState }) => {
     try {
-      console.log('payload', payload);
       const state = getState();
       const userType = state.auth.userType;
-      // console.log('userType', userType);
-      // await new Promise((resolve) => setTimeout(resolve, 4000));
       const response = await axios.post(API_URL[userType].COMPANY_WISE_REPORTS, {
         data: {
           startDate: payload?.data?.startDate,
@@ -60,9 +59,8 @@ export const fetchCompanyWiseReports = createAsyncThunk(
 //Companywise reports for drivers at CP level
 export const fetchCompanyWiseReportsDriver = createAsyncThunk(
   'reports/fetchCompanyWiseReportsDriver',
-  async (payload, { rejectWithValue}) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      console.log('payload', payload);
       const response = await axios.post('/reports/company/wise/summary/driver', {
         data: {
           startDate: payload?.data?.startDate,
@@ -70,7 +68,6 @@ export const fetchCompanyWiseReportsDriver = createAsyncThunk(
           companyIDs: payload?.data?.companyId || []
         }
       });
-      
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : error.message);
@@ -80,31 +77,55 @@ export const fetchCompanyWiseReportsDriver = createAsyncThunk(
 
 export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports', async (payload, { rejectWithValue, getState }) => {
   try {
-    console.log('payload', payload);
     const state = getState();
     const userType = state.auth.userType;
     // await new Promise((resolve) => setTimeout(resolve, 4000));
     const response = await axios.post(API_URL[userType].CAB_WISE_REPORTS, payload);
-    console.log('payload', response.data);
 
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
 });
+
+export const fetchDriverMonthlyReports = createAsyncThunk(
+  'reports/fetchDriverMonthlyReports',
+  async (payload, { rejectWithValue, getState }) => {
+    try {
+      const response = await axios.post('/reports/driver/monthly', payload);
+      console.log('res', response);
+
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
+
 export const fetchAdvanceReports = createAsyncThunk('reports/fetchAdvanceReports', async (payload, { rejectWithValue, getState }) => {
   try {
-    console.log('payload', payload);
     const state = getState();
     const userType = state.auth.userType;
     // await new Promise((resolve) => setTimeout(resolve, 4000));
     const response = await axios.post(API_URL[userType].ADVANCE_REPORTS, payload);
-    console.log('response.data.data', response.data.data);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
 });
+
+//Driver Advance Report
+export const fetchDriverAdvanceReports = createAsyncThunk(
+  'reports/fetchDriverAdvanceReports',
+  async (payload, { rejectWithValue, getState }) => {
+    try {
+      const response = await axios.post('/reports/advance/summary/driver', payload);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
 
 const reportSlice = createSlice({
   name: 'reports',
@@ -153,6 +174,18 @@ const reportSlice = createSlice({
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
+      .addCase(fetchDriverMonthlyReports.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDriverMonthlyReports.fulfilled, (state, action) => {
+        state.monthlyReportData = action.payload || []; // Handle empty result
+        state.loading = false;
+      })
+      .addCase(fetchDriverMonthlyReports.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
       .addCase(fetchAdvanceReports.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -162,6 +195,18 @@ const reportSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchAdvanceReports.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      .addCase(fetchDriverAdvanceReports.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDriverAdvanceReports.fulfilled, (state, action) => {
+        state.driverAdvanceReportData = action.payload || []; // Handle empty result
+        state.loading = false;
+      })
+      .addCase(fetchDriverAdvanceReports.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })

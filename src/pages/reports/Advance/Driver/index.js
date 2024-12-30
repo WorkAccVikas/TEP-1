@@ -6,7 +6,7 @@ import Table from './Table';
 import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import { formatDateUsingMoment } from 'utils/helper';
-import { fetchAdvanceReports } from 'store/slice/cabProvidor/reportSlice';
+import { fetchAdvanceReports, fetchDriverAdvanceReports } from 'store/slice/cabProvidor/reportSlice';
 import { DocumentDownload } from 'iconsax-react';
 import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
 import TableSkeleton from 'components/tables/TableSkeleton';
@@ -22,7 +22,7 @@ const AdvanceReportForVendor = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState([]);
 
-  const { loading, advanceReportData } = useSelector((state) => state.report);
+  const { loading, driverAdvanceReportData } = useSelector((state) => state.report);
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
@@ -30,16 +30,15 @@ const AdvanceReportForVendor = () => {
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
-        endDate: formatDateUsingMoment(endDate),
-        searchByUids: [...selectedDriver, ...selectedVendor]
+        endDate: formatDateUsingMoment(endDate)
       }
     };
 
-    dispatch(fetchAdvanceReports(payload));
-  }, [startDate, endDate, selectedDriver, selectedVendor]);
+    dispatch(fetchDriverAdvanceReports(payload));
+  }, [startDate, endDate]);
 
   const downloadReports = useCallback(() => {
-    if (advanceReportData.length === 0) {
+    if (driverAdvanceReportData.length === 0) {
       dispatch(
         openSnackbar({
           open: true,
@@ -53,9 +52,9 @@ const AdvanceReportForVendor = () => {
       );
       return;
     }
-    console.log('Data = ', advanceReportData);
+    console.log('Data = ', driverAdvanceReportData);
 
-    const transformedData = advanceReportData.map((item) => ({
+    const transformedData = driverAdvanceReportData.map((item) => ({
       userType: item.isDriver ? 'driver' : 'vendor',
       requestedBy: item.requestedById?.userName,
       approvedBy: item.approvedBy?.userName,
@@ -66,12 +65,11 @@ const AdvanceReportForVendor = () => {
       approvedAmount: item.approvedAmount,
       approvedInterest: item.advanceTypeId?.interestRate ? (item.approvedAmount * item.advanceTypeId?.interestRate) / 100 : 0,
       transactionId: item.transactionId,
-      totalVehiclesCount: item.totalVehiclesCount,
       driverCount: item.driverCount
     }));
     console.log({ transformedData });
     // downloadAdvanceReport(transformedData, 'advanceReport');
-  }, [advanceReportData]);
+  }, [driverAdvanceReportData]);
 
   return (
     <>
@@ -79,17 +77,15 @@ const AdvanceReportForVendor = () => {
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'space-between'} gap={2} alignItems={'center'}>
           <Stack direction={'row'} gap={2} alignItems={'center'}>
-            {/* Driver Filter */}
-            <Box sx={{ minWidth: '300px' }}>
+            {/* <Box sx={{ minWidth: '300px' }}>
               <DriverSelection
                 value={selectedDriver}
                 setSelectedOptions={setSelectedDriver}
                 sx={{ minWidth: '300px', maxWidth: '600px' }}
               />
-            </Box>
+            </Box> */}
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-              {/* Vendor Filter */}
+            {/* <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
               <Box sx={{ minWidth: '300px' }}>
                 <VendorSelection
                   value={selectedVendor}
@@ -97,7 +93,7 @@ const AdvanceReportForVendor = () => {
                   sx={{ minWidth: '300px', maxWidth: '600px' }}
                 />
               </Box>
-            </AccessControlWrapper>
+            </AccessControlWrapper> */}
           </Stack>
 
           <Stack direction={'row'} gap={2}>
@@ -143,4 +139,3 @@ const AdvanceReportForVendor = () => {
 };
 
 export default AdvanceReportForVendor;
-
