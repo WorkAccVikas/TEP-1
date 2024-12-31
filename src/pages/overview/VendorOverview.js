@@ -237,7 +237,7 @@ const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, v
     Overview: <Overview data={vendorDetail} data1={vendorSpecificDetail} vendorCompanyName={vendorCompanyName} />,
     Trips: <TripDetail vendorId={vendorId} />,
     Advance: <AdvanceVendor vendorId={vendorId} />,
-    Invoice: <Transaction data={data} />,
+    Invoice: <Transaction vendorId={vendorId} />,
     'Attached Companies': <AttachedCompany vendorId={vendorId} />
   };
 

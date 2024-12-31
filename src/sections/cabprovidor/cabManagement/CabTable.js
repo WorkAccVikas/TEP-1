@@ -86,7 +86,8 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Header: 'Driver',
         accessor: 'assignedDriver',
         Cell: ({ row }) => {
-          const assignedDrivers = row.original.assignedDriver;
+          const assignedDrivers = row.original.assignedDrivers;
+          console.log('assignedDrivers', assignedDrivers);
 
           if (!assignedDrivers || assignedDrivers.length === 0) {
             return <Chip color="error" variant="light" size="small" label="Not Assigned" />;

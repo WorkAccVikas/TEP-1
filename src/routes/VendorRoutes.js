@@ -46,8 +46,8 @@ const User = Loadable(lazy(() => import('pages/management/user')));
 const AddUser = Loadable(lazy(() => import('pages/management/user/AddUser')));
 // Vendor
 const Vendor = Loadable(lazy(() => import('sections/vendor/management/vendor')));
-const AddVendor = Loadable(lazy(() => import('pages/management/vendor/AddVendor')));
-const VendorOverview = Loadable(lazy(() => import('pages/overview/VendorOverview')));
+// const AddVendor = Loadable(lazy(() => import('pages/management/vendor/AddVendor')));
+const VendorOverview = Loadable(lazy(() => import('sections/vendor/overview/vendorOverview')));
 
 // Driver
 const Driver = Loadable(lazy(() => import('pages/management/driver')));
@@ -243,6 +243,10 @@ const VendorRoutes = {
                 {
                   path: 'view',
                   element: <Vendor />
+                },
+                {
+                  path: 'overview',
+                  element: <VendorOverview />
                 },
               ]
             },

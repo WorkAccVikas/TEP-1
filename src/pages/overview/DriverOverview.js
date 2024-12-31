@@ -23,14 +23,15 @@ import AdvanceDriver from 'sections/cabprovidor/driverManagement/driverOverview/
 import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
 import { Base64 } from 'js-base64';
+import Expense from 'sections/cabprovidor/driverManagement/driverOverview/expense/Expense';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Advance', icon: <WalletAdd />, access: [USERTYPE.iscabProvider] },
-  { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] }
+  { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
+  { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
 ];
-
 const DriverOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
   const navigate = useNavigate();
@@ -60,87 +61,6 @@ const DriverOverview = () => {
   const handleChange = (event, newValue) => {
     setActiveTab(newValue);
   };
-
-  // Utility function to generate random date
-  const getRandomDate = () => {
-    const start = new Date(2020, 0, 1);
-    const end = new Date();
-    const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-    return date.toLocaleDateString(); // Format the date as needed
-  };
-
-  // Utility function to generate random invoice number
-  const getRandomInvoiceNumber = () => {
-    return `INV-${Math.floor(Math.random() * 1000000)}`;
-  };
-
-  // Utility function to generate random amount
-  const getRandomAmount = () => {
-    return (Math.random() * 1000).toFixed(2); // Random amount between 0 and 1000
-  };
-
-  // Utility function to generate random balance due
-  const getRandomBalanceDue = () => {
-    return (Math.random() * 500).toFixed(2); // Random balance due between 0 and 500
-  };
-
-  // Function to generate a random vehicle
-  const getRandomVehicle = () => {
-    const vehicles = ['Car', 'Truck', 'Bike', 'Bus', 'Van'];
-    return vehicles[Math.floor(Math.random() * vehicles.length)];
-  };
-
-  // Function to generate random advance rate
-  const getRandomAdvanceRate = () => {
-    return `${Math.floor(Math.random() * 20) + 1}%`; // Random advance rate between 1% and 20%
-  };
-
-  // Function to generate random description
-  const getRandomDescription = () => {
-    return `Installment ${Math.floor(Math.random() * 52) + 1}`; // Random installment between 1 and 52
-  };
-
-  // Function to generate random company names
-  const getRandomCompanyName = () => {
-    const companies = [
-      'ABC Corp',
-      'Global Tech',
-      'Innovative Solutions',
-      'Bright Future',
-      'Tech Wizards',
-      'NextGen Industries',
-      'BlueSky Ventures',
-      'Dynamic Group'
-    ];
-    return companies[Math.floor(Math.random() * companies.length)];
-  };
-
-  // Function to generate random data for the table
-  const generateRandomTransactions = (num) => {
-    return Array.from({ length: num }, (_, index) => ({
-      id: index + 1,
-      startDate: getRandomDate(),
-      invoiceNumber: getRandomInvoiceNumber(),
-      amount: getRandomAmount(),
-      balanceDue: getRandomBalanceDue(),
-      status: Math.random() > 0.5 ? 'Active' : 'Inactive',
-      vehicle: getRandomVehicle(),
-      advanceRate: getRandomAdvanceRate(),
-      advanceType: 'Full',
-      description: getRandomDescription(),
-      company_name: getRandomCompanyName(),
-      totalLoanAmount: `₹${(Math.random() * 10000).toFixed(2)}`,
-      totalPaid: `₹${(Math.random() * 5000).toFixed(2)}`,
-      totalBalance: `₹${(Math.random() * 5000).toFixed(2)}`,
-      loanTerm: `${Math.floor(Math.random() * 10) + 1} years`,
-      totalWeek: Math.floor(Math.random() * 52),
-      termPaid: Math.floor(Math.random() * 52),
-      endDate: '2025-12-31'
-    }));
-  };
-
-  // Usage in your Transaction component
-  const data = generateRandomTransactions(10);
 
   useEffect(() => {
     if (driverId) {
@@ -233,7 +153,8 @@ const TabContent = ({ activeTab, driverDetail, driverId, driverSpecificDetail, f
     Overview: <Overview data={driverDetail} data1={driverSpecificDetail} />,
     Trips: <TripDetail driverId={driverId} />,
     Advance: <AdvanceDriver driverId={driverId} />,
-    'Attached Companies': <AttachedCompany driverId={driverId} />
+    'Attached Companies': <AttachedCompany driverId={driverId} />,
+    Expense: <Expense/>,
   };
   // Get the active tab label
   const activeTabLabel = filteredTabs[activeTab]?.label;

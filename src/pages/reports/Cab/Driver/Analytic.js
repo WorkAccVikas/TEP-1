@@ -59,11 +59,11 @@ const Analytic = () => {
     mcdCharge: 0
   });
   const [data, setData] = useState([]);
-  const { cabReportData } = useSelector((state) => state.report);
+  const { monthlyReportData } = useSelector((state) => state.report);
 
   useEffect(() => {
-    if (cabReportData) {
-      const totals = cabReportData.reduce(
+    if (monthlyReportData) {
+      const totals = monthlyReportData.reduce(
         (acc, item) => ({
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
@@ -81,7 +81,7 @@ const Analytic = () => {
 
       setOverAllData(totals);
 
-      const chartDataTotals = cabReportData.reduce(
+      const chartDataTotals = monthlyReportData.reduce(
         (acc, item) => {
           Object.keys(labelsMapping).forEach((label) => {
             const key = labelsMapping[label];
@@ -110,7 +110,7 @@ const Analytic = () => {
       const chartValues = labels.map((label) => chartDataTotals[labelsMapping[label]]);
       setData(chartValues);
     }
-  }, [cabReportData]);
+  }, [monthlyReportData]);
 
   return (
     <>

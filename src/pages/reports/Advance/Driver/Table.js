@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 import { useSelector } from 'store';
 
 const Table = () => {
-  const { advanceReportData } = useSelector((state) => state.report);
+  const { driverAdvanceReportData } = useSelector((state) => state.report);
 
   const columns = useMemo(
     () => [
@@ -109,10 +109,10 @@ const Table = () => {
 
   return (
     <>
-      {advanceReportData && advanceReportData.length > 0 ? (
+      {driverAdvanceReportData && driverAdvanceReportData.length > 0 ? (
         <MainCard content={false}>
           <Stack gap={2}>
-            <ReactTable columns={columns} data={advanceReportData} />
+            <ReactTable columns={columns} data={driverAdvanceReportData} />
           </Stack>
         </MainCard>
       ) : (
