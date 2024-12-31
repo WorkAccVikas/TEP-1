@@ -37,6 +37,8 @@ import { ThemeMode } from 'config';
 import Header from 'components/tables/genericTable/Header';
 import ExpenseForm from './ExpenseForm';
 import { PopupTransition } from 'components/@extended/Transitions';
+import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 
 const Expense = ({ driverId }) => {
   const theme = useTheme();
@@ -77,13 +79,42 @@ const Expense = ({ driverId }) => {
   }, [driverId, updateKey]);
 
   const handleDelete = async (id) => {
-    const response = await axiosServices.delete('/expense/delete', {
+    const payload = {
       data: {
         expenseId: id
       }
-    });
-    console.log("response",response);
-    
+    };
+
+    try {
+      const response = await axiosServices.delete('/expense/delete', {
+        data: payload // Correctly passing the data here
+      });
+      
+      if (response.status === 200) {
+        setUpdateKey(updateKey + 1);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: response.data?.message || 'Expense deleted Successfully',
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false
+          })
+        );
+      }
+      // Optional: Add success feedback or state update logic
+      if (response.status === 200) {
+        console.log('Expense deleted successfully.');
+        // Example: Call a function to refresh the list of expenses
+        // refreshExpenses();
+      } else {
+        console.log('Failed to delete the expense.');
+      }
+    } catch (error) {
+      console.error('Error deleting the expense:', error.message || error);
+    }
   };
 
   const columns = useMemo(
