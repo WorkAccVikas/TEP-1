@@ -8,7 +8,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Bill, Book, Buliding, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Buliding, Card, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import Transaction from 'sections/cabprovidor/vendorManagement/vendorOverview/Transaction';
 import Mails from 'sections/cabprovidor/vendorManagement/vendorOverview/Mails';
 import Statement from 'sections/cabprovidor/vendorManagement/vendorOverview/Statement';
@@ -24,6 +24,7 @@ import AdvanceVendor from 'sections/cabprovidor/vendorManagement/vendorOverview/
 import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
 import Expense from 'sections/cabprovidor/vendorManagement/vendorOverview/expense/Expense';
+import VendorRate from 'sections/cabprovidor/vendorManagement/vendorOverview/rate/VendorRate';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider] },
@@ -32,6 +33,7 @@ const tabConfig = [
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
   { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
+  // { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
 ];
 
 const VendorOverview = () => {
@@ -136,6 +138,7 @@ const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, v
     Invoice: <Transaction vendorId={vendorId} />,
     'Attached Companies': <AttachedCompany vendorId={vendorId} />,
      Expense: <Expense vendorId={vendorId}/>,
+    //  'Rates': <VendorRate vendorId={vendorId}/>,
   };
 
   // Get the active tab label

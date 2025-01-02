@@ -188,7 +188,7 @@ const VendorRatelisting = () => {
 
   const handleDialogClose = (flag = false) => {
     setDialogOpen(false);
-    navigate('/management/vendor/view', { replace: true });
+    !flag && navigate('/management/vendor/view', { replace: true });
   };
 
   const handleCompanySelect = (company) => {
