@@ -17,6 +17,21 @@ CREATE TABLE
     );
 
 CREATE TABLE
+    VehicleMaintenance (
+        maintenanceId UUID PRIMARY KEY,
+        vehicleId UUID REFERENCES Vehicles (vehicleId) ON DELETE CASCADE,
+        maintenanceType VARCHAR NOT NULL CHECK (
+            maintenanceType IN ('repair', 'service', 'inspection')
+        ),
+        scheduledDate TIMESTAMP NOT NULL,
+        completedDate TIMESTAMP,
+        cost DECIMAL(10, 2),
+        status VARCHAR CHECK (status IN ('pending', 'completed', 'canceled')) DEFAULT 'pending',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE
     VehicleCategories (
         categoryId UUID PRIMARY KEY,
         categoryName VARCHAR NOT NULL,

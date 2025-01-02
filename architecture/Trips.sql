@@ -23,3 +23,16 @@ CREATE TABLE
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
+CREATE TABLE
+    TripHistory (
+        tripId UUID PRIMARY KEY,
+        vehicleId UUID REFERENCES Vehicles (vehicleId),
+        driverId UUID REFERENCES Users (userId),
+        startLocationId UUID REFERENCES Locations (locationId),
+        endLocationId UUID REFERENCES Locations (locationId),
+        startTime TIMESTAMP,
+        endTime TIMESTAMP,
+        status VARCHAR CHECK (status IN ('completed', 'canceled', 'ongoing')),
+        distance DECIMAL(10, 2),
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
