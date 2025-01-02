@@ -7,7 +7,6 @@ import { SiGooglesheets } from 'react-icons/si';
 import { CiSettings } from 'react-icons/ci';
 import { MdManageAccounts } from 'react-icons/md';
 
-
 // icons
 const icons = {
   samplePage: MenuBoard,
@@ -80,9 +79,9 @@ const setting = {
       children: [
         {
           id: 'create-template',
-          title: <FormattedMessage id="create template" />,
+          title: <FormattedMessage id="template" />,
           type: 'item',
-          url: '/settings/roster/create-template',
+          url: '/settings/roster/template',
           icon: icons.rosterTemplate
         }
       ]

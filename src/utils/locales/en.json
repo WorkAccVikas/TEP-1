@@ -68,5 +68,7 @@
   "subscription": "Subscription",
   "expense management": "Expense Management",
   "driver reports": "Driver Reports",
-  "transaction": "Transactions"
+  "transaction": "Transactions",
+  "template": "Template",
+  "monthly": "Monthly"
 }

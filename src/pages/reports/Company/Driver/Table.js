@@ -10,7 +10,8 @@ import { useCallback, useMemo } from 'react';
 import { useSelector } from 'store';
 
 const Table = () => {
-  const { companyReportData } = useSelector((state) => state.report);
+  const { companyReportDriverData } = useSelector((state) => state.report);
+  
   const columns = useMemo(
     () => [
       // {
@@ -110,10 +111,10 @@ const Table = () => {
   );
   return (
     <>
-      {companyReportData && companyReportData.length > 0 ? (
+      {companyReportDriverData && companyReportDriverData.length > 0 ? (
         <MainCard content={false}>
           <Stack gap={2}>
-            <ReactTable columns={columns} data={companyReportData} />
+            <ReactTable columns={columns} data={companyReportDriverData} />
           </Stack>
         </MainCard>
       ) : (

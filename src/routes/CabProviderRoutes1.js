@@ -121,6 +121,10 @@ const AccountSettings = Loadable(lazy(() => import('pages/setting/account')));
 // Expense
 const Transaction = Loadable(lazy(() => import('pages/expense/Transaction')));
 
+// Template
+const TemplateOperations = Loadable(lazy(() => import('pages/apps/roster/template/TemplateOperations')));
+const TemplateList = Loadable(lazy(() => import('pages/apps/roster/template')));
+
 const Temp1 = Loadable(lazy(() => import('temp1')));
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -542,6 +546,23 @@ const CabProvidorRoutes = {
                 {
                   path: 'create-template',
                   element: <RosterSetting />
+                },
+                {
+                  path: 'template',
+                  children: [
+                    {
+                      path: '',
+                      element: <TemplateList />
+                    },
+                    {
+                      path: 'create',
+                      element: <TemplateOperations />
+                    },
+                    {
+                      path: 'edit/:id',
+                      element: <TemplateOperations />
+                    }
+                  ]
                 }
               ]
             },

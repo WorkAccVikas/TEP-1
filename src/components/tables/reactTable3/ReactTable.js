@@ -8,7 +8,7 @@ import { Fragment, useMemo } from 'react';
 import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
 import { renderFilterTypes } from 'utils/react-table';
 
-function ReactTable({ columns, data }) {
+function ReactTable({ columns, data, pagesize }) {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -32,7 +32,7 @@ function ReactTable({ columns, data }) {
       filterTypes,
       initialState: {
         pageIndex: 0,
-        pageSize: 5,
+        pageSize: pagesize || 5,
         hiddenColumns: ['_id'],
         sortBy: [sortBy]
       }

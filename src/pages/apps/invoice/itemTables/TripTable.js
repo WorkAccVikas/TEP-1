@@ -191,7 +191,8 @@ const TripItemTable = ({
   setAmountSummary,
   invoiceSetting,
   advanceData,
-  officeCharge
+  officeCharge,
+  expenseCharge
 }) => {
   console.log('TripItemTable render .............');
   console.log('advanceData', advanceData);
@@ -344,13 +345,15 @@ const TripItemTable = ({
           totalDiscount: finalDiscountAmount,
           subTotal: total - finalDiscountAmount, // Ensure subTotal is always total - totalDiscount
           ...(typeof advanceData !== 'object' ? { advanceAmount: advanceData } : {}),
-          ...(typeof officeCharge !== 'object' ? { officeCharge } : {}),
-          ...(typeof officeCharge !== 'object' ? { grandTotal: grandTotal - advanceData - officeCharge } : { grandTotal })
+          // ...(typeof officeCharge !== 'object' ? { officeCharge } : {}),
+          ...(typeof expenseCharge !== 'object' ? { expenseCharge } : {}),
+          // ...(typeof officeCharge !== 'object' ? { grandTotal: grandTotal - advanceData - officeCharge - expenseCharge } : { grandTotal })
+          ...(typeof advanceData !== 'object' ? { grandTotal: grandTotal - advanceData - expenseCharge } : { grandTotal })
           // grandTotal
         };
       });
     }
-  }, [itemData, tripData, groupByOption, userType, advanceData, officeCharge]);
+  }, [itemData, tripData, groupByOption, userType, advanceData, officeCharge, expenseCharge]);
 
   useEffect(() => {
     if (invoiceSetting) {
@@ -553,17 +556,26 @@ const TripItemTable = ({
                 </Stack>
                 <Divider />
                 {/* Office Charge Amount */}
-                {typeof officeCharge === 'number' && officeCharge > 0 && (
+                {/* {typeof officeCharge === 'number' && officeCharge > 0 && (
                   <Stack direction="row" justifyContent="space-between">
                     <Typography>Office Charge:</Typography>
                     <Typography color={theme.palette.error.main}>{`₹ ${amountSummary.officeCharge?.toFixed(2)}`}</Typography>
                   </Stack>
-                )}
+                )} */}
                 {/* Advance Amount */}
                 {typeof advanceData === 'number' && advanceData > 0 && (
                   <Stack direction="row" justifyContent="space-between">
                     <Typography>Advance:</Typography>
                     <Typography color={theme.palette.error.main}>{`₹ ${amountSummary.advanceAmount?.toFixed(2)}`}</Typography>
+                  </Stack>
+                )}
+                {/* Expense Charge */}
+                {typeof expenseCharge === 'number' && expenseCharge >= 0 && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography>Expense Charge:</Typography>
+                    <Typography
+                      color={amountSummary.expenseCharge?.toFixed(2) > 0 && theme.palette.error.main}
+                    >{`₹ ${amountSummary.expenseCharge?.toFixed(2)}`}</Typography>
                   </Stack>
                 )}
                 <Divider />
