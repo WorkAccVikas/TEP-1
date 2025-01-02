@@ -203,11 +203,11 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Cell: ({ value }) => value || 'N/A'
           // disableSortBy: true
         },
-        {
-          Header: 'Office Charge',
-          accessor: 'officeChargeAmount',
-          Cell: ({ value }) => value || 'N/A'
-        },
+        // {
+        //   Header: 'Office Charge',
+        //   accessor: 'officeChargeAmount',
+        //   Cell: ({ value }) => value || 'N/A'
+        // },
         {
           Header: 'Vehicles',
           accessor: 'assignedVehicle',

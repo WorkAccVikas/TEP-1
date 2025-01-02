@@ -188,6 +188,7 @@ const Create = () => {
 
   const [advanceData, setAdvanceData] = useState(null);
   const [officeCharge, setOfficeCharge] = useState(null);
+  const [expenseCharge, setExpenseCharge] = useState(null);
 
   const [dates, setDates] = useState({
     // invoiceDate: new Date(), // Default to today's date
@@ -943,6 +944,7 @@ const Create = () => {
               invoiceSetting={settings}
               advanceData={advanceData}
               officeCharge={officeCharge}
+              expenseCharge={expenseCharge}
             />
           ) : (
             <DefaultItemTable
@@ -1232,6 +1234,7 @@ const Create = () => {
         handleClose={handleOpenDialog}
         recieversDetails={recieversDetails}
         setTripData={setTripData}
+        setExpenseCharge={setExpenseCharge}
       />
     </>
   );
