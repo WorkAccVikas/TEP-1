@@ -28,7 +28,20 @@ import { useSelector } from 'store';
 import { USERTYPE } from 'constant';
 import { registerUser } from 'store/slice/cabProvidor/userSlice';
 import { addSpecialDetails } from 'store/slice/cabProvidor/vendorSlice';
-import { isNumber, isPinCode, isPositiveNumber, isRequiredString, isString, isValidEmail, separateValidAndInvalidItems } from '../helper';
+import {
+  isAnythingRequired,
+  isMobileNumber,
+  isMobileNumberOptional,
+  isNumber,
+  isPinCodeOptional,
+  isPositiveNumberRequired,
+  isRequiredString,
+  isString,
+  isValidEmail,
+  isValidEmailOptional,
+  separateValidAndInvalidItems,
+  separateValidAndInvalidItemsWithGenericDependencies
+} from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -42,7 +55,7 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 });
 
-const MANDATORY_HEADERS = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+const MANDATORY_HEADERS = ['Username*', 'Email', 'Phone', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
 
 const OPTIONAL_HEADERS = [
   'Contact Person Name',
@@ -66,29 +79,73 @@ const OPTIONAL_HEADERS = [
 ];
 
 // Validation rules for specific indices
-const validationRules = {
-  0: isRequiredString,
-  // 1: isRequiredString,
-  1: (value) => isRequiredString(value) && isValidEmail(value), // userEmail,
-  2: isRequiredString,
-  3: isRequiredString,
-  4: isPositiveNumber,
-  5: isString,
-  6: isString,
-  7: isString,
-  8: isString,
-  9: isString,
-  10: isString,
-  11: isPinCode,
-  12: isValidEmail,
-  15: isString,
-  16: isNumber,
-  17: isString,
-  18: isString,
-  19: isString,
-  20: isString,
-  21: isNumber,
-  22: isString
+// const validationRules = {
+//   0: isRequiredString,
+//   // 1: isRequiredString,
+//   1: (value) => isRequiredString(value) && isValidEmail(value), // userEmail,
+//   2: isRequiredString,
+//   3: isRequiredString,
+//   4: isPositiveNumber,
+//   5: isString,
+//   6: isString,
+//   7: isString,
+//   8: isString,
+//   9: isString,
+//   10: isString,
+//   11: isPinCode,
+//   12: isValidEmail,
+//   15: isString,
+//   16: isNumber,
+//   17: isString,
+//   18: isString,
+//   19: isString,
+//   20: isString,
+//   21: isNumber,
+//   22: isString
+// };
+
+const fieldMapping = {
+  0: { name: 'Username', validation: isRequiredString },
+  1: { name: 'Email', validation: isValidEmailOptional },
+  2: { name: 'Phone', validation: isMobileNumberOptional },
+  3: { name: 'Password', validation: isAnythingRequired },
+  4: { name: 'Vendor Legal Name', validation: isAnythingRequired },
+  5: { name: 'Office Charge Amount', validation: isPositiveNumberRequired },
+
+  6: { name: 'Contact Person Name', validation: isString },
+  7: { name: 'PAN', validation: isString },
+  8: { name: 'GSTIN', validation: isString },
+  9: { name: 'Office Address', validation: isString },
+  10: { name: 'Office City', validation: isString },
+  11: { name: 'Office State', validation: isString },
+  12: { name: 'Office Pincode', validation: isPinCodeOptional },
+  13: { name: 'Work Email', validation: isValidEmailOptional },
+  14: { name: 'Work Mobile Number', validation: isMobileNumberOptional },
+  15: { name: 'Work Landline Number', validation: isMobileNumberOptional },
+  16: { name: 'Bank Name', validation: isString },
+  17: { name: 'Account Number', validation: isNumber },
+  18: { name: 'Account Holder Name', validation: isString },
+  19: { name: 'Branch Name', validation: isString },
+  // 20: { name: 'IFSC Code', validation: isAnythingRequired },
+  // 21: { name: 'Bank Address', validation: isAnythingRequired },
+  22: { name: 'ESI Number', validation: isNumber },
+  23: { name: 'PF Number', validation: isString },
+
+  dependencies: [
+    {
+      fields: [1, 2],
+      validation: ([email, phone]) => {
+        if (!email && !phone) {
+          throw new Error('Either Email or Phone is required');
+        }
+        // if (emailValid || phoneValid) {
+        else if (!email || !phone) {
+          return true; // At least one of Email or Phone is valid
+        }
+      },
+      errorField: 'Email/Phone'
+    }
+  ]
 };
 
 export const BulkUploadDialog = ({ open, handleClose }) => {
@@ -146,40 +203,52 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
       // setBasicData(mappedDataForBasic); // Set the mapped data to state
 
       // Execute and log the results
-      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules);
+
+      const { validItems, invalidItems } = separateValidAndInvalidItemsWithGenericDependencies(jsonData.slice(1), fieldMapping);
+
       console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
       console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
 
       if (invalidItems.length > 0) {
-        setInvalidData(invalidItems);
+        const items = invalidItems.map((entry) => {
+          const reasons = Object.entries(entry.errors)
+            .map(([field, message], index) => `${index + 1}. ${field} : ${message}`)
+            .join('\n');
+
+          return [...entry.item, `Reasons :\n${reasons}`];
+        });
+        console.log('Invalid Items with Reasons:', items);
+
+        setInvalidData(items);
       }
 
       const mappedDataForBasic = validItems.map((row) => {
         return {
           userName: row[0],
-          userEmail: row[1],
-          userPassword: row[2],
-          vendorLegalName: row[3],
-          officeChargeAmount: row[4],
+          userEmail: row[1] || `sampleEmail-${row[2]}@tripBiller.com`,
+          contactNumber: row[2] || null,
+          userPassword: row[3]?.toString(),
+          vendorLegalName: row[4]?.toString(),
+          officeChargeAmount: row[5],
 
-          contactPersonName: row[5] || '',
-          PAN: row[6] || '',
-          GSTIN: row[7] || '',
-          officeAddress: row[8] || '',
-          officeCity: row[9] || '',
-          officeState: row[10] || '',
-          officePinCode: row[11] || '',
-          workEmail: row[12] || '',
-          workMobileNumber: row[13] || '',
-          workLandLineNumber: row[14] || '',
-          bankName: row[15] || '',
-          accountNumber: row[16] || '',
-          accountHolderName: row[17] || '',
-          branchName: row[18] || '',
-          IFSC_code: row[19] || '',
-          bankAddress: row[20] || '',
-          ESI_Number: row[21] || '',
-          PF_Number: row[22] || ''
+          contactPersonName: row[6] || '',
+          PAN: row[7] || '',
+          GSTIN: row[8] || '',
+          officeAddress: row[9] || '',
+          officeCity: row[10] || '',
+          officeState: row[11] || '',
+          officePinCode: row[12] || '',
+          workEmail: row[13] || '',
+          workMobileNumber: row[14] || '',
+          workLandLineNumber: row[15] || '',
+          bankName: row[16] || '',
+          accountNumber: row[17] || '',
+          accountHolderName: row[18] || '',
+          branchName: row[19] || '',
+          IFSC_code: row[20]?.toString() || '',
+          bankAddress: row[21]?.toString() || '',
+          ESI_Number: row[22] || '',
+          PF_Number: row[23] || ''
         };
       });
 
@@ -259,23 +328,40 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
   );
 
   const handleViewClickForInvalid = useCallback((data) => {
-    // alert(`handleViewClickForInvalid ${data.length}`);
-    console.log('DATA = ', data);
+    try {
+      // alert(`handleViewClickForInvalid ${data.length}`);
+      console.log('DATA = ', data);
 
-    // const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
-    const vendorHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS];
+      // const vendorHeaders = ['Username*', 'Email*', 'Password*', 'Vendor Legal Name*', 'Office Charge Amount*'];
+      const vendorHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
 
-    // Create the second sheet (headers + data if available)
-    const vendorSheet = XLSX.utils.aoa_to_sheet([
-      vendorHeaders,
-      ...data // Will be empty if no data
-    ]);
-    // Create a workbook and append the sheets
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Vendor Data');
+      const HeaderLength = vendorHeaders.length;
 
-    // Export the Excel file
-    XLSX.writeFile(workbook, 'InvalidVendorData.xlsx');
+      const output = data.map((row) => {
+        // Add `null` to the end of the row until its length matches the required length
+        while (row.length < HeaderLength) {
+          row.splice(-1, 0, null); // Add nulls before the last item
+        }
+        return row;
+      });
+
+      console.log('output = ', output);
+
+      // Create the second sheet (headers + data if available)
+      const vendorSheet = XLSX.utils.aoa_to_sheet([
+        vendorHeaders,
+        // ...data // Will be empty if no data
+        ...output // Will be empty if no data
+      ]);
+      // Create a workbook and append the sheets
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Vendor Data');
+
+      // Export the Excel file
+      XLSX.writeFile(workbook, 'InvalidVendorData.xlsx');
+    } catch (error) {
+      console.log('🚀 ~ handleViewClickForInvalid ~ error:', error);
+    }
   }, []);
 
   const actionTaskForInvalidData = useCallback(
@@ -286,6 +372,7 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
           color="error"
           variant="contained"
           onClick={() => {
+            console.log('Rakhi = ', data);
             handleViewClickForInvalid(data);
           }}
         >
@@ -321,7 +408,7 @@ export const BulkUploadDialog = ({ open, handleClose }) => {
           formData.append('userEmail', item.userEmail);
           formData.append('userPassword', item.userPassword);
           formData.append('userType', USERTYPE.isVendor);
-          formData.append('contactNumber', '');
+          formData.append('contactNumber', item.contactNumber || '');
           formData.append('alternateContactNumber', '');
 
           const response = await dispatch(registerUser(formData)).unwrap();

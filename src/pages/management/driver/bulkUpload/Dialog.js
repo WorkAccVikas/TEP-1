@@ -119,8 +119,8 @@ const fieldMapping = {
     {
       fields: [2, 3], // Email and Phone
       validation: ([email, phone]) => {
-        console.log(`🚀 ~ email:`, email);
-        console.log(`🚀 ~ phone:`, phone);
+        // console.log(`🚀 ~ email:`, email);
+        // console.log(`🚀 ~ phone:`, phone);
         // const emailValid =
         //   typeof email === "string" && EMAIL_REGEX_PATTERN.test(email);
         // const phoneValid =
@@ -211,7 +211,7 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
         return {
           vendorId: vendorId,
           userName: row[1],
-          userEmail: row[2] || `smapleEmail-${row[3]}@tripBiller.com`,
+          userEmail: row[2] || `sampleEmail-${row[3]}@tripBiller.com`,
           contactNumber: row[3] || null,
           officeChargeAmount: row[4] || 0,
           fatherName: row[5] || null,
@@ -330,13 +330,13 @@ const BulkUploadDialog = ({ open, handleClose, setUpdateKey }) => {
     console.log('output = ', output);
 
     // Create the second sheet (headers + data if available)
-    const vendorSheet = XLSX.utils.aoa_to_sheet([
+    const driverSheet = XLSX.utils.aoa_to_sheet([
       driverHeaders,
-      ...data // Will be empty if no data
+      ...output // Will be empty if no data
     ]);
     // Create a workbook and append the sheets
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Driver Data');
+    XLSX.utils.book_append_sheet(workbook, driverSheet, 'Invalid Driver Data');
 
     // Export the Excel file
     XLSX.writeFile(workbook, 'InvalidDriverData.xlsx');

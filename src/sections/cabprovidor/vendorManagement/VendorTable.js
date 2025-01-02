@@ -114,7 +114,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         Header: 'Status',
         accessor: 'vendorDetails',
         Cell: ({ row, value }) => {
-          console.log(row);
+          // console.log(row);
           const [status, setStatus] = useState(row.original.isActive);
           const [openDialog, setOpenDialog] = useState(false);
           const [newStatus, setNewStatus] = useState(null);
