@@ -19,7 +19,7 @@ const MandatoryFields = [
   { name: 'addOnRate', headerName: 'Add On Rate', required: false, defaultValue: 0 },
   { name: 'penalty', headerName: 'Penalty', required: false, defaultValue: 0 },
   { name: 'remarks', headerName: 'Remarks', required: false, defaultValue: '' },
-  { name: 'rosterTripId', headerName: 'Trip Id', required: false, defaultValue: '#ID' }
+  { name: 'rosterTripId', headerName: 'Trip Id', required: true, defaultValue: '#ID' }
 ];
 
 export default function CreateRosterTemplate() {

@@ -618,7 +618,8 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       // console.log('values.vehicleImages', values.vehicleImages);
 
       formData.append('vehicletype', values.vehicletype);
-      formData.append('vendorId', values.vendorId || 'null');
+      // formData.append('vendorId', values.vendorId || 'null');
+      formData.append('vendorId', values.vendorId);
       formData.append('vehicleName', values.vehicleName);
       formData.append('vehicleNumber', values.vehicleNumber);
       formData.append('GPS_EMI', values.GPS_EMI);
