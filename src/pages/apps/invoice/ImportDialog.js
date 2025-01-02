@@ -31,7 +31,7 @@ export const getFilterStrategy = (userType) => {
   return () => true; // Default no filtering if userType doesn't match
 };
 
-const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) => {
+const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData, setExpenseCharge }) => {
   const [dateRange, setDateRange] = useState({
     // startDate: addMonths(new Date(), -1), // Default to today's date
     // endDate: new Date() // Default to 1 month after today's date
@@ -86,6 +86,17 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
 
       // setTripData(response.data.data);
       setTripData(filteredData);
+
+      const response1 = await axiosServices.get('/expense/list');
+      console.log(`🚀 ~ fetchTripData ~ response1:`, response1);
+
+      const data1 = response1.data.data;
+      console.log(`🚀 ~ fetchTripData ~ data1:`, data1);
+
+      const expenseAmount = data1.reduce((sum, item) => sum + item.amount, 0);
+      console.log(`🚀 ~ fetchTripData ~ expenseAmount:`, expenseAmount);
+      setExpenseCharge(expenseAmount || 5);
+
       dispatch(
         openSnackbar({
           open: true,
@@ -103,7 +114,7 @@ const TripImportDialog = ({ open, handleClose, recieversDetails, setTripData }) 
       dispatch(
         openSnackbar({
           open: true,
-          message,
+          message: error?.response?.data || error?.message || 'Error fetching Import trip data',
           variant: 'alert',
           alert: { color: 'error' },
           close: true,

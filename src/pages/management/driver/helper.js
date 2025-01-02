@@ -2,6 +2,9 @@ import { EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN, PIN_CODE_REGEX_PATTER
 // Modified validation functions to include detailed error messages
 export const isRequiredString = (value) => {
   if (typeof value === 'string' && value.trim() !== '') return true;
+  else if (typeof value === 'number') {
+    throw new Error('Expected a string');
+  }
   throw new Error('This field is required');
 };
 
@@ -85,6 +88,37 @@ export const isDateInFuture = (value) => {
   }
 
   throw new Error('Expected a valid date in DD/MM/YYYY format');
+};
+
+export const isPinCodeOptional = (value) => {
+  // Skip validation for undefined
+  if (typeof value === 'undefined' || value === null) return true;
+
+  if (typeof value === 'number' && PIN_CODE_REGEX_PATTERN.test(value.toString())) return true;
+  throw new Error('Expected a 6-digit pin code');
+};
+
+export const isAnythingRequired = (value) => {
+  if (!value) {
+    throw new Error('This field is required');
+  }
+
+  return true;
+};
+
+export const isPositiveNumberRequired = (value) => {
+  if (typeof value !== 'number' && !value) {
+    throw new Error('This field is required');
+  }
+  if (typeof value !== 'number') {
+    throw new Error('Expected a number');
+  }
+
+  if (value < 0) {
+    throw new Error('Expected a positive number');
+  }
+
+  return true;
 };
 
 // Validation function to check if the value is in the expected values array (guard clause style)
