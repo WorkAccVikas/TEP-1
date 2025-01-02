@@ -1,5 +1,17 @@
 import PropTypes from 'prop-types';
-import { alpha, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Chip,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useEffect, useMemo, useState } from 'react';
@@ -8,26 +20,39 @@ import axiosServices from 'utils/axios';
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import { HeaderSort, TablePagination } from 'components/third-party/ReactTable';
+import { USERTYPE } from 'constant';
 import { useSelector } from 'react-redux';
-import DateRangeSelect from 'pages/trips/filter/DateFilter';
 
-const Invoice = ({ vendorId }) => {
+const API_URL = {
+    [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
+    [USERTYPE.isVendor]: '/invoice/all/vendor',
+    [USERTYPE.iscabProviderUser]: '/invoice/by/cabProviderId',
+    [USERTYPE.isVendorUser]: '/invoice/all/vendor'
+  };
+
+const TripDetail = () => {
   const theme = useTheme();
+  const mode = theme.palette.mode;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refetch, setRefetch] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
+
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axiosServices.get('/invoice/all/vendor', {
+        const response = await axiosServices.get(API_URL[userType], {
           params: {
-            vendorId: vendorId,
+            // page: page,
+            // limit: limit,
             invoiceStartDate: formatDateUsingMoment(startDate),
             invoiceEndDate: formatDateUsingMoment(endDate)
+            // companyId: filterOptions?.selectedCompany?._id
           }
         });
 
@@ -42,7 +67,7 @@ const Invoice = ({ vendorId }) => {
     };
 
     fetchInvoice();
-  }, [userType,startDate, endDate]);
+  }, [userType, startDate, endDate, refetch]);
 
   const columns = useMemo(
     () => [
@@ -63,7 +88,7 @@ const Invoice = ({ vendorId }) => {
         Header: 'Invoice Id',
         accessor: 'invoiceNumber',
         disableFilters: true,
-        Cell: ({ value }) => value || 'N/A'
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Billed To',
@@ -71,6 +96,7 @@ const Invoice = ({ vendorId }) => {
         disableFilters: true,
         Cell: ({ row }) => {
           const { values } = row;
+
           return (
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
@@ -102,7 +128,7 @@ const Invoice = ({ vendorId }) => {
         Header: 'Amount',
         accessor: 'grandTotal',
         Cell: ({ value }) => {
-          return <Typography>₹ {value === null || value === undefined ? 'N/A' : value}</Typography>;
+          return <Typography>₹ {(value === null || value === undefined ? 'N/A' : value)}</Typography>;
         }
       },
       {
@@ -110,18 +136,21 @@ const Invoice = ({ vendorId }) => {
         accessor: 'status',
         disableFilters: true,
         Cell: ({ value }) => {
-          if (value === 3) {
+          if (value === 2) {
             return <Chip color="error" label="Cancelled" size="small" variant="light" />;
-          } else if (value === 2) {
+          } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
-          } else {
-            return <Chip color="info" label="Unpaid" size="small" variant="light" />;
+          } else if (value === 0) {
+            return <Chip color="warning" label="Unpaid" size="small" variant="light" />;
+          } else if (value === 3) {
+            return <Chip color="info" label="Pending" size="small" variant="light" />;
           }
         }
-      }
+      },
     ],
     [userType]
   );
+
 
   return (
     <>
@@ -143,9 +172,7 @@ const Invoice = ({ vendorId }) => {
             {loading ? (
               <TableSkeleton rows={10} columns={8} />
             ) : data?.length > 0 ? (
-              <ScrollX>
-                <ReactTable columns={columns} data={data} loading={loading} />
-              </ScrollX>
+              <ReactTable columns={columns} data={data} loading={loading} />
             ) : (
               <EmptyTableDemo />
             )}
@@ -156,16 +183,15 @@ const Invoice = ({ vendorId }) => {
   );
 };
 
-Invoice.propTypes = {
+TripDetail.propTypes = {
   page: PropTypes.number.isRequired,
   setPage: PropTypes.func.isRequired,
   limit: PropTypes.number.isRequired,
   setLimit: PropTypes.func.isRequired,
-  lastPageNo: PropTypes.number.isRequired,
-  vendorId: PropTypes.string.isRequired
+  lastPageNo: PropTypes.number.isRequired
 };
 
-export default Invoice;
+export default TripDetail;
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -204,68 +230,58 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
   return (
     <>
       <Stack spacing={3}>
-        <Table {...getTableProps()}>
-          {/* <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
-                    {column.render('Header')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead> */}
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
-                    <HeaderSort column={column} sort />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row);
-              const rowProps = row.getRowProps();
+        <ScrollX>
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, i) => {
+                prepareRow(row);
+                const rowProps = row.getRowProps();
 
-              return (
-                <Fragment key={i}>
-                  <TableRow
-                    {...row.getRowProps()}
-                    onClick={() => {
-                      row.toggleRowSelected();
-                    }}
-                    sx={{
-                      bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
-                    }}
-                  >
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
-                        {cell.render('Cell')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.isExpanded &&
-                    renderRowSubComponent({
-                      row,
-                      rowProps,
-                      visibleColumns,
-                      expanded
-                    })}
-                </Fragment>
-              );
-            })}
-            <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2 }} colSpan={10}>
-                <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                return (
+                  <Fragment key={i}>
+                    <TableRow
+                      {...row.getRowProps()}
+                      onClick={() => {
+                        row.toggleRowSelected();
+                      }}
+                      sx={{
+                        bgcolor: row.isSelected ? alpha(theme.palette.primary.lighter, 0.35) : 'inherit'
+                      }}
+                    >
+                      {row.cells.map((cell) => (
+                        <TableCell key={cell.column.id} {...cell.getCellProps([{ className: cell.column.className }])}>
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {row.isExpanded &&
+                      renderRowSubComponent({
+                        row,
+                        rowProps,
+                        visibleColumns,
+                        expanded
+                      })}
+                  </Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollX>
+
+        <Box sx={{ p: 2, pt: 0 }}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </Box>
       </Stack>
     </>
   );

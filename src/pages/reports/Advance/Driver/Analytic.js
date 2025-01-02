@@ -45,11 +45,11 @@ const Analytic = () => {
     totalRevenue: 0
   });
 
-  const { advanceReportData } = useSelector((state) => state.report);
+  const { driverAdvanceReportData } = useSelector((state) => state.report);
   console.log({ overAllData });
   useEffect(() => {
-    if (advanceReportData) {
-      const totals = advanceReportData.reduce(
+    if (driverAdvanceReportData) {
+      const totals = driverAdvanceReportData.reduce(
         (acc, item) => ({
           advanceCount: acc.advanceCount + 1, // Increment count
           requestedAmount: acc.requestedAmount + (item?.requestedAmount || 0), // Fallback to 0
@@ -71,7 +71,7 @@ const Analytic = () => {
 
       setOverAllData(totals);
     }
-  }, [advanceReportData]);
+  }, [driverAdvanceReportData]);
 
   return (
     <>

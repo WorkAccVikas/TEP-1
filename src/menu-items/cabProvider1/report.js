@@ -183,7 +183,7 @@ const report = {
 
         {
           id: 'cab-report3',
-          title: <FormattedMessage id="cab" />,
+          title: <FormattedMessage id="monthly" />,
           // type: 'collapse',
           type: 'item',
           url: '/reports/driver/cab-report'

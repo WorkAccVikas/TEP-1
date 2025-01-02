@@ -307,7 +307,7 @@ const NotificationPage = () => {
                 borderRadius: 1.5,
                 width: '100%',
                 minWidth: 285,
-                maxWidth: 420,
+                maxWidth: 520,
                 [theme.breakpoints.down('md')]: {
                   maxWidth: 285
                 }
@@ -316,24 +316,36 @@ const NotificationPage = () => {
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard elevation={0} border={false}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    {/* Notifications Heading */}
                     <Typography variant="h5">Notifications</Typography>
-                    {notifications.length > 0 && (
-                      <Button
-                        variant="text"
-                        size="small"
-                        onClick={handleMarkAllRead}
-                        sx={{ textTransform: 'none', fontWeight: 500, color: 'primary.main' }}
-                      >
-                        Mark All Read
-                      </Button>
-                    )}
+
+                    {/* Right-side actions */}
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      {/* View All Link */}
+                      <Link variant="h6" color="primary" onClick={handleClick}>
+                        View all
+                      </Link>
+
+                      {/* Mark All Read Button */}
+                      {notifications.length > 0 && (
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={handleMarkAllRead}
+                          sx={{ textTransform: 'none', fontWeight: 500, color: 'primary.main' }}
+                        >
+                          Mark All Read
+                        </Button>
+                      )}
+                    </Stack>
                   </Stack>
+
                   <List
                     component="nav"
                     sx={{
                       '& .MuiListItemButton-root': {
-                        p: 1.5,
-                        my: 1.5,
+                        p: 1,
+                        my: 1,
                         border: `1px solid ${theme.palette.divider}`,
                         '&:hover': {
                           bgcolor: 'primary.lighter',
@@ -373,12 +385,6 @@ const NotificationPage = () => {
                       </Typography>
                     )}
                   </List>
-
-                  <Stack direction="row" justifyContent="center">
-                    <Link variant="h6" color="primary" onClick={handleClick}>
-                      View all
-                    </Link>
-                  </Stack>
                 </MainCard>
               </ClickAwayListener>
             </Paper>

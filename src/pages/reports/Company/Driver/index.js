@@ -8,7 +8,7 @@ import CompanySelection from 'SearchComponents/CompanySelectionAutocomplete';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import { dispatch } from 'store';
 import { useSelector } from 'store';
-import { fetchCompanyWiseReports } from 'store/slice/cabProvidor/reportSlice';
+import { fetchCompanyWiseReports, fetchCompanyWiseReportsDriver } from 'store/slice/cabProvidor/reportSlice';
 import { filterKeys, formatDateUsingMoment } from 'utils/helper';
 import Analytic from './Analytic';
 import TableSkeleton from 'components/tables/TableSkeleton';
@@ -23,33 +23,27 @@ const CompanyWiseReportForVendor = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState([]);
 
-  const { loading, companyReportData } = useSelector((state) => state.report);
+  const { loading, companyReportDriverData } = useSelector((state) => state.report);
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
-    console.log({ selectedCompanies });
-
     let companyID = null;
     if (selectedCompanies.length > 0) {
       companyID = selectedCompanies.map((company) => company._id);
     }
-    console.log('selectedDriver = ', selectedDriver);
-
-    const selectedDriverID = selectedDriver.map((item) => item._id);
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        companyId: companyID || [],
-        driverIds: selectedDriverID || []
+        companyId: companyID || []
       }
     };
 
-    dispatch(fetchCompanyWiseReports(payload));
+    dispatch(fetchCompanyWiseReportsDriver(payload));
   }, [startDate, endDate, selectedCompanies, selectedDriver]);
 
   const downloadReports = useCallback(() => {
-    if (companyReportData.length === 0) {
+    if (companyReportDriverData.length === 0) {
       dispatch(
         openSnackbar({
           open: true,
@@ -64,9 +58,9 @@ const CompanyWiseReportForVendor = () => {
       return;
     }
     const ignoredKeys = ['companyGuardPrice', 'vendorGuardPrice', 'companyRate', 'vendorRate', 'companyPenalty', 'vendorPenalty'];
-    const filteredData = filterKeys(companyReportData, ignoredKeys);
+    const filteredData = filterKeys(companyReportDriverData, ignoredKeys);
     downloadCompanyWiseReport(filteredData, 'companyWiseReport');
-  }, [companyReportData]);
+  }, [companyReportDriverData]);
 
   return (
     <>
@@ -82,7 +76,7 @@ const CompanyWiseReportForVendor = () => {
               />
             </Box>
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+            {/* <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
               <Box sx={{ minWidth: '300px' }}>
                 <DriverSelection
                   value={selectedDriver}
@@ -90,7 +84,7 @@ const CompanyWiseReportForVendor = () => {
                   sx={{ minWidth: '300px', maxWidth: '600px' }}
                 />
               </Box>
-            </AccessControlWrapper>
+            </AccessControlWrapper> */}
           </Stack>
 
           <Stack direction={'row'} gap={2}>
