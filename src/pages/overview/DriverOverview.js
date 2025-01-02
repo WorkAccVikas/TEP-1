@@ -154,7 +154,7 @@ const TabContent = ({ activeTab, driverDetail, driverId, driverSpecificDetail, f
     Trips: <TripDetail driverId={driverId} />,
     Advance: <AdvanceDriver driverId={driverId} />,
     'Attached Companies': <AttachedCompany driverId={driverId} />,
-    Expense: <Expense/>,
+    Expense: <Expense driverId={driverId}/>,
   };
   // Get the active tab label
   const activeTabLabel = filteredTabs[activeTab]?.label;

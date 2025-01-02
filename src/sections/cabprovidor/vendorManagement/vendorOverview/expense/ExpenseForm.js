@@ -24,10 +24,10 @@ import { useEffect, useState } from 'react';
 import { addZoneType, updateZoneType } from 'store/slice/cabProvidor/zoneTypeSlice';
 import axiosServices from 'utils/axios';
 
-const ExpenseForm = ({ data, onCancel, updateKey, setUpdateKey, driverId, setSelectedData }) => {
+const ExpenseForm = ({ data, onCancel, updateKey, setUpdateKey, vendorId, setSelectedData }) => {
   const dispatch = useDispatch();
 
-  console.log({ data, onCancel, updateKey, setUpdateKey, driverId });
+  console.log({ data, onCancel, updateKey, setUpdateKey, vendorId });
 
   const formik = useFormik({
     initialValues: {
@@ -40,7 +40,7 @@ const ExpenseForm = ({ data, onCancel, updateKey, setUpdateKey, driverId, setSel
         const response = !data
           ? await axiosServices.post('/expense/add', {
               data: {
-                driverId: driverId,
+                vendorId: vendorId,
                 amount: values.amount,
                 expenseName: values.expenseName
               }
