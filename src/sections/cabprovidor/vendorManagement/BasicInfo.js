@@ -387,7 +387,12 @@ const BasicInfo = ({ basicInfo, handleNext, setErrorIndex, setVendorId }) => {
                     min: 0,
                     className: 'hide-arrows', // LEARN : Hides arrows in some browsers,
                     step: 5, // LEARN : Add step attribute for increment/decrement
-                    onFocus: (event) => event.target.select() // LEARN : Select content on focus
+                    onFocus: (event) => event.target.select(),
+                    sx: {
+                      '::-webkit-outer-spin-button': { display: 'none' },
+                      '::-webkit-inner-spin-button': { display: 'none' },
+                      '-moz-appearance': 'textfield' // Firefox
+                    }
                   }
                 }}
                 autoComplete="officeChargeAmount"

@@ -11,19 +11,20 @@ import { useSelector } from 'store';
 import Analytic from './Analytic';
 import { filterAndExtractValues, filterKeys, formatDateUsingMoment } from 'utils/helper';
 import { dispatch } from 'store';
-import { fetchCabWiseReports } from 'store/slice/cabProvidor/reportSlice';
+import { fetchCabWiseReports, fetchDriverMonthlyReports } from 'store/slice/cabProvidor/reportSlice';
 import Table from './Table';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
+import { downloadMonthlyReport } from 'pages/reports/utils/DownloadMonthlyReport';
 
 const CabWiseReportForVendor = () => {
   const [selectedCab, setSelectedCab] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState([]);
 
-  const { loading, cabReportData } = useSelector((state) => state.report);
+  const { loading, monthlyReportData } = useSelector((state) => state.report);
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
@@ -38,17 +39,15 @@ const CabWiseReportForVendor = () => {
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
-        endDate: formatDateUsingMoment(endDate),
-        vehicleIDs: cabID || [],
-        driverIds: selectedDriverID || []
+        endDate: formatDateUsingMoment(endDate)
       }
     };
 
-    dispatch(fetchCabWiseReports(payload));
-  }, [startDate, endDate, selectedCab, selectedDriver]);
+    dispatch(fetchDriverMonthlyReports(payload));
+  }, [startDate, endDate]);
 
   const downloadReports = useCallback(() => {
-    if (cabReportData.length === 0) {
+    if (monthlyReportData.length === 0) {
       dispatch(
         openSnackbar({
           open: true,
@@ -62,10 +61,10 @@ const CabWiseReportForVendor = () => {
       );
       return;
     }
-    const ignoredKeys = ['companyGuardPrice', 'vendorGuardPrice', 'companyRate', 'vendorRate', 'companyPenalty', 'vendorPenalty'];
-    const filteredData = filterKeys(cabReportData, ignoredKeys);
-    downloadCabWiseReport(filteredData, 'cabWiseReport');
-  }, [cabReportData]);
+    const ignoredKeys = ['companyGuardPrice', 'vendorGuardPrice', 'companyRate', 'vendorRate', 'companyPenalty', 'vendorPenalty','driverId'];
+    const filteredData = filterKeys(monthlyReportData, ignoredKeys);
+    downloadMonthlyReport(filteredData, 'monthlyReport');
+  }, [monthlyReportData]);
 
   return (
     <>
@@ -73,21 +72,21 @@ const CabWiseReportForVendor = () => {
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
           <Stack direction={'row'} gap={2} alignItems={'center'}>
-            {/* Vehicle Filter */}
-            <Box sx={{ minWidth: '300px' }}>
+           
+            {/* <Box sx={{ minWidth: '300px' }}>
               <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
-            </Box>
+            </Box> */}
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+            {/* <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
               <Box sx={{ minWidth: '300px' }}>
-                {/* Driver Filter */}
+               
                 <DriverSelection
                   value={selectedDriver}
                   setSelectedOptions={setSelectedDriver}
                   sx={{ minWidth: '300px', maxWidth: '600px' }}
                 />
               </Box>
-            </AccessControlWrapper>
+            </AccessControlWrapper> */}
           </Stack>
 
           <Stack direction={'row'} gap={2}>
@@ -122,7 +121,7 @@ const CabWiseReportForVendor = () => {
         {/* Main Part */}
         <Stack spacing={2}>
           {/* Analytic */}
-          <Analytic />
+          {/* <Analytic /> */}
 
           {/* Table */}
           {loading ? <TableSkeleton rows={10} columns={6} /> : <Table />}

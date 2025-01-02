@@ -17,6 +17,7 @@ import AccessControlWrapper from 'components/common/guards/AccessControlWrapper'
 import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import { openSnackbar } from 'store/reducers/snackbar';
 import WrapperButton from 'components/common/guards/WrapperButton';
+import { downloadAdvanceReport } from 'pages/reports/utils/DownloadAdvanceReport';
 
 const AdvanceReportForVendor = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
@@ -67,11 +68,10 @@ const AdvanceReportForVendor = () => {
       approvedAmount: item.approvedAmount,
       approvedInterest: item.advanceTypeId?.interestRate ? (item.approvedAmount * item.advanceTypeId?.interestRate) / 100 : 0,
       transactionId: item.transactionId,
-      totalVehiclesCount: item.totalVehiclesCount,
       driverCount: item.driverCount
     }));
     console.log({ transformedData });
-    // downloadAdvanceReport(transformedData, 'advanceReport');
+    downloadAdvanceReport(transformedData, 'advanceReport');
   }, [advanceReportData]);
 
   return (

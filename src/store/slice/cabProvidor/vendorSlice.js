@@ -39,6 +39,8 @@ export const fetchVendor1 = createAsyncThunk('vendors/fetchVendor1', async (_, {
     }
 
     const response = await axios.get('/vendor/cab/providers/details');
+    console.log("response",response);
+    
     return response.data.data; // Ensure the API response is in this format
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
