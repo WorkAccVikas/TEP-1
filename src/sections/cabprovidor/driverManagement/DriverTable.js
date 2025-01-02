@@ -76,6 +76,8 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
 
   const handleOpenReassignDialog = (row) => {
     setDriverId(row);
+    console.log({row});
+    
     setAssignedVehicle(row?.assignedVehicle || []);
     setReassignDialogOpen(true);
   };
@@ -217,7 +219,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const assignedVehicle = row.original.assignedVehicle;
             const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : 'N/A'; // accessing vehicleNumber if assigned
 
-            if (!assignedVehicle) {
+            if (!cabNo) {
               return (
                 <Chip
                   color="error"
