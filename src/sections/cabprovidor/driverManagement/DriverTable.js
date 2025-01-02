@@ -215,7 +215,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             // console.log("row.original",row.original);
 
             const assignedVehicle = row.original.assignedVehicle;
-            const cabNo = assignedVehicle ? assignedVehicle.vehicleId.vehicleNumber : null; // accessing vehicleNumber if assigned
+            const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : null; // accessing vehicleNumber if assigned
 
             if (!assignedVehicle) {
               return (
