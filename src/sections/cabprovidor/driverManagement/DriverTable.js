@@ -356,14 +356,14 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             );
           }
         },
-        {
-          Header: 'Compliance Progress',
-          accessor: 'progress',
-          Cell: ({ row, value }) => {
-            const progessValue = Math.floor(Math.random() * 101);
-            return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
-          }
-        },
+        // {
+        //   Header: 'Compliance Progress',
+        //   accessor: 'progress',
+        //   Cell: ({ row, value }) => {
+        //     const progessValue = Math.floor(Math.random() * 101);
+        //     return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+        //   }
+        // },
         {
           Header: 'Actions',
           className: 'cell-center',
