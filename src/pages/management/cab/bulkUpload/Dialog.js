@@ -297,7 +297,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
           formData.append('vehicletype', item.vehicletype);
           formData.append('vehicleNumber', item.vehicleNumber);
           formData.append('vehicleName', item.vehicleName);
-          formData.append('vendorId', item.vendorId || null);
+          item.vendorId && formData.append('vendorId', item.vendorId);
           item.fitnessDate && formData.append('fitnessDate', item.fitnessDate);
           item.insuranceExpiryDate && formData.append('insuranceExpiryDate', item.insuranceExpiryDate);
           item.pollutionExpiryDate && formData.append('pollutionExpiryDate', item.pollutionExpiryDate);
