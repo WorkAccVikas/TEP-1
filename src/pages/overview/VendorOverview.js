@@ -33,7 +33,7 @@ const tabConfig = [
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
   { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
-  // { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
+  { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
 ];
 
 const VendorOverview = () => {
@@ -138,7 +138,7 @@ const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, v
     Invoice: <Transaction vendorId={vendorId} />,
     'Attached Companies': <AttachedCompany vendorId={vendorId} />,
      Expense: <Expense vendorId={vendorId}/>,
-    //  'Rates': <VendorRate vendorId={vendorId}/>,
+     'Rates': <VendorRate vendorId={vendorId}/>,
   };
 
   // Get the active tab label

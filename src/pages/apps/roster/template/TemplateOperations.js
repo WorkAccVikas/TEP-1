@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { createTemplate } from 'store/slice/cabProvidor/templateSlice';
 import axiosServices from 'utils/axios';
 import * as XLSX from 'xlsx';
 
@@ -177,7 +178,7 @@ const TemplateOperations = () => {
   };
 
   // Create final template object
-  const createTemplate = async () => {
+  const addTemplate = async () => {
     try {
       let CabproviderId;
       const templateData = {
@@ -191,12 +192,24 @@ const TemplateOperations = () => {
         CabproviderId = userInformation.userId;
       }
       setMutateLoading(true);
-      const response = await axiosServices.post('tripData/add/roster/setting', {
+      // const response = await axiosServices.post('tripData/add/roster/setting', {
+      //   data: {
+      //     CabproviderId: CabproviderId,
+      //     RosterTemplates: [templateData],
+      //     excelHeaders
+      //   }
+      // });
+
+      const payload = {
         data: {
           CabproviderId: CabproviderId,
-          RosterTemplates: [templateData]
+          RosterTemplates: [templateData],
+          excelHeaders
         }
-      });
+      };
+
+      const response = await dispatch(createTemplate(payload)).unwrap();
+      console.log(`🚀 ~ createTemplate ~ response:`, response);
 
       console.log(response.data);
       // Save to local storage or handle as needed
@@ -360,7 +373,7 @@ const TemplateOperations = () => {
                 ) : (
                   <Button
                     variant="contained"
-                    onClick={createTemplate}
+                    onClick={addTemplate}
                     disabled={!isFormValid() || mutateLoading}
                     sx={{ alignSelf: 'center' }}
                     title="Create Template"

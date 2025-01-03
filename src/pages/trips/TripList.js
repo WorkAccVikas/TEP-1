@@ -954,16 +954,18 @@ const TripList = () => {
           params: {
             startDate: formatDateUsingMoment(startDate),
             endDate: formatDateUsingMoment(endDate),
-            companyID: filterOptions.selectedCompany._id,
-            vehicleId: filterOptions.selectedVehicle._id,
-            driverId: filterOptions.selectedDriver._id,
-            vendorId: filterOptions.selectedVendor._id
+            companyID: filterOptions.selectedCompany?.['_id'] || null,
+            vehicleId: filterOptions.selectedVehicle?.['_id'] || null,
+            driverId: filterOptions.selectedDriver?.['_id'] || null,
+            vendorId: filterOptions.selectedVendor?.['_id'] || null,
           }
         });
         setData(response.data.data);
       } catch (error) {
         console.log('Error at fetching trips = ', error);
-        if (error.response.status === 500) {
+        console.log("error.response",error.response);
+        
+        if (error.response?.status === 500) {
           setData([]);
         } else {
           dispatch(

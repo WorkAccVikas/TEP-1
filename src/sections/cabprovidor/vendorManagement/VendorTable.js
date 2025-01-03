@@ -227,29 +227,8 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           const vendorID = row.original.vendorId;
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              {/* <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="View"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/driver-overview/${driverID}`);
-                  }}
-                >
-                  <Eye />
-                </IconButton>
-              </Tooltip> */}
 
-              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.READ}>
+              {/* <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.READ}>
                 <Tooltip
                   componentsProps={{
                     tooltip: {
@@ -271,7 +250,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                     <Eye />
                   </IconButton>
                 </Tooltip>
-              </WrapperButton>
+              </WrapperButton> */}
 
               <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.UPDATE}>
                 <Tooltip
