@@ -1,18 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 // assets
-import { Chip, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import axiosServices from 'utils/axios';
-import { useLocation, useNavigate } from 'react-router';
 import MainCard from 'components/MainCard';
-import Breadcrumbs from 'components/@extended/Breadcrumbs';
-import { APP_DEFAULT_PATH } from 'config';
 import VendorRateTable from 'pages/management/vendor/vendorRate/VendorRateTable';
+import CompanyFilter2 from 'pages/trips/filter/CompanyFilter2';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
 
 const VendorRate = ({ vendorId }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [data, setData] = useState([]);
   const [skipPageReset, setSkipPageReset] = useState(false);
   const [companyRate, setCompanyRate] = useState([]);
@@ -21,23 +17,17 @@ const VendorRate = ({ vendorId }) => {
   const [limit, setLimit] = useState(10);
   const [updateKey, setUpdateKey] = useState(0);
   const [loading, setLoading] = useState('true');
-  const [showCompanyList, setShowCompanyList] = useState(false); // State to manage which component to show
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const [selectedVendorID, setSelectedVendorID] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(true); // Dialog state
 
-  const [selectedCompanyName, setSelectedCompanyName] = useState('');
-  const [selectedVendorName, setSelectedVendorName] = useState('');
-  const [isSelectingCompany, setIsSelectingCompany] = useState(false);
-  const searchRef = useRef(null);
+  const [filterOptions, setFilterOptions] = useState({
+    selectedCompany: {}
+  });
 
   useEffect(() => {
     const fetchdata = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       try {
-        const response = await axiosServices.get(
-          `/cabRateMaster/unwind/rate/vendorId?vendorId=${vendorId}&companyID=${selectedCompany._id}`
-        );
+        const params = filterOptions.selectedCompany._id ? { companyID: filterOptions.selectedCompany._id } : {};
+        const response = await axiosServices.get(`/cabRateMaster/unwind/rate/vendorId?vendorId=${vendorId}`, { params });
         setVendorList(response.data.data);
       } catch (error) {
         console.error('Error fetching data', error);
@@ -46,65 +36,55 @@ const VendorRate = ({ vendorId }) => {
       }
     };
 
-    if (!selectedCompany || !selectedVendorID) return;
-
     fetchdata();
-  }, [selectedCompany, selectedVendorID, updateKey]);
+  }, [vendorId, updateKey, filterOptions]);
 
   useEffect(() => {
     setSkipPageReset(false);
   }, [data]);
   useEffect(() => {}, [companyRate]);
 
-  // Close SearchComponent when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Check if the click is inside the search component or its dropdown
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target) &&
-        !document.querySelector('.MuiAutocomplete-popper')?.contains(event.target)
-      ) {
-        setIsSelectingCompany(false);
-      }
-    };
-
-    if (isSelectingCompany) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSelectingCompany]);
-
   return (
     <>
-      {/* Render CompanyRateListing once a company is selected */}
-
-      <>
-        <Stack gap={1} spacing={1}>
-          <MainCard
-            title={
-              <Stack direction="row" alignItems="center" gap={1}>
-                Vendor Rates between <Chip label={selectedCompanyName} color="primary" />
-                and <Chip label={selectedVendorName} color="secondary" />
-              </Stack>
-            }
+      <Stack gap={1} spacing={1}>
+        <MainCard>
+          {/* filter */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}
           >
-            <VendorRateTable
-              data={vendorList}
-              page={page}
-              setPage={setPage}
-              limit={limit}
-              setLimit={setLimit}
-              updateKey={updateKey}
-              setUpdateKey={setUpdateKey}
-              loading={loading}
+            {/* Company Filter */}
+            <CompanyFilter2
+              setFilterOptions={setFilterOptions}
+              sx={{
+                color: '#fff',
+                '& .MuiSelect-select': {
+                  padding: '0.5rem',
+                  pr: '2rem'
+                },
+                '& .MuiSelect-icon': {
+                  color: '#fff' // Set the down arrow color to white
+                },
+                width: '200px',
+                pb: 1
+              }}
+              value={filterOptions.selectedCompany}
             />
-          </MainCard>
-        </Stack>
-      </>
+          </Box>
+          <VendorRateTable
+            data={vendorList}
+            page={page}
+            setPage={setPage}
+            limit={limit}
+            setLimit={setLimit}
+            updateKey={updateKey}
+            setUpdateKey={setUpdateKey}
+            loading={loading}
+          />
+        </MainCard>
+      </Stack>
     </>
   );
 };

@@ -373,7 +373,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const isCabProviderDriver = row.original.isCabProviderDriver;
             return (
               <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-                {isCabProviderDriver === USERTYPE.iscabProvider && (
+                {/* {isCabProviderDriver === USERTYPE.iscabProvider && (
                   <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.READ}>
                     <Tooltip
                       componentsProps={{
@@ -397,7 +397,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                       </IconButton>
                     </Tooltip>
                   </WrapperButton>
-                )}
+                )} */}
 
                 <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.UPDATE}>
                   <Tooltip
