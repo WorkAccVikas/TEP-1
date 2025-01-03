@@ -41,12 +41,23 @@ import CompanyFilter1 from 'pages/trips/filter/CompanyFilter1';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
 import { HeaderSort } from 'components/third-party/ReactTable';
+import { usePopup } from 'hooks/usePopup';
+import AssignTemplateDialog from './AssignTemplateDialog';
+import { TbFileSpreadsheet } from 'react-icons/tb';
 
 const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [currentRow, setCurrentRow] = useState(null);
+
+  const { open: openAssignDialog, handleOpen: handleOpenAssignDialog, handleClose: handleCloseAssignDialog } = usePopup();
+
+  const handleCloseAssignDialog1 = () => {
+    handleOpenAssignDialog();
+    setCurrentRow(null);
+  };
 
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
@@ -148,13 +159,52 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'Amount Receivable',
         accessor: 'stateTaxAmount',
-       Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
+      },
+      {
+        Header: 'Assign Template',
+        accessor: 'assignTemplate',
+        className: 'cell-center',
+        Cell: ({ row }) => {
+          return (
+            <>
+              {/* <Button
+                size="small"
+                variant="outlined"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const id = row.original._id;
+                  console.log('🚀 ~ row:', row);
+                  handleOpenAssignDialog();
+                  setCurrentRow(row.original);
+
+                  // alert(`Assign Template for Company ID: ${id}`);
+                }}
+              >
+                Assign
+              </Button> */}
+
+              <IconButton
+                size="medium"
+                color="success"
+                title="Assign Template"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenAssignDialog();
+                  setCurrentRow(row.original);
+                }}
+              >
+                <TbFileSpreadsheet />
+              </IconButton>
+            </>
+          );
+        }
       },
       {
         Header: 'Status',
         accessor: 'status',
         Cell: ({ row, value }) => {
-          console.log(row);
+          // console.log(row);
           const [status, setStatus] = useState(row.original.isActive);
           const [openDialog, setOpenDialog] = useState(false);
           const [newStatus, setNewStatus] = useState(null);
@@ -466,6 +516,8 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       <div style={{ marginTop: '20px' }}>
         <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
       </div>
+
+      {openAssignDialog && <AssignTemplateDialog open={openAssignDialog} handleClose={handleCloseAssignDialog} currentRow={currentRow} />}
     </>
   );
 };

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchCompanies } from 'store/slice/cabProvidor/companySlice';
 import PropTypes from 'prop-types';
 import CompanyTable from 'sections/cabprovidor/companyManagement/CompanyTable';
+import { fetchAllTemplates } from 'store/slice/cabProvidor/templateSlice';
 
 const Company = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,10 @@ const Company = () => {
   const [query, setQuery] = useState(null);
 
   console.log('metaData', metaData);
+
+  useEffect(() => {
+    dispatch(fetchAllTemplates());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchCompanies({ page: page, limit: limit, query: query }));

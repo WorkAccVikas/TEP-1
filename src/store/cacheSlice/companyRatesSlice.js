@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { USERTYPE } from 'constant';
+import { logoutActivity } from 'store/slice/cabProvidor/accountSettingSlice';
 import axiosServices from 'utils/axios';
+import { handleReset } from 'utils/helper';
 
 // Async thunk to fetch company rates with userType
 export const fetchCompanyRates = createAsyncThunk(
@@ -33,13 +35,15 @@ export const fetchCompanyRates = createAsyncThunk(
   }
 );
 
+const initialState = {
+  cache: {}, // Stores cached company rates
+  loading: false, // Tracks loading state
+  error: null // Tracks error state
+};
+
 const companyRatesSlice = createSlice({
   name: 'companyRates',
-  initialState: {
-    cache: {}, // Stores cached company rates
-    loading: false, // Tracks loading state
-    error: null // Tracks error state
-  },
+  initialState,
   reducers: {
     clearCompanyRatesCache: (state) => {
       state.cache = {};
@@ -59,7 +63,8 @@ const companyRatesSlice = createSlice({
       .addCase(fetchCompanyRates.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 
