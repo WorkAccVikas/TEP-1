@@ -29,6 +29,8 @@ import { addBranch, fetchCompanies } from 'store/slice/cabProvidor/companySlice'
 import ConfigurableAutocomplete from 'components/autocomplete/ConfigurableAutocomplete';
 import { LoadingButton } from '@mui/lab';
 import { Save2 } from 'iconsax-react';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import { APP_DEFAULT_PATH } from 'config';
 
 // ==============================|| LAYOUTS -  COLUMNS ||============================== //
 
@@ -269,10 +271,17 @@ function AddBranch() {
     }
   }, [rowOriginal]);
 
+   let breadcrumbLinks = [
+      { title: 'Home', to: APP_DEFAULT_PATH },
+      { title: 'Company', to: '/management/company/view' },
+      { title: 'Add Branch' }
+    ];
+
   return (
     <form onSubmit={formik.handleSubmit} id="validation-forms">
       <Grid container spacing={3}>
         <Grid item xs={12}>
+        <Breadcrumbs custom links={breadcrumbLinks} />
           <MainCard title={'ADD BRANCH INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={4}>

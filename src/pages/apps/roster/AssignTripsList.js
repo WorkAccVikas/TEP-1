@@ -58,7 +58,7 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
   const initialState = useMemo(
     () => ({
       filters: [{ id: 'status', value: '' }],
-      hiddenColumns: ['remarks', 'addOnRate', 'vehicleRate', 'vehicleNumber', 'guard', 'location'], // These may need to be updated or removed based on your new data structure
+      hiddenColumns: ['remarks', 'addOnRate', 'vehicleRate', 'guard', 'location'], // These may need to be updated or removed based on your new data structure
       pageIndex: 0,
       pageSize: 5
     }),
@@ -408,7 +408,18 @@ const AssignTripList = () => {
       {
         Header: 'Vehicle Number',
         accessor: 'vehicleNumber',
-        disableFilters: true
+        disableFilters: true,
+        Cell: ({ row }) => {
+          return (
+            row.original?.vehicleNumber || (
+              <Tooltip title={'Vehicle number not found'}>
+                <IconButton size="small" color="error">
+                  <InfoCircle />
+                </IconButton>
+              </Tooltip>
+            )
+          );
+        }
       },
       {
         Header: 'Vehicle Rate',
