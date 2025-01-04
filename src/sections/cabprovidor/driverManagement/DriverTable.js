@@ -217,7 +217,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             // console.log("row.original",row.original);
 
             const assignedVehicle = row.original.assignedVehicle;
-            const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : 'N/A'; // accessing vehicleNumber if assigned
+            const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : null; // accessing vehicleNumber if assigned
 
             if (!cabNo) {
               return (
@@ -358,14 +358,14 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             );
           }
         },
-        {
-          Header: 'Compliance Progress',
-          accessor: 'progress',
-          Cell: ({ row, value }) => {
-            const progessValue = Math.floor(Math.random() * 101);
-            return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
-          }
-        },
+        // {
+        //   Header: 'Compliance Progress',
+        //   accessor: 'progress',
+        //   Cell: ({ row, value }) => {
+        //     const progessValue = Math.floor(Math.random() * 101);
+        //     return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+        //   }
+        // },
         {
           Header: 'Actions',
           className: 'cell-center',
