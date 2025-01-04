@@ -283,7 +283,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
               {/* Confirmation Dialog */}
               <Dialog open={openDialog} onClose={handleCancel}>
                 <DialogTitle>Confirm Status Change</DialogTitle>
-                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this cab?</DialogContent>
+                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this company?</DialogContent>
                 <DialogActions>
                   <Button onClick={handleCancel} color="error">
                     Cancel
