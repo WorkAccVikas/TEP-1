@@ -29,6 +29,8 @@ import MultiFileUpload from 'components/third-party/dropzone/MultiFile';
 import { useEffect, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Save2 } from 'iconsax-react';
+import { APP_DEFAULT_PATH } from 'config';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
 
 // ==============================|| LAYOUTS -  COLUMNS ||============================== //
 const taxOptions = {
@@ -298,10 +300,17 @@ function AddCompany() {
     }
   });
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Company', to: '/management/company/view' },
+    { title: 'Add Company' }
+  ];
+
   return (
     <form onSubmit={formik.handleSubmit} id="validation-forms">
       <Grid container spacing={3}>
         <Grid item xs={12}>
+          <Breadcrumbs custom links={breadcrumbLinks} />
           <MainCard title={'ADD COMPANY INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={4}>

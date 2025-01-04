@@ -316,12 +316,15 @@ const List = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
+        setLoading(true);
+        const companyId = filterOptions?.selectedCompany?._id;
         const response = await axiosServices.get(API_URL[userType], {
           params: {
             // page: page,
             // limit: limit,
             invoiceStartDate: formatDateUsingMoment(startDate),
-            invoiceEndDate: formatDateUsingMoment(endDate)
+            invoiceEndDate: formatDateUsingMoment(endDate),
+            companyId
             // companyId: filterOptions?.selectedCompany?._id
           }
         });

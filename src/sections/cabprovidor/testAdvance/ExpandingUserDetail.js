@@ -25,13 +25,15 @@ import Avatar from 'components/@extended/Avatar';
 import MainCard from 'components/MainCard';
 
 // assets
-import ReactTable from 'components/tables/reactTable1/ReactTable';
+import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
 import { useEffect, useState } from 'react';
 import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { dispatch } from 'store';
 import { format } from 'date-fns';
 import ScrollX from 'components/ScrollX';
+import TableSkeleton from 'components/tables/TableSkeleton';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 // ==============================|| EXPANDING TABLE - USER DETAILS ||============================== //
 
@@ -129,55 +131,55 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   // Columns for the Payment History table
 
   const personalDetailsColumns = [
-    { 
-      Header: 'Transaction Id', 
-      accessor: 'transactionId', 
-      Cell: ({ value }) => value || 'N/A' 
+    {
+      Header: 'Transaction Id',
+      accessor: 'transactionId',
+      Cell: ({ value }) => value || 'N/A'
     },
-    { 
-      Header: 'Date', 
-      accessor: 'updatedAt', 
-      Cell: ({ value }) => value ? formatDate(value) : 'N/A' 
+    {
+      Header: 'Date',
+      accessor: 'updatedAt',
+      Cell: ({ value }) => (value ? formatDate(value) : 'N/A')
     },
-    { 
-      Header: 'Approved Amount', 
-      accessor: 'approvedAmount', 
-      className: 'cell-center', 
-      Cell: ({ value }) => value || 'N/A' 
+    {
+      Header: 'Approved Amount',
+      accessor: 'approvedAmount',
+      className: 'cell-center',
+      Cell: ({ value }) => value || 'N/A'
     },
-    { 
-      Header: 'Final Amount', 
-      accessor: 'finalAmount', 
-      className: 'cell-center', 
-      Cell: ({ value }) => value || 'N/A' 
+    {
+      Header: 'Final Amount',
+      accessor: 'finalAmount',
+      className: 'cell-center',
+      Cell: ({ value }) => value || 'N/A'
     }
   ];
 
   // Columns for the Vehicle Details table
   const aboutMeColumns = [
-    { 
-      Header: 'Vehicle No.', 
-      accessor: 'vehicleNumber', 
-      Cell: ({ value }) => value || 'N/A' 
+    {
+      Header: 'Vehicle No.',
+      accessor: 'vehicleNumber',
+      Cell: ({ value }) => value || 'N/A'
     },
-    { 
-      Header: 'Vehicle Name', 
-      accessor: 'vehicleName', 
-      Cell: ({ value }) => value || 'N/A' 
+    {
+      Header: 'Vehicle Name',
+      accessor: 'vehicleName',
+      Cell: ({ value }) => value || 'N/A'
     },
     {
       Header: 'Driver Name',
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
         return driver ? driver.userName : 'N/A';
-      },
+      }
     },
     {
       Header: 'Driver Contact',
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
         return driver ? driver.contactNumber : 'N/A';
-      },
+      }
     }
   ];
 
@@ -211,8 +213,8 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                     <Stack spacing={2.5} alignItems="center">
                       <Avatar alt="Avatar 1" size="xl" src={personalDetails.userImage || ''} />
                       <Stack spacing={0.5} alignItems="center">
-                        <Typography variant="h5">{personalDetails.userName || "N/A"}</Typography>
-                        <Typography color="secondary">+91-{personalDetails.contactNumber || "N/A"}</Typography>
+                        <Typography variant="h5">{personalDetails.userName || 'N/A'}</Typography>
+                        <Typography color="secondary">+91-{personalDetails.contactNumber || 'N/A'}</Typography>
                       </Stack>
                     </Stack>
                   </Grid>
@@ -271,7 +273,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Bank Name
                         </Typography>
                         <Typography
-                          title={personalDetails.bankName || "N/A"}
+                          title={personalDetails.bankName || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -280,7 +282,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.bankName || "N/A"}
+                          {personalDetails.bankName || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -290,7 +292,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Branch Name
                         </Typography>
                         <Typography
-                          title={personalDetails.branchName || "N/A"}
+                          title={personalDetails.branchName || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -299,7 +301,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.branchName || "N/A"}
+                          {personalDetails.branchName || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -309,7 +311,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           IFSC Code
                         </Typography>
                         <Typography
-                          title={personalDetails.IFSC_code || "N/A"}
+                          title={personalDetails.IFSC_code || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -318,7 +320,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.IFSC_code || "N/A"}
+                          {personalDetails.IFSC_code || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -328,7 +330,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Account Number
                         </Typography>
                         <Typography
-                          title={personalDetails.accountNumber || "N/A"}
+                          title={personalDetails.accountNumber || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -337,7 +339,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.accountNumber || "N/A"}
+                          {personalDetails.accountNumber || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -347,7 +349,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Account Holder Name
                         </Typography>
                         <Typography
-                          title={personalDetails.accountHolderName || "N/A"}
+                          title={personalDetails.accountHolderName || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -356,7 +358,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.accountHolderName || "N/A"}
+                          {personalDetails.accountHolderName || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -366,7 +368,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Address
                         </Typography>
                         <Typography
-                          title={personalDetails.bankAddress || "N/A"}
+                          title={personalDetails.bankAddress || 'N/A'}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -375,7 +377,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.bankAddress || "N/A"}
+                          {personalDetails.bankAddress || 'N/A'}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -464,14 +466,26 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
           </Grid>
           <Grid item xs={12} sm={8} md={7} lg={7}>
             <Stack spacing={0} sx={{ width: '100%' }}>
-              <MainCard title="Payment History" sx={{ width: '100%' }}>
+              <MainCard title="Payment History">
                 <ScrollX>
-                  <ReactTable columns={personalDetailsColumns} data={transactionData} defaultPageSize={5} hideHeader />
+                  {loading ? (
+                    <TableSkeleton rows={10} columns={5} />
+                  ) : transactionData?.length === 0 ? (
+                    <TableNoDataMessage text="No Payment History Found" />
+                  ) : (
+                    <ReactTable columns={personalDetailsColumns} data={transactionData} defaultPageSize={5} hideHeader />
+                  )}
                 </ScrollX>
               </MainCard>
-              <MainCard title="Vehicle Details" sx={{ width: '100%' }}>
+              <MainCard title="Vehicle Details">
                 <ScrollX>
-                  <ReactTable columns={aboutMeColumns} data={vehicleData} showPagination={false} defaultPageSize={5} hideHeader />
+                  {loading ? (
+                    <TableSkeleton rows={10} columns={5} />
+                  ) : vehicleData?.length === 0 ? (
+                    <TableNoDataMessage text="No Vehicle Details Found" />
+                  ) : (
+                    <ReactTable columns={aboutMeColumns} data={vehicleData} showPagination={false} defaultPageSize={5} hideHeader />
+                  )}
                 </ScrollX>
               </MainCard>
             </Stack>
