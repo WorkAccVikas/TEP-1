@@ -31,6 +31,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
   const [cabOptions, setCabOptions] = useState([]);
 
   const [tripPayload, setTripPayload] = useState([]);
+  console.log(`🚀 ~ AssignTripsDialog ~ tripPayload:`, tripPayload);
 
   const [errorMessages, setErrorMessages] = useState([]);
 
@@ -80,6 +81,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
       };
     });
 
+    console.log('tripPayload = ', tripPayload);
+
     const rosterUploadArray = tripPayload.map((item) => {
       return {
         vehicleTypeArray: item._vehicleType ? [{ _id: item._vehicleType._id, vehicleTypeName: item._vehicleType.vehicleTypeName }] : [],
@@ -93,7 +96,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         zoneName: item._zoneName?.zoneName || 'N/A',
         zoneType: item._zoneType?.zoneTypeName || 'N/A',
         vehicleType: item._vehicleType?.vehicleTypeName || 'N/A',
-        vehicleNumber: item._driver?.assignedVehicle?.vehicleId?.vehicleNumber || 'N/A',
+        // vehicleNumber: item._driver?.assignedVehicle?.vehicleId?.vehicleNumber || 'N/A',
         rosterMapDataId: item._roster_id,
         _roster_id: item._roster_id,
         tripId: item._roster_id,
@@ -107,7 +110,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         guard: item._guard_1,
         guardPrice: item._guard_price_1,
         vehicleTypeID: item._vehicleType?._id,
-        // vehicleNumber: item._cab?.vehicleNumber || 'N/A',
+        vehicleNumber: item._cab?.vehicleNumber || 'N/A',
         driverId: item._driver?._id,
         companyRate: item._companyRate,
         vendorRate: 0,
@@ -119,6 +122,8 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
         status: 3
       };
     });
+
+    console.log('rosterUploadArray = ', rosterUploadArray);
 
     const fileId = tripData[0].rosterFileId;
 
@@ -136,6 +141,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     };
 
     try {
+      // xl;
       const response = await axiosServices.post('/assignTrip/to/driver', _generateTripPayLoad);
       if (response.status === 201) {
         const response1 = await axiosServices.put('/tripData/map/roster/update', _mappedRosterDataPayload);
