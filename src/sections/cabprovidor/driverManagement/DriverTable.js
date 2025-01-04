@@ -214,6 +214,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Header: 'Vehicles',
           accessor: 'assignedVehicle',
           Cell: ({ row }) => {
+            // console.log("row.original",row.original);
 
             const assignedVehicle = row.original.assignedVehicle;
             const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : 'N/A'; // accessing vehicleNumber if assigned
@@ -357,14 +358,14 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             );
           }
         },
-        // {
-        //   Header: 'Compliance Progress',
-        //   accessor: 'progress',
-        //   Cell: ({ row, value }) => {
-        //     const progessValue = Math.floor(Math.random() * 101);
-        //     return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
-        //   }
-        // },
+        {
+          Header: 'Compliance Progress',
+          accessor: 'progress',
+          Cell: ({ row, value }) => {
+            const progessValue = Math.floor(Math.random() * 101);
+            return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+          }
+        },
         {
           Header: 'Actions',
           className: 'cell-center',
@@ -374,7 +375,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const isCabProviderDriver = row.original.isCabProviderDriver;
             return (
               <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-                {/* {isCabProviderDriver === USERTYPE.iscabProvider && (
+                {isCabProviderDriver === USERTYPE.iscabProvider && (
                   <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.READ}>
                     <Tooltip
                       componentsProps={{
@@ -398,7 +399,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                       </IconButton>
                     </Tooltip>
                   </WrapperButton>
-                )} */}
+                )}
 
                 <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.UPDATE}>
                   <Tooltip
