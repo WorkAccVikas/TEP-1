@@ -43,7 +43,7 @@ export const createTemplate = createAsyncThunk('templates/create', async (payloa
 
 export const updateTemplate = createAsyncThunk('templates/update', async (payload, { rejectWithValue }) => {
   try {
-    const response = await axios.put(API_URL.UPDATE, payload);
+    const response = await axios.post(API_URL.UPDATE, payload);
     return response;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
@@ -95,8 +95,11 @@ const templateSlice = createSlice({
       })
       .addCase(fetchAllTemplates.fulfilled, (state, action) => {
         console.log(`🚀 ~ .addCase ~ action:`, action);
+        const rosterTemplateId = action.payload._id;
+        console.log(`🚀 ~ .addCase ~ rosterTemplateId:`, rosterTemplateId);
+
         state.data = action.payload.RosterTemplates || []; // Handle empty result
-        state.rosterTemplateId = action.payload._id;
+        state.rosterTemplateId = rosterTemplateId;
         state.loading = false;
       })
       .addCase(fetchAllTemplates.rejected, (state, action) => {
