@@ -212,7 +212,6 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Header: 'Vehicles',
           accessor: 'assignedVehicle',
           Cell: ({ row }) => {
-            // console.log("row.original",row.original);
 
             const assignedVehicle = row.original.assignedVehicle;
             const cabNo = assignedVehicle ? assignedVehicle.vehicleId.vehicleNumber : null; // accessing vehicleNumber if assigned
