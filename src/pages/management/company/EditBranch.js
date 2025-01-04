@@ -30,6 +30,8 @@ import ConfigurableAutocomplete from 'components/autocomplete/ConfigurableAutoco
 import { LoadingButton } from '@mui/lab';
 import { Save2 } from 'iconsax-react';
 import { result } from 'lodash';
+import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import { APP_DEFAULT_PATH } from 'config';
 
 // ==============================|| LAYOUTS -  COLUMNS ||============================== //
 
@@ -275,10 +277,17 @@ function EditBranch() {
     })();
   }, [id, dispatch]);
 
+  let breadcrumbLinks = [
+    { title: 'Home', to: APP_DEFAULT_PATH },
+    { title: 'Company', to: '/management/company/view' },
+    { title: 'Update branch' }
+  ];
+
   return (
     <form onSubmit={formik.handleSubmit} id="validation-forms">
       <Grid container spacing={3}>
         <Grid item xs={12}>
+          <Breadcrumbs custom links={breadcrumbLinks} />
           <MainCard title={'UPDATE BRANCH INFORMATION'}>
             <Grid container spacing={2} alignItems="center">
               {/* <Grid item xs={12} lg={4}>
