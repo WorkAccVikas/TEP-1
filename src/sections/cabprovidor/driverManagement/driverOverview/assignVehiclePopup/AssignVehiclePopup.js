@@ -165,7 +165,7 @@ const AssignVehiclePopup = ({ handleClose, driverId, setUpdateKey, updateKey, as
   };
 
   return (
-    <MainCard title={assignedVehicle ? 'Reassign Vehicle' : 'Assign Vehicle'}>
+    <MainCard title="Assign Vehicle">
       <form onSubmit={formik.handleSubmit}>
         <Grid container spacing={1}>
           <Grid item xs={12}>
