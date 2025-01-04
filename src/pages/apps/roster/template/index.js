@@ -10,7 +10,7 @@ import axiosServices from 'utils/axios';
 import { ThemeMode } from 'config';
 import ReactTable from 'components/tables/reactTable1/ReactTable';
 import CustomAlertDelete from './CustomAlertDelete';
-import { fetchAllTemplates } from 'store/slice/cabProvidor/templateSlice';
+import { deleteTemplate, fetchAllTemplates } from 'store/slice/cabProvidor/templateSlice';
 import { useSelector } from 'store';
 
 const TemplateList = () => {
@@ -140,13 +140,8 @@ const TemplateList = () => {
       // TODO : API CALL FOR DELETING TEMPLATE
       alert(`handleDelete ${deleteId}`);
       setDeleteLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // const response = await axiosServices.delete(`/tripData/delete/roster/settings/${deleteId}`);
-
-      const response = {
-        status: 200
-      };
+      const response = await dispatch(deleteTemplate(deleteId)).unwrap();
+      console.log(`🚀 ~ handleDelete ~ response:`, response);
 
       if (response.status === 200) {
         dispatch(

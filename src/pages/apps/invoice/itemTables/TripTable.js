@@ -261,7 +261,7 @@ const TripItemTable = ({
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
     }
-  }, [tripData]);
+  }, [tripData, groupByOption, userType]);
 
   useEffect(() => {
     if (tripData && tripData.length > 0) {
