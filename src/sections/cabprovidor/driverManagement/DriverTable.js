@@ -45,6 +45,7 @@ import AlertDelete from 'components/alertDialog/AlertDelete';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { Base64 } from 'js-base64';
 import WrapperButton from 'components/common/guards/WrapperButton';
+import { FaCar } from 'react-icons/fa';
 
 const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
@@ -216,10 +217,10 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Cell: ({ row }) => {
             // console.log("row.original",row.original);
 
-            const assignedVehicle = row.original.assignedVehicle.filter(item=> item.vehicleId);
+            const assignedVehicle = row.original.assignedVehicle.filter((item) => item.vehicleId);
             const cabNo = assignedVehicle.length > 0 ? assignedVehicle : null; // accessing vehicleNumber if assigned
 
-            console.log("row",row.original);
+            console.log('row', row.original);
 
             if (!cabNo) {
               return (
@@ -239,8 +240,6 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               );
             } else {
               return (
-               
-                
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {assignedVehicle.map((vehicle, index) => (
                     <Chip
@@ -258,6 +257,19 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                       onClick={() => handleOpenReassignDialog(row.original, vehicle.vehicleId._id)}
                     />
                   ))}
+
+                  <Button
+                    variant="outlined"
+                    startIcon={<FaCar />}
+                    title="Assign new vehicle"
+                    size="small"
+                    sx={{
+                      alignSelf: 'center'
+                    }}
+                    onClick={() => handleOpenPendingDialog(row.original)}
+                  >
+                    Assign
+                  </Button>
                 </div>
               );
             }
