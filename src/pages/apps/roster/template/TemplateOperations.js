@@ -3,9 +3,10 @@ import CustomCircularLoader from 'components/CustomCircularLoader';
 import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { useSelector } from 'store';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
-import { createTemplate } from 'store/slice/cabProvidor/templateSlice';
+import { createTemplate, getTemplateDetails, updateTemplate } from 'store/slice/cabProvidor/templateSlice';
 import axiosServices from 'utils/axios';
 import * as XLSX from 'xlsx';
 
@@ -78,24 +79,29 @@ const TemplateOperations = () => {
   const [loading, setLoading] = useState(false);
   const [mutateLoading, setMutateLoading] = useState(false);
 
+  const { rosterTemplateId } = useSelector((state) => state.template);
+
   useEffect(() => {
     // TODO : API call FOR GETTING DETAILS OF TEMPLATE
     const fetchTemplateDetails = async () => {
       try {
         setLoading(true);
         console.log('Api call for get template details (At Template Updating)');
+        console.log({ id });
+        const response = await dispatch(getTemplateDetails(id)).unwrap();
+        console.log(`🚀 ~ fetchTemplateDetails ~ response:`, response);
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        setMappedHeaders(fakeResponse.mappedData);
+        setMappedHeaders(response.data.mappedData);
         setExcelHeaders(fakeResponse.excelHeaders);
         setFormData((prev) => {
           return {
             ...prev,
-            templateName: fakeResponse.templateName,
-            dateFormat: fakeResponse.dateFormat,
-            timeFormat: fakeResponse.timeFormat,
-            pickupType: fakeResponse.pickupType,
-            dropType: fakeResponse.dropType
+            templateName: response.data.templateName,
+            dateFormat: response.data.dateFormat,
+            timeFormat: response.data.timeFormat,
+            pickupType: response.data.pickupType,
+            dropType: response.data.dropType
           };
         });
       } catch (error) {
@@ -256,7 +262,18 @@ const TemplateOperations = () => {
         CabproviderId = userInformation.userId;
       }
 
+      const payload = {
+        data: {
+          mappedData: mappedHeaders,
+          ...formData,
+          rosterTemplateId
+        }
+      };
+      console.log(`🚀 ~ editTemplate ~ payload:`, payload);
+
       setMutateLoading(true);
+      const response = await dispatch(updateTemplate(payload)).unwrap();
+      console.log(`🚀 ~ editTemplate ~ response:`, response);
       await new Promise((resolve) => setTimeout(resolve, 2000));
       alert(`editTemplate api finished ${CabproviderId}`);
     } catch (error) {
