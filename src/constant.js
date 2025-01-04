@@ -101,6 +101,8 @@ export const PIN_CODE_REGEX_PATTERN = /^[1-9][0-9]{5}$/;
 
 export const MOBILE_NUMBER_REGEX_PATTERN = /^\d{10}$/; // Matches exactly 10 digits
 
+export const ALPHA_NUMERIC_REGEX_PATTERN = /^[a-zA-Z0-9]+$/;
+
 export const DOCUMENT_TITLE = {
   '/landing': 'Landing',
   '/login': 'Login',

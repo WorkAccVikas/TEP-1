@@ -1,4 +1,4 @@
-import { EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN, PIN_CODE_REGEX_PATTERN } from 'constant';
+import { EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN, PIN_CODE_REGEX_PATTERN, ALPHA_NUMERIC_REGEX_PATTERN } from 'constant';
 // Modified validation functions to include detailed error messages
 export const isRequiredString = (value) => {
   if (typeof value === 'string' && value.trim() !== '') return true;
@@ -149,6 +149,18 @@ export const validateArrayItem = (item, rules, fieldMapping) => {
     }
   });
   return Object.keys(errors).length === 0 ? null : errors;
+};
+
+export const isValidVehicleNumber = (value) => {
+  if (!value) {
+    throw new Error('This field is required');
+  }
+
+  if (!ALPHA_NUMERIC_REGEX_PATTERN.test(value)) {
+    throw new Error('Expected a valid vehicle number');
+  }
+
+  return true;
 };
 
 // Function to separate valid and invalid items

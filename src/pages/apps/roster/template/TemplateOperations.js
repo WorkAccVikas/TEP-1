@@ -253,8 +253,6 @@ const TemplateOperations = () => {
 
   const editTemplate = async () => {
     try {
-      console.log('editTemplate');
-      alert('editTemplate');
       let CabproviderId;
       const userInformation = JSON.parse(localStorage.getItem('userInformation'));
 
@@ -266,7 +264,7 @@ const TemplateOperations = () => {
         data: {
           mappedData: mappedHeaders,
           ...formData,
-          rosterTemplateId
+          rosterTemplateId: id
         }
       };
       console.log(`🚀 ~ editTemplate ~ payload:`, payload);
@@ -274,8 +272,16 @@ const TemplateOperations = () => {
       setMutateLoading(true);
       const response = await dispatch(updateTemplate(payload)).unwrap();
       console.log(`🚀 ~ editTemplate ~ response:`, response);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert(`editTemplate api finished ${CabproviderId}`);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Template updated successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: true
+        })
+      );
+      navigate('/settings/roster/template', { replace: true });
     } catch (error) {
       console.log('Error :: editTemplate = ', error);
       dispatch(
