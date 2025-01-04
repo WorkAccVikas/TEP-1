@@ -5,6 +5,7 @@ import { handleReset } from 'utils/helper';
 
 const initialState = {
   data: null, // Empty array initially
+  rosterTemplateId: null,
   metaData: {
     totalCount: 0,
     page: 1,
@@ -17,9 +18,9 @@ const initialState = {
 const API_URL = {
   ALL: '/tripData/list/roster/settings',
   CREATE: '/tripData/add/roster/setting',
-  UPDATE: '',
-  DELETE: '',
-  DETAILS: ''
+  UPDATE: '/tripData/roster/setting/edit/template',
+  DELETE: '/tripData/roster/setting/delete/template',
+  DETAILS: '/tripData/roster/setting/view/template'
 };
 
 export const fetchAllTemplates = createAsyncThunk('templates/fetchAll', async (_, { rejectWithValue, getState }) => {
@@ -49,9 +50,15 @@ export const updateTemplate = createAsyncThunk('templates/update', async (payloa
   }
 });
 
-export const deleteTemplate = createAsyncThunk('templates/delete', async (id, { rejectWithValue }) => {
+export const deleteTemplate = createAsyncThunk('templates/delete', async (id, { rejectWithValue, getState }) => {
   try {
-    const response = await axios.delete(`${API_URL.DELETE}/${id}`);
+    const state = getState();
+    // const rosterTemplateId = state.template.rosterTemplateId;
+    const response = await axios.put(`${API_URL.DELETE}`, null, {
+      params: {
+        rosterTemplateId: id
+      }
+    });
     return response;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
@@ -60,8 +67,12 @@ export const deleteTemplate = createAsyncThunk('templates/delete', async (id, { 
 
 export const getTemplateDetails = createAsyncThunk('templates/details', async (id, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${API_URL.DETAILS}/${id}`);
-    return response;
+    const response = await axios.get(`${API_URL.DETAILS}`, {
+      params: {
+        rosterTemplateId: id
+      }
+    });
+    return response.data;
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
   }
@@ -85,6 +96,7 @@ const templateSlice = createSlice({
       .addCase(fetchAllTemplates.fulfilled, (state, action) => {
         console.log(`🚀 ~ .addCase ~ action:`, action);
         state.data = action.payload.RosterTemplates || []; // Handle empty result
+        state.rosterTemplateId = action.payload._id;
         state.loading = false;
       })
       .addCase(fetchAllTemplates.rejected, (state, action) => {

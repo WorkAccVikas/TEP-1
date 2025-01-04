@@ -196,7 +196,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               {/* Confirmation Dialog */}
               <Dialog open={openDialog} onClose={handleCancel}>
                 <DialogTitle>Confirm Status Change</DialogTitle>
-                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this cab?</DialogContent>
+                <DialogContent>Are you sure you want to {newStatus === 1 ? 'activate' : 'deactivate'} this vendor?</DialogContent>
                 <DialogActions>
                   <Button onClick={handleCancel} color="error">
                     Cancel
