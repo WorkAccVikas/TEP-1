@@ -74,11 +74,11 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
     setPendingDialogOpen(true);
   };
 
-  const handleOpenReassignDialog = (row) => {
+  const handleOpenReassignDialog = (row, vehicleId) => {
     setDriverId(row);
-    console.log({row});
-    
-    setAssignedVehicle(row?.assignedVehicle || []);
+    console.log({ row });
+
+    setAssignedVehicle(vehicleId || null);
     setReassignDialogOpen(true);
   };
 
@@ -182,7 +182,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                   style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                  {formattedValue  || 'N/A'}
+                  {formattedValue || 'N/A'}
                   {isCabProviderDriver > 0 && (
                     <Tooltip title="Cabprovider" arrow>
                       <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
@@ -216,8 +216,10 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Cell: ({ row }) => {
             // console.log("row.original",row.original);
 
-            const assignedVehicle = row.original.assignedVehicle;
-            const cabNo = assignedVehicle ? assignedVehicle?.vehicleId?.vehicleNumber : null; // accessing vehicleNumber if assigned
+            const assignedVehicle = row.original.assignedVehicle.filter(item=> item.vehicleId);
+            const cabNo = assignedVehicle.length > 0 ? assignedVehicle : null; // accessing vehicleNumber if assigned
+
+            console.log("row",row.original);
 
             if (!cabNo) {
               return (
@@ -237,19 +239,26 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               );
             } else {
               return (
-                <Chip
-                  color="success"
-                  label={cabNo}
-                  size="small"
-                  variant="light"
-                  sx={{
-                    ':hover': {
-                      backgroundColor: 'rgba(36, 140, 106 ,.5)',
-                      cursor: 'pointer'
-                    }
-                  }}
-                  onClick={() => handleOpenReassignDialog(row.original)}
-                />
+               
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {assignedVehicle.map((vehicle, index) => (
+                    <Chip
+                      key={index}
+                      color="success"
+                      label={vehicle?.vehicleId?.vehicleNumber}
+                      size="small"
+                      variant="light"
+                      sx={{
+                        ':hover': {
+                          backgroundColor: 'rgba(36, 140, 106 ,.5)',
+                          cursor: 'pointer'
+                        }
+                      }}
+                      onClick={() => handleOpenReassignDialog(row.original, vehicle.vehicleId._id)}
+                    />
+                  ))}
+                </div>
               );
             }
           }
@@ -375,7 +384,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const isCabProviderDriver = row.original.isCabProviderDriver;
             return (
               <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-                {isCabProviderDriver === USERTYPE.iscabProvider && (
+                {/* {isCabProviderDriver === USERTYPE.iscabProvider && (
                   <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.READ}>
                     <Tooltip
                       componentsProps={{
@@ -399,7 +408,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                       </IconButton>
                     </Tooltip>
                   </WrapperButton>
-                )}
+                )} */}
 
                 <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.UPDATE}>
                   <Tooltip
