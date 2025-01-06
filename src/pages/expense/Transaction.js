@@ -254,15 +254,21 @@ const Transaction = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
+        const companyId = filterOptions?.selectedCompany?._id;
+        const vendorId = filterOptions?.selectedVendor?._id;
+        const driverId = filterOptions?.selectedDriver?._id;
         const response = await axiosServices.get('/invoice/all/transactions', {
           params: {
             // page: page,
             // limit: limit,
             startDate: formatDateUsingMoment(startDate),
             endDate: formatDateUsingMoment(endDate),
-            companyId: filterOptions.selectedCompany._id,
-            vendorId: filterOptions.selectedVendor._id,
-            driverId: filterOptions.selectedDriver._id
+            companyId,
+            vendorId,
+            driverId
+            // companyId: filterOptions.selectedCompany._id,
+            // vendorId: filterOptions.selectedVendor._id,
+            // driverId: filterOptions.selectedDriver._id
           }
         });
         console.log('response', response);
