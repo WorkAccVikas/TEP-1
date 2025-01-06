@@ -151,12 +151,14 @@ const AddCabRateDriver = () => {
       try {
         const res = await dispatch(fetchAllDrivers(CabProviderId)).unwrap();
         console.log(`🚀 ~ AddCabRateDriver ~ res:`, res);
-        const res1 = res.map((i) => {
-          return {
-            _id: i.driverId._id,
-            userName: i.driverId.userName
-          };
-        });
+        const res1 = res
+          .filter((item) => item.driverId)
+          .map((i) => {
+            return {
+              _id: i.driverId._id,
+              userName: i.driverId.userName
+            };
+          });
         // setDriverList(res);
         setDriverList(res1);
       } catch (error) {
@@ -432,7 +434,7 @@ const AddCabRateDriver = () => {
 
   return (
     <>
-     <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-end'} sx={{mb:2}}>
+      <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-end'} sx={{ mb: 2 }}>
         <Button
           variant="contained"
           color="secondary"

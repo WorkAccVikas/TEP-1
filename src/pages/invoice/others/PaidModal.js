@@ -26,19 +26,19 @@ const remainingAmount = (totalAmount, receivedAmount, TDS) => {
 const validationSchema = Yup.object({
   receivedAmount: Yup.number()
     .min(1, 'The amount you enter must be more than zero.')
-    .test('max-remaining', function (value) {
-      const { totalAmount, TDS } = this.parent; // Access sibling fields
-      const maxAllowed = remainingAmount(totalAmount, 0, TDS);
-      if (value > maxAllowed) {
-        return this.createError({
-          path: this.path,
-          message: `Received amount exceeds the allowable limit of ₹${maxAllowed}`
-        });
-      }
-      return true;
-    })
+    // .test('max-remaining', function (value) {
+    //   const { totalAmount, TDS } = this.parent; // Access sibling fields
+    //   const maxAllowed = remainingAmount(totalAmount, 0, TDS);
+    //   if (value > maxAllowed) {
+    //     return this.createError({
+    //       path: this.path,
+    //       message: `Received amount exceeds the allowable limit of ₹${maxAllowed}`
+    //     });
+    //   }
+    //   return true;
+    // })
     .required('Received Amount is required'),
-  TDS: Yup.number().min(0, 'TDS must be at least 0').max(100, 'TDS cannot exceed 100').required('TDS is required'),
+  TDSRate: Yup.number().min(0, 'TDS must be at least 0').max(100, 'TDS cannot exceed 100').required('TDS is required'),
   transactionID: Yup.string().required('Transaction ID is required')
 });
 
@@ -52,7 +52,7 @@ const PaidModal = ({ onClose, amount, onConfirm }) => {
       TDS: 0,
       TDSRate: 0
     },
-    // validationSchema,
+    validationSchema,
     onSubmit: async (values) => {
       setButtonClicked(true);
       console.log(values.totalAmount, values.receivedAmount + values.TDS);
@@ -80,7 +80,7 @@ const PaidModal = ({ onClose, amount, onConfirm }) => {
   const handleCustomChange = (fieldName, value) => {
     // Example: Custom logic before setting the value
     const updatedValue = value < 0 ? 0 : value; // Prevent negative values
-    formik.setFieldValue(fieldName, updatedValue);
+    formik.setFieldValue(fieldName, Number(updatedValue) || 0);
     if (fieldName === 'TDSRate') {
       const recievedAmount = formik.values.totalAmount - (formik.values.totalAmount * updatedValue) / 100;
       formik.setFieldValue('TDS', (formik.values.totalAmount * updatedValue) / 100);

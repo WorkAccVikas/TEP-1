@@ -427,9 +427,10 @@ const Create = () => {
             close: true
           })
         );
-        navigation('/apps/invoices/list', {
-          replace: true
-        });
+        // navigation('/apps/invoices/company', {
+        //   replace: true
+        // });
+        navigation(-1, { replace: true });
       }
     } catch (error) {
       console.error('Error creating invoice:', error);
