@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import ScrollX from 'components/ScrollX';
 import PaginationBox from 'components/tables/Pagination';
-import ReactTable from 'components/tables/reactTable/ReactTable';
 import PropTypes from 'prop-types';
 import { useCallback, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
@@ -28,7 +27,7 @@ import ReassignVehicle from './driverOverview/reassignVehiclePopup/ReassignVehic
 import axiosServices from 'utils/axios';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { dispatch, useSelector } from 'store';
-import { Edit, Eye, Trash } from 'iconsax-react';
+import { Edit, Eye, Trash, AddSquare } from 'iconsax-react';
 import { ThemeMode } from 'config';
 import { ACTION, FUEL_TYPE, MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import {
@@ -46,8 +45,9 @@ import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { Base64 } from 'js-base64';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { FaCar } from 'react-icons/fa';
+import ReactTable from 'components/tables/reactTable4/ReactTable';
 
-const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
+const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey, setAllDriversSelected }) => {
   const theme = useTheme();
   // const selectedID = useSelector((state) => state.drivers.selectedID);
   // console.log('selectedID', selectedID);
@@ -58,6 +58,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   const [assignedVehicle, setAssignedVehicle] = useState([]);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+
   const userType = useSelector((state) => state.auth.userType);
 
   const { remove, deletedName, selectedID } = useSelector((state) => state.drivers);
@@ -148,12 +149,12 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
       };
 
       return [
-        {
-          Header: '_id',
-          accessor: '_id',
-          className: 'cell-center',
-          disableSortBy: true
-        },
+        // {
+        //   Header: '_id',
+        //   accessor: '_id',
+        //   className: 'cell-center',
+        //   disableSortBy: true
+        // },
         {
           Header: '#',
           accessor: 'id',
@@ -195,16 +196,26 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           }
         },
         {
+          Header: 'Contact Number',
+          accessor: 'contactNumber',
+          Cell: ({ value }) => value || 'N/A'
+          // disableSortBy: true
+        },
+        {
           Header: 'Email',
           accessor: 'userEmail',
           Cell: ({ value }) => value || 'N/A'
           // disableSortBy: true
         },
         {
-          Header: 'Contact Number',
-          accessor: 'contactNumber',
-          Cell: ({ value }) => value || 'N/A'
-          // disableSortBy: true
+          Header: 'Driver Within',
+          accessor: 'driverWithin',
+          Cell: ({ value }) => {
+            // List of random names
+            const randomNames = ['John Doe', 'Jane Smith', 'Alex Johnson', 'Emily Davis', 'Chris Brown'];
+
+            return value || randomNames[Math.floor(Math.random() * randomNames.length)];
+          }
         },
         // {
         //   Header: 'Office Charge',
@@ -220,7 +231,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const assignedVehicle = row.original.assignedVehicle.filter((item) => item.vehicleId);
             const cabNo = assignedVehicle.length > 0 ? assignedVehicle : null; // accessing vehicleNumber if assigned
 
-            console.log('row', row.original);
+            // console.log('row', row.original);
 
             if (!cabNo) {
               return (
@@ -379,14 +390,14 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             );
           }
         },
-        // {
-        //   Header: 'Compliance Progress',
-        //   accessor: 'progress',
-        //   Cell: ({ row, value }) => {
-        //     const progessValue = Math.floor(Math.random() * 101);
-        //     return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
-        //   }
-        // },
+        {
+          Header: 'Compliance Progress',
+          accessor: 'progress',
+          Cell: ({ row, value }) => {
+            const progessValue = Math.floor(Math.random() * 101);
+            return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
+          }
+        },
         {
           Header: 'Actions',
           className: 'cell-center',
@@ -474,6 +485,30 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                     </IconButton>
                   </Tooltip>
                 </WrapperButton>
+
+                <WrapperButton>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
+                      }
+                    }}
+                    title="Add Expense"
+                  >
+                    <IconButton
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(`🚀 ~ row.values.id:`, row.values);
+                      }}
+                    >
+                      <AddSquare />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
               </Stack>
             );
           }
@@ -495,7 +530,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               ) : data?.length === 0 ? (
                 <EmptyTableDemo />
               ) : (
-                <ReactTable columns={columns} data={data} />
+                <ReactTable columns={columns} data={data} setAllDriversSelected={setAllDriversSelected} />
               )}
             </ScrollX>
           </MainCard>
