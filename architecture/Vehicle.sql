@@ -1,16 +1,34 @@
--- Vehicles Table: Stores vehicle details, now linking to a category
 CREATE TABLE
     Vehicles (
-        vehicleId UUID PRIMARY KEY, -- Unique vehicle ID
-        vehicleNumber VARCHAR NOT NULL, -- Vehicle registration number
-        vehicleType VARCHAR NOT NULL, -- Type of the vehicle (e.g., Sedan, Truck)
-        manufacturer VARCHAR, -- Vehicle manufacturer (e.g., Toyota, Ford)
-        model VARCHAR, -- Vehicle model (e.g., Corolla, F-150)
-        capacity INT, -- Passenger or weight capacity
-        vehicleOwner UUID REFERENCES Users (userId) -- Link to the vehicle Owner allow null
+        vehicleId UUID PRIMARY KEY,
+        ownerId UUID REFERENCES Users (userId), -- Owner of the vehicle
+        companyId UUID REFERENCES Companies (companyId), -- Optional, if owned by a company
         categoryId UUID REFERENCES VehicleCategories (categoryId), -- Link to the vehicle category
-        fuelType VARCHAR, -- Fuel type (e.g., Diesel, Petrol, Electric)
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp for vehicle record creation
+        vehicleType VARCHAR NOT NULL, -- E.g., car, truck, etc.
+        registrationNumber VARCHAR UNIQUE NOT NULL, -- Vehicle registration
+        capacity INT, -- Passenger or cargo capacity
+        isAvailable BOOLEAN DEFAULT TRUE, -- Availability for trips
+        isShared BOOLEAN DEFAULT FALSE, -- Indicates if the vehicle can be used by other companies
+        pricing JSONB, -- Pricing details (e.g., per km, per hour)
+        status VARCHAR CHECK (status IN ('active', 'inactive', 'maintenance')) DEFAULT 'active',
+        deletedAt TIMESTAMP, -- Soft delete
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE
+    VehicleMaintenance (
+        maintenanceId UUID PRIMARY KEY,
+        vehicleId UUID REFERENCES Vehicles (vehicleId) ON DELETE CASCADE,
+        maintenanceType VARCHAR NOT NULL CHECK (
+            maintenanceType IN ('repair', 'service', 'inspection')
+        ),
+        scheduledDate TIMESTAMP NOT NULL,
+        completedDate TIMESTAMP,
+        cost DECIMAL(10, 2),
+        status VARCHAR CHECK (status IN ('pending', 'completed', 'canceled')) DEFAULT 'pending',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
 CREATE TABLE

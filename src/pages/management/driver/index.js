@@ -66,7 +66,6 @@ const Driver = () => {
   const [driverType, setDriverType] = useState(1);
   const lastPageIndex = metaData.lastPageNo;
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
-  const [allDriversSelected, setAllDriversSelected] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
 
