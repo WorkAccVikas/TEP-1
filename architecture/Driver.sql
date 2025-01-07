@@ -11,7 +11,6 @@ CREATE TABLE
 CREATE TABLE
     LoanEmi (
         loanId UUID PRIMARY KEY, -- Unique loan ID
-        vehicleId UUID REFERENCES Vehicles (vehicleId) ON DELETE CASCADE, -- Reference to the vehicle
         userId UUID REFERENCES Users (userId) ON DELETE SET NULL, -- Driver or vendor responsible for the loan
         loanAmount DECIMAL(12, 2) NOT NULL, -- Total loan amount
         emiAmount DECIMAL(10, 2) NOT NULL, -- EMI amount
