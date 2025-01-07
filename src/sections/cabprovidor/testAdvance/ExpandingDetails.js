@@ -29,7 +29,7 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 
 // assets
-import { ArrowDown2, ArrowRight2, Eye, ShieldCross, TickCircle } from 'iconsax-react';
+import { Add, ArrowDown2, ArrowRight2, Eye, ShieldCross, TickCircle } from 'iconsax-react';
 import ExpandingUserDetail from './ExpandingUserDetail';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
@@ -50,6 +50,7 @@ import { formatDateUsingMoment } from 'utils/helper';
 import { HeaderSort } from 'components/third-party/ReactTable';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axiosServices from 'utils/axios';
+import NewAdvance from '../advances/NewAdvance';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -146,6 +147,7 @@ const ExpandingDetails = () => {
   const [advanceData, setAdvanceData] = useState(null);
   const [add, setAdd] = useState(false);
   const [key, setKey] = useState(0);
+  const [updateKey, setUpdateKey] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
@@ -154,6 +156,13 @@ const ExpandingDetails = () => {
 
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
+  };
+
+  const handleAdvance = (actionType) => {
+    if (actionType === 'add') {
+      setAdvanceData(null); // Reset for add
+    }
+    setAdd(!add); // Toggle dialog
   };
 
   const handleAdd = () => {
@@ -309,7 +318,7 @@ const ExpandingDetails = () => {
         Cell: ({ row }) => {
           const handleChange = async (event) => {
             const selectedValue = event.target.value;
-      
+
             if (selectedValue === 'Approve') {
               setAdvanceData(row.original);
               handleAdd(selectedValue);
@@ -318,16 +327,16 @@ const ExpandingDetails = () => {
               await handleReject();
             }
           };
-      
+
           const handleReject = async () => {
             try {
               const response = await axiosServices.put(`/advance/status/update`, {
                 data: {
                   _id: row.original._id, // Assuming `_id` is part of row data
-                  isApproved: 2,
+                  isApproved: 2
                 }
               });
-      
+
               if (response.status === 200) {
                 const snackbarColor = 'error'; // Red for rejection
                 dispatch(
@@ -362,14 +371,14 @@ const ExpandingDetails = () => {
                   }
                 })
               );
-            } 
+            }
           };
-      
+
           const handleChipClick = () => {
             setAdvanceData(row.original);
             handleAdd('Approve');
           };
-      
+
           return (
             <Stack
               direction="row"
@@ -446,7 +455,7 @@ const ExpandingDetails = () => {
             </Stack>
           );
         }
-      }      
+      }
     ],
     []
   );
@@ -467,6 +476,19 @@ const ExpandingDetails = () => {
     <>
       <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 2 }}>
         <Stack direction={'row'} alignItems="center" spacing={2}>
+          <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ}>
+            <Button
+              variant="contained"
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+              onClick={() => handleAdvance('add')}
+              size="small"
+              disabled={loading}
+              sx={{ height: '36px' }}
+            >
+              {loading ? 'Loading...' : 'Add Advance'}
+            </Button>
+          </WrapperButton>
+
           <WrapperButton moduleName={MODULE.ADVANCE_TYPE} permission={PERMISSIONS.READ}>
             <Button
               variant="contained"
@@ -524,6 +546,19 @@ const ExpandingDetails = () => {
         aria-describedby="alert-dialog-slide-description"
       >
         <AdvanceForm advanceData={advanceData} onCancel={handleAdd} key={key} setKey={setKey} />
+      </Dialog>
+      {/* Dialog for adding Advance Type */}
+      <Dialog
+        maxWidth="sm"
+        TransitionComponent={PopupTransition}
+        keepMounted
+        fullWidth
+        onClose={handleAdd}
+        open={add}
+        sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <NewAdvance advanceData={advanceData} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
       </Dialog>
     </>
   );

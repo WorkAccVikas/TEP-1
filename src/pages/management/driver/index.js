@@ -66,6 +66,7 @@ const Driver = () => {
   const [driverType, setDriverType] = useState(1);
   const lastPageIndex = metaData.lastPageNo;
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
+  const [allDriversSelected, setAllDriversSelected] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
 
@@ -263,6 +264,27 @@ const Driver = () => {
                 </Button>
               </Wrapper>
             </AccessControlWrapper>
+            {allDriversSelected && (
+              <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.isVendor]}>
+                <Wrapper
+                  allowedPermission={{
+                    [MODULE.DRIVER]: [PERMISSIONS.CREATE]
+                  }}
+                  strategy={STRATEGY.ALL}
+                >
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="warning"
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                    // onClick={handleDriverBulkUploadOpen}
+                    disabled={loading} // Disable button while loading
+                  >
+                    Add Expenses
+                  </Button>
+                </Wrapper>
+              </AccessControlWrapper>
+            )}
           </Stack>
         </Stack>
         <DriverTable
@@ -275,6 +297,7 @@ const Driver = () => {
           loading={loading}
           setUpdateKey={setUpdateKey}
           updateKey={updateKey}
+          setAllDriversSelected={setAllDriversSelected}
         />
       </Stack>
 

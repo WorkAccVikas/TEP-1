@@ -172,7 +172,7 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
               {option.vehicleNumber || 'N/A'}
               <br />
               <span style={{ fontSize: 'smaller', color: 'gray' }}>
-                {option?.vehicleTypeName || 'N/A'}
+                {option?.vehicleTypeName || 'No Cab Type'}
               </span>
             </div>
           </li>

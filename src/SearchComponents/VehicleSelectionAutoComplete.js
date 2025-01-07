@@ -89,7 +89,7 @@ const VehicleSelection = ({ sx, value, setSelectedOptions }) => {
             <div>
               {option.vehicleNumber}
               <br />
-              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.vehicleTypeName || 'N/A'}</span>
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.vehicleTypeName || 'No Cab Type'}</span>
             </div>
           </li>
         )}

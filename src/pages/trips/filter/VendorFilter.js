@@ -110,7 +110,7 @@ const VendorFilter = ({ setFilterOptions, sx, value }) => {
             <div>
               {option.vendorCompanyName || 'N/A'}
               <br />
-              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.workMobileNumber ? `+91-${option.workMobileNumber}` : 'N/A'}</span>
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.workMobileNumber ? `+91-${option?.workMobileNumber}` : 'No Contact Number'}</span>
             </div>
           </li>
         )}
