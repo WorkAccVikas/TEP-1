@@ -922,7 +922,7 @@ const TripList = () => {
     }
   ];
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_MONTH);
 
   const navigate = useNavigate();
 

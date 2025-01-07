@@ -478,3 +478,21 @@ export function checkGSTtype(str1, str2) {
 
   return firstTwoStr1 === firstTwoStr2;
 }
+
+/**
+ * Compares two arrays and returns the differences.
+ * @param {Array} array1 - The first array.
+ * @param {Array} array2 - The second array.
+ * @returns {Object} An object containing removeId (elements in array1 but not in array2)
+ *                  and newId (elements in array2 but not in array1).
+ * @complexity O(n + m) where n and m are the lengths of the input arrays.
+ */
+export const getArrayDifferences = (array1, array2) => {
+  const set1 = new Set(array1);
+  const set2 = new Set(array2);
+
+  const removeId = array1.filter((item) => !set2.has(item));
+  const newId = array2.filter((item) => !set1.has(item));
+
+  return { removeId, newId };
+};
