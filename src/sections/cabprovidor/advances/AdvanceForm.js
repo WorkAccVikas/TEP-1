@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import axios from 'axios';
 
 // material-ui
 import {
@@ -63,7 +62,6 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
           })
         );
         setKey(key + 1);
-        window.location.reload();
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -122,7 +120,7 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
             })
           );
           setKey(key + 1);
-          window.location.reload();
+          // window.location.reload();
         }
       } catch (error) {
         console.error('Error updating status:', error);
@@ -234,6 +232,16 @@ const AdvanceForm = ({ onCancel, advanceData, key, setKey }) => {
                       placeholder="Enter Approved Amount"
                       error={Boolean(formik.touched.approvedAmount && formik.errors.approvedAmount)}
                       helperText={formik.touched.approvedAmount && formik.errors.approvedAmount}
+                      InputProps={{
+        
+                        inputProps: {
+                          sx: {
+                            '::-webkit-outer-spin-button': { display: 'none' },
+                            '::-webkit-inner-spin-button': { display: 'none' },
+                            '-moz-appearance': 'textfield' // Firefox
+                          }
+                        }
+                      }}
                     />
                   </Stack>
                 </Grid>

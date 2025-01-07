@@ -8,6 +8,8 @@ import {
   Chip,
   CircularProgress,
   Dialog,
+  MenuItem,
+  Select,
   Stack,
   Switch,
   Table,
@@ -27,7 +29,7 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 
 // assets
-import { ArrowDown2, ArrowRight2, Eye } from 'iconsax-react';
+import { ArrowDown2, ArrowRight2, Eye, ShieldCross, TickCircle } from 'iconsax-react';
 import ExpandingUserDetail from './ExpandingUserDetail';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
@@ -46,6 +48,8 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import { height, width } from '@mui/system';
 import { formatDateUsingMoment } from 'utils/helper';
 import { HeaderSort } from 'components/third-party/ReactTable';
+import { openSnackbar } from 'store/reducers/snackbar';
+import axiosServices from 'utils/axios';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -166,7 +170,7 @@ const ExpandingDetails = () => {
         endDate: formatDateUsingMoment(endDate)
       })
     );
-  }, [dispatch, page, limit, startDate, endDate]);
+  }, [dispatch, page, limit, startDate, endDate, key]);
 
   const handleLimitChange = useCallback((event) => {
     setLimit(+event.target.value);
@@ -207,7 +211,7 @@ const ExpandingDetails = () => {
       {
         Header: 'Requested By',
         accessor: 'requestedById.userName',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Requested Amount',
@@ -217,7 +221,7 @@ const ExpandingDetails = () => {
       {
         Header: 'Advance Type',
         accessor: 'advanceTypeId.advanceTypeName',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Interest Rate',
@@ -254,48 +258,8 @@ const ExpandingDetails = () => {
       //   disableSortBy: true,
       //   Cell: ({ row }) => {
       //     const handleToggle = () => {
-      //       setAdvanceData(row.original);
-      //       handleAdd();
-      //     };
-
-      //     const getSwitchColor = () => {
-      //       if (row.original.isApproved === 1) return 'success'; // Green when approved
-      //       if (row.original.isApproved === 2) return 'error'; // Red when rejected
-      //       return 'default'; // Default color for pending
-      //     };
-
-      //     return (
-      //       <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
-      //         <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
-      //           <Tooltip
-      //             componentsProps={{
-      //               tooltip: {
-      //                 sx: {
-      //                   backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-      //                   opacity: 0.9
-      //                 }
-      //               }
-      //             }}
-      //             title={row.original.isApproved === 1 ? 'Reject' : 'Approve'}
-      //           >
-      //             <Switch
-      //               checked={row.original.isApproved === 1 || row.original.isApproved === 2}
-      //               onChange={handleToggle}
-      //               color={getSwitchColor()}
-      //             />
-      //           </Tooltip>
-      //         </WrapperButton>
-      //       </Stack>
-      //     );
-      //   }
-      // }
-      // {
-      //   Header: 'Actions',
-      //   disableSortBy: true,
-      //   Cell: ({ row }) => {
-      //     const handleToggle = () => {
-      //       // Only open the dialog if the status is not approved or rejected
-      //       if (row.original.isApproved !== 1 && row.original.isApproved !== 2) {
+      //       // Open the dialog only for pending or rejected statuses
+      //       if (row.original.isApproved === 0 || row.original.isApproved === 2) {
       //         setAdvanceData(row.original);
       //         handleAdd();
       //       }
@@ -308,9 +272,8 @@ const ExpandingDetails = () => {
       //     };
 
       //     const getTooltipTitle = () => {
-      //       // Only show "Approve" if it's not already approved or rejected
-      //       if (row.original.isApproved === 1) return 'Approved'; // No action for already approved
-      //       if (row.original.isApproved === 2) return 'Rejected'; // No action for rejected
+      //       if (row.original.isApproved === 1) return 'Approved'; // Approved status
+      //       if (row.original.isApproved === 2) return 'Rejected'; // Rejected status
       //       return 'Approve'; // Default for pending state
       //     };
 
@@ -332,7 +295,7 @@ const ExpandingDetails = () => {
       //               checked={row.original.isApproved === 1 || row.original.isApproved === 2}
       //               onChange={handleToggle}
       //               color={getSwitchColor()}
-      //               disabled={row.original.isApproved === 1 || row.original.isApproved === 2} // Disable switch for approved/rejected
+      //               disabled={row.original.isApproved === 1} // Disable switch for approved
       //             />
       //           </Tooltip>
       //         </WrapperButton>
@@ -344,52 +307,146 @@ const ExpandingDetails = () => {
         Header: 'Actions',
         disableSortBy: true,
         Cell: ({ row }) => {
-          const handleToggle = () => {
-            // Open the dialog only for pending or rejected statuses
-            if (row.original.isApproved === 0 || row.original.isApproved === 2) {
+          const handleChange = async (event) => {
+            const selectedValue = event.target.value;
+      
+            if (selectedValue === 'Approve') {
               setAdvanceData(row.original);
-              handleAdd();
+              handleAdd(selectedValue);
+            } else if (selectedValue === 'Reject') {
+              setAdvanceData(row.original);
+              await handleReject();
             }
           };
-
-          const getSwitchColor = () => {
-            if (row.original.isApproved === 1) return 'success'; // Green when approved
-            if (row.original.isApproved === 2) return 'error'; // Red when rejected
-            return 'default'; // Default color for pending
-          };
-
-          const getTooltipTitle = () => {
-            if (row.original.isApproved === 1) return 'Approved'; // Approved status
-            if (row.original.isApproved === 2) return 'Rejected'; // Rejected status
-            return 'Approve'; // Default for pending state
-          };
-
-          return (
-            <Stack direction="row" alignItems="center" justifyContent="left" spacing={0}>
-              <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
+      
+          const handleReject = async () => {
+            try {
+              const response = await axiosServices.put(`/advance/status/update`, {
+                data: {
+                  _id: row.original._id, // Assuming `_id` is part of row data
+                  isApproved: 2,
+                }
+              });
+      
+              if (response.status === 200) {
+                const snackbarColor = 'error'; // Red for rejection
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: 'Advance Status Rejected Successfully.',
+                    variant: 'alert',
+                    alert: {
+                      color: snackbarColor
+                    },
+                    close: false,
+                    sx: {
+                      backgroundColor: theme.palette.error.main
                     }
-                  }}
-                  title={getTooltipTitle()} // Conditional tooltip title
-                >
-                  <Switch
-                    checked={row.original.isApproved === 1 || row.original.isApproved === 2}
-                    onChange={handleToggle}
-                    color={getSwitchColor()}
-                    disabled={row.original.isApproved === 1} // Disable switch for approved
+                  })
+                );
+                setKey(key + 1); // Refresh key to trigger re-render
+              }
+            } catch (error) {
+              console.error('Error updating status:', error);
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: 'Failed to update status.',
+                  variant: 'alert',
+                  alert: {
+                    color: 'error'
+                  },
+                  close: false,
+                  sx: {
+                    backgroundColor: theme.palette.error.main
+                  }
+                })
+              );
+            } 
+          };
+      
+          const handleChipClick = () => {
+            setAdvanceData(row.original);
+            handleAdd('Approve');
+          };
+      
+          return (
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="left"
+              spacing={1} // Adjust spacing between elements
+            >
+              <WrapperButton moduleName={MODULE.ADVANCE} permission={PERMISSIONS.UPDATE}>
+                {row.original.isApproved === 1 ? (
+                  <Chip
+                    icon={<TickCircle variant="Bold" />}
+                    label="Approved"
+                    color="success"
+                    size="small"
+                    variant="light"
+                    sx={{
+                      fontSize: '12px',
+                      padding: '2px 6px'
+                    }}
                   />
-                </Tooltip>
+                ) : row.original.isApproved === 2 ? (
+                  <Tooltip title="Click to Approve">
+                    <Chip
+                      icon={<ShieldCross variant="Bold" />}
+                      label="Rejected"
+                      color="error"
+                      size="small"
+                      variant="light"
+                      onClick={handleChipClick}
+                      sx={{
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        padding: '2px 6px',
+                        backgroundColor: theme.palette.error.light,
+                        color: theme.palette.error.contrastText
+                      }}
+                    />
+                  </Tooltip>
+                ) : (
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
+                      }
+                    }}
+                  >
+                    <Select
+                      onChange={handleChange}
+                      displayEmpty
+                      sx={{
+                        minWidth: 100,
+                        fontSize: '12px',
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[800] : theme.palette.grey[50],
+                        color: mode === ThemeMode.DARK ? theme.palette.common.white : theme.palette.common.black,
+                        borderRadius: '10px',
+                        '.MuiSelect-select': {
+                          padding: '8px'
+                        }
+                      }}
+                      defaultValue=""
+                    >
+                      <MenuItem disabled value="">
+                        Approve/Reject
+                      </MenuItem>
+                      <MenuItem value="Approve">Approve</MenuItem>
+                      <MenuItem value="Reject">Reject</MenuItem>
+                    </Select>
+                  </Tooltip>
+                )}
               </WrapperButton>
             </Stack>
           );
         }
-      }
+      }      
     ],
     []
   );

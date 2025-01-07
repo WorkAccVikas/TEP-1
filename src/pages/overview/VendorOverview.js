@@ -8,7 +8,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Bill, Book, Buliding, Card, DocumentText, EmptyWallet, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Buliding, Card, DocumentText, EmptyWallet, Profile, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import Transaction from 'sections/cabprovidor/vendorManagement/vendorOverview/Transaction';
 import Mails from 'sections/cabprovidor/vendorManagement/vendorOverview/Mails';
 import Statement from 'sections/cabprovidor/vendorManagement/vendorOverview/Statement';
@@ -25,6 +25,7 @@ import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
 import Expense from 'sections/cabprovidor/vendorManagement/vendorOverview/expense/Expense';
 import VendorRate from 'sections/cabprovidor/vendorManagement/vendorOverview/rate/VendorRate';
+import AttachedDriver from 'sections/cabprovidor/vendorManagement/vendorOverview/AttachedDriver';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider] },
@@ -32,6 +33,7 @@ const tabConfig = [
   { label: 'Advance', icon: <TableDocument />, access: [USERTYPE.iscabProvider] },
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
+  { label: 'Attached Drivers', icon: <Profile />, access: [USERTYPE.iscabProvider] },
   { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
   { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
 ];
@@ -103,7 +105,22 @@ const VendorOverview = () => {
       ) : (
         <MainCard border={false}>
           <Box>
-            <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
+            <Tabs
+              value={activeTab}
+              onChange={handleChange}
+              aria-label="Profile Tabs"
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              sx={{
+                '& .MuiTab-root': {
+                  minWidth: 120,
+                },
+                '& .MuiTabScrollButton-root': {
+                  width: '10px',
+                },
+              }}
+            >
               {filteredTabs.map((tab, index) => (
                 <Tab key={index} label={tab.label} icon={tab.icon} iconPosition="start" />
               ))}
@@ -137,8 +154,9 @@ const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, v
     Advance: <AdvanceVendor vendorId={vendorId} />,
     Invoice: <Transaction vendorId={vendorId} />,
     'Attached Companies': <AttachedCompany vendorId={vendorId} />,
-     Expense: <Expense vendorId={vendorId}/>,
-     'Rates': <VendorRate vendorId={vendorId}/>,
+    'Attached Drivers': <AttachedDriver vendorId={vendorId} />,
+    Expense: <Expense vendorId={vendorId} />,
+    Rates: <VendorRate vendorId={vendorId} />
   };
 
   // Get the active tab label
