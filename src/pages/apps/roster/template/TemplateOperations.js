@@ -93,7 +93,7 @@ const TemplateOperations = () => {
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
         setMappedHeaders(response.data.mappedData);
-        setExcelHeaders(fakeResponse.excelHeaders);
+        setExcelHeaders(response.data.excelHeaders);
         setFormData((prev) => {
           return {
             ...prev,
@@ -189,7 +189,8 @@ const TemplateOperations = () => {
       let CabproviderId;
       const templateData = {
         ...formData, // Include form data
-        mappedData: mappedHeaders // Include mapped headers
+        mappedData: mappedHeaders, // Include mapped headers
+        excelHeaders
       };
 
       const userInformation = JSON.parse(localStorage.getItem('userInformation'));

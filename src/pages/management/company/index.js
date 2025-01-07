@@ -16,6 +16,7 @@ const Company = () => {
   const [query, setQuery] = useState(null);
 
   console.log('metaData', metaData);
+  const [refetch, setRefetch] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllTemplates());
@@ -23,7 +24,11 @@ const Company = () => {
 
   useEffect(() => {
     dispatch(fetchCompanies({ page: page, limit: limit, query: query }));
-  }, [dispatch, page, limit, query]);
+  }, [dispatch, page, limit, query, refetch]);
+
+  const handleRefetch = useCallback(() => {
+    setRefetch((p) => !p);
+  }, []);
 
   // Debounced function to handle search input
   const handleSearch = useCallback(
@@ -51,6 +56,7 @@ const Company = () => {
       setLastPageNo={setLastPageNo}
       loading={loading}
       setQuery={handleSearch} // Pass the debounced function
+      handleRefetch={handleRefetch}
     />
   );
 };

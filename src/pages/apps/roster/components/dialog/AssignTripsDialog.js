@@ -37,6 +37,10 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
 
   const [syncLoading, setSyncLoading] = useState(false);
   const [tripLoading, setTripLoading] = useState(false);
+  const [defaultSelection, setDefaultSelection] = useState({
+    _driver: '',
+    _cab: ''
+  });
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -1033,6 +1037,19 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     _isDualTrip: 'Dual Trip'
   };
 
+  const handleDefaultSelection = (e) => {
+    const { name, value } = e.target;
+
+    console.log(`🚀 ~ handleDefaultSelection ~ value:`, name, value, typeof value);
+
+    const obj = JSON.parse(value);
+    console.log('🚀 ~ handleDefaultSelection ~ obj:', obj);
+
+    setDefaultSelection((prev) => ({ ...prev, [name]: obj }));
+
+    setData((prev) => prev.map((item) => ({ ...item, [name]: obj })));
+  };
+
   return (
     <>
       <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -1095,6 +1112,244 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
                 </tr>
               </thead>
               <tbody>
+                {/* Common Selection */}
+                <tr>
+                  {/* Sr. No */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Trip ID */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Zone Name */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Zone Type */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Location */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Date */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Time */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Type */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Vehicle Type */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/* Vehicle */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <Select
+                      value={defaultSelection._cab?._id} // Using stringified value
+                      onChange={handleDefaultSelection}
+                      name="_cab"
+                      displayEmpty
+                      inputProps={{ 'aria-label': 'Driver' }}
+                      sx={{ width: '100%' }}
+                    >
+                      <MenuItem value="" disabled>
+                        Select Vehicle
+                      </MenuItem>
+                      {cabOptions?.map((cab) => (
+                        <MenuItem key={cab._id} value={JSON.stringify(cab)}>
+                          {cab.vehicleNumber}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </td>
+
+                  {/* Driver */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {/* Driver */}
+                    <Select
+                      value={defaultSelection._driver?._id} // Using stringified value
+                      onChange={handleDefaultSelection}
+                      name="_driver"
+                      displayEmpty
+                      inputProps={{ 'aria-label': 'Driver' }}
+                      sx={{ width: '100%' }}
+                    >
+                      <MenuItem value="" disabled>
+                        Select Driver
+                      </MenuItem>
+                      {drivers.map((driver) => (
+                        <MenuItem key={driver._id} value={JSON.stringify(driver)}>
+                          {driver.userName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+
+                  {/*  */}
+                  <td
+                    style={{
+                      border: '1px solid black',
+                      padding: '8px',
+                      textAlign: 'center'
+                    }}
+                  ></td>
+                </tr>
+
                 {data.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}

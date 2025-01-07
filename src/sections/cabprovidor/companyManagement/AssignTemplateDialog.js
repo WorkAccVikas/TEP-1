@@ -19,6 +19,8 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { PopupTransition } from 'components/@extended/Transitions';
 import { Add } from 'iconsax-react';
 import { useSelector } from 'store';
+import axiosServices from 'utils/axios';
+import { getArrayDifferences } from 'utils/helper';
 
 const data = [
   {
@@ -129,14 +131,15 @@ const data = [
   }
 ];
 
-const AssignTemplateDialog = ({ currentRow, open, handleClose }) => {
+const AssignTemplateDialog = ({ currentRow, open, handleClose, handleRefetch }) => {
   console.log(`🚀 ~ AssignTemplateDialog ~ currentRow:`, currentRow);
 
   // const [templateID, setTemplateID] = useState([]);
-  const [templateID, setTemplateID] = useState(['6716343b5d337daba3ac8a93', '671634805d337daba3ac8a9c']); // Initial selected templates
+  // const [templateID, setTemplateID] = useState(['6716343b5d337daba3ac8a93', '671634805d337daba3ac8a9c']); // Initial selected templates
+  const [templateID, setTemplateID] = useState(currentRow.templateIds); // Initial selected templates
 
-  // const { data } = useSelector((state) => state.template);
-  console.log(`🚀 ~ AssignTemplateDialog ~ data:`, data);
+  const { data } = useSelector((state) => state.template);
+  // console.log(`🚀 ~ AssignTemplateDialog ~ data:`, data);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -155,10 +158,13 @@ const AssignTemplateDialog = ({ currentRow, open, handleClose }) => {
         return;
       }
 
+      const result = getArrayDifferences(currentRow.templateIds, templateID);
+
       const payload = {
         data: {
-          companyID: currentRow._id,
-          templateID: templateID
+          companyId: currentRow._id,
+          removedTemplateIds: result.removeId,
+          newTemplateId: result.newId
         }
       };
 
@@ -166,7 +172,8 @@ const AssignTemplateDialog = ({ currentRow, open, handleClose }) => {
 
       setIsLoading(true);
       // TODO : API call for updating company template
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      const response = await axiosServices.post('/tripData/roster/setting/assign', payload);
 
       dispatch(
         openSnackbar({
@@ -177,6 +184,8 @@ const AssignTemplateDialog = ({ currentRow, open, handleClose }) => {
           close: true
         })
       );
+
+      handleRefetch();
 
       handleClose();
     } catch (error) {

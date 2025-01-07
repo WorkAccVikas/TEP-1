@@ -138,7 +138,7 @@ const TemplateList = () => {
   const handleDelete = async () => {
     try {
       // TODO : API CALL FOR DELETING TEMPLATE
-      alert(`handleDelete ${deleteId}`);
+      // alert(`handleDelete ${deleteId}`);
       setDeleteLoading(true);
       const response = await dispatch(deleteTemplate(deleteId)).unwrap();
       console.log(`🚀 ~ handleDelete ~ response:`, response);

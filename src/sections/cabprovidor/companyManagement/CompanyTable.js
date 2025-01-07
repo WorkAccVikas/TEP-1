@@ -45,7 +45,7 @@ import { usePopup } from 'hooks/usePopup';
 import AssignTemplateDialog from './AssignTemplateDialog';
 import { TbFileSpreadsheet } from 'react-icons/tb';
 
-const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
+const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery, handleRefetch }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
@@ -163,7 +163,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       },
       {
         Header: 'Assign Template',
-        accessor: 'assignTemplate',
+        accessor: 'templateIds',
         className: 'cell-center',
         Cell: ({ row }) => {
           return (
@@ -517,7 +517,9 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
       </div>
 
-      {openAssignDialog && <AssignTemplateDialog open={openAssignDialog} handleClose={handleCloseAssignDialog} currentRow={currentRow} />}
+      {openAssignDialog && (
+        <AssignTemplateDialog open={openAssignDialog} handleClose={handleCloseAssignDialog} currentRow={currentRow} handleRefetch={handleRefetch} />
+      )}
     </>
   );
 };
