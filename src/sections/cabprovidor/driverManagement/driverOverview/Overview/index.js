@@ -2,6 +2,7 @@ import { Grid, List, ListItem, Stack, Typography } from '@mui/material';
 import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import OverviewGraph from './OverviewGraph';
+import InvoiceStats from './InvoiceStats';
 
 const Overview = ({ data, data1 }) => {
   console.log("data",data);
@@ -199,7 +200,8 @@ const Overview = ({ data, data1 }) => {
       <Grid item xs={12} sm={6} md={6} xl={6}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <OverviewGraph />
+            {/* <OverviewGraph /> */}
+            <InvoiceStats/>
           </Grid>
         </Grid>
       </Grid>

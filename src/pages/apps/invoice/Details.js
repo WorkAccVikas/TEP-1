@@ -40,6 +40,30 @@ import { format } from 'date-fns';
 
 // ==============================|| INVOICE - DETAILS ||============================== //
 
+const INVOICE_STATUS = {
+  UNPAID: 0,
+  PAID: 1,
+  CANCELLED: 2,
+  PENDING: 3
+};
+
+const InvoiceLabel = (status) => {
+  console.log('🚀 ~ InvoiceLabel ~ status:', status);
+
+  switch (status) {
+    case INVOICE_STATUS.PAID:
+      return <Chip label="Paid" variant="light" color="success" size="small" />;
+    case INVOICE_STATUS.UNPAID:
+      return <Chip label="Unpaid" variant="light" color="warning" size="small" />;
+    case INVOICE_STATUS.CANCELLED:
+      return <Chip label="Cancelled" variant="light" color="error" size="small" />;
+    case INVOICE_STATUS.PENDING:
+      return <Chip label="Pending" variant="light" color="info" size="small" />;
+    default:
+      return null;
+  }
+};
+
 const Details = () => {
   const theme = useTheme();
   const { id } = useParams();
@@ -118,7 +142,8 @@ const Details = () => {
                 <Stack spacing={0.5}>
                   <Stack direction="row" spacing={2}>
                     <LogoSection />
-                    <Chip label="Paid" variant="light" color="success" size="small" />
+                    {/* <Chip label="Paid" variant="light" color="success" size="small" /> */}
+                    {InvoiceLabel(data?.status)}
                   </Stack>
                   <Typography color="secondary">#{data?.invoiceNumber}</Typography>
                 </Stack>

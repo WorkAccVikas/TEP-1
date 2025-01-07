@@ -26,7 +26,13 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { enqueueSnackbar, useSnackbar } from 'notistack';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import VehicleTypeSelection from 'SearchComponents/VehicleTypeSelectionAutoComplete';
-import { isDateInFuture, isRequiredString, isValueInExpectedValues, separateValidAndInvalidItems } from 'pages/management/driver/helper';
+import {
+  isDateInFuture,
+  isRequiredString,
+  isValidVehicleNumber,
+  isValueInExpectedValues,
+  separateValidAndInvalidItems
+} from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -66,7 +72,8 @@ const fieldMapping = {
 
 const validationRules = {
   1: isRequiredString,
-  2: isRequiredString,
+  // 2: isRequiredString,
+  2: isValidVehicleNumber,
   3: isRequiredString,
 
   4: isDateInFuture,
@@ -145,7 +152,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
         return {
           vendorId: row[0],
           vehicletype: row[1],
-          vehicleNumber: row[2],
+          vehicleNumber: row[2]?.toUpperCase(),
           vehicleName: row[3],
 
           fitnessDate: row[4],
@@ -297,7 +304,7 @@ const BulkUploadDialog = ({ open, handleClose }) => {
           formData.append('vehicletype', item.vehicletype);
           formData.append('vehicleNumber', item.vehicleNumber);
           formData.append('vehicleName', item.vehicleName);
-          formData.append('vendorId', item.vendorId || null);
+          item.vendorId && formData.append('vendorId', item.vendorId);
           item.fitnessDate && formData.append('fitnessDate', item.fitnessDate);
           item.insuranceExpiryDate && formData.append('insuranceExpiryDate', item.insuranceExpiryDate);
           item.pollutionExpiryDate && formData.append('pollutionExpiryDate', item.pollutionExpiryDate);

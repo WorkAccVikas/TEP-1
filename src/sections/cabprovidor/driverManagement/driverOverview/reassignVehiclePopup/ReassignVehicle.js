@@ -24,7 +24,7 @@ const ReassignVehicle = ({ handleClose, driverId, setUpdateKey, updateKey, assig
   const [selectedVehicles, setSelectedVehicles] = useState([]);
 
   console.log('selectedVehicles', selectedVehicles);
-  console.log('driverId', driverId);
+  console.log('assignedVehicle', assignedVehicle);
   console.log('assignedVehicle', assignedVehicle);
 
   useEffect(() => {
@@ -43,13 +43,15 @@ const ReassignVehicle = ({ handleClose, driverId, setUpdateKey, updateKey, assig
     fetchdata();
   }, [CabproviderId]);
 
-  const handleAssign = async () => {
+  const handleAssign = async (selectedVehicles) => {
+    console.log({ selectedVehicles });
+
     try {
       const response = await axiosServices.put(`/vehicleAssignment/reAssign/vehicle`, {
         data: {
-          oldVehicleId: assignedVehicle.vehicleId._id,
+          oldVehicleId: assignedVehicle,
           driverId: driverId._id,
-          newVehicleId: selectedVehicles[0]._id
+          newVehicleId: selectedVehicles[0]?._id
         }
       });
 
@@ -84,26 +86,26 @@ const ReassignVehicle = ({ handleClose, driverId, setUpdateKey, updateKey, assig
     }
   };
 
-//   const formik = useFormik({
-//     initialValues: {
-//       role: '',
-//       skills: []
-//     },
-//     // validationSchema,
-//     onSubmit: () => {
-//       dispatch(
-//         openSnackbar({
-//           open: true,
-//           message: 'Autocomplete - Submit Success',
-//           variant: 'alert',
-//           alert: {
-//             color: 'success'
-//           },
-//           close: false
-//         })
-//       );
-//     }
-//   });
+  //   const formik = useFormik({
+  //     initialValues: {
+  //       role: '',
+  //       skills: []
+  //     },
+  //     // validationSchema,
+  //     onSubmit: () => {
+  //       dispatch(
+  //         openSnackbar({
+  //           open: true,
+  //           message: 'Autocomplete - Submit Success',
+  //           variant: 'alert',
+  //           alert: {
+  //             color: 'success'
+  //           },
+  //           close: false
+  //         })
+  //       );
+  //     }
+  //   });
 
   const handleChange = (event, value) => {
     // Logic to ensure only one vehicle can be selected
@@ -165,7 +167,7 @@ const ReassignVehicle = ({ handleClose, driverId, setUpdateKey, updateKey, assig
                 <Button variant="outlined" onClick={() => navigate('/management/cab/add-cab')}>
                   Add Vehicle
                 </Button>
-                <Button variant="contained" onClick={handleAssign} disabled={selectedVehicles.length === 0}>
+                <Button variant="contained" onClick={() => handleAssign(selectedVehicles)} disabled={selectedVehicles.length === 0}>
                   Reassign
                 </Button>
               </Stack>

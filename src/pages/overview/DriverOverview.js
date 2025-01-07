@@ -8,13 +8,10 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, Buliding, DocumentText, EmptyWallet, MoneyRecive, Routing2, WalletAdd, WalletMoney } from 'iconsax-react';
+import { Book, Buliding, Card, DocumentText, EmptyWallet, MoneyRecive, Routing2, WalletAdd, WalletMoney } from 'iconsax-react';
 import Overview from 'sections/cabprovidor/driverManagement/driverOverview/Overview';
 import Statement from 'sections/cabprovidor/driverManagement/driverOverview/Statement';
 import TripDetail from 'sections/cabprovidor/driverManagement/driverOverview/TripDetail';
-import SalaryDetail from 'sections/cabprovidor/driverManagement/driverOverview/SalaryDetail';
-import Loan from 'sections/cabprovidor/driverManagement/driverOverview/Loan';
-import axios from 'axios';
 import axiosServices from 'utils/axios';
 import AttachedCompany from 'sections/cabprovidor/driverManagement/driverOverview/AttachedCompany';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
@@ -24,6 +21,7 @@ import { USERTYPE } from 'constant';
 import { useSelector } from 'store';
 import { Base64 } from 'js-base64';
 import Expense from 'sections/cabprovidor/driverManagement/driverOverview/expense/Expense';
+import DriverRate from 'sections/cabprovidor/driverManagement/driverOverview/rate/DriverRate';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
@@ -31,18 +29,14 @@ const tabConfig = [
   { label: 'Advance', icon: <WalletAdd />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
   { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
+  { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
 ];
 const DriverOverview = () => {
-  const { id } = useParams(); // used to extract companyId to fetch company Data
-  const navigate = useNavigate();
-  // const location = useLocation();
-  // console.log(`🚀 ~ DriverOverview ~ location:`, location);
-  // const { CabProvider } = location.state || {}; // Destructure state
-  // console.log(`🚀 ~ DriverOverview ~ CabProvider:`, CabProvider);
+  const { id } = useParams();
   const [searchParams] = useSearchParams();
-  console.log(`🚀 ~ DriverOverview ~ queryParams:`, searchParams);
-  const CabProvider = searchParams.get('cabProvider') === 'true'; // "testCode"
-  console.log(`🚀 ~ DriverOverview ~ code:`, CabProvider);
+  const CabProvider = searchParams.get('cabProvider') === 'true';
+
+  console.log('CabProvider', CabProvider);
 
   const driverId = id;
 
@@ -65,7 +59,6 @@ const DriverOverview = () => {
   useEffect(() => {
     if (driverId) {
       const fetchDriverData = async () => {
-        const token = localStorage.getItem('serviceToken');
         try {
           const response = await axiosServices.get(`/driver/by?driverId=${driverId}`);
 
@@ -89,21 +82,22 @@ const DriverOverview = () => {
 
   const filteredTabs = useMemo(() => {
     if (userType === USERTYPE.isVendor) {
-      console.log('Vendor');
       return tabConfig.filter((tab) => tab.access.includes(USERTYPE.isVendor));
     }
 
     if (userType === USERTYPE.iscabProvider) {
-      console.log('CabProvider');
       return CabProvider
         ? tabConfig // Show all tabs if `CabProvider` is true
         : tabConfig.filter((tab) => tab.access.includes(USERTYPE.isVendor));
     }
 
+    // Show 'Rates' tab only if CabProvider is true
+    if (!CabProvider) {
+      return tabConfig.filter((tab) => tab.label !== 'Rates');
+    }
+
     return []; // Return an empty array if no conditions match
   }, [userType, CabProvider]);
-
-  console.log('🚀 ~ DriverOverview ~ filteredTabs:', filteredTabs.length);
 
   return (
     <>
@@ -154,7 +148,8 @@ const TabContent = ({ activeTab, driverDetail, driverId, driverSpecificDetail, f
     Trips: <TripDetail driverId={driverId} />,
     Advance: <AdvanceDriver driverId={driverId} />,
     'Attached Companies': <AttachedCompany driverId={driverId} />,
-    Expense: <Expense driverId={driverId}/>,
+    Expense: <Expense driverId={driverId} />,
+    Rates: <DriverRate driverId={driverId} />
   };
   // Get the active tab label
   const activeTabLabel = filteredTabs[activeTab]?.label;

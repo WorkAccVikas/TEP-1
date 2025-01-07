@@ -3,8 +3,10 @@ import CustomCircularLoader from 'components/CustomCircularLoader';
 import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { useSelector } from 'store';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import { createTemplate, getTemplateDetails, updateTemplate } from 'store/slice/cabProvidor/templateSlice';
 import axiosServices from 'utils/axios';
 import * as XLSX from 'xlsx';
 
@@ -77,24 +79,29 @@ const TemplateOperations = () => {
   const [loading, setLoading] = useState(false);
   const [mutateLoading, setMutateLoading] = useState(false);
 
+  const { rosterTemplateId } = useSelector((state) => state.template);
+
   useEffect(() => {
     // TODO : API call FOR GETTING DETAILS OF TEMPLATE
     const fetchTemplateDetails = async () => {
       try {
         setLoading(true);
         console.log('Api call for get template details (At Template Updating)');
+        console.log({ id });
+        const response = await dispatch(getTemplateDetails(id)).unwrap();
+        console.log(`🚀 ~ fetchTemplateDetails ~ response:`, response);
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        setMappedHeaders(fakeResponse.mappedData);
-        setExcelHeaders(fakeResponse.excelHeaders);
+        setMappedHeaders(response.data.mappedData);
+        setExcelHeaders(response.data.excelHeaders);
         setFormData((prev) => {
           return {
             ...prev,
-            templateName: fakeResponse.templateName,
-            dateFormat: fakeResponse.dateFormat,
-            timeFormat: fakeResponse.timeFormat,
-            pickupType: fakeResponse.pickupType,
-            dropType: fakeResponse.dropType
+            templateName: response.data.templateName,
+            dateFormat: response.data.dateFormat,
+            timeFormat: response.data.timeFormat,
+            pickupType: response.data.pickupType,
+            dropType: response.data.dropType
           };
         });
       } catch (error) {
@@ -177,12 +184,13 @@ const TemplateOperations = () => {
   };
 
   // Create final template object
-  const createTemplate = async () => {
+  const addTemplate = async () => {
     try {
       let CabproviderId;
       const templateData = {
         ...formData, // Include form data
-        mappedData: mappedHeaders // Include mapped headers
+        mappedData: mappedHeaders, // Include mapped headers
+        excelHeaders
       };
 
       const userInformation = JSON.parse(localStorage.getItem('userInformation'));
@@ -191,12 +199,24 @@ const TemplateOperations = () => {
         CabproviderId = userInformation.userId;
       }
       setMutateLoading(true);
-      const response = await axiosServices.post('tripData/add/roster/setting', {
+      // const response = await axiosServices.post('tripData/add/roster/setting', {
+      //   data: {
+      //     CabproviderId: CabproviderId,
+      //     RosterTemplates: [templateData],
+      //     excelHeaders
+      //   }
+      // });
+
+      const payload = {
         data: {
           CabproviderId: CabproviderId,
-          RosterTemplates: [templateData]
+          RosterTemplates: [templateData],
+          excelHeaders
         }
-      });
+      };
+
+      const response = await dispatch(createTemplate(payload)).unwrap();
+      console.log(`🚀 ~ createTemplate ~ response:`, response);
 
       console.log(response.data);
       // Save to local storage or handle as needed
@@ -234,8 +254,6 @@ const TemplateOperations = () => {
 
   const editTemplate = async () => {
     try {
-      console.log('editTemplate');
-      alert('editTemplate');
       let CabproviderId;
       const userInformation = JSON.parse(localStorage.getItem('userInformation'));
 
@@ -243,9 +261,28 @@ const TemplateOperations = () => {
         CabproviderId = userInformation.userId;
       }
 
+      const payload = {
+        data: {
+          mappedData: mappedHeaders,
+          ...formData,
+          rosterTemplateId: id
+        }
+      };
+      console.log(`🚀 ~ editTemplate ~ payload:`, payload);
+
       setMutateLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert(`editTemplate api finished ${CabproviderId}`);
+      const response = await dispatch(updateTemplate(payload)).unwrap();
+      console.log(`🚀 ~ editTemplate ~ response:`, response);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Template updated successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: true
+        })
+      );
+      navigate('/settings/roster/template', { replace: true });
     } catch (error) {
       console.log('Error :: editTemplate = ', error);
       dispatch(
@@ -360,7 +397,7 @@ const TemplateOperations = () => {
                 ) : (
                   <Button
                     variant="contained"
-                    onClick={createTemplate}
+                    onClick={addTemplate}
                     disabled={!isFormValid() || mutateLoading}
                     sx={{ alignSelf: 'center' }}
                     title="Create Template"
