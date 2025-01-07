@@ -109,16 +109,6 @@ function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
                 </TableRow> */}
               </TableBody>
             </Table>
-            {/* <SyntaxHighlight>
-              {JSON.stringify(
-                {
-                  selectedRowIndices: selectedRowIds,
-                  'selectedFlatRows[].original': selectedFlatRows.map((d) => d.original)
-                },
-                null,
-                2
-              )}
-            </SyntaxHighlight> */}
           </Stack>
         </ScrollX>
       {/* </MainCard> */}
