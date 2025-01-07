@@ -49,7 +49,7 @@ const ReassignVehicle = ({ handleClose, driverId, setUpdateKey, updateKey, assig
     try {
       const response = await axiosServices.put(`/vehicleAssignment/reAssign/vehicle`, {
         data: {
-          oldVehicleId: assignedVehicle.vehicleId._id,
+          oldVehicleId: assignedVehicle,
           driverId: driverId._id,
           newVehicleId: selectedVehicles[0]?._id
         }

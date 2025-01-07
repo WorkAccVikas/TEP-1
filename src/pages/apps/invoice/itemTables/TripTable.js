@@ -261,7 +261,7 @@ const TripItemTable = ({
       const combinedData = [...mappedData, ...guardItems, ...penaltyItems];
       setItemData(combinedData);
     }
-  }, [tripData]);
+  }, [tripData, groupByOption, userType]);
 
   useEffect(() => {
     if (tripData && tripData.length > 0) {
@@ -339,6 +339,8 @@ const TripItemTable = ({
         const grandTotal = prev.total - finalDiscountAmount + finalTaxAmount + prev.mcdCharges + prev.tollCharges + prev.additionalCharges;
         console.log('prev.total', prev.total);
 
+        const modifiedExpense = userType === USERTYPE.iscabProvider ? 0 : expenseCharge;
+
         return {
           ...prev,
           totalTax: finalTaxAmount,
@@ -348,7 +350,7 @@ const TripItemTable = ({
           // ...(typeof officeCharge !== 'object' ? { officeCharge } : {}),
           ...(typeof expenseCharge !== 'object' ? { expenseCharge } : {}),
           // ...(typeof officeCharge !== 'object' ? { grandTotal: grandTotal - advanceData - officeCharge - expenseCharge } : { grandTotal })
-          ...(typeof advanceData !== 'object' ? { grandTotal: grandTotal - advanceData - expenseCharge } : { grandTotal })
+          ...(typeof advanceData !== 'object' ? { grandTotal: grandTotal - advanceData - modifiedExpense } : { grandTotal })
           // grandTotal
         };
       });
@@ -570,7 +572,7 @@ const TripItemTable = ({
                   </Stack>
                 )}
                 {/* Expense Charge */}
-                {typeof expenseCharge === 'number' && expenseCharge >= 0 && (
+                {userType !== USERTYPE.iscabProvider && typeof expenseCharge === 'number' && expenseCharge >= 0 && (
                   <Stack direction="row" justifyContent="space-between">
                     <Typography>Expense Charge:</Typography>
                     <Typography

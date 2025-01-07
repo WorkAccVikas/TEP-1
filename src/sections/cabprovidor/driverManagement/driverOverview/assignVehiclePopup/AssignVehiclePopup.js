@@ -36,8 +36,9 @@ const AssignVehiclePopup = ({ handleClose, driverId, setUpdateKey, updateKey, as
   const CabproviderId = userInfo.userId;
   const [selectedVehicles, setSelectedVehicles] = useState([]);
 
-  console.log('selectedVehicles', selectedVehicles);
-  console.log('assignedVehicle', assignedVehicle);
+  // console.log('selectedVehicles', selectedVehicles);
+  // console.log('assignedVehicle', assignedVehicle);
+  // console.log('driverId', driverId);
 
   const handleOpenDialog = () => {
     navigate('/management/cab/add-cab');
@@ -53,7 +54,7 @@ const AssignVehiclePopup = ({ handleClose, driverId, setUpdateKey, updateKey, as
       const response = await axiosServices.post(`/vehicleAssignment/to/driver`, {
         data: {
           vehicleId: selectedVehicles[0]._id,
-          driverId: driverId
+          driverId: driverId?._id
         }
       });
 
@@ -165,7 +166,7 @@ const AssignVehiclePopup = ({ handleClose, driverId, setUpdateKey, updateKey, as
   };
 
   return (
-    <MainCard title={assignedVehicle ? 'Reassign Vehicle' : 'Assign Vehicle'}>
+    <MainCard title="Assign Vehicle">
       <form onSubmit={formik.handleSubmit}>
         <Grid container spacing={1}>
           <Grid item xs={12}>

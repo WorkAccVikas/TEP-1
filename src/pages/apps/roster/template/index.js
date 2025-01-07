@@ -10,26 +10,31 @@ import axiosServices from 'utils/axios';
 import { ThemeMode } from 'config';
 import ReactTable from 'components/tables/reactTable1/ReactTable';
 import CustomAlertDelete from './CustomAlertDelete';
+import { deleteTemplate, fetchAllTemplates } from 'store/slice/cabProvidor/templateSlice';
+import { useSelector } from 'store';
 
 const TemplateList = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
+  // const [loading, setLoading] = useState(false);
+  // const [data, setData] = useState(null);
   const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState(null);
   const [alertOpen, setAlertOpen] = useState(false);
   const [refetch, setRefetch] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const { loading, data } = useSelector((state) => state.template);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const response = await axiosServices.get('/tripData/list/roster/settings');
-        console.log(`🚀 ~ fetchData ~ response:`, response);
-        setData(response.data.data.RosterTemplates);
+        // setLoading(true);
+        // const response = await axiosServices.get('/tripData/list/roster/settings');
+        // console.log(`🚀 ~ fetchData ~ response:`, response);
+        // setData(response.data.data.RosterTemplates);
         // setData([]);
+        dispatch(fetchAllTemplates());
       } catch (error) {
         console.error('Error fetching data:', error);
         dispatch(
@@ -42,7 +47,7 @@ const TemplateList = () => {
           })
         );
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
@@ -133,15 +138,10 @@ const TemplateList = () => {
   const handleDelete = async () => {
     try {
       // TODO : API CALL FOR DELETING TEMPLATE
-      alert(`handleDelete ${deleteId}`);
+      // alert(`handleDelete ${deleteId}`);
       setDeleteLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // const response = await axiosServices.delete(`/tripData/delete/roster/settings/${deleteId}`);
-
-      const response = {
-        status: 200
-      };
+      const response = await dispatch(deleteTemplate(deleteId)).unwrap();
+      console.log(`🚀 ~ handleDelete ~ response:`, response);
 
       if (response.status === 200) {
         dispatch(
