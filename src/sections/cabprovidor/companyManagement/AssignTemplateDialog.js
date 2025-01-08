@@ -163,7 +163,7 @@ const AssignTemplateDialog = ({ currentRow, open, handleClose, handleRefetch }) 
       const payload = {
         data: {
           companyId: currentRow._id,
-          removedTemplateIds: result.removeId,
+          oldTemplateId: result.removeId,
           newTemplateId: result.newId
         }
       };
@@ -171,8 +171,6 @@ const AssignTemplateDialog = ({ currentRow, open, handleClose, handleRefetch }) 
       console.log('payload', payload);
 
       setIsLoading(true);
-      // TODO : API call for updating company template
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
       const response = await axiosServices.post('/tripData/roster/setting/assign', payload);
 
       dispatch(
