@@ -8,7 +8,7 @@ import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import MainCard from 'components/MainCard';
 
 // assets
-import { Bill, Book, Buliding, Card, DocumentText, EmptyWallet, Profile, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
+import { Bill, Book, Buliding, Car, Card, DocumentText, EmptyWallet, Profile, Routing2, TableDocument, WalletMoney } from 'iconsax-react';
 import Transaction from 'sections/cabprovidor/vendorManagement/vendorOverview/Transaction';
 import Mails from 'sections/cabprovidor/vendorManagement/vendorOverview/Mails';
 import Statement from 'sections/cabprovidor/vendorManagement/vendorOverview/Statement';
@@ -26,6 +26,7 @@ import { useSelector } from 'store';
 import Expense from 'sections/cabprovidor/vendorManagement/vendorOverview/expense/Expense';
 import VendorRate from 'sections/cabprovidor/vendorManagement/vendorOverview/rate/VendorRate';
 import AttachedDriver from 'sections/cabprovidor/vendorManagement/vendorOverview/AttachedDriver';
+import AttachedVehicle from 'sections/cabprovidor/vendorManagement/vendorOverview/AttachedVehicle';
 
 const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider] },
@@ -34,6 +35,7 @@ const tabConfig = [
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] },
   { label: 'Attached Drivers', icon: <Profile />, access: [USERTYPE.iscabProvider] },
+  { label: 'Attached Cabs', icon: <Car />, access: [USERTYPE.iscabProvider] },
   { label: 'Expense', icon: <WalletMoney />, access: [USERTYPE.iscabProvider] },
   { label: 'Rates', icon: <Card />, access: [USERTYPE.iscabProvider] }
 ];
@@ -155,6 +157,7 @@ const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, v
     Invoice: <Transaction vendorId={vendorId} />,
     'Attached Companies': <AttachedCompany vendorId={vendorId} />,
     'Attached Drivers': <AttachedDriver vendorId={vendorId} />,
+    'Attached Cabs': <AttachedVehicle vendorId={vendorId} />,
     Expense: <Expense vendorId={vendorId} />,
     Rates: <VendorRate vendorId={vendorId} />
   };

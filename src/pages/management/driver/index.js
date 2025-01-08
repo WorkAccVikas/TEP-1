@@ -66,7 +66,7 @@ const Driver = () => {
   const [driverType, setDriverType] = useState(1);
   const lastPageIndex = metaData.lastPageNo;
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
-  const [allDriversSelected, setAllDriversSelected] = useState(false);
+  const [selectedDrivers, setSelectedDrivers] = useState([]);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
 
@@ -264,7 +264,7 @@ const Driver = () => {
                 </Button>
               </Wrapper>
             </AccessControlWrapper>
-            {allDriversSelected && (
+            {selectedDrivers.length !== 0 && (
               <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.isVendor]}>
                 <Wrapper
                   allowedPermission={{
@@ -277,10 +277,12 @@ const Driver = () => {
                     size="small"
                     color="warning"
                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
-                    // onClick={handleDriverBulkUploadOpen}
+                    onClick={() => {
+                      console.log('All Expensess Selected');
+                    }}
                     disabled={loading} // Disable button while loading
                   >
-                    Add Expenses
+                    {`Add Expenses for ${selectedDrivers.length} Driver${selectedDrivers.length > 1 ? 's' : ''}`}
                   </Button>
                 </Wrapper>
               </AccessControlWrapper>
@@ -297,7 +299,7 @@ const Driver = () => {
           loading={loading}
           setUpdateKey={setUpdateKey}
           updateKey={updateKey}
-          setAllDriversSelected={setAllDriversSelected}
+          setSelectedDrivers={setSelectedDrivers}
         />
       </Stack>
 

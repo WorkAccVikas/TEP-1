@@ -8,9 +8,10 @@ import { CSVExport, IndeterminateCheckbox, TablePagination, TableRowSelection } 
 import PropTypes from 'prop-types';
 import { Fragment, useEffect, useMemo } from 'react';
 import { useExpanded, useFilters, useGlobalFilter, usePagination, useRowSelect, useSortBy, useTable } from 'react-table';
+import EcommerceRadial from 'sections/widget/chart/EcommerceRadial';
 import { renderFilterTypes } from 'utils/react-table';
 
-function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
+function ReactTable({ columns, data, pagesize, setSelectedDrivers }) {
   const theme = useTheme();
   // const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -33,7 +34,7 @@ function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
       columns,
       data,
       filterTypes,
-      initialState: { pageIndex: 0, pageSize: 10 }
+      // initialState: { pageIndex: 0, pageSize: 10 }
     },
     useFilters,
     usePagination,
@@ -54,10 +55,10 @@ function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
   );
 
   useEffect(() => {
-    if (columns.length === selectedFlatRows.length) {
-      setAllDriversSelected(true);
+    if (selectedFlatRows.length === 0) {
+      setSelectedDrivers([]);
     } else {
-      setAllDriversSelected(false);
+      setSelectedDrivers(selectedFlatRows.map((d) => d.original));
     }
   }, [selectedFlatRows]);
   return (
@@ -66,7 +67,11 @@ function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
         title="Row Selection (Pagination)"
         content={false}
         secondary={<CSVExport data={selectedFlatRows.map((d) => d.original)} filename={'row-selection-table.csv'} />}
-      > */}
+      >
+        <Stack direction="row" spacing={3} alignItems="center">
+          <EcommerceRadial color={theme.palette.primary.main} title={'Total Drivers'} />
+          <EcommerceRadial color={theme.palette.error.dark} title={'Total Cabs'} />
+        </Stack> */}
         <ScrollX>
           {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
           <Stack spacing={3}>
@@ -83,7 +88,7 @@ function ReactTable({ columns, data, pagesize, setAllDriversSelected }) {
                 ))}
               </TableHead>
               <TableBody {...getTableBodyProps()}>
-                {page.map((row) => {
+                {rows.map((row) => {
                   prepareRow(row);
                   return (
                     <TableRow

@@ -61,6 +61,11 @@ const AttachedDriver = ({ vendorId }) => {
     fetchData();
   }, [page, limit,vendorId]); // Only fetch data when id changes
 
+  const handleLimitChange = useCallback((event) => {
+    setLimit(+event.target.value);
+    setPage(1);
+  }, []);
+
   const columns = useMemo(
     () => [
       {
@@ -132,7 +137,7 @@ const AttachedDriver = ({ vendorId }) => {
         <Box>
           {drivers.length > 0 && (
             <div style={{ padding: '10px' }}>
-              <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
+              <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={handleLimitChange} lastPageIndex={lastPageNo} />
             </div>
           )}
         </Box>

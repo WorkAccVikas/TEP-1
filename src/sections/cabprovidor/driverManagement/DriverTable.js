@@ -47,7 +47,7 @@ import WrapperButton from 'components/common/guards/WrapperButton';
 import { FaCar } from 'react-icons/fa';
 import ReactTable from 'components/tables/reactTable4/ReactTable';
 
-const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey, setAllDriversSelected }) => {
+const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey, setSelectedDrivers }) => {
   const theme = useTheme();
   // const selectedID = useSelector((state) => state.drivers.selectedID);
   // console.log('selectedID', selectedID);
@@ -530,7 +530,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
               ) : data?.length === 0 ? (
                 <EmptyTableDemo />
               ) : (
-                <ReactTable columns={columns} data={data} setAllDriversSelected={setAllDriversSelected} />
+                <ReactTable columns={columns} data={data} setSelectedDrivers={setSelectedDrivers} />
               )}
             </ScrollX>
           </MainCard>
