@@ -14,7 +14,7 @@ import IconButton from 'components/@extended/IconButton';
 // assets
 import { Add } from 'iconsax-react';
 import axiosServices from 'utils/axios';
-import { Autocomplete, Box, Checkbox, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, Box, Checkbox, CircularProgress, FormControl, MenuItem, Select, TextField, Tooltip } from '@mui/material';
 import ScrollX from 'components/ScrollX';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
@@ -1048,6 +1048,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     setDefaultSelection((prev) => ({ ...prev, [name]: obj }));
 
     setData((prev) => prev.map((item) => ({ ...item, [name]: obj })));
+    setPayload1((prev) => prev.map((item) => ({ ...item, [name]: obj })));
   };
 
   return (
@@ -1062,20 +1063,32 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
               Assign New Trips
             </Typography>
             <Button
-              sx={{ ml: 2, flex: 0.2 }}
+              sx={{
+                ml: 2,
+                flex: 0.2,
+                pointerEvents: payload1.length === 0 || syncLoading || tripLoading ? 'none' : 'auto',
+                position: 'relative'
+              }}
               color="secondary"
               variant="contained"
               onClick={bulkSync}
-              disabled={payload1.length === 0 || syncLoading || tripLoading}
+              startIcon={syncLoading || tripLoading ? <CircularProgress size={20} color="inherit" /> : null}
+              // disabled={payload1.length === 0 || syncLoading || tripLoading}
             >
               {`Sync ${payload1.length} Trips`}
             </Button>
             <Button
-              sx={{ ml: 2, flex: 0.2 }}
+              sx={{
+                ml: 2,
+                flex: 0.2,
+                pointerEvents: tripPayload.length === 0 || syncLoading || tripLoading ? 'none' : 'auto',
+                position: 'relative'
+              }}
               color="success"
               variant="contained"
-              disabled={tripPayload.length === 0 || syncLoading || tripLoading}
               onClick={generateTrips}
+              startIcon={syncLoading || tripLoading ? <CircularProgress size={20} color="inherit" /> : null}
+              // disabled={tripPayload.length === 0 || syncLoading || tripLoading}
             >
               {/* Save */}
               {`Generate ${tripPayload.length} Trips`}
