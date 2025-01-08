@@ -27,8 +27,7 @@ const VendorSelection = ({ sx, value = [], setSelectedOptions }) => {
         const response = await axiosServices.get('/vendor/list?page=1&limit=50');
         const vendors = response.data.data.results || [];
 
-        console.log("vendors",vendors);
-        
+        console.log('vendors', vendors);
 
         const vendorList = vendors.map((item) => ({
           _id: item._id,
@@ -97,7 +96,7 @@ const VendorSelection = ({ sx, value = [], setSelectedOptions }) => {
               {option.vendorCompanyName}
               <br />
               <span style={{ fontSize: 'smaller', color: 'gray' }}>
-                {option?.workMobileNumber ? `+91-${option?.workMobileNumber}` : 'No Contact Number'}
+                {option?.contactNumber ? `+91-${option?.contactNumber}` : 'No Contact Number'}
               </span>
             </div>
           </li>
