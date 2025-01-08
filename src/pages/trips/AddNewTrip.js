@@ -335,6 +335,7 @@ const createPayload = (values, item, driverType) => {
   return {
     data: {
       companyID: values.companyID._id,
+      tripId: values.tripId,
       tripDate: formatDateUsingMoment(values.tripDate),
       tripTime: item,
       tripType: values.tripType,
@@ -504,6 +505,7 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
         const payload = {
           data: {
             companyID: values.companyID._id,
+            tripId: values.tripId,
             tripDate: formatDateUsingMoment(values.tripDate),
             tripTime: values.tripTime,
             tripType: values.tripType,
@@ -970,6 +972,15 @@ const AddNewTrip = ({ handleClose, handleRefetch, id }) => {
                   </Stack>
 
                   <Grid container spacing={1}>
+                    {/* Trip ID */}
+                    <Grid item xs={2}>
+                      <Stack gap={1}>
+                        <InputLabel htmlFor="tripId">Trip ID</InputLabel>
+
+                        <TextField fullWidth id="tripId" placeholder="Trip ID" {...formik.getFieldProps('tripId')} />
+                      </Stack>
+                    </Grid>
+
                     {/* Company Name */}
                     <Grid item xs={2}>
                       <Stack gap={1}>

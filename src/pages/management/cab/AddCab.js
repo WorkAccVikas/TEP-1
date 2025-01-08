@@ -15,6 +15,7 @@ import {
   InputLabel,
   Stack,
   Switch,
+  TextField,
   Typography
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -53,6 +54,13 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         permitOneYrExpiryDate: null,
         permitFiveYrExpiryDate: null,
 
+        fitness_no: '',
+        insurance_no: '',
+        pollution_no: '',
+        permit_one_yr_no: '',
+        permit_five_yr_no: '',
+        rc_no: '',
+
         fuelType: 0,
         fireCylinder: 0,
         firstAidBox: 0,
@@ -89,6 +97,13 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         permitOneYrExpiryDate: null,
         permitFiveYrExpiryDate: null,
 
+        fitness_no: '',
+        insurance_no: '',
+        pollution_no: '',
+        permit_one_yr_no: '',
+        permit_five_yr_no: '',
+        rc_no: '',
+
         fuelType: 0,
         fireCylinder: 0,
         firstAidBox: 0,
@@ -122,6 +137,13 @@ export const getInitialValuesByUserTypeForCreation = (userType) => {
         pollutionExpiryDate: null,
         permitOneYrExpiryDate: null,
         permitFiveYrExpiryDate: null,
+
+        fitness_no: '',
+        insurance_no: '',
+        pollution_no: '',
+        permit_one_yr_no: '',
+        permit_five_yr_no: '',
+        rc_no: '',
 
         fuelType: 0,
         fireCylinder: 0,
@@ -229,6 +251,13 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
             ? null
             : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
+        fitness_no: data?.fitness_no || '',
+        insurance_no: data?.insurance_no || '',
+        pollution_no: data?.pollution_no || '',
+        permitOneYr_no: data?.permitOneYr_no || '',
+        permitFiveYr_no: data?.permitFiveYr_no || '',
+        rc_no: data?.rc_no || '',
+
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
         insuranceExpiryDate_Doc: '',
@@ -283,6 +312,13 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
           typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
             ? null
             : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+
+        fitness_no: data?.fitness_no || '',
+        insurance_no: data?.insurance_no || '',
+        pollution_no: data?.pollution_no || '',
+        permitOneYr_no: data?.permitOneYr_no || '',
+        permitFiveYr_no: data?.permitFiveYr_no || '',
+        rc_no: data?.rc_no || '',
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -339,6 +375,13 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
             ? null
             : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
 
+        fitness_no: data?.fitness_no || '',
+        insurance_no: data?.insurance_no || '',
+        pollution_no: data?.pollution_no || '',
+        permitOneYr_no: data?.permitOneYr_no || '',
+        permitFiveYr_no: data?.permitFiveYr_no || '',
+        rc_no: data?.rc_no || '',
+
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
         insuranceExpiryDate_Doc: '',
@@ -393,6 +436,13 @@ export const getInitialValuesByUserTypeForUpdate = (data, userType) => {
           typeof data?.permitFiveYrExpiryDate === 'undefined' || data?.permitFiveYrExpiryDate === ''
             ? null
             : convertToDateUsingMoment(data?.permitFiveYrExpiryDate),
+
+        fitness_no: data?.fitness_no || '',
+        insurance_no: data?.insurance_no || '',
+        pollution_no: data?.pollution_no || '',
+        permitOneYr_no: data?.permitOneYr_no || '',
+        permitFiveYr_no: data?.permitFiveYr_no || '',
+        rc_no: data?.rc_no || '',
 
         fitnessDate_Doc: '',
         fitnessDate_DocUrl: data?.fitnessDate_Doc,
@@ -476,6 +526,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values.vehicleImages);
 
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
+
       vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
@@ -517,6 +574,14 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values.vehicleImages);
+
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
+
       vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
@@ -559,6 +624,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values.vehicleImages);
 
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
+
       vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
@@ -600,6 +672,13 @@ const getPayloadForUpdate = (values, userType, vehicleImages) => {
       values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values.vehicleImages);
+
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
 
       vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
@@ -651,38 +730,18 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values?.vehicleImages);
 
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
+
       // Append multiple vehicle images
       vehicleImages?.forEach((item) => {
         formData.append('vehicleImage', item.file);
       });
 
-      // const vehicleImageArray = []
-      // if (values?.vehicleImages && values.vehicleImages.length > 0) {
-      //   // Convert each file into a Blob and concatenate them
-
-      //   const combinedBlob = new Blob(values.vehicleImages, { type: values.vehicleImages[0].type });
-
-      //   // Create a new File from the combined Blob
-      //   const combinedFile = new File([combinedBlob], "combined-vehicle-images", {
-      //     type: values.vehicleImages[0].type,
-      //   });
-
-      //   console.log("combinedFile",combinedFile);
-
-      //   console.log();
-
-      //   // Append the single file to FormData
-      //   formData.append("vehicleImages", combinedFile);
-      // }
-
-      //       if (values?.vehicleImages && values.vehicleImages.length > 0) {
-      //         values.vehicleImages?.forEach((file) => {
-      //           vehicleImageArray.push(file);
-      //         });
-      //       }
-      // console.log({vehicleImageArray});
-
-      //       formData.append('vehicleImages', vehicleImageArray)
       return formData;
     }
 
@@ -717,7 +776,17 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       formData.append('RC_Model_doc', values.RC_Model_doc?.[0]);
       formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
-      formData.append('vehicleImages', values?.vehicleImages);
+
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
+
+      vehicleImages?.forEach((item) => {
+        formData.append('vehicleImage', item.file);
+      });
       return formData;
     }
 
@@ -754,6 +823,13 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values?.vehicleImages);
+
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
 
       // Append multiple vehicle images
       vehicleImages?.forEach((item) => {
@@ -795,6 +871,13 @@ const getPayloadForCreation = (values, userType, vehicleImages) => {
       values.permitOneYrExpiryDate_doc && formData.append('permitOneYrExpiryDate_doc', values.permitOneYrExpiryDate_doc?.[0]);
       values.permitFiveYrExpiryDate_doc && formData.append('permitFiveYrExpiryDate_doc', values.permitFiveYrExpiryDate_doc?.[0]);
       // formData.append('vehicleImages', values?.vehicleImages);
+
+      formData.append('fitness_no', values.fitness_no);
+      formData.append('insurance_no', values.insurance_no);
+      formData.append('pollution_no', values.pollution_no);
+      formData.append('permitOneYr_no', values.permitOneYr_no);
+      formData.append('permitFiveYr_no', values.permitFiveYr_no);
+      formData.append('rc_no', values.rc_no);
 
       // Append multiple vehicle images
       vehicleImages?.forEach((item) => {
@@ -1111,6 +1194,8 @@ const AddCab = () => {
                       <Grid item xs={12} sm={4}>
                         <MainCard title="Fitness">
                           <Stack spacing={1} gap={2}>
+                            <TextField label="Fitness Number" fullWidth {...getFieldProps('fitness_no')} />
+
                             <DatePicker
                               label="Select Fitness Date"
                               sx={{ width: '100%' }}
@@ -1160,6 +1245,8 @@ const AddCab = () => {
                       <Grid item xs={12} sm={4}>
                         <MainCard title="Insurance">
                           <Stack spacing={1} gap={2}>
+                            <TextField label="Insurance Number" fullWidth {...getFieldProps('insurance_no')} />
+
                             <DatePicker
                               label="Select Insurance Date"
                               sx={{ width: '100%' }}
@@ -1209,6 +1296,8 @@ const AddCab = () => {
                       <Grid item xs={12} sm={4}>
                         <MainCard title="Pollution">
                           <Stack spacing={1} gap={2}>
+                            <TextField label="Pollution Number" fullWidth {...getFieldProps('pollution_no')} />
+
                             <DatePicker
                               label="Select Pollution Expiry Date"
                               sx={{
@@ -1259,6 +1348,8 @@ const AddCab = () => {
                       <Grid item xs={12} sm={4}>
                         <MainCard title="Permit 1 year">
                           <Stack spacing={1} gap={2}>
+                            <TextField label="Permit Number (1 Year)" fullWidth {...getFieldProps('permitOneYr_no')} />
+
                             <DatePicker
                               label="Select Permit 1 year Expiry Date"
                               sx={{ width: '100%' }}
@@ -1306,6 +1397,8 @@ const AddCab = () => {
                       <Grid item xs={12} sm={4}>
                         <MainCard title="Permit 5 years">
                           <Stack spacing={1} gap={2}>
+                            <TextField label="Permit Number (5 Years)" fullWidth {...getFieldProps('permitFiveYr_no')} />
+
                             <DatePicker
                               label="Select Permit 5 years Expiry Date"
                               sx={{ width: '100%' }}
@@ -1374,6 +1467,9 @@ const AddCab = () => {
                             </Grid>
                             <Grid item xs={12}>
                               <Divider />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <TextField label="RC Number" fullWidth {...getFieldProps('rc_no')} />
                             </Grid>
                             <Grid item xs={12}>
                               <UploadSingleFile
@@ -1853,7 +1949,7 @@ const AddCab = () => {
                     <Button color="error" onClick={() => navigate('/management/cab/view')}>
                       Cancel
                     </Button>
-                    <Button variant="contained" type="submit" disabled={isSubmitting || (!id ? !dirty : vehicleImages.length === 0)}>
+                    <Button variant="contained" type="submit" disabled={isSubmitting || !dirty}>
                       {!id ? 'Add' : 'Save'}
                     </Button>
                   </DialogActions>

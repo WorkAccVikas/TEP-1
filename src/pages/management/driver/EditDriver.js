@@ -69,18 +69,31 @@ const getInitialValuesForSpecificInfo = (data) => {
 
     policeVerifiction_doc: '',
     policeVerifiction_doc_URL: data?.policeVerifiction_doc,
+    policeVerifiction_no: data?.policeVerifiction_no || '',
+
     aadharCard_doc: '',
     aadharCard_doc_URL: data?.aadharCard_doc,
+    aadharCard_no: data?.aadharCard_no || '',
+
     drivingLicense_doc: '',
     drivingLicense_doc_URL: data?.drivingLicense_doc,
+    drivingLicense_no: data?.drivingLicense_no || '',
+
     PANCard_doc: '',
     PANCard_doc_URL: data?.PANCard_doc,
+    PANCard_no: data?.PANCard_no || '',
+
     medicalCerti_doc: '',
     medicalCerti_doc_URL: data?.medicalCerti_doc,
+    medicalCerti_no: data?.medicalCerti_no || '',
+
     covidCertic_doc: '',
     covidCertic_doc_URL: data?.covidCertic_doc,
+    covidCertic_no: data?.covidCertic_no || '',
+
     cancelledChequeORpassbook_doc: '',
-    cancelledChequeORpassbook_doc_URL: data?.cancelledChequeORpassbook_doc
+    cancelledChequeORpassbook_doc_URL: data?.cancelledChequeORpassbook_doc,
+    cancelledChequeORpassbook_no: data?.cancelledChequeORpassbook_no || ''
   };
 };
 
@@ -456,9 +469,15 @@ const DriverSpecificInfo = () => {
       formData.append('cancelledChequeORpassbook_doc', values.cancelledChequeORpassbook_doc?.[0]);
       // }
 
-        const response = await dispatch(
-          updateDriverSpecificDetails(formData)
-        ).unwrap();
+      formData.append('policeVerifiction_no', values.policeVerifiction_no || '');
+      formData.append('aadharCard_no', values.aadharCard_no || '');
+      formData.append('drivingLicense_no', values.drivingLicense_no || '');
+      formData.append('PANCard_no', values.PANCard_no || '');
+      formData.append('medicalCerti_no', values.medicalCerti_no || '');
+      formData.append('covidCertic_no', values.covidCertic_no || '');
+      formData.append('cancelledChequeORpassbook_no', values.cancelledChequeORpassbook_no || '');
+
+      const response = await dispatch(updateDriverSpecificDetails(formData)).unwrap();
 
       console.log(`🚀 ~ formikHandleSubmit ~ response:`, response);
 
@@ -476,7 +495,7 @@ const DriverSpecificInfo = () => {
 
       resetForm();
       setSubmitting(false);
-    //   dispatch(incrementCounter());
+      //   dispatch(incrementCounter());
     } catch (error) {
       console.log(`🚀 ~ formikHandleSubmit ~ error:`, error);
       dispatch(
@@ -665,6 +684,8 @@ const DriverSpecificInfo = () => {
                 <Grid item xs={12} sm={4}>
                   <MainCard title="Police Verification">
                     <Stack spacing={1} gap={2}>
+                      <TextField label="Police Verification Number" {...getFieldProps('policeVerifiction_no')} />
+
                       <UploadSingleFile
                         setFieldValue={setFieldValue}
                         file={values.policeVerifiction_doc}
@@ -698,6 +719,9 @@ const DriverSpecificInfo = () => {
                     link={values.aadharCard_doc_URL}
                     saveTo="aadharCard_doc"
                     error={touched.aadharCard_doc && !!errors.aadharCard_doc}
+                    textField={'aadharCard_no'}
+                    textFieldLabel={'Aadhar Card Number'}
+                    getFieldProps={getFieldProps}
                     // onPreview={handlePreview}
                   />
                 </Grid>
@@ -712,6 +736,9 @@ const DriverSpecificInfo = () => {
                     link={values.drivingLicense_doc_URL}
                     saveTo="drivingLicense_doc"
                     error={touched.drivingLicense_doc && !!errors.drivingLicense_doc}
+                    textField={'drivingLicense_no'}
+                    textFieldLabel={'Driver License Number'}
+                    getFieldProps={getFieldProps}
                   />
                 </Grid>
 
@@ -725,6 +752,9 @@ const DriverSpecificInfo = () => {
                     link={values.PANCard_doc_URL}
                     saveTo="PANCard_doc"
                     error={touched.PANCard_doc && !!errors.PANCard_doc}
+                    textField={'PANCard_no'}
+                    textFieldLabel={'PAN Card Number'}
+                    getFieldProps={getFieldProps}
                   />
                 </Grid>
 
@@ -738,6 +768,9 @@ const DriverSpecificInfo = () => {
                     link={values.medicalCerti_doc_URL}
                     saveTo="medicalCerti_doc"
                     error={touched.medicalCerti_doc && !!errors.medicalCerti_doc}
+                    textField={'medicalCerti_no'}
+                    textFieldLabel={'Medical Certificate Number'}
+                    getFieldProps={getFieldProps}
                   />
                 </Grid>
 
@@ -751,6 +784,9 @@ const DriverSpecificInfo = () => {
                     link={values.covidCertic_doc_URL}
                     saveTo="covidCertic_doc"
                     error={touched.covidCertic_doc && !!errors.covidCertic_doc}
+                    textField={'covidCertic_no'}
+                    textFieldLabel={'Covid Certificate Number'}
+                    getFieldProps={getFieldProps}
                   />
                 </Grid>
 
@@ -764,6 +800,9 @@ const DriverSpecificInfo = () => {
                     link={values.cancelledChequeORpassbook_doc_URL}
                     saveTo="cancelledChequeORpassbook_doc"
                     error={touched.cancelledChequeORpassbook_doc && !!errors.cancelledChequeORpassbook_doc}
+                    textField={'cancelledChequeORpassbook_no'}
+                    textFieldLabel={'Cancelled Cheque Number / Passbook Number'}
+                    getFieldProps={getFieldProps}
                   />
                 </Grid>
               </Grid>
@@ -796,10 +835,17 @@ const DocumentUploadCard = ({
   saveTo,
   acceptedFileType = 'application/pdf',
   error,
-  onPreview = handlePreview
+  onPreview = handlePreview,
+  textField,
+  textFieldLabel,
+  getFieldProps
 }) => (
   <MainCard title={title}>
     <Stack spacing={1} gap={2}>
+      <TextField
+        label={textFieldLabel}
+        {...getFieldProps(textField)} // Removed the curly braces around textField
+      />
       <UploadSingleFile setFieldValue={setFieldValue} file={file} saveTo={saveTo} acceptedFileType={acceptedFileType} error={error} />
       {id && !!link && (
         <Button variant="outlined" color="secondary" fullWidth onClick={() => onPreview(link)}>
