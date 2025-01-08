@@ -158,12 +158,12 @@ const ExpandingDetails = () => {
     navigate('/apps/invoices/advance-type');
   };
 
-  const handleAdvance = (actionType) => {
-    if (actionType === 'add') {
-      setAdvanceData(null); // Reset for add
-    }
-    setAdd(!add); // Toggle dialog
-  };
+  // const handleAdvance = (actionType) => {
+  //   if (actionType === 'add') {
+  //     setAdvanceData(null); // Reset for add
+  //   }
+  //   setAdd(!add); // Toggle dialog
+  // };
 
   const handleAdd = () => {
     setAdd(!add);
@@ -480,7 +480,7 @@ const ExpandingDetails = () => {
             <Button
               variant="contained"
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-              onClick={() => handleAdvance('add')}
+              // onClick={() => handleAdvance('add')}
               size="small"
               disabled={loading}
               sx={{ height: '36px' }}
@@ -548,7 +548,7 @@ const ExpandingDetails = () => {
         <AdvanceForm advanceData={advanceData} onCancel={handleAdd} key={key} setKey={setKey} />
       </Dialog>
       {/* Dialog for adding Advance Type */}
-      <Dialog
+      {/* <Dialog
         maxWidth="sm"
         TransitionComponent={PopupTransition}
         keepMounted
@@ -559,7 +559,7 @@ const ExpandingDetails = () => {
         aria-describedby="alert-dialog-slide-description"
       >
         <NewAdvance advanceData={advanceData} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };

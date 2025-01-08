@@ -379,6 +379,10 @@ const AllRosters = () => {
 
   const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // console.log('rosterStat', rosterStat);
+  // console.log('rosterFiles', rosterFiles);
+  const totalStatus3Count = rosterFiles.reduce((sum, file) => sum + (file.totalCountWithStatus3 || 0), 0);
+
   const widgetsData = [
     {
       title: 'Roster',
@@ -479,8 +483,11 @@ const AllRosters = () => {
                 <Typography variant="body2" color="white">
                   Trips Assigned
                 </Typography>
-                <Typography variant="body1" color="white">
+                {/* <Typography variant="body1" color="white">
                   {rosterStat?.sumOfEqualCount ?? 0}
+                </Typography> */}
+                <Typography variant="body1" color="white">
+                  {totalStatus3Count}
                 </Typography>
               </Stack>
             </Stack>

@@ -29,6 +29,7 @@ import { useFormik, FormikProvider } from 'formik';
 // project-imports
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import axiosServices from 'utils/axios';
 
 const CustomerSchema = Yup.object({
   advanceType: Yup.string().required('Advance Type is required'), // Validate that an advance type is selected
@@ -53,11 +54,7 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
     const providerId = localStorage.getItem('providerId');
 
     const fetchdata = async () => {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}advanceType/cab/providerId`, {
-        headers: {
-          Authorization: `${token}`
-        }
-      });
+      const response = await axiosServices.get(`/advanceType/cab/providerId`);
       if (response.status === 200) {
         setLoading(false);
       }
@@ -74,12 +71,10 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
 
   useEffect(() => {
     const providerId1 = JSON.parse(localStorage.getItem('providerId'));
+    console.log("providerId1",providerId1);
+    
     const fetchdata = async () => {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}advanceType/all?cabProviderId=${providerId1}`, {
-        headers: {
-          Authorization: `${token}`
-        }
-      });
+      const response = await axiosServices.get(`/advanceType/all?cabProviderId=${providerId1}`);
 
       if (response.status === 200) {
         setLoading(false);
@@ -102,8 +97,8 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
     onSubmit: async (values, { resetForm }) => {
       try {
         if (isCreating) {
-          const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}advance/request`,
+          const response = await axiosServices.post(
+            `/advance/request`,
             {
               data: {
                 cabProviderId: advanceProvider,
@@ -139,8 +134,8 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
           );
         } else {
           // PUT request for editing existing record
-          const response = await axios.put(
-            `${process.env.REACT_APP_API_URL}advance/edit`,
+          const response = await axiosServices.put(
+            `/advance/edit`,
             {
               data: {
                 _id: advanceProvider,
@@ -283,6 +278,8 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
                         value={formik.values.advanceType}
                         onChange={(e) => {
                           const selectedAdvanceType = fetchAllAdvance.find((item) => item._id === e.target.value);
+                          console.log("fetchAllAdvance",fetchAllAdvance);
+                          
                           formik.setFieldValue('advanceType', e.target.value); // Update the advance type
                           formik.setFieldValue('interestRate', selectedAdvanceType?.interestRate || ''); // Update the interest rate
                         }}
