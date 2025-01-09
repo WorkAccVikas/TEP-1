@@ -39,6 +39,7 @@ import axios from 'utils/axios';
 import { formatDateUsingMoment, getNestedComplexProperty } from 'utils/helper';
 import moment from 'moment';
 import TemplateSelectDialog from 'sections/rateUpload/driverRate/TemplateSelectDialog';
+import useBeforeUnloadAlert from 'hooks/useBackButtonAlert';
 
 const getInitialValue = (data) => {
   return data ? {} : { driverId: [], rateData: [] };
@@ -86,6 +87,9 @@ const AddCabRateDriver = () => {
   const CabProviderId = userInfo.userId;
 
   const scrollRef = useRef(null);
+
+  // const [isFormDirty, setIsFormDirty] = useState(true);
+  // useBeforeUnloadAlert(isFormDirty);
 
   // Function to handle horizontal scroll on mouse wheel
   // const handleScroll = (event) => {

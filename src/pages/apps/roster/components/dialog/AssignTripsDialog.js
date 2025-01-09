@@ -1048,7 +1048,7 @@ export default function AssignTripsDialog({ data: tripData, open, handleClose, s
     setDefaultSelection((prev) => ({ ...prev, [name]: obj }));
 
     setData((prev) => prev.map((item) => ({ ...item, [name]: obj })));
-    setPayload1((prev) => prev.map((item) => ({ ...item, [name]: obj })));
+    setPayload1(data.map((item) => ({ ...item, [name]: obj })));
   };
 
   return (
