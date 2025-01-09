@@ -31,6 +31,7 @@ import { ThemeMode } from 'config';
 import { Edit } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
+import EcommerceRadial from 'sections/widget/chart/EcommerceRadial';
 
 const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
@@ -86,7 +87,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Header: 'Driver',
         accessor: 'assignedDriver',
         Cell: ({ row }) => {
-          const assignedDrivers = row.original.assignedDrivers.filter(item => item.driverId);
+          const assignedDrivers = row.original.assignedDrivers.filter((item) => item.driverId);
 
           if (!assignedDrivers || assignedDrivers.length === 0) {
             return <Chip color="error" variant="light" size="small" label="Not Assigned" />;
@@ -277,6 +278,12 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
     <>
       <Stack gap={1} spacing={1}>
         <MainCard content={false}>
+          {/* {data.length > 0 && (
+            <Stack direction="row" spacing={3} alignItems="center">
+              <EcommerceRadial color={theme.palette.primary.main} title={'Total Drivers'} />
+              <EcommerceRadial color={theme.palette.error.dark} title={'Total Cabs'} />
+            </Stack>
+          )} */}
           <ScrollX>
             {loading ? (
               <TableSkeleton rows={10} columns={5} />

@@ -151,6 +151,7 @@ const ExpandingDetails = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
+  const [dialogType, setDialogType] = useState(null); // Track which dialog to show ('add' or 'view')
 
   const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
@@ -168,6 +169,14 @@ const ExpandingDetails = () => {
   const handleAdd = () => {
     setAdd(!add);
     if (advanceData && !add) setAdvanceData(null);
+  };
+
+  const handleDialogOpen = (type) => {
+    setDialogType(type); // Set dialog type
+  };
+
+  const handleDialogClose = () => {
+    setDialogType(null); // Reset dialog type
   };
 
   useEffect(() => {
@@ -480,7 +489,7 @@ const ExpandingDetails = () => {
             <Button
               variant="contained"
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
-              // onClick={() => handleAdvance('add')}
+              onClick={() => handleDialogOpen('add')}
               size="small"
               disabled={loading}
               sx={{ height: '36px' }}
@@ -547,19 +556,18 @@ const ExpandingDetails = () => {
       >
         <AdvanceForm advanceData={advanceData} onCancel={handleAdd} key={key} setKey={setKey} />
       </Dialog>
-      {/* Dialog for adding Advance Type */}
-      {/* <Dialog
+      <Dialog
         maxWidth="sm"
         TransitionComponent={PopupTransition}
         keepMounted
         fullWidth
-        onClose={handleAdd}
-        open={add}
+        onClose={handleDialogClose}
+        open={Boolean(dialogType)}
         sx={{ '& .MuiDialog-paper': { p: 0 }, transition: 'transform 225ms' }}
         aria-describedby="alert-dialog-slide-description"
       >
-        <NewAdvance advanceData={advanceData} onCancel={handleAdd} updateKey={updateKey} setUpdateKey={setUpdateKey} />
-      </Dialog> */}
+        <NewAdvance advanceData={advanceData} onCancel={handleDialogClose} key={key} setKey={setKey} />
+      </Dialog>
     </>
   );
 };

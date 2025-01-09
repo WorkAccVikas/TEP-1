@@ -489,7 +489,7 @@ function ReactTable({
         }
 
         // Eligible for changing status when status is 1, 2, or 3
-        if ( !invoiceId) {
+        if (!invoiceId) {
           SelectedchangeStatusRow.push(row.original);
         }
       });
@@ -957,14 +957,14 @@ const TripList = () => {
             companyID: filterOptions.selectedCompany?.['_id'] || null,
             vehicleId: filterOptions.selectedVehicle?.['_id'] || null,
             driverId: filterOptions.selectedDriver?.['_id'] || null,
-            vendorId: filterOptions.selectedVendor?.['_id'] || null,
+            vendorId: filterOptions.selectedVendor?.['_id'] || null
           }
         });
         setData(response.data.data);
       } catch (error) {
         console.log('Error at fetching trips = ', error);
-        console.log("error.response",error.response);
-        
+        console.log('error.response', error.response);
+
         if (error.response?.status === 500) {
           setData([]);
         } else {
@@ -1162,32 +1162,32 @@ const TripList = () => {
       {
         Header: 'Trip Time',
         accessor: 'tripTime',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Id',
         accessor: 'rosterTripId',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Name',
         accessor: 'zoneNameID.zoneName',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
         accessor: 'zoneTypeID.zoneTypeName',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab',
         accessor: 'vehicleNumber.vehicleNumber',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Type',
         accessor: 'vehicleTypeID.vehicleTypeName',
-         Cell: ({ value }) => value || 'N/A'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Driver',
